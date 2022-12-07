@@ -36,5 +36,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'MultiLoader'
+rootProject.name = 'Veil'
 include("Common", "Fabric", "Forge", "Quilt")

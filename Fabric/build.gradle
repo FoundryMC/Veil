@@ -30,6 +30,8 @@ loom {
             runDir("run")
         }
     }
+
+    accessWidenerPath.set(project(":Common").file("src/main/resources/veil.accesswidener"))
 }
 
 

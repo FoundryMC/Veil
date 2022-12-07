@@ -21,16 +21,16 @@ repositories {
 		}
 	}
 }
-
 dependencies {
 
 	minecraft "com.mojang:minecraft:${minecraft_version}"
 	mappings loom.officialMojangMappings()
 	modImplementation "org.quiltmc:quilt-loader:${quilt_loader_version}"
 
-	modImplementation("org.quiltmc:qsl:${quilt_stdlib_version}") {
+	modImplementation("org.quiltmc:qsl:${quilt_stdlib_version}+${minecraft_version}") {
 		exclude group: "net.fabricmc"
 	}
+	modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilt_fabric_api_version}-${minecraft_version}"
 
 	implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
 	implementation project(":Common")
@@ -44,6 +44,11 @@ processResources {
 	filesMatching("quilt.mod.json") {
 		expand "version": project.version
 	}
+}
+
+loom {
+	accessWidenerPath = project(":Common").file("src/main/resources/veil.accesswidener")
+
 }
 
 tasks.withType(JavaCompile) {

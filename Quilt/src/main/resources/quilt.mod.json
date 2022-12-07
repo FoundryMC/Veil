@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "quilt_loader": {
-    "group": "quilt-example-mod",
-    "id": "modid",
+    "group": "foundry",
+    "id": "veil",
     "version": "${version}",
     "intermediate_mappings": "net.fabricmc:intermediary",
 
-    "name": "Example Mod",
+    "name": "Veil",
     "description": "This is an example description! Tell everyone what your mod is about!",
     "authors": [
       "Me!"
@@ -22,7 +22,7 @@
     "environment": "*",
     "entrypoints": {
       "init": [
-        "com.example.examplemod.ExampleMod"
+        "foundry.veil.VeilQuilt"
       ]
     },
     "depends": [
@@ -36,7 +36,7 @@
       },
       {
         "id": "minecraft",
-        "version": "1.18.2"
+        "version": "1.19.2"
       },
       {
         "id": "java",
@@ -45,6 +45,6 @@
     ]
   },
   "mixin": [
-    "modid.mixins.json"
+    "veil.mixins.json"
   ]
 }

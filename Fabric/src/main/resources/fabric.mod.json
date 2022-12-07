@@ -1,12 +1,13 @@
 {
     "schemaVersion": 1,
-    "id": "modid",
+    "id": "veil",
     "version": "${version}",
   
-    "name": "Example Mod",
+    "name": "Veil",
     "description": "This is an example description! Tell everyone what your mod is about!",
     "authors": [
-      "Me!"
+      "amo",
+      "Cappin"
     ],
     "contact": {
       "homepage": "https://fabricmc.net/",
@@ -19,17 +20,17 @@
     "environment": "*",
     "entrypoints": {
       "main": [
-        "com.example.examplemod.ExampleMod"
+        "foundry.veil.VeilFabric"
       ]
     },
     "mixins": [
-      "modid.mixins.json"
+      "veil.mixins.json"
     ],
   
     "depends": {
-      "fabricloader": ">=0.13",
+      "fabricloader": ">=0.14",
       "fabric": "*",
-      "minecraft": "1.18.x",
+      "minecraft": "1.19.x",
       "java": ">=17"
     },
     "suggests": {
