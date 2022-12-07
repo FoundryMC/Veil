@@ -24,7 +24,7 @@
       ]
     },
     "mixins": [
-      "veil.mixins.json"
+      "veil-common.mixins.json"
     ],
   
     "depends": {

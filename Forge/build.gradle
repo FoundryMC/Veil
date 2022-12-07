@@ -69,7 +69,6 @@ minecraft {
         }
     }
 }
-
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
@@ -80,11 +79,9 @@ dependencies {
 tasks.withType(JavaCompile) {
     source(project(":Common").sourceSets.main.allSource)
 }
-
 processResources {
     from project(":Common").sourceSets.main.resources
 }
-
 
 jar.finalizedBy('reobfJar')
 
