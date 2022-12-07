@@ -66,7 +66,7 @@ public abstract class PostProcessor {
     protected double time;
 
     /**
-     * Example: "Veil:bar" points to Veil:shaders/post/foo.json
+     * Example: "veil:bar" points to veil:shaders/post/foo.json
      */
     public abstract ResourceLocation getPostChainLocation();
 

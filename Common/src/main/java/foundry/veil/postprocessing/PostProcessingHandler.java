@@ -1,6 +1,7 @@
 package foundry.veil.postprocessing;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import foundry.veil.Veil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class PostProcessingHandler {
     }
 
     public static void resize(int width, int height){
+        Veil.LOGGER.error("Resizing post-processing");
         instances.forEach(instance -> instance.resize(width, height));
     }
 
