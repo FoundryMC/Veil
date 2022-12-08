@@ -9,7 +9,7 @@
   "attributes": [ "Position" ],
   "samplers": [
     { "name": "DiffuseSampler" },
-    { "name": "MainDepth" }
+    { "name": "DepthMain" }
   ],
   "uniforms": [
     { "name": "Data", "type": "int", "count": 1, "values": [ 0 ] },

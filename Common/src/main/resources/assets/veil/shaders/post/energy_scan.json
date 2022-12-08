@@ -10,7 +10,7 @@
       "outtarget": "swap",
       "auxtargets": [
         {
-          "name": "MainDepth",
+          "name": "DepthMain",
           "id": "depthMain:depth"
         }
       ]
