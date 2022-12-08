@@ -1,15 +1,35 @@
 package foundry.veil;
 
 import foundry.veil.postprocessing.PostProcessingHandler;
+import foundry.veil.test.PostProcessingEffectsRegistry;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID)
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_L;
+
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID, value = Dist.CLIENT)
 public class VeilForgeClientEvents {
 
-    @SubscribeEvent
-    public static void onLevelRenderLast(RenderLevelStageEvent event){
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onLevelRenderLast(RenderLevelLastEvent event){
         PostProcessingHandler.onLevelRenderLast(event.getPoseStack());
+    }
+
+    @SubscribeEvent
+    public static void onKeyPress(InputEvent.Key event){
+        if(event.getAction() == GLFW.GLFW_PRESS){
+            if(event.getKey() == GLFW_KEY_L){
+                PostProcessingEffectsRegistry.ENERGY_SPHERE.init();
+                PostProcessingEffectsRegistry.ENERGY_SPHERE.setActive(true);
+                PostProcessingEffectsRegistry.ENERGY_SCAN.init();
+                PostProcessingEffectsRegistry.ENERGY_SCAN.setActive(true);
+            }
+        }
     }
 }

@@ -6,12 +6,12 @@ import foundry.veil.postprocessing.InstantiatedPostProcessor;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.resources.ResourceLocation;
 
-public class EnergySpherePostProcessor extends InstantiatedPostProcessor<EnergySphereFx> {
-    private EffectInstance effectEnergySphere;
+public class EnergyScanPostProcessor extends InstantiatedPostProcessor<EnergyScanFx> {
+    private EffectInstance effectEnergyScan;
 
     @Override
     public ResourceLocation getPostChainLocation() {
-        return Veil.veilPath("energy_sphere");
+        return Veil.veilPath("energy_scan");
     }
 
     @Override
@@ -21,7 +21,7 @@ public class EnergySpherePostProcessor extends InstantiatedPostProcessor<EnergyS
 
     @Override
     protected int getDataSizePerInstance() {
-        return 8;
+        return 19;
     }
 
     @Override
@@ -29,13 +29,14 @@ public class EnergySpherePostProcessor extends InstantiatedPostProcessor<EnergyS
         super.init();
 
         if (postChain != null)
-            effectEnergySphere = effects[0];
+            effectEnergyScan = effects[0];
     }
 
     @Override
     public void beforeProcess(PoseStack viewModelStack) {
         super.beforeProcess(viewModelStack);
-        setDataBufferUniform(effectEnergySphere, "Data", "instanceCount");
+
+        setDataBufferUniform(effectEnergyScan, "Data", "instanceCount");
     }
 
     @Override

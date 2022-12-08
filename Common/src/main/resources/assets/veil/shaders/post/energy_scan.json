@@ -5,7 +5,7 @@
   ],
   "passes": [
     {
-      "name": "veil:energy_sphere",
+      "name": "veil:energy_scan",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "auxtargets": [

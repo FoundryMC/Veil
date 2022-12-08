@@ -44,6 +44,9 @@ processResources {
 	filesMatching("quilt.mod.json") {
 		expand "version": project.version
 	}
+	filesMatching('*.mixin.json') {
+		expand "refmap_target": "${project.archivesBaseName}"
+	}
 }
 
 loom {

@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "foundry.veil.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "${refmap_target}refmap.json",
+  "refmap": "veil.refmap.json",
   "mixins": [
     "BowItemMixin",
     "CrossbowItemMixin",

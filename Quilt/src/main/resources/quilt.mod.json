@@ -48,6 +48,7 @@
     ]
   },
   "mixin": [
-    "veil-common.mixins.json"
+    "veil-common.mixins.json",
+    "veil-quilt.mixins.json"
   ]
 }

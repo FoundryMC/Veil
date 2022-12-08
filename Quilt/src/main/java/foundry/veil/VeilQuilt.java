@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
@@ -21,7 +22,7 @@ public class VeilQuilt implements ModInitializer {
             UseItemCallback.EVENT.register((player, world, hand) -> {
                 if(player.level.isClientSide){
                     if(player.getItemInHand(hand).is(Items.ALLIUM)){
-                        PostProcessingEffectsRegistry.ENERGY_SPHERE.addFxInstance(new EnergySphereFx(new Vector3f((float) player.position().x,(float) player.position().y,(float) player.position().z), 1, 1){
+                        PostProcessingEffectsRegistry.ENERGY_SPHERE.addFxInstance(new EnergySphereFx(new Vector3f(Vec3.atCenterOf(player.getOnPos())), 0, 1){
                             @Override
                             public void update(double deltaTime) {
                                 super.update(deltaTime);
@@ -32,7 +33,7 @@ public class VeilQuilt implements ModInitializer {
                                     remove();
                                     return;
                                 }
-                                t = Easings.ease(t, Easings.Easing.easeOutCirc);
+                                t = Mth.lerp(Easings.ease(t, Easings.Easing.easeOutCirc), 0, 1);
 
                                 this.radius = t * 300F;
                                 this.intensity = (300F - radius) / 300F;

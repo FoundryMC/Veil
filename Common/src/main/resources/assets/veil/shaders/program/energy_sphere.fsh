@@ -1,27 +1,27 @@
 #version 330
 
 uniform sampler2D DiffuseSampler;
-uniform sampler2D MainDepthSampler;
+uniform sampler2D DepthMain;
 
 uniform samplerBuffer Data;
 uniform int instanceCount;
 
 uniform float time;
-uniform float fov;
-uniform float aspectRatio;
-uniform vec3 cameraPos;
-uniform vec3 lookVector;
-uniform vec3 upVector;
-uniform vec3 leftVector;
-uniform float nearPlaneDistance;
-uniform float farPlaneDistance;
+uniform float Fov;
+uniform float AspectRatio;
+uniform vec3 CameraPos;
+uniform vec3 LookVector;
+uniform vec3 UpVector;
+uniform vec3 LeftVector;
+uniform float NearPlaneDistance;
+uniform float FarPlaneDistance;
 
 in vec2 texCoord;
 
 out vec4 fragColor;
 
-#moj_import <fufo:noise>
-#moj_import <fufo:common_math>
+#moj_import <veil:noise>
+#moj_import <veil:common_math>
 
 float fetch(int index) {
     return texelFetch(Data, index).r;
@@ -53,17 +53,17 @@ float calcPattern(vec3 worldPos, float intensity) {
 vec3 energySphere(vec3 ray, float worldDepth, vec3 center, float radius, vec3 baseColor, float intensity) {
     float mul = 0.;
 
-    RSIResult rsi = raySphereIntersection(ray, center - cameraPos, radius);
+    RSIResult rsi = raySphereIntersection(ray, center - CameraPos, radius);
 
     if (rsi.didIntersect) {
         if (rsi.tNear < worldDepth) {
             float fadeNearCamera = min(rsi.tNear / 10., 1.);
             fadeNearCamera = fadeNearCamera*fadeNearCamera*fadeNearCamera;
-            mul += calcPattern(rsi.insNear + cameraPos, intensity) * fadeNearCamera;
+            mul += calcPattern(rsi.insNear + CameraPos, intensity) * fadeNearCamera;
         }
         if (rsi.hasFar) {
             if (rsi.tFar < worldDepth) {
-                mul += calcPattern(rsi.insFar  + cameraPos, intensity);
+                mul += calcPattern(rsi.insFar  + CameraPos, intensity);
             }
         }
     }
@@ -75,9 +75,10 @@ void main() {
     vec3 orgCol = texture(DiffuseSampler, texCoord).xyz; // the original color of this pixel
 
     vec2 ndc = texCoord2NDC(texCoord); // normalized device coordinate (-1 to 1)
-    vec3 ray = rayFromNDC(ndc, lookVector, leftVector, upVector, nearPlaneDistance, fov, aspectRatio);
-    float depth = texture(MainDepthSampler, texCoord).r;
-    float worldDepth = getWorldDepth(depth, nearPlaneDistance, farPlaneDistance, texCoord, fov, aspectRatio);
+    vec3 ray = rayFromNDC(ndc, LookVector, LeftVector, UpVector, NearPlaneDistance, Fov, AspectRatio);
+    float depth = texture(DepthMain, texCoord).r;
+    float worldDepth = getWorldDepth(depth, NearPlaneDistance, FarPlaneDistance, texCoord, Fov, AspectRatio);
+    worldDepth = worldDepth * worldDepth * 100;
 
     fragColor = vec4(orgCol, 1.0);
 
@@ -89,12 +90,13 @@ void main() {
         fetch(i+2)
         );
         vec3 baseColor = vec3(
-        fetch(i+3),
-        fetch(i+4),
-        fetch(i+5)
+        0.5,//fetch(i+3),
+        0.1,//fetch(i+4),
+        0.5//fetch(i+5)
         );
-        float radius = fetch(i+6);
-        float intensity = fetch(i+7);
-        fragColor += vec4(energySphere(ray, worldDepth, center, radius, baseColor, intensity), 0.);
+        float radius = 150;
+        float intensity = 0.5;
+        //fragColor += vec4(energySphere(ray, worldDepth, center, radius, baseColor, intensity), 0.);
+        fragColor = vec4(worldDepth, worldDepth, worldDepth,1);
     }
 }
