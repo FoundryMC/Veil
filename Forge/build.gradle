@@ -1,18 +1,27 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
+apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'maven-publish'
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
+
+mixin {
+    add sourceSets.main, "veil-forge-${minecraft_version}"
+    config "veil-common.mixins.json"
+    //config "veil.forge.mixins.json"
+}
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
@@ -72,8 +81,10 @@ minecraft {
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":Common")
+    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 }
 
 tasks.withType(JavaCompile) {

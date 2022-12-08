@@ -22,11 +22,11 @@ repositories {
 	}
 }
 dependencies {
-
+	annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
 	minecraft "com.mojang:minecraft:${minecraft_version}"
 	mappings loom.officialMojangMappings()
 	modImplementation "org.quiltmc:quilt-loader:${quilt_loader_version}"
-
+	implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 	modImplementation("org.quiltmc:qsl:${quilt_stdlib_version}+${minecraft_version}") {
 		exclude group: "net.fabricmc"
 	}

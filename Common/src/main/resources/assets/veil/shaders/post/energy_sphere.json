@@ -1,0 +1,24 @@
+{
+  "targets": [
+    "swap",
+    "depthMain"
+  ],
+  "passes": [
+    {
+      "name": "veil:energy_sphere",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "auxtargets": [
+        {
+          "name": "MainDepthSampler",
+          "id": "depthMain:depth"
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

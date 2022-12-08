@@ -44,6 +44,7 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
         }
         instances.add(instance);
         setActive(true);
+        Veil.LOGGER.warn("Added fx instance to " + this + ": " + instance);
         return instance;
     }
 

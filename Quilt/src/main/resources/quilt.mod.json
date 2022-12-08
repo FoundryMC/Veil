@@ -23,6 +23,9 @@
     "entrypoints": {
       "init": [
         "foundry.veil.VeilQuilt"
+      ],
+      "client_init": [
+        "foundry.veil.VeilQuiltClient"
       ]
     },
     "depends": [

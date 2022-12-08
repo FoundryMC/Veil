@@ -9,3 +9,4 @@ accessible field net/minecraft/client/renderer/RenderType$CompositeState texture
 accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 accessible class com/mojang/blaze3d/preprocessor/GlslPreprocessor$Context
+accessible field net/minecraft/client/Minecraft timer Lnet/minecraft/client/Timer;

@@ -21,6 +21,9 @@
     "entrypoints": {
       "main": [
         "foundry.veil.VeilFabric"
+      ],
+      "client": [
+        "foundry.veil.VeilFabricClient"
       ]
     },
     "mixins": [

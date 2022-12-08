@@ -1,0 +1,27 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "one",
+    "dstrgb": "zero"
+  },
+  "vertex": "veil:postprocessing_base",
+  "fragment": "veil:energy_sphere",
+  "attributes": [ "Position" ],
+  "samplers": [
+    { "name": "DiffuseSampler" },
+    { "name": "MainDepthSampler" }
+  ],
+  "uniforms": [
+    { "name": "Data", "type": "int", "count": 1, "values": [ 0 ] },
+    { "name": "instanceCount", "type": "int", "count": 1, "values": [ 0 ] },
+    { "name": "time", "type": "float", "count": 1, "values": [ 1.0 ] },
+    { "name": "fov", "type": "float", "count": 1, "values": [ 1.0 ] },
+    { "name": "aspectRatio", "type": "float", "count": 1, "values": [ 1.0 ] },
+    { "name": "cameraPos", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
+    { "name": "lookVector", "type": "float", "count": 3, "values": [ 1.0, 0.0, 0.0 ] },
+    { "name": "upVector", "type": "float", "count": 3, "values": [ 0.0, 1.0, 0.0 ] },
+    { "name": "leftVector", "type": "float", "count": 3, "values": [ 0.0, 0.0, 1.0 ] },
+    { "name": "nearPlaneDistance", "type": "float", "count": 1, "values": [ 1.0 ] },
+    { "name": "farPlaneDistance", "type": "float", "count": 1, "values": [ 1.0 ] }
+  ]
+}

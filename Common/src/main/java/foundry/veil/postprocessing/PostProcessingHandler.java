@@ -26,7 +26,6 @@ public class PostProcessingHandler {
     }
 
     public static void resize(int width, int height){
-        Veil.LOGGER.error("Resizing post-processing");
         instances.forEach(instance -> instance.resize(width, height));
     }
 

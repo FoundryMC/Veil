@@ -1,165 +1,205 @@
 package foundry.veil.math;
 
+import net.minecraft.util.Mth;
+
 public class Easings {
     public static float ease(float x, Easing eType){
         return eType.ease(x);
     }
 
     public enum Easing implements IEasing {
-        easeInOutBack {
-            public float ease(float x) {
-                float c1 = 1.70158F;
-                float c2 = c1 * 1.525F;
-                return (float) (x < 0.5 ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2 : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2);
-            }
+        linear {
+            public float ease(float x) { return x;}
         },
-        easeOutCubic{
-            public float ease(float x) {
-                return (float) ((float) 1 - Math.pow(1 - x, 3));
-            }
-        },
-        easeOutQuart{
-            public float ease(float x) {
-                return (float) (1 - Math.pow(1 - x, 4));
-            }
-        },
-        easeOutQuint{
-            public float ease(float x) {
-                return (float) (1 - Math.pow(1 - x, 5));
-            }
-        },
-        easeOutSine{
-            public float ease(float x) {
-                return (float) Math.sin(x * (Math.PI / 2));
-            }
-        },
-        easeOutExpo{
-            public float ease(float x) {
-                return (float) (x == 1 ? 1 : 1 - Math.pow(2, -10 * x));
-            }
-        },
-        easeOutCirc{
-            public float ease(float x) {
-                return (float) Math.sqrt(1 - Math.pow(x - 1, 2));
-            }
-        },
-        easeOutBack{
-            public float ease(float x) {
-                float c1 = 1.70158F;
-                float c3 = c1 + 1;
-                return (float) (1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2));
-            }
-        },
-        easeOutElastic{
-            public float ease(float x) {
-                float c4 = (float) (2 * Math.PI / 3);
-                return x == 0 ? 0 : x == 1 ? 1 : (float) Math.pow(2, -10 * x) * (float) Math.sin((x * 10 - 0.75F) * c4) + 1;
-            }
-        },
-        easeOutBounce{
-            public float ease(float x) {
-                float n1 = 7.5625F;
-                float d1 = 2.75F;
-                if (x < 1 / d1) {
-                    return n1 * x * x;
-                } else if (x < 2 / d1) {
-                    return n1 * (x -= 1.5F / d1) * x + 0.75F;
-                } else if (x < 2.5 / d1) {
-                    return n1 * (x -= 2.25F / d1) * x + 0.9375F;
-                } else {
-                    return n1 * (x -= 2.625F / d1) * x + 0.984375F;
-                }
-            }
-        },
-        easeInQuad{
+        easeInQuad {
             public float ease(float x) {
                 return x * x;
             }
         },
-        easeInCubic{
+        easeOutQuad {
+            public float ease(float x) {
+                return 1 - (1 - x) * (1 - x);
+            }
+        },
+        easeInOutQuad {
+            public float ease(float x) {
+                return x < 0.5 ? 2 * x * x : (float) (1 - Math.pow(-2 * x + 2, 2) / 2);
+            }
+        },
+        easeInCubic {
             public float ease(float x) {
                 return x * x * x;
             }
         },
-        easeInQuart{
+        easeOutCubic {
+            public float ease(float x) {
+                return (float) (1 - Math.pow(1 - x, 3));
+            }
+        },
+        easeInOutCubic {
+            public float ease(float x) {
+                return x < 0.5 ? 4 * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 3) / 2);
+            }
+        },
+        easeInQuart {
             public float ease(float x) {
                 return x * x * x * x;
             }
         },
-        easeInQuint{
+        easeOutQuart {
+            public float ease(float x) {
+                return (float) (1 - Math.pow(1 - x, 4));
+            }
+        },
+        easeInOutQuart {
+            public float ease(float x) {
+                return x < 0.5 ? 8 * x * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 4) / 2);
+            }
+        },
+        easeInQuint {
             public float ease(float x) {
                 return x * x * x * x * x;
             }
         },
-        easeInSine{
+        easeOutQuint {
             public float ease(float x) {
-                return (float) (1 - Math.cos(x * (Math.PI / 2)));
+                return (float) (1 - Math.pow(1 - x, 5));
             }
         },
-        easeInExpo{
+        easeInOutQuint {
             public float ease(float x) {
-                return (float) (x == 0 ? 0 : Math.pow(2, 10 * x - 10));
+                return x < 0.5 ? 16 * x * x * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 5) / 2);
             }
         },
-        easeInCirc{
+        easeInSine {
             public float ease(float x) {
-                return (float) -(Math.sqrt(1 - x * x) - 1);
+                return 1 - Mth.cos((float) ((x * Math.PI) / 2));
             }
         },
-        easeInBack{
+        easeOutSine {
             public float ease(float x) {
-                float c1 = 1.70158F;
-                float c3 = c1 + 1;
-                return (float) (c3 * x * x * x - c1 * x * x);
+                return Mth.sin((float) ((x * Math.PI) / 2));
             }
         },
-        easeInElastic{
+        easeInOutSine {
             public float ease(float x) {
-                float c4 = (float) (2 * Math.PI / 3);
-                return x == 0 ? 0 : x == 1 ? 1 : (float) -Math.pow(2, 10 * x - 10) * (float) Math.sin((x * 10 - 0.75F) * c4);
+                return -(Mth.cos((float) (Math.PI * x)) - 1) / 2;
             }
         },
-        easeInBounce{
+        easeInExpo {
             public float ease(float x) {
-                return 1 - Easings.Easing.easeOutBounce.ease(1 - x);
+                return x == 0 ? 0 : (float) Math.pow(2, 10 * x - 10);
             }
         },
-        easeInOutQuad{
+        easeOutExpo {
             public float ease(float x) {
-                return x < 0.5 ? 2 * x * x : 1 - (float) Math.pow(-2 * x + 2, 2) / 2;
+                return x == 1 ? 1 : (float) (1 - Math.pow(2, -10 * x));
             }
         },
-        easeInOutCubic{
+        easeInOutExpo {
             public float ease(float x) {
-                return x < 0.5 ? 4 * x * x * x : 1 - (float) Math.pow(-2 * x + 2, 3) / 2;
+                return x == 0
+                        ? 0
+                        : (float) (x == 1
+                        ? 1
+                        : x < 0.5
+                        ? Math.pow(2, 20 * x - 10) / 2
+                        : (2 - Math.pow(2, -20 * x + 10)) / 2);
             }
         },
-        easeInOutQuart{
+        easeInCirc {
             public float ease(float x) {
-                return x < 0.5 ? 8 * x * x * x * x : 1 - (float) Math.pow(-2 * x + 2, 4) / 2;
+                return (float) (1 - Math.sqrt(1 - Math.pow(x, 2)));
             }
         },
-        easeInOutQuint{
+        easeOutCirc {
             public float ease(float x) {
-                return x < 0.5 ? 16 * x * x * x * x * x : 1 - (float) Math.pow(-2 * x + 2, 5) / 2;
+                return (float) Math.sqrt(1 - Math.pow(x - 1, 2));
             }
         },
-        easeInOutSine{
+        easeInOutCirc {
             public float ease(float x) {
-                return (float) (-0.5 * (Math.cos(Math.PI * x) - 1));
+                return (float) (x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2);
             }
         },
-        easeInOutExpo{
+        easeInBack {
             public float ease(float x) {
-                return x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? (float) Math.pow(2, 20 * x - 10) / 2 : (float) (2 - Math.pow(2, -20 * x + 10) / 2);
+                return 2.70158F * x * x * x - 1.70158F * x * x;
             }
         },
-        easeInOutCirc{
+        easeOutBack {
             public float ease(float x) {
-                return x < 0.5 ? (float) (-(Math.sqrt(1 - (float) Math.pow(2 * x, 2)) - 1) / 2) : (float) ((Math.sqrt(1 - (float) Math.pow(-2 * x + 2, 2)) + 1) / 2);
+                return (float) (1 + 2.70158F * Math.pow(x - 1, 3) + 1.70158F * Math.pow(x - 1, 2));
             }
         },
+        easeInOutBack {
+            public float ease(float x) {
+                return (float) (x < 0.5
+                        ? (Math.pow(2 * x, 2) * ((2.5949095F + 1) * 2 * x - 2.5949095F)) / 2
+                        : (Math.pow(2 * x - 2, 2) * ((2.5949095F + 1) * (x * 2 - 2) + 2.5949095F) + 2) / 2);
+            }
+        },
+        easeInElastic {
+            public float ease(float x) {
+                return x == 0
+                        ? 0
+                        : (float) (x == 1
+                        ? 1
+                        : -Math.pow(2, 10 * x - 10) * Mth.sin((float) ((x * 10 - 10.75) * ((2 * Math.PI) / 3))));
+            }
+        },
+        easeOutElastic {
+            public float ease(float x) {
+                return x == 0
+                        ? 0
+                        : (float) (x == 1
+                        ? 1
+                        : Math.pow(2, -10 * x) * Mth.sin((float) ((x * 10 - 0.75) * ((2 * Math.PI) / 3))) + 1);
+            }
+        },
+        easeInOutElastic {
+            public float ease(float x) {
+                return x == 0
+                        ? 0
+                        : (float) (x == 1
+                        ? 1
+                        : x < 0.5
+                        ? -(Math.pow(2, 20 * x - 10) * Mth.sin((float) ((20 * x - 11.125) * ((2 * Math.PI) / 4.5)))) / 2
+                        : (Math.pow(2, -20 * x + 10) * Mth.sin((float) ((20 * x - 11.125) * ((2 * Math.PI) / 4.5)))) / 2 + 1);
+            }
+        },
+        easeInBounce {
+            public float ease(float x) {
+                return 1 - bounceOut(1 - x);
+            }
+        },
+        easeOutBounce {
+            public float ease(float x) {
+                return 1 - bounceOut(1 - x);
+            }
+        },
+        easeInOutBounce {
+            public float ease(float x) {
+                return x < 0.5
+                        ? (1 - bounceOut(1 - 2 * x)) / 2
+                        : (1 + bounceOut(2 * x - 1)) / 2;
+            }
+        };
 
+        private static float bounceOut(float x) {
+            float n1 = 7.5625F;
+            float d1 = 2.75F;
+
+            if (x < 1 / d1) {
+                return n1 * x * x;
+            } else if (x < 2 / d1) {
+                return n1 * (x -= 1.5 / d1) * x + 0.75F;
+            } else if (x < 2.5 / d1) {
+                return n1 * (x -= 2.25 / d1) * x + 0.9375F;
+            } else {
+                return n1 * (x -= 2.625 / d1) * x + 0.984375F;
+            }
+        }
     }
 
     public interface IEasing {

@@ -1,7 +1,7 @@
 package foundry.veil.color;
 
 public class Filter {
-    public static Color apply(Color color, float value, FilterType type) {
+    public static Color apply(Color color, float value, IFilterType type) {
         return type.apply(color, value);
     }
 
