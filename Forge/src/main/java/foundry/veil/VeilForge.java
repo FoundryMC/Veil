@@ -31,40 +31,6 @@ public class VeilForge {
                 if(event.getLevel().isClientSide){
                     PostProcessingEffectsRegistry.BLOOM.addFxInstance(new BloomFx(){
                     });
-//                    PostProcessingEffectsRegistry.ENERGY_SPHERE.addFxInstance(new EnergySphereFx(new Vector3f(0,100,0), 0, 1){
-//                        @Override
-//                        public void update(double deltaTime) {
-//                            super.update(deltaTime);
-//
-//                            float t = getTime() / 7.5F;
-//
-//                            if (t > 1) {
-//                                remove();
-//                                return;
-//                            }
-//                            t = 0.5f;;
-//
-//                            this.radius = t * 300F;
-//                            this.intensity = (300F - radius) / 300F;
-//                            this.intensity = (float) Mth.clamp(intensity, 0., 1.);
-//                        }
-//                    });
-//                    PostProcessingEffectsRegistry.ENERGY_SCAN.addFxInstance(new EnergyScanFx(new Vector3f(0,100,0)) {
-//                        @Override
-//                        public void update(double deltaTime) {
-//                            super.update(deltaTime);
-//
-//                            float t = getTime() / 7.5F;
-//                            if (t < 1) {
-//                                t = 0.5f;
-//                            }
-//
-//                            virtualRadius = t * 300F;
-//                            if (virtualRadius > 1300F) {
-//                                remove();
-//                            }
-//                        }
-//                    });
                 }
             }
         }
