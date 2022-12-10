@@ -4,7 +4,9 @@ plugins {
 }
 
 archivesBaseName = "${mod_name}-quilt-${minecraft_version}"
-
+if (System.getenv('BUILD_NUMBER') != null) {
+	version += "." + System.getenv('BUILD_NUMBER')
+}
 repositories {
 
 	maven {

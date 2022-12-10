@@ -16,7 +16,9 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'maven-publish'
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
-
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
+}
 mixin {
     add sourceSets.main, "veil-forge-${minecraft_version}"
     config "veil-common.mixins.json"

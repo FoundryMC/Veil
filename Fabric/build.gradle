@@ -5,7 +5,9 @@ plugins {
 }
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
-
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
+}
 dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     minecraft "com.mojang:minecraft:${minecraft_version}"

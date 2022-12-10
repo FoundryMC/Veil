@@ -5,7 +5,9 @@ plugins {
 }
 
 archivesBaseName = "${mod_name}-common-${minecraft_version}"
-
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
+}
 minecraft {
     version(minecraft_version)
     runs {   
