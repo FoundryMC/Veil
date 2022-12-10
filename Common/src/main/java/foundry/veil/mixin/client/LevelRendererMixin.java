@@ -36,8 +36,20 @@ public class LevelRendererMixin {
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
     public void veil$injectCustomRenderTargets(CallbackInfo ci){
         for(String id : RenderTargetRegistry.shouldCopyDepth) {
-            RenderTargetRegistry.renderTargets.get(id).copyDepthFrom(Minecraft.getInstance().getMainRenderTarget());
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+            RenderTarget target = RenderTargetRegistry.renderTargets.get(id);
+            if(target != null) {
+                target.clear(Minecraft.ON_OSX);
+                target.copyDepthFrom(Minecraft.getInstance().getMainRenderTarget());
+                Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+            }
+        }
+    }
+
+    @Inject(method = "deinitTransparency", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;destroyBuffers()V"))
+    public void veil$deinitCustomRenderTargets(CallbackInfo ci){
+        for(RenderTarget target : RenderTargetRegistry.renderTargets.values()){
+            target.destroyBuffers();
+            target = null;
         }
     }
 }
