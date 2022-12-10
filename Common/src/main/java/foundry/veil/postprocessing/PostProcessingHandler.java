@@ -35,4 +35,12 @@ public class PostProcessingHandler {
         instances.forEach(PostProcessor::applyPostProcess);
         copiedDepth = true;
     }
+
+    public static void stopEffect(PostProcessor instance){
+        instance.setActive(false);
+    }
+
+    public static List<PostProcessor> getInstances() {
+        return instances;
+    }
 }

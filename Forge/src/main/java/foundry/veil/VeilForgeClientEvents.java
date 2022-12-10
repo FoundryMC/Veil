@@ -1,5 +1,6 @@
 package foundry.veil;
 
+import foundry.veil.postprocessing.InstantiatedPostProcessor;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.test.PostProcessingEffectsRegistry;
 import net.minecraftforge.api.distmarker.Dist;
@@ -11,6 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_COMMA;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_L;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID, value = Dist.CLIENT)
@@ -24,11 +26,8 @@ public class VeilForgeClientEvents {
     @SubscribeEvent
     public static void onKeyPress(InputEvent.Key event){
         if(event.getAction() == GLFW.GLFW_PRESS){
-            if(event.getKey() == GLFW_KEY_L){
-                PostProcessingEffectsRegistry.ENERGY_SPHERE.init();
-                PostProcessingEffectsRegistry.ENERGY_SPHERE.setActive(true);
-                PostProcessingEffectsRegistry.ENERGY_SCAN.init();
-                PostProcessingEffectsRegistry.ENERGY_SCAN.setActive(true);
+            if(event.getKey() == GLFW_KEY_COMMA){
+                PostProcessingHandler.getInstances().forEach(instance -> instance.setActive(false));
             }
         }
     }

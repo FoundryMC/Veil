@@ -17,7 +17,7 @@ float linearizeDepth(float depth, float near, float far) {
 }
 
 float getWorldDepth(float depth, float near, float far, vec2 texCoord, float fov, float aspectRatio) {
-    return linearizeDepth(depth, near, far);
+    return length(vec3(1., (2. * texCoord - 1.) * vec2(aspectRatio, 1.) * tan(fov / 2.)) * linearizeDepth(depth, near, far));
 }
 
 vec2 texCoord2NDC(vec2 tc) {

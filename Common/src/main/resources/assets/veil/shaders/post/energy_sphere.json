@@ -1,7 +1,7 @@
 {
   "targets": [
     "swap",
-    "depthMain"
+    "DepthMain"
   ],
   "passes": [
     {
@@ -10,8 +10,8 @@
       "outtarget": "swap",
       "auxtargets": [
         {
-          "name": "MainDepth",
-          "id": "depthMain:depth"
+          "name": "DepthMain",
+          "id": "DepthMain:depth"
         }
       ]
     },
