@@ -16,6 +16,14 @@ import java.util.Map;
 public class PoseRegistry {
     public static Map<Item, ExtendedPose> poses = new HashMap<>();
 
+    /**
+        * Add a {@link ExtendedPose} to the registry.
+        * @param item The item that triggers the pose.
+        * @param pose The pose.
+        *            <p>
+        * Create an {@link ExtendedPose}, either using an anonymous class or a separate class.
+        * You are given a {@link PoseData} object which contains various state data of the model.
+     **/
     public static ExtendedPose registerPose(Item item, ExtendedPose pose) {
         poses.put(item, pose);
         return pose;
