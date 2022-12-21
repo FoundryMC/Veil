@@ -1,6 +1,10 @@
 buildscript {
+    ext.kotlin_version = '1.7.10'
     repositories {
         mavenCentral()
+    }
+    dependencies{
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0"
     }
 }
 
@@ -22,6 +26,10 @@ subprojects {
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    }
         
     jar {
         manifest {
