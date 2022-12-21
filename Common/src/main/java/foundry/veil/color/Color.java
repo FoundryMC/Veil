@@ -9,6 +9,7 @@ public class Color {
     public static final Color RED = new Color(255, 0, 0, 255);
     public static final Color GREEN = new Color(0, 255, 0, 255);
     public static final Color BLUE = new Color(0, 0, 255, 255);
+    public static final Color CLEAR = new Color(0, 0, 0, 0);
     float r, g, b, a;
 
     public Color(float r, float g, float b, float a) {

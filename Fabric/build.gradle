@@ -12,12 +12,18 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.7.4+kotlin.1.6.21")
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     implementation project(":Common")
 }
+
+compileKotlin {
+    source(project(":Common").sourceSets.main.kotlin)
+}
+
 
 loom {
     runs {

@@ -16,6 +16,11 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'maven-publish'
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
+
+apply from: "https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-" +
+        "${kotlinForForgeVersion}.gradle"
+
+
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
@@ -94,6 +99,12 @@ tasks.withType(JavaCompile) {
 }
 processResources {
     from project(":Common").sourceSets.main.resources
+}
+
+
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/java'
+    test.kotlin.srcDirs += 'src/main/java'
 }
 
 jar.finalizedBy('reobfJar')
