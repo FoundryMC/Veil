@@ -17,9 +17,11 @@ public class PoseData{
     public ModelPart mainHand;
     public ModelPart offHand;
 
+    public boolean swapped;
+
     float partialTick = Minecraft.getInstance().timer.partialTick;
 
-    public PoseData(float ageInTicks, float walkTime, float limbSwing, float limbSwingAmount, float headYaw, float headPitch, float useTime, float maxUseTime, ModelPart mainHand, ModelPart offHand) {
+    public PoseData(float ageInTicks, float walkTime, float limbSwing, float limbSwingAmount, float headYaw, float headPitch, float useTime, float maxUseTime, ModelPart mainHand, ModelPart offHand, boolean swapped) {
         this.mainHand = mainHand;
         this.offHand = offHand;
         this.ageInTicks = ageInTicks;
@@ -30,5 +32,6 @@ public class PoseData{
         this.headPitch = headPitch;
         this.useTime = useTime;
         this.maxUseTime = maxUseTime;
+        this.swapped = swapped;
     }
 }

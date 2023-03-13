@@ -25,14 +25,5 @@ public class VeilForge {
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID)
     public static class VeilForgeEvents {
-        @SubscribeEvent
-        public static void onItemRightClick(PlayerInteractEvent.RightClickItem event) {
-            if(event.getItemStack().getItem().equals(Items.ALLIUM)){
-                if(event.getLevel().isClientSide){
-                    PostProcessingEffectsRegistry.BLOOM.addFxInstance(new BloomFx(){
-                    });
-                }
-            }
-        }
     }
 }

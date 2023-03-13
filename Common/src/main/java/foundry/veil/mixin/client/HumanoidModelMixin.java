@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +40,17 @@ public class HumanoidModelMixin<T extends LivingEntity> {
         ItemStack i = $$0.getMainHandItem();
         int chargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getCharge() - Minecraft.getInstance().player.getUseItemRemainingTicks() : 1;
         int maxChargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getMaxCharge() : 1;
-        PoseData poseData = new PoseData($$3, 0, $$1, $$2, $$4, $$5, chargeTime, maxChargeTime, mainHand, offHand);
+        ModelPart mainhand = $$0.getMainArm() == HumanoidArm.RIGHT ? this.rightArm : this.leftArm;
+        ModelPart offhand = $$0.getMainArm() == HumanoidArm.RIGHT ? this.leftArm : this.rightArm;
+        boolean swapped = false;
+        // swap arms if offhand
+        if ($$0.getUsedItemHand() == InteractionHand.OFF_HAND) {
+            ModelPart temp = mainhand;
+            mainhand = offhand;
+            offhand = temp;
+            swapped = true;
+        }
+        PoseData poseData = new PoseData($$3, 0, $$1, $$2, $$4, $$5, chargeTime, maxChargeTime, mainhand, offhand, swapped);
         PoseRegistry.poses.forEach((item, pose) -> {
             pose.data = poseData;
             if ($$0 instanceof Player && ((Player) $$0).getUseItem().is(item)) {
