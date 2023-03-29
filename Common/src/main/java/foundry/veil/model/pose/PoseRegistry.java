@@ -122,7 +122,7 @@ public class PoseRegistry {
 
         @Override
         public void poseBody(ModelPart body) {
-            body.xRot = -0.5f + Math.max(0, (((float) Math.PI / 2F) + headXRot)) / 2f;
+            body.xRot = -0.75f + Math.max(0, (((float) Math.PI / 2F) + headXRot)) / 2f;
         }
 
         @Override
