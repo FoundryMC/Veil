@@ -40,9 +40,11 @@ public class PoseData{
         this.swapped = swapped;
     }
 
-    public PoseData(PoseStack stackPoseStack, ItemStack stack, float limbSwingAmount){
+    public PoseData(PoseStack stackPoseStack, ItemStack stack, float limbSwingAmount, float useTime, float maxUseTime){
         this.stackPoseStack = stackPoseStack;
         this.stack = stack;
         this.limbSwingAmount = limbSwingAmount;
+        this.useTime = useTime;
+        this.maxUseTime = maxUseTime;
     }
 }

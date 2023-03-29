@@ -1,5 +1,6 @@
 package foundry.veil.model.pose;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,6 +8,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 
 public abstract class ExtendedPose implements VeilPoseable {
     public PoseData data;
+    public boolean forceRenderOffhand = false;
 
     public void poseRightArm(HumanoidModel<?> model, VeilPoseable pose) {
         pose.pose(model);
@@ -21,6 +23,26 @@ public abstract class ExtendedPose implements VeilPoseable {
         poseBody(model.body);
         poseMainHand(data.mainHand);
         poseOffHand(data.offHand);
+    }
+
+    @Override
+    public boolean forceRenderOffhand() {
+        return false;
+    }
+
+    @Override
+    public boolean forceRenderMainHand() {
+        return false;
+    }
+
+    @Override
+    public void poseMainHandFirstPerson(PoseStack stack) {
+
+    }
+
+    @Override
+    public void poseOffHandFirstPerson(PoseStack stack) {
+
     }
 
     @Override

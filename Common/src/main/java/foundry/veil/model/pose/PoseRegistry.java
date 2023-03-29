@@ -1,5 +1,6 @@
 package foundry.veil.model.pose;
 
+import foundry.veil.Veil;
 import foundry.veil.math.Easings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
@@ -112,6 +113,7 @@ public class PoseRegistry {
     public static ExtendedPose TRIDENT = registerPose(i -> i instanceof TridentItem, new ExtendedPose() {
         float headXRot = 0;
         float headYRot = 0;
+        public final boolean forceRenderOffhand = true;
 
         @Override
         public void pose(HumanoidModel<?> model) {
