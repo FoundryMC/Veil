@@ -35,8 +35,6 @@ public class HumanoidModelMixin<T extends LivingEntity> {
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private void veil$poseRightArmMixin(T $$0, float $$1, float $$2, float $$3, float $$4, float $$5, CallbackInfo ci) {
-        ModelPart mainHand = $$0.getMainArm() == HumanoidArm.RIGHT ? this.rightArm : this.leftArm;
-        ModelPart offHand = $$0.getMainArm() == HumanoidArm.RIGHT ? this.leftArm : this.rightArm;
         ItemStack i = $$0.getMainHandItem();
         int chargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getCharge() - Minecraft.getInstance().player.getUseItemRemainingTicks() : 1;
         int maxChargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getMaxCharge() : 1;
@@ -45,15 +43,12 @@ public class HumanoidModelMixin<T extends LivingEntity> {
         boolean swapped = false;
         // swap arms if offhand
         if ($$0.getUsedItemHand() == InteractionHand.OFF_HAND) {
-            ModelPart temp = mainhand;
-            mainhand = offhand;
-            offhand = temp;
             swapped = true;
         }
         PoseData poseData = new PoseData($$3, 0, $$1, $$2, $$4, $$5, chargeTime, maxChargeTime, mainhand, offhand, swapped);
         PoseRegistry.poses.forEach((item, pose) -> {
             pose.data = poseData;
-            if ($$0 instanceof Player && ((Player) $$0).getUseItem().is(item)) {
+            if ($$0 instanceof Player && item.test(((Player) $$0).getUseItem().getItem())) {
                 pose.pose((HumanoidModel<?>) (Object) this);
             }
         });
@@ -84,11 +79,6 @@ public class HumanoidModelMixin<T extends LivingEntity> {
 
     @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;crouching:Z"))
     private boolean veil$cancelSneak(boolean original) {
-        if (original) {
-            this.body.xRot += 0.5f;
-            this.head.xRot -= 0.5f;
-            this.body.x = 3.2F;
-        }
         return false;
     }
 
