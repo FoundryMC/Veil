@@ -12,7 +12,6 @@
   ],
   "client": [
     "client.AgeableListModelMixin",
-    "client.BlockEntityWithoutLevelRendererMixin",
     "client.EffectProgramMixin",
     "client.GameRendererMixin",
     "client.HumanoidModelMixin",
