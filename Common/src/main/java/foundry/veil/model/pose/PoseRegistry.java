@@ -51,7 +51,7 @@ public class PoseRegistry {
         }
     });
 
-    public static ExtendedPose CROSSBOW = registerPose(Items.CROSSBOW, new ExtendedPose() {
+    public static ExtendedPose CROSSBOW = registerPose(i -> i instanceof CrossbowItem, new ExtendedPose() {
         @Override
         public void poseMainHand(ModelPart mainHand) {
             float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
