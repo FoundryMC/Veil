@@ -36,6 +36,11 @@ public abstract class ExtendedPose implements VeilPoseable {
     }
 
     @Override
+    public void poseItemUsing(ItemInHandRenderer itemRenderer) {
+
+    }
+
+    @Override
     public void poseMainHandFirstPerson(PoseStack stack) {
 
     }

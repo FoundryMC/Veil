@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 public interface VeilPoseable {
     void pose(HumanoidModel<?> model);
     void poseItem(ItemInHandRenderer itemRenderer);
+    void poseItemUsing(ItemInHandRenderer itemRenderer);
     void poseLeftArm(ModelPart leftArm);
     void poseRightArm(ModelPart rightArm);
     void poseLeftLeg(ModelPart leftLeg);
