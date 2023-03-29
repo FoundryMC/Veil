@@ -31,7 +31,7 @@ public class PoseRegistry {
     }
 
     public static ExtendedPose registerPose(Predicate<Item> itemPredicate, ExtendedPose pose) {
-        poses.put(null, pose);
+        poses.put(itemPredicate, pose);
         return pose;
     }
 
@@ -80,17 +80,26 @@ public class PoseRegistry {
 
         @Override
         public void poseMainHand(ModelPart offHand) {
+            if(!data.swapped){
+                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
+                offHand.yRot = ((float) -Math.PI / 8F) + headYRot / 3f;
+                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
+                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
+                offHand.xRot *= mult * 1.2f;
+                offHand.yRot *= mult * 1.75f;
+            }
         }
 
         @Override
         public void poseOffHand(ModelPart offHand) {
-
-            offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
-            offHand.yRot = -((float) -Math.PI / 8F) + headYRot / 3f;
-            float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
-            mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
-            offHand.xRot *= mult * 1.2f;
-            offHand.yRot *= mult * 1.75f;
+            if(data.swapped){
+                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
+                offHand.yRot = -((float) -Math.PI / 8F) + headYRot / 3f;
+                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
+                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
+                offHand.xRot *= mult * 1.2f;
+                offHand.yRot *= mult * 1.75f;
+            }
         }
     });
 

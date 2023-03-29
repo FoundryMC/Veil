@@ -47,6 +47,7 @@ public class HumanoidModelMixin<T extends LivingEntity> {
         }
         PoseData poseData = new PoseData($$3, 0, $$1, $$2, $$4, $$5, chargeTime, maxChargeTime, mainhand, offhand, swapped);
         PoseRegistry.poses.forEach((item, pose) -> {
+            if(item == null || pose == null) return;
             pose.data = poseData;
             if ($$0 instanceof Player && item.test(((Player) $$0).getUseItem().getItem())) {
                 pose.pose((HumanoidModel<?>) (Object) this);
