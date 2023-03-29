@@ -10,28 +10,35 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 //Unused rn
 public class PoseHelper {
-    public static void poseItemUsing(PoseData data, ItemInHandRenderer pRenderer){
+    public static boolean poseItemUsing(PoseData data, ItemInHandRenderer pRenderer){
+        AtomicBoolean flag = new AtomicBoolean(false);
         PoseRegistry.poses.forEach((item, pose) -> {
             if (item == null || pose == null) return;
             pose.data = data;
             if (item.test(data.stack.getItem())) {
                 pose.poseItemUsing(pRenderer);
+                flag.set(pose.overrideItemTransform());
             }
         });
+        return flag.get();
     }
 
-    public static void poseItem(PoseData data, ItemInHandRenderer pRenderer){
+    public static boolean poseItem(PoseData data, ItemInHandRenderer pRenderer){
+        AtomicBoolean flag = new AtomicBoolean(false);
         PoseRegistry.poses.forEach((item, pose) -> {
             if (item == null || pose == null) return;
             pose.data = data;
             if (item.test(data.stack.getItem())) {
                 pose.poseItem(pRenderer);
+                flag.set(pose.overrideItemTransform());
             }
         });
+        return flag.get();
     }
 
     public static void offhandCapture(PoseData data, ItemStack pStack, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pEquippedProgress, float pSwingProgress, HumanoidArm pSide, ItemInHandRenderer pRenderer){

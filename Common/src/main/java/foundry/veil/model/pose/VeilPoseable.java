@@ -21,4 +21,5 @@ public interface VeilPoseable {
     void poseOffHandFirstPerson(PoseStack stack);
     boolean forceRenderOffhand();
     boolean forceRenderMainHand();
+    boolean overrideItemTransform();
 }

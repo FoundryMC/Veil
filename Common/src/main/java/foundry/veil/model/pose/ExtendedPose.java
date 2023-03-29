@@ -26,6 +26,11 @@ public abstract class ExtendedPose implements VeilPoseable {
     }
 
     @Override
+    public boolean overrideItemTransform() {
+        return false;
+    }
+
+    @Override
     public boolean forceRenderOffhand() {
         return false;
     }
