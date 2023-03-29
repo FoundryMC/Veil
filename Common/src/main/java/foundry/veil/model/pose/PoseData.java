@@ -8,14 +8,14 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 
 public class PoseData{
-    float ageInTicks;
-    float walkTime;
-    float limbSwing;
-    float limbSwingAmount;
-    float headYaw;
-    float headPitch;
-    float useTime;
-    float maxUseTime;
+    public float ageInTicks;
+    public float walkTime;
+    public float limbSwing;
+    public float limbSwingAmount;
+    public float headYaw;
+    public float headPitch;
+    public float useTime;
+    public float maxUseTime;
     public ModelPart mainHand;
     public ModelPart offHand;
 
