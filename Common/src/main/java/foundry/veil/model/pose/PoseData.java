@@ -24,7 +24,7 @@ public class PoseData{
     public PoseStack stackPoseStack;
     public ItemStack stack;
 
-    float partialTick = Minecraft.getInstance().timer.partialTick;
+    public float partialTick = Minecraft.getInstance().timer.partialTick;
 
     public PoseData(float ageInTicks, float walkTime, float limbSwing, float limbSwingAmount, float headYaw, float headPitch, float useTime, float maxUseTime, ModelPart mainHand, ModelPart offHand, boolean swapped) {
         this.mainHand = mainHand;
