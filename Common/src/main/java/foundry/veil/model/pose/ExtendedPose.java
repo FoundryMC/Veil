@@ -3,6 +3,7 @@ package foundry.veil.model.pose;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 
 public abstract class ExtendedPose implements VeilPoseable {
     public PoseData data;
@@ -20,6 +21,11 @@ public abstract class ExtendedPose implements VeilPoseable {
         poseBody(model.body);
         poseMainHand(data.mainHand);
         poseOffHand(data.offHand);
+    }
+
+    @Override
+    public void poseItem(ItemInHandRenderer itemRenderer) {
+
     }
 
     @Override

@@ -4,6 +4,7 @@ import foundry.veil.math.Easings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.*;
 
@@ -79,8 +80,13 @@ public class PoseRegistry {
         }
 
         @Override
+        public void poseItem(ItemInHandRenderer itemRenderer) {
+            data.stackPoseStack.translate(0,0.25,0);
+        }
+
+        @Override
         public void poseMainHand(ModelPart offHand) {
-            if(!data.swapped){
+            if (!data.swapped) {
                 offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
                 offHand.yRot = ((float) -Math.PI / 8F) + headYRot / 3f;
                 float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
@@ -92,7 +98,7 @@ public class PoseRegistry {
 
         @Override
         public void poseOffHand(ModelPart offHand) {
-            if(data.swapped){
+            if (data.swapped) {
                 offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
                 offHand.yRot = -((float) -Math.PI / 8F) + headYRot / 3f;
                 float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
