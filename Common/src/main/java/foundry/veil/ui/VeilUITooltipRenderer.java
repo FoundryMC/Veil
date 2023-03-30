@@ -105,7 +105,7 @@ public class VeilUITooltipRenderer {
             Matrix4f viewMat = modelView.last().pose();
             Vec3 ray = TargetPicker.getRay(projMat, viewMat, mc.getWindow().getGuiScaledWidth()/2f, mc.getWindow().getGuiScaledHeight()/2f);
             Vec3 start = new Vec3(cameraX, cameraY, cameraZ);
-            Vec3 end = start.add(ray.scale(Double.MAX_VALUE));
+            Vec3 end = start.add(ray.scale(100));
             if(mc.player == null) return;
             BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
             Vec3 hitVec = blockHitResult1.getLocation();
