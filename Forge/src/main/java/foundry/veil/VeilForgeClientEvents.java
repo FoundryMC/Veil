@@ -4,6 +4,7 @@ import foundry.veil.postprocessing.InstantiatedPostProcessor;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.test.BloomPostProcessor;
 import foundry.veil.test.PostProcessingEffectsRegistry;
+import foundry.veil.ui.VeilIGuiOverlay;
 import foundry.veil.ui.VeilUITooltipRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
@@ -22,7 +23,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_L;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID, value = Dist.CLIENT)
 public class VeilForgeClientEvents {
-
+    public static final IGuiOverlay OVERLAY = VeilUITooltipRenderer::renderOverlay;
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLevelRenderLast(RenderLevelLastEvent event){
         PostProcessingHandler.onLevelRenderLast(event.getPoseStack());
@@ -42,6 +43,6 @@ public class VeilForgeClientEvents {
 
     @SubscribeEvent
     public static void registerGuiOverlays(RegisterGuiOverlaysEvent event){
-        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", (IGuiOverlay) VeilUITooltipRenderer.OVERLAY);
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", OVERLAY);
     }
 }
