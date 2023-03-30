@@ -16,5 +16,6 @@ public interface Tooltippable {
     void setBackgroundColor(int color);
     void setTopBorderColor(int color);
     void setBottomBorderColor(int color);
+    boolean getWorldspace();
 
 }

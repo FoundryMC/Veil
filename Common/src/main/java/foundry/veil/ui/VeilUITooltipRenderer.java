@@ -87,6 +87,9 @@ public class VeilUITooltipRenderer {
             borderTop = borderTop.multiply(1,1,1,fade);
             borderBottom = borderBottom.multiply(1,1,1,fade);
         }
+        if(tooltippable.getWorldspace()){
+            // TODO: Implement worldspace tooltips
+        }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
         stack.popPose();
