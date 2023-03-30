@@ -11,6 +11,8 @@ public class Color {
     public static final Color BLUE = new Color(0, 0, 255, 255);
     public static final Color CLEAR = new Color(0, 0, 0, 0);
 
+    public static final Color RAINBOW = new Color(255,255,255,255);
+
     public static final Color VANILLA_TOOLTIP_BACKGROUND = new Color(0xf0_100010);
     public static final Color VANILLA_TOOLTIP_BORDER_TOP = new Color(0x50_5000ff);
     public static final Color VANILLA_TOOLTIP_BORDER_BOTTOM = new Color(0x50_28007f);
@@ -21,6 +23,12 @@ public class Color {
         this.g = g;
         this.b = b;
         this.a = a;
+    }
+
+    public static void tickRainbow(int ticks, float partialTick){
+        RAINBOW.r = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI) * 0.5f + 0.5f;
+        RAINBOW.g = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI + 2 * Math.PI / 3) * 0.5f + 0.5f;
+        RAINBOW.b = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI + 4 * Math.PI / 3) * 0.5f + 0.5f;
     }
 
     public Color(float r, float g, float b) {
@@ -55,6 +63,10 @@ public class Color {
 
     public float getRed() {
         return r;
+    }
+
+    public static Color of(int col){
+        return WHITE.multiply(col);
     }
 
     public float getGreen() {
@@ -137,6 +149,10 @@ public class Color {
 
     public Color multiply(float r, float g, float b, float a) {
         return new Color(this.r * r, this.g * g, this.b * b, this.a * a);
+    }
+
+    public Color multiply(int col){
+        return multiply((col >> 16) & 0xFF, (col >> 8) & 0xFF, col & 0xFF, (col >> 24) & 0xFF);
     }
 
     public void desaturate(float amount) {

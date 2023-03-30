@@ -77,9 +77,9 @@ public class VeilUITooltipRenderer {
         tooltipY = Math.min(tooltipY, height - tooltipHeight - 20);
 
         float fade = Mth.clamp((hoverTicks + partialTicks) / 24f, 0, 1);
-        Color background = Color.VANILLA_TOOLTIP_BACKGROUND.multiply(1,1,1,0.75f);
-        Color borderTop = Color.VANILLA_TOOLTIP_BORDER_TOP;
-        Color borderBottom = Color.VANILLA_TOOLTIP_BORDER_BOTTOM;
+        Color background = Color.of(tooltippable.getTheme()[0]);
+        Color borderTop = Color.of(tooltippable.getTheme()[1]);
+        Color borderBottom = Color.of(tooltippable.getTheme()[2]);
 
         if(fade < 1){
             stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);

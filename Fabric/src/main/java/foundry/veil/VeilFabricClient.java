@@ -3,6 +3,7 @@ package foundry.veil;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.ui.VeilUITooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -17,6 +18,11 @@ public class VeilFabricClient implements ClientModInitializer {
         });
         HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
             VeilUITooltipRenderer.OVERLAY.render(Minecraft.getInstance().gui, matrices, tickDelta, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if(client.player == null)
+                return;
+            VeilClient.tickClient(client.player.tickCount, client.getFrameTime());
         });
     }
 }

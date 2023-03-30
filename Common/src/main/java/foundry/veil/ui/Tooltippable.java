@@ -10,4 +10,10 @@ public interface Tooltippable {
     void addTooltip(Component tooltip);
     void addTooltip(List<Component> tooltip);
     void addTooltip(String tooltip);
+    int[] getTheme();
+    void setTheme(int[] theme);
+    void setBackgroundColor(int color);
+    void setTopBorderColor(int color);
+    void setBottomBorderColor(int color);
+
 }

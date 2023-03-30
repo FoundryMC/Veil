@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
+import org.quiltmc.qsl.lifecycle.api.client.event.ClientTickEvents;
 
 public class VeilQuiltClient implements ClientModInitializer {
     @Override
@@ -17,6 +18,11 @@ public class VeilQuiltClient implements ClientModInitializer {
         });
         HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
             VeilUITooltipRenderer.OVERLAY.render(Minecraft.getInstance().gui, matrices, tickDelta, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+        });
+        ClientTickEvents.END.register(client -> {
+            if(client.player == null)
+                return;
+            VeilClient.tickClient(client.player.tickCount, client.getFrameTime());
         });
     }
 }
