@@ -26,6 +26,7 @@ public class VeilUITooltipRenderer {
     public static BlockPos lastHoveredPos = null;
 
     public static void renderOverlay(Gui gui, PoseStack stack, float partialTicks, int width, int height){
+        stack.pushPose();
         Minecraft mc = Minecraft.getInstance();
         if(mc.options.hideGui || mc.gameMode.getPlayerMode() == GameType.SPECTATOR)
             return;
@@ -88,5 +89,6 @@ public class VeilUITooltipRenderer {
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
+        stack.popPose();
     }
 }
