@@ -12,6 +12,12 @@ public class ColorTheme {
 
     }
 
+    public ColorTheme(Color... colors){
+        for(Color color : colors){
+            addColor(color);
+        }
+    }
+
     public void addColor(String name, Color color){
         colors.put(Optional.ofNullable(name), color);
     }
