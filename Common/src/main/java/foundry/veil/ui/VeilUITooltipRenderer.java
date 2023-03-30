@@ -82,7 +82,7 @@ public class VeilUITooltipRenderer {
         Color borderBottom = tooltippable.getTheme().getColor("bottomBorder");
 
         if(fade < 1){
-            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
+            stack.translate((Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
             background = background.multiply(1,1,1,fade);
             borderTop = borderTop.multiply(1,1,1,fade);
             borderBottom = borderBottom.multiply(1,1,1,fade);
