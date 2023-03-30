@@ -105,31 +105,116 @@ public class UIUtils {
 
         final int zLevel = 400;
 
+        drawTooltipRects(pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight);
+    }
+
+    public static void drawHoverText(@Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int x, int y, int z, int screenWidth, int screenHeight,
+                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font) {
+        if(textLines.isEmpty())
+            return;
+
+        List<ClientTooltipComponent> list = gatherTooltipComponents(stack, textLines,
+                stack.getTooltipImage(), x, screenWidth, screenHeight, font, font);
+        // RenderSystem.disableRescaleNormal();
+        RenderSystem.disableDepthTest();
+        int tooltipTextWidth = 0;
+
+        for (FormattedText textLine : textLines) {
+            int textLineWidth = font.width(textLine);
+            if (textLineWidth > tooltipTextWidth)
+                tooltipTextWidth = textLineWidth;
+        }
+
+        boolean needsWrap = false;
+
+        int titleLinesCount = 1;
+        int tooltipX = x + 12;
+        if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+            tooltipX = x - 16 - tooltipTextWidth;
+            if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+            {
+                if (x > screenWidth / 2)
+                    tooltipTextWidth = x - 12 - 8;
+                else
+                    tooltipTextWidth = screenWidth - 16 - x;
+                needsWrap = true;
+            }
+        }
+
+        if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
+            tooltipTextWidth = maxTextWidth;
+            needsWrap = true;
+        }
+
+        if (needsWrap) {
+            int wrappedTooltipWidth = 0;
+            List<FormattedText> wrappedTextLines = new ArrayList<>();
+            for (int i = 0; i < textLines.size(); i++) {
+                FormattedText textLine = textLines.get(i);
+                List<FormattedText> wrappedLine = font.getSplitter()
+                        .splitLines(textLine, tooltipTextWidth, Style.EMPTY);
+                if (i == 0)
+                    titleLinesCount = wrappedLine.size();
+
+                for (FormattedText line : wrappedLine) {
+                    int lineWidth = font.width(line);
+                    if (lineWidth > wrappedTooltipWidth)
+                        wrappedTooltipWidth = lineWidth;
+                    wrappedTextLines.add(line);
+                }
+            }
+            tooltipTextWidth = wrappedTooltipWidth;
+            textLines = wrappedTextLines;
+
+            if (x > screenWidth / 2)
+                tooltipX = x - 16 - tooltipTextWidth;
+            else
+                tooltipX = x + 12;
+        }
+
+        int tooltipY = y - 12;
+        int tooltipHeight = 8;
+
+        if (textLines.size() > 1) {
+            tooltipHeight += (textLines.size() - 1) * 10;
+            if (textLines.size() > titleLinesCount)
+                tooltipHeight += 2; // gap between title lines and next lines
+        }
+
+        if (tooltipY < 4)
+            tooltipY = 4;
+        else if (tooltipY + tooltipHeight + 4 > screenHeight)
+            tooltipY = screenHeight - tooltipHeight - 4;
+
+        drawTooltipRects(pStack, z, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight);
+    }
+
+    private static void drawTooltipRects(PoseStack pStack, int z, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, List<ClientTooltipComponent> list, int tooltipTextWidth, int titleLinesCount, int tooltipX, int tooltipY, int tooltipHeight) {
         pStack.pushPose();
         Matrix4f mat = pStack.last()
                 .pose();
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3,
                 tooltipY - 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY + tooltipHeight + 3,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 3,
                 tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
                 tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, zLevel, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3,
+        drawGradientRect(mat, z, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3,
                 backgroundColor, backgroundColor);
-        drawGradientRect(mat, zLevel, tooltipX + tooltipTextWidth + 3, tooltipY - 3,
+        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 3, tooltipY - 3,
                 tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1,
                 tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-        drawGradientRect(mat, zLevel, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1,
+        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1,
                 tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
                 tooltipY - 3 + 1, borderColorStart, borderColorStart);
-        drawGradientRect(mat, zLevel, tooltipX - 3, tooltipY + tooltipHeight + 2,
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 2,
                 tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
         MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance()
                 .getBuilder());
-        pStack.translate(0.0D, 0.0D, zLevel);
+        pStack.translate(0.0D, 0.0D, z);
 
         for (int lineNumber = 0; lineNumber < list.size(); ++lineNumber) {
             ClientTooltipComponent line = list.get(lineNumber);
