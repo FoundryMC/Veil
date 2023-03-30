@@ -18,12 +18,5 @@ public class VeilClientEvents {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", OVERLAY);
     }
 
-    @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event){
-        if(event.phase == TickEvent.Phase.END){
-            if(Minecraft.getInstance().player == null)
-                return;
-            VeilClient.tickClient(Minecraft.getInstance().player.tickCount, Minecraft.getInstance().getFrameTime());
-        }
-    }
+
 }

@@ -6,6 +6,7 @@ import foundry.veil.test.BloomPostProcessor;
 import foundry.veil.test.PostProcessingEffectsRegistry;
 import foundry.veil.ui.VeilIGuiOverlay;
 import foundry.veil.ui.VeilUITooltipRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -13,6 +14,7 @@ import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -38,6 +40,15 @@ public class VeilForgeClientEvents {
             if(event.getKey() == GLFW_KEY_L){
                 PostProcessingHandler.getInstances().stream().filter(instance -> instance instanceof BloomPostProcessor).forEach(instance -> instance.setActive(true));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void clientTick(TickEvent.ClientTickEvent event){
+        if(event.phase == TickEvent.Phase.END){
+            if(Minecraft.getInstance().player == null)
+                return;
+            VeilClient.tickClient(Minecraft.getInstance().player.tickCount, Minecraft.getInstance().getFrameTime());
         }
     }
 
