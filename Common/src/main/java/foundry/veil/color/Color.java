@@ -26,7 +26,7 @@ public class Color {
     }
 
     public static void tickRainbow(int ticks, float partialTick){
-        float hue = (ticks + partialTick) / 200.0f;
+        float hue = (ticks + partialTick) / 20.0f;
         hue -= Math.floor(hue);
         RAINBOW.setHue(hue);
     }
