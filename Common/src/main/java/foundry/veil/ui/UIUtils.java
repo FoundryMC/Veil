@@ -180,11 +180,11 @@ public class UIUtils {
             }
         }
 
-        if (tooltipTextWidth > -1)
-        {
-            tooltipTextWidth = -1;
-            needsWrap = true;
-        }
+//        if (tooltipTextWidth > -1)
+//        {
+//            tooltipTextWidth = -1;
+//            needsWrap = true;
+//        }
 
         int tooltipTextWidthF = tooltipTextWidth;
         if (needsWrap)
