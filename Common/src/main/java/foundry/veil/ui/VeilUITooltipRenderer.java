@@ -1,8 +1,10 @@
 package foundry.veil.ui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import foundry.veil.color.Color;
 import foundry.veil.extensions.PoseStackExtensionKt;
 import foundry.veil.helper.SpaceHelper;
@@ -14,10 +16,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,10 +97,24 @@ public class VeilUITooltipRenderer {
         }
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            Matrix4f p = stack.last().pose();
-            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(p.m03, p.m13, p.m23));
-            //stack.translate(worldToScreen.x(), worldToScreen.y(), worldToScreen.z());
-            PoseStackExtensionKt.moveTo(stack, pos.getX(), pos.getY(), pos.getZ());
+            double cameraX = mc.gameRenderer.getMainCamera().getPosition().x;
+            double cameraY = mc.gameRenderer.getMainCamera().getPosition().y;
+            double cameraZ = mc.gameRenderer.getMainCamera().getPosition().z;
+            PoseStack modelView = RenderSystem.getModelViewStack();
+            Matrix4f projMat = RenderSystem.getProjectionMatrix();
+
+            Matrix4f viewMat = modelView.last().pose();
+            Vec3 ray = TargetPicker.getRay(projMat, viewMat, mc.getWindow().getGuiScaledWidth()/2f, mc.getWindow().getGuiScaledHeight()/2f);
+            Vec3 start = new Vec3(cameraX, cameraY, cameraZ);
+            Vec3 end = start.add(ray.scale(Double.MAX_VALUE));
+            if(mc.player == null) return;
+            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+            Vec3 hitVec = blockHitResult1.getLocation();
+            Vector4f hitPos = new Vector4f((float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 1);
+            hitPos.transform(viewMat);
+            hitPos.transform(projMat);
+            tooltipX = (int) ((hitPos.x() / hitPos.w() + 1) * mc.getWindow().getGuiScaledWidth() / 2);
+            tooltipY = (int) ((-hitPos.y() / hitPos.w() + 1) * mc.getWindow().getGuiScaledHeight() / 2);
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
