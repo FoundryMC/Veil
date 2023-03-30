@@ -5,7 +5,7 @@
   "passes": [
     {
       "name": "veil:bloom",
-      "intarget": "veil_custom",
+      "intarget": "minecraft:main",
       "outtarget": "swap"
     },
     {

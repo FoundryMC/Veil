@@ -10,6 +10,10 @@ public class Color {
     public static final Color GREEN = new Color(0, 255, 0, 255);
     public static final Color BLUE = new Color(0, 0, 255, 255);
     public static final Color CLEAR = new Color(0, 0, 0, 0);
+
+    public static final Color VANILLA_TOOLTIP_BACKGROUND = new Color(0xf0_100010);
+    public static final Color VANILLA_TOOLTIP_BORDER_TOP = new Color(0x50_5000ff);
+    public static final Color VANILLA_TOOLTIP_BORDER_BOTTOM = new Color(0x50_28007f);
     float r, g, b, a;
 
     public Color(float r, float g, float b, float a) {
@@ -33,6 +37,12 @@ public class Color {
 
     public Color(int hex) {
         this((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF, (hex >> 24) & 0xFF);
+    }
+
+    public Color(int hex, boolean hasAlpha){
+        this(hex);
+        if(!hasAlpha)
+            a = 1.0f;
     }
 
     public Color() {
@@ -125,6 +135,10 @@ public class Color {
         return newColor;
     }
 
+    public Color multiply(float r, float g, float b, float a) {
+        return new Color(this.r * r, this.g * g, this.b * b, this.a * a);
+    }
+
     public void desaturate(float amount) {
         saturate(-amount);
     }
@@ -143,5 +157,9 @@ public class Color {
         Color newColor = new Color(r, g, b, a);
         newColor.invert();
         return newColor;
+    }
+
+    public int getRGB() {
+        return (getRedInt() << 16) | (getGreenInt() << 8) | getBlueInt();
     }
 }
