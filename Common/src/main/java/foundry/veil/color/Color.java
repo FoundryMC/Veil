@@ -26,9 +26,8 @@ public class Color {
     }
 
     public static void tickRainbow(int ticks, float partialTick){
-        float hue = (ticks + partialTick) / 200.0f;
-        hue -= Math.floor(hue);
-        RAINBOW.setHue(hue);
+        // slowly change the hue of the rainbow color, it should take 5 seconds to complete a full cycle using sin
+        RAINBOW.setHue((float) (Math.sin((ticks+partialTick) * 0.05f) * 0.5f + 0.5f));
     }
 
     public void setHue(float hue) {
