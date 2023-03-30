@@ -47,7 +47,8 @@ public abstract class PostProcessor {
             Pair.of("NearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
             Pair.of("FarPlaneDistance", u -> u.set(MC.gameRenderer.getDepthFar())),
             Pair.of("Fov", u -> u.set((float) Math.toRadians(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), MC.getFrameTime(), true)))),
-            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight()))
+            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight())),
+            Pair.of("Perspective", u -> u.set(MC.options.getCameraType().ordinal()))
     );
 
     /**

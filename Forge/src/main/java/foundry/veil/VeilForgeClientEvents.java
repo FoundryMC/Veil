@@ -1,8 +1,11 @@
 package foundry.veil;
 
+import foundry.veil.postprocessing.ExpandedShaderInstance;
 import foundry.veil.postprocessing.InstantiatedPostProcessor;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.test.PostProcessingEffectsRegistry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
@@ -21,6 +24,7 @@ public class VeilForgeClientEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLevelRenderLast(RenderLevelLastEvent event){
         PostProcessingHandler.onLevelRenderLast(event.getPoseStack());
+        ((ExpandedShaderInstance) Minecraft.getInstance().gameRenderer.blitShader).getPerspectiveUniform();
     }
 
     @SubscribeEvent

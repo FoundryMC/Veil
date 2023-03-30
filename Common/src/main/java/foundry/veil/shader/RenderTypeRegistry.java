@@ -23,7 +23,7 @@ public class RenderTypeRegistry {
     public static void init(){
 //        RenderTargetRegistry.register("veil_custom", new TextureTarget(Minecraft.getInstance().getMainRenderTarget().width, Minecraft.getInstance().getMainRenderTarget().height, true, Minecraft.ON_OSX), true);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.TORCH);
-//        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.WALL_TORCH);
+        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.WALL_TORCH);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.TORCH, CUTOUT);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.WALL_TORCH, CUTOUT);
     }
