@@ -1,13 +1,10 @@
 package foundry.veil.ui;
 
-import com.mojang.blaze3d.shaders.Uniform;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import foundry.veil.color.Color;
 import foundry.veil.helper.SpaceHelper;
-import foundry.veil.postprocessing.PostProcessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -96,7 +93,7 @@ public class VeilUITooltipRenderer {
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Matrix4f p = stack.last().pose();
-            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(p.m03, p.m13, p.m23), width, height);
+            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(p.m03, p.m13, p.m23));
             stack.translate(worldToScreen.x(), worldToScreen.y(), worldToScreen.z());
         }
 
