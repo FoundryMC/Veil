@@ -1,5 +1,7 @@
 package foundry.veil.color;
 
+import net.minecraft.util.Mth;
+
 /**
  * A simple color class that can be used to represent a color in RGBA format with utility functions.
  */
@@ -28,6 +30,13 @@ public class Color {
     public static void tickRainbow(int ticks, float partialTick){
         // slowly change the hue of the rainbow color, it should take 5 seconds to complete a full cycle using sin
         //RAINBOW.setHue((float) (Math.sin((ticks+partialTick) * 0.05f) * 0.5f + 0.5f));
+    }
+
+    public void lerp(Color other, float t){
+        r = Mth.lerp(t, r, other.r);
+        g = Mth.lerp(t, g, other.g);
+        b = Mth.lerp(t, b, other.b);
+        a = Mth.lerp(t, a, other.a);
     }
 
     public void setHue(float hue) {
