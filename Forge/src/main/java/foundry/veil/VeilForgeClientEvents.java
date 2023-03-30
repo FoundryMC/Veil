@@ -41,8 +41,4 @@ public class VeilForgeClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void registerGuiOverlays(RegisterGuiOverlaysEvent event){
-        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", OVERLAY);
-    }
 }
