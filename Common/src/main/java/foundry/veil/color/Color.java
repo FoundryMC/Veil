@@ -11,7 +11,7 @@ public class Color {
     public static final Color BLUE = new Color(0, 0, 255, 255);
     public static final Color CLEAR = new Color(0, 0, 0, 0);
 
-    public static final Color RAINBOW = new Color(255,255,255,255);
+    //public static final Color RAINBOW = new Color(255,255,255,255);
 
     public static final Color VANILLA_TOOLTIP_BACKGROUND = new Color(0xf0_100010);
     public static final Color VANILLA_TOOLTIP_BORDER_TOP = new Color(0x50_5000ff);
@@ -27,7 +27,7 @@ public class Color {
 
     public static void tickRainbow(int ticks, float partialTick){
         // slowly change the hue of the rainbow color, it should take 5 seconds to complete a full cycle using sin
-        RAINBOW.setHue((float) (Math.sin((ticks+partialTick) * 0.05f) * 0.5f + 0.5f));
+        //RAINBOW.setHue((float) (Math.sin((ticks+partialTick) * 0.05f) * 0.5f + 0.5f));
     }
 
     public void setHue(float hue) {
