@@ -88,7 +88,12 @@ public class VeilUITooltipRenderer {
             borderBottom = borderBottom.multiply(1,1,1,fade);
         }
         if(tooltippable.getWorldspace()){
-            // TODO: Implement worldspace tooltips
+            // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
+            stack.translate(pos.getX() - mc.player.getX(), pos.getY() - mc.player.getY(), pos.getZ() - mc.player.getZ());
+            stack.scale(1/16f, 1/16f, 1/16f);
+            tooltipX = 0;
+            tooltipY = 0;
+            stack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
