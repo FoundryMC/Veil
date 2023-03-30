@@ -6,7 +6,6 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import foundry.veil.color.Color;
-import foundry.veil.extensions.PoseStackExtensionKt;
 import foundry.veil.helper.SpaceHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
