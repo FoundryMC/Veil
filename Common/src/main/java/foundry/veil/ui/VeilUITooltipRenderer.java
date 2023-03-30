@@ -99,7 +99,6 @@ public class VeilUITooltipRenderer {
             Matrix4f invViewMatrix = PostProcessor.viewModelStack.last().pose().copy();
             invViewMatrix.invert();
             stack.last().pose().multiply(invViewMatrix);
-            stack.translate(pos.getX(), pos.getY(), pos.getZ());
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
