@@ -1,7 +1,11 @@
 package foundry.veil.ui;
 
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import foundry.veil.color.Color;
+import foundry.veil.postprocessing.PostProcessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -89,11 +93,13 @@ public class VeilUITooltipRenderer {
         }
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            stack.translate(pos.getX() - mc.player.getX(), pos.getY() - mc.player.getY(), pos.getZ() - mc.player.getZ());
-            stack.scale(1/16f, 1/16f, 1/16f);
-            tooltipX = 0;
-            tooltipY = 0;
-            stack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
+            Matrix4f invProjMatrix = RenderSystem.getProjectionMatrix().copy();
+            invProjMatrix.invert();
+            stack.last().pose().multiply(invProjMatrix);
+            Matrix4f invViewMatrix = PostProcessor.viewModelStack.last().pose().copy();
+            invViewMatrix.invert();
+            stack.last().pose().multiply(invViewMatrix);
+            stack.translate(pos.getX(), pos.getY(), pos.getZ());
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
