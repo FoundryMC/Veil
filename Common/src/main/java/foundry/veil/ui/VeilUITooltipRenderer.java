@@ -95,7 +95,8 @@ public class VeilUITooltipRenderer {
         }
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), width, height);
+            Matrix4f p = stack.last().pose();
+            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(p.m03, p.m13, p.m23), width, height);
             stack.translate(worldToScreen.x(), worldToScreen.y(), worldToScreen.z());
         }
 
