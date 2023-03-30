@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -48,7 +49,12 @@ public class VeilUITooltipRenderer {
         hoverTicks++;
         lastHoveredPos = pos;
         boolean shouldShowTooltip = VeilUITooltipHandler.shouldShowTooltip();
-        List<Component> tooltip = tooltippable.getTooltip();
+
+        boolean hasInformation = blockEntity instanceof Tooltippable;
+        List<Component> tooltip = new ArrayList<>();
+        if(hasInformation){
+            tooltip.addAll(tooltippable.getTooltip());
+        }
         if(tooltip.isEmpty()){
             hoverTicks = 0;
             return;
@@ -75,7 +81,7 @@ public class VeilUITooltipRenderer {
         Color borderBottom = Color.VANILLA_TOOLTIP_BORDER_BOTTOM;
 
         if(fade < 1){
-            stack.translate(Math.pow(fade, 2) * 20, 0, 0);
+            stack.translate(Math.pow(fade, 2) * Math.signum(0.5d)*8, 0, 0);
             background = background.multiply(1,1,1,fade);
             borderTop = borderTop.multiply(1,1,1,fade);
             borderBottom = borderBottom.multiply(1,1,1,fade);
