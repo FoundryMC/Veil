@@ -81,12 +81,12 @@ public class VeilUITooltipRenderer {
         Color borderBottom = Color.VANILLA_TOOLTIP_BORDER_BOTTOM;
 
         if(fade < 1){
-            stack.translate(Math.pow(fade, 2) * Math.signum(0.5d)*8, 0, 0);
+            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
             background = background.multiply(1,1,1,fade);
             borderTop = borderTop.multiply(1,1,1,fade);
             borderBottom = borderBottom.multiply(1,1,1,fade);
         }
 
-        UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getRGB(), borderTop.getRGB(), borderBottom.getRGB(), mc.font);
+        UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
     }
 }
