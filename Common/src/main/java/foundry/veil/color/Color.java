@@ -26,9 +26,50 @@ public class Color {
     }
 
     public static void tickRainbow(int ticks, float partialTick){
-        RAINBOW.r = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI) * 0.5f + 0.5f;
-        RAINBOW.g = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI + 2 * Math.PI / 3) * 0.5f + 0.5f;
-        RAINBOW.b = (float) Math.sin((ticks + partialTick) / 20.0 * 2 * Math.PI + 4 * Math.PI / 3) * 0.5f + 0.5f;
+        float hue = (ticks + partialTick) / 20.0f;
+        hue -= Math.floor(hue);
+        RAINBOW.setHue(hue);
+    }
+
+    public void setHue(float hue) {
+        float h = hue * 6.0f;
+        int i = (int) Math.floor(h);
+        float f = h - i;
+        float p = 1.0f - a;
+        float q = 1.0f - f * a;
+        float t = 1.0f - (1.0f - f) * a;
+        switch (i) {
+            case 0 -> {
+                r = a;
+                g = t;
+                b = p;
+            }
+            case 1 -> {
+                r = q;
+                g = a;
+                b = p;
+            }
+            case 2 -> {
+                r = p;
+                g = a;
+                b = t;
+            }
+            case 3 -> {
+                r = p;
+                g = q;
+                b = a;
+            }
+            case 4 -> {
+                r = t;
+                g = p;
+                b = a;
+            }
+            case 5 -> {
+                r = a;
+                g = p;
+                b = q;
+            }
+        }
     }
 
     public Color(float r, float g, float b) {
@@ -66,7 +107,15 @@ public class Color {
     }
 
     public static Color of(int col){
-        return WHITE.multiply(col);
+        return BLACK.add(col);
+    }
+
+    public Color add(int col){
+        r += (col >> 16) & 0xFF;
+        g += (col >> 8) & 0xFF;
+        b += col & 0xFF;
+        a += (col >> 24) & 0xFF;
+        return this;
     }
 
     public float getGreen() {
