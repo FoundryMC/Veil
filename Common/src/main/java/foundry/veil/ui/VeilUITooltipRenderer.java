@@ -4,7 +4,9 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import foundry.veil.color.Color;
+import foundry.veil.helper.SpaceHelper;
 import foundry.veil.postprocessing.PostProcessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -93,12 +95,8 @@ public class VeilUITooltipRenderer {
         }
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            Matrix4f invProjMatrix = RenderSystem.getProjectionMatrix().copy();
-            invProjMatrix.invert();
-            stack.last().pose().multiply(invProjMatrix);
-            Matrix4f invViewMatrix = PostProcessor.viewModelStack.last().pose().copy();
-            invViewMatrix.invert();
-            stack.last().pose().multiply(invViewMatrix);
+            Vector3f worldToScreen = SpaceHelper.worldToScreenCoords(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), width, height);
+            stack.translate(worldToScreen.x(), worldToScreen.y(), worldToScreen.z());
         }
 
         UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
