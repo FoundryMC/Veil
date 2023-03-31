@@ -126,7 +126,6 @@ public class VeilUITooltipRenderer {
             Vec3i diff = playerPosInt.subtract(cornerInt);
             // TODO: Make this only do corners and not half way along edges
             corner = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-            System.out.println(corner);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(corner, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             tooltipX = (int)screenSpacePos.x();
