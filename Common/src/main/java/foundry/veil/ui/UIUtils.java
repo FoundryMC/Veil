@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
+import foundry.veil.Veil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -22,6 +23,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -166,6 +168,7 @@ public class UIUtils {
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
         for (VeilUIItemTooltipDataHolder item : items) {
             renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
+            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow"));
         }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
@@ -264,6 +267,21 @@ public class UIUtils {
 
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
+    }
+
+    public static void drawTexturedRect(Matrix4f mat, int zLevel, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int textureWidth, int textureHeight, ResourceLocation texture)
+    {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, texture);
+        float f = 1.0F / textureWidth;
+        float f1 = 1.0F / textureHeight;
+        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.vertex(mat, x,     y + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
+        buffer.vertex(mat, x + width, y + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
+        buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
+        buffer.vertex(mat, x,     y,     zLevel).uv(u * f, v * f1).endVertex();
+        Tesselator.getInstance().end();
     }
 
     public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
