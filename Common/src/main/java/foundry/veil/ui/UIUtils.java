@@ -149,6 +149,20 @@ public class UIUtils {
         drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 2,
                 tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
+        int itemY = tooltipY;
+        for (int lineNumber = 0; lineNumber < list.size(); ++lineNumber) {
+            if (lineNumber + 1 == titleLinesCount) {
+                itemY += 2;
+            }
+
+            itemY += 10;
+        }
+        Minecraft.getInstance().getItemRenderer().blitOffset += 300;
+        for (VeilUIItemTooltipDataHolder item : items) {
+            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
+            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+        }
+        Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
         MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance()
                 .getBuilder());
@@ -168,12 +182,6 @@ public class UIUtils {
             tooltipY += 10;
         }
 
-        Minecraft.getInstance().getItemRenderer().blitOffset += 300;
-        for (VeilUIItemTooltipDataHolder item : items) {
-            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
-            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
-        }
-        Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
         renderType.endBatch();
         pStack.popPose();
