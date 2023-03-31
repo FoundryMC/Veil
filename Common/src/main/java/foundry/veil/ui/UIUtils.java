@@ -160,7 +160,7 @@ public class UIUtils {
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
         for (VeilUIItemTooltipDataHolder item : items) {
             renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
-            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+            drawTexturedRect(mat, 299, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
         }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
