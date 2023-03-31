@@ -62,12 +62,8 @@ public class VeilUITooltipRenderer {
         hoverTicks++;
         lastHoveredPos = pos;
         boolean shouldShowTooltip = VeilUITooltipHandler.shouldShowTooltip();
-
-        boolean hasInformation = blockEntity instanceof Tooltippable;
         List<Component> tooltip = new ArrayList<>();
-        if(hasInformation){
-            tooltip.addAll(tooltippable.getTooltip());
-        }
+        tooltip.addAll(tooltippable.getTooltip());
         if(tooltip.isEmpty()){
             hoverTicks = 0;
             return;
@@ -92,11 +88,11 @@ public class VeilUITooltipRenderer {
         Color background = tooltippable.getTheme().getColor("background");
         Color borderTop = tooltippable.getTheme().getColor("topBorder");
         Color borderBottom = tooltippable.getTheme().getColor("bottomBorder");
-        float heightBonus = 0;
-        float widthBonus = 0;
-        float textXOffset = 0;
-        float textYOffset = 0;
-        ItemStack istack = ItemStack.EMPTY;
+        float heightBonus = tooltippable.getTooltipHeight();
+        float widthBonus = tooltippable.getTooltipWidth();
+        float textXOffset = tooltippable.getTooltipXOffset();
+        float textYOffset = tooltippable.getTooltipYOffset();
+        ItemStack istack = tooltippable.getStack() == null ? ItemStack.EMPTY : tooltippable.getStack();
         if(pos != lastHoveredPos){
             currentPos = null;
             desiredPos = null;
@@ -111,8 +107,11 @@ public class VeilUITooltipRenderer {
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
             desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-            if(fade < 1){
-                currentPos = currentPos.add(0, -1+fade, 0);
+            if(fade == 0){
+                currentPos = currentPos.add(0, -0.25f, 0);
+                background = background.multiply(1,1,1,fade);
+                borderTop = borderTop.multiply(1,1,1,fade);
+                borderBottom = borderBottom.multiply(1,1,1,fade);
             }
             currentPos = currentPos.lerp(desiredPos, 0.05f);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
@@ -120,26 +119,26 @@ public class VeilUITooltipRenderer {
             tooltipX = (int)screenSpacePos.x();
             tooltipY = (int)screenSpacePos.y();
         }
-        if(fade < 1){
-            if(tooltippable.getTimeline() != null){
-                TooltipTimeline timeline = tooltippable.getTimeline();
-                TooltipKeyframe frame = timeline.getCurrentKeyframe();
-                if(frame != null){
-                    background = frame.getBackgroundColor() == null ? background : frame.getBackgroundColor();
-                    borderTop = frame.getTopBorderColor() == null ? borderTop : frame.getTopBorderColor();
-                    borderBottom = frame.getBottomBorderColor() == null ? borderBottom : frame.getBottomBorderColor();
-                    heightBonus = frame.getTooltipTextHeightBonus();
-                    widthBonus = frame.getTooltipTextWidthBonus();
-                    textXOffset = frame.getTooltipTextXOffset();
-                    textYOffset = frame.getTooltipTextYOffset();
-                    istack = frame.getItemStack() == null ? istack : frame.getItemStack();
-                }
-            }
-            stack.translate(-(Math.pow(fade, 2)*8), 0, 0);
-            background = background.multiply(1,1,1,fade);
-            borderTop = borderTop.multiply(1,1,1,fade);
-            borderBottom = borderBottom.multiply(1,1,1,fade);
-        }
+//        if(fade < 1){
+//            if(tooltippable.getTimeline() != null){
+//                TooltipTimeline timeline = tooltippable.getTimeline();
+//                TooltipKeyframe frame = timeline.getCurrentKeyframe();
+//                if(frame != null){
+//                    background = frame.getBackgroundColor() == null ? background : frame.getBackgroundColor();
+//                    borderTop = frame.getTopBorderColor() == null ? borderTop : frame.getTopBorderColor();
+//                    borderBottom = frame.getBottomBorderColor() == null ? borderBottom : frame.getBottomBorderColor();
+//                    heightBonus = frame.getTooltipTextHeightBonus();
+//                    widthBonus = frame.getTooltipTextWidthBonus();
+//                    textXOffset = frame.getTooltipTextXOffset();
+//                    textYOffset = frame.getTooltipTextYOffset();
+//                    istack = frame.getItemStack() == null ? istack : frame.getItemStack();
+//                }
+//            }
+//            stack.translate(-(Math.pow(fade, 2)*8), 0, 0);
+//            background = background.multiply(1,1,1,fade);
+//            borderTop = borderTop.multiply(1,1,1,fade);
+//            borderBottom = borderBottom.multiply(1,1,1,fade);
+//        }
 
         UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus);
         stack.popPose();
