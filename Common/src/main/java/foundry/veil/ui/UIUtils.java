@@ -281,6 +281,7 @@ public class UIUtils {
         buffer.vertex(mat, x + width, y + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
         buffer.vertex(mat, x,     y,     zLevel).uv(u * f, v * f1).endVertex();
+        buffer.end();
         Tesselator.getInstance().end();
     }
 
