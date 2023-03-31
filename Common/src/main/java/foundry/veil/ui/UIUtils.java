@@ -160,7 +160,7 @@ public class UIUtils {
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
         for (VeilUIItemTooltipDataHolder item : items) {
             renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
-            drawTexturedRect(mat, 299, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+            drawTexturedRect(mat, z+100, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
         }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
@@ -282,10 +282,7 @@ public class UIUtils {
 
     public static void drawTexturedRect(Matrix4f mat, int zLevel, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int textureWidth, int textureHeight, ResourceLocation texture)
     {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         RenderSystem.enableTexture();
-        RenderSystem.enableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texture);
         float f = 1.0F / textureWidth;
@@ -298,7 +295,6 @@ public class UIUtils {
         buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
         buffer.vertex(mat, x,     y,     zLevel).uv(u * f, v * f1).endVertex();
         tessellator.end();
-        RenderSystem.disableBlend();
     }
 
     public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
