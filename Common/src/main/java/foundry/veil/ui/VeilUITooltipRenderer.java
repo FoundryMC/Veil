@@ -60,6 +60,10 @@ public class VeilUITooltipRenderer {
         Tooltippable tooltippable = (Tooltippable) blockEntity;
         int prevHoverTicks = hoverTicks;
         hoverTicks++;
+        if(pos != lastHoveredPos){
+            currentPos = null;
+            desiredPos = null;
+        }
         lastHoveredPos = pos;
         boolean shouldShowTooltip = VeilUITooltipHandler.shouldShowTooltip();
         List<Component> tooltip = new ArrayList<>();
@@ -93,10 +97,7 @@ public class VeilUITooltipRenderer {
         float textXOffset = tooltippable.getTooltipXOffset();
         float textYOffset = tooltippable.getTooltipYOffset();
         ItemStack istack = tooltippable.getStack() == null ? ItemStack.EMPTY : tooltippable.getStack();
-        if(pos != lastHoveredPos){
-            currentPos = null;
-            desiredPos = null;
-        }
+
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
