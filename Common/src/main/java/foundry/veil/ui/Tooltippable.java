@@ -25,5 +25,6 @@ public interface Tooltippable {
     int getTooltipHeight();
     int getTooltipXOffset();
     int getTooltipYOffset();
+    List<VeilUIItemTooltipDataHolder> getItems();
 
 }

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 public class UIUtils {
     public static void drawHoverText(@Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
-                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, int tooltipTextWidthBonus, int tooltipTextHeightBonus) {
+                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items) {
         if(textLines.isEmpty())
             return;
 
@@ -112,91 +112,10 @@ public class UIUtils {
         tooltipHeight += tooltipTextHeightBonus;
 
 
-        drawTooltipRects(pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight);
+        drawTooltipRects(pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight, items);
     }
 
-    public static void drawHoverText(@Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int x, int y, int z, int screenWidth, int screenHeight,
-                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font) {
-        if(textLines.isEmpty())
-            return;
-
-        List<ClientTooltipComponent> list = gatherTooltipComponents(stack, textLines,
-                stack.getTooltipImage(), x, screenWidth, screenHeight, font, font);
-        // RenderSystem.disableRescaleNormal();
-        RenderSystem.disableDepthTest();
-        int tooltipTextWidth = 0;
-
-        for (FormattedText textLine : textLines) {
-            int textLineWidth = font.width(textLine);
-            if (textLineWidth > tooltipTextWidth)
-                tooltipTextWidth = textLineWidth;
-        }
-
-        boolean needsWrap = false;
-
-        int titleLinesCount = 1;
-        int tooltipX = x + 12;
-        if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
-            tooltipX = x - 16 - tooltipTextWidth;
-            if (tooltipX < 4) // if the tooltip doesn't fit on the screen
-            {
-                if (x > screenWidth / 2)
-                    tooltipTextWidth = x - 12 - 8;
-                else
-                    tooltipTextWidth = screenWidth - 16 - x;
-                needsWrap = true;
-            }
-        }
-
-        if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
-            tooltipTextWidth = maxTextWidth;
-            needsWrap = true;
-        }
-
-        if (needsWrap) {
-            int wrappedTooltipWidth = 0;
-            List<FormattedText> wrappedTextLines = new ArrayList<>();
-            for (int i = 0; i < textLines.size(); i++) {
-                FormattedText textLine = textLines.get(i);
-                List<FormattedText> wrappedLine = font.getSplitter()
-                        .splitLines(textLine, tooltipTextWidth, Style.EMPTY);
-                if (i == 0)
-                    titleLinesCount = wrappedLine.size();
-
-                for (FormattedText line : wrappedLine) {
-                    int lineWidth = font.width(line);
-                    if (lineWidth > wrappedTooltipWidth)
-                        wrappedTooltipWidth = lineWidth;
-                    wrappedTextLines.add(line);
-                }
-            }
-            tooltipTextWidth = wrappedTooltipWidth;
-            textLines = wrappedTextLines;
-
-            if (x > screenWidth / 2)
-                tooltipX = x - 16 - tooltipTextWidth;
-            else
-                tooltipX = x + 12;
-        }
-
-        int tooltipY = y - 12;
-        int tooltipHeight = 8;
-
-        if (textLines.size() > 1) {
-            tooltipHeight += (textLines.size() - 1) * 10;
-            if (textLines.size() > titleLinesCount)
-                tooltipHeight += 2; // gap between title lines and next lines
-        }
-
-        if (tooltipY < 4)
-            tooltipY = 4;
-        else if (tooltipY + tooltipHeight + 4 > screenHeight)
-            tooltipY = screenHeight - tooltipHeight - 4;
-
-        drawTooltipRects(pStack, z, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight);
-    }
-
-    private static void drawTooltipRects(PoseStack pStack, int z, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, List<ClientTooltipComponent> list, int tooltipTextWidth, int titleLinesCount, int tooltipX, int tooltipY, int tooltipHeight) {
+    private static void drawTooltipRects(PoseStack pStack, int z, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, List<ClientTooltipComponent> list, int tooltipTextWidth, int titleLinesCount, int tooltipX, int tooltipY, int tooltipHeight, List<VeilUIItemTooltipDataHolder> items) {
         pStack.pushPose();
         Matrix4f mat = pStack.last()
                 .pose();
@@ -236,7 +155,9 @@ public class UIUtils {
         }
 
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
-        Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(Items.ACACIA_BOAT.getDefaultInstance(), tooltipX, tooltipY);
+        for (VeilUIItemTooltipDataHolder item : items) {
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX(), tooltipY + item.getY());
+        }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
         renderType.endBatch();

@@ -94,6 +94,7 @@ public class VeilUITooltipRenderer {
         float widthBonus = tooltippable.getTooltipWidth();
         float textXOffset = tooltippable.getTooltipXOffset();
         float textYOffset = tooltippable.getTooltipYOffset();
+        List<VeilUIItemTooltipDataHolder> items = tooltippable.getItems();
         ItemStack istack = tooltippable.getStack() == null ? ItemStack.EMPTY : tooltippable.getStack();
         if(pos != lastHoveredPos){
             currentPos = null;
@@ -142,7 +143,7 @@ public class VeilUITooltipRenderer {
 //            borderBottom = borderBottom.multiply(1,1,1,fade);
 //        }
 
-        UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus);
+        UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items);
         stack.popPose();
     }
 }
