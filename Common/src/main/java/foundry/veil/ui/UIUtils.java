@@ -4,16 +4,20 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -230,6 +234,8 @@ public class UIUtils {
 
             tooltipY += 10;
         }
+
+        Minecraft.getInstance().getItemRenderer().renderStatic(Items.ACACIA_BOAT.getDefaultInstance(), ItemTransforms.TransformType.GUI, 15728640, OverlayTexture.NO_OVERLAY, pStack, renderType, 1);
 
         renderType.endBatch();
         pStack.popPose();
