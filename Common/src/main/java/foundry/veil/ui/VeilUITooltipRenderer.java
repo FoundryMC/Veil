@@ -97,6 +97,10 @@ public class VeilUITooltipRenderer {
         float textXOffset = 0;
         float textYOffset = 0;
         ItemStack istack = ItemStack.EMPTY;
+        if(pos != lastHoveredPos){
+            currentPos = null;
+            desiredPos = null;
+        }
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
@@ -108,7 +112,7 @@ public class VeilUITooltipRenderer {
             Vec3i diff = playerPosInt.subtract(cornerInt);
             desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
             if(fade < 1){
-                currentPos = currentPos.add(0, -fade, 0);
+                currentPos = currentPos.add(0, -1+fade, 0);
             }
             currentPos = currentPos.lerp(desiredPos, 0.05f);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
