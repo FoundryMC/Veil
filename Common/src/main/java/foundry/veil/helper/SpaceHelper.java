@@ -2,10 +2,7 @@ package foundry.veil.helper;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.mojang.math.*;
 import foundry.veil.mixin.client.Matrix4fAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -150,6 +147,18 @@ public class SpaceHelper {
         return a * b + c;
     }
 
+    public static Quaternion restrictAxis(Vec3 v, Quaternion q){
+        Quaternion q2 = q.copy();
+        q2.normalize();
+        Vec3 v2 = new Vec3(q2.i(), q2.j(), q2.k());
+        double D = v.dot(v2);
+        double den = Math.sqrt(D*D+ q2.r()*q2.r());
+        double real = q2.r()/den;
+        double imag = D/den;
+        Vec3 f = v.scale(imag);
+        return new Quaternion((float)f.x, (float)f.y, (float)f.z, (float)real);
+    }
+
     public static Vector3f worldToScreenSpace(Vec3 pos, float partialTicks) {
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
@@ -158,6 +167,7 @@ public class SpaceHelper {
         Vector3f position = new Vector3f((float) (cameraPosition.x - pos.x), (float) (cameraPosition.y - pos.y), (float) (cameraPosition.z - pos.z));
         Quaternion cameraRotation = camera.rotation().copy();
         cameraRotation.conj();
+        cameraRotation = restrictAxis(new Vec3(1, 1, 0), cameraRotation);
         position.transform(cameraRotation);
 
         // Account for view bobbing
