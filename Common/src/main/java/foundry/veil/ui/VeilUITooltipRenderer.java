@@ -97,6 +97,25 @@ public class VeilUITooltipRenderer {
         float textXOffset = 0;
         float textYOffset = 0;
         ItemStack istack = ItemStack.EMPTY;
+        if(tooltippable.getWorldspace()){
+            // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
+            Vec3 corner = Vec3.atCenterOf(pos);
+            currentPos = currentPos == null ? corner : currentPos;
+            // move corner to the closest top corner to the player
+            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
+            Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
+            Vec3i diff = playerPosInt.subtract(cornerInt);
+            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            if(fade < 1){
+                currentPos = currentPos.add(0, -fade, 0);
+            }
+            currentPos = currentPos.lerp(desiredPos, 0.05f);
+            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
+            screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
+            tooltipX = (int)screenSpacePos.x();
+            tooltipY = (int)screenSpacePos.y();
+        }
         if(fade < 1){
             if(tooltippable.getTimeline() != null){
                 TooltipTimeline timeline = tooltippable.getTimeline();
@@ -112,27 +131,10 @@ public class VeilUITooltipRenderer {
                     istack = frame.getItemStack() == null ? istack : frame.getItemStack();
                 }
             }
-//            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
-//            background = background.multiply(1,1,1,fade);
-//            borderTop = borderTop.multiply(1,1,1,fade);
-//            borderBottom = borderBottom.multiply(1,1,1,fade);
-        }
-
-        if(tooltippable.getWorldspace()){
-            // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            Vec3 corner = Vec3.atCenterOf(pos);
-            currentPos = currentPos == null ? corner : currentPos;
-            // move corner to the closest top corner to the player
-            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
-            Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
-            Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
-            Vec3i diff = playerPosInt.subtract(cornerInt);
-            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-            currentPos = currentPos.lerp(desiredPos, 0.05f);
-            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
-            screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
-            tooltipX = (int)screenSpacePos.x();
-            tooltipY = (int)screenSpacePos.y();
+            stack.translate(-(Math.pow(fade, 2)*8), 0, 0);
+            background = background.multiply(1,1,1,fade);
+            borderTop = borderTop.multiply(1,1,1,fade);
+            borderBottom = borderBottom.multiply(1,1,1,fade);
         }
 
         UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus);
