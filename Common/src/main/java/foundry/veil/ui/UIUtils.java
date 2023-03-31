@@ -339,7 +339,6 @@ public class UIUtils {
         $$4.translate(8.0, 8.0, 0.0);
         $$4.scale(1.0F, -1.0F, 1.0F);
         $$4.scale(16.0F, 16.0F, 16.0F);
-        $$4.mulPose(Vector3f.YP.rotationDegrees(Minecraft.getInstance().level.getGameTime()));
         RenderSystem.applyModelViewMatrix();
         PoseStack $$5 = new PoseStack();
         MultiBufferSource.BufferSource $$6 = Minecraft.getInstance().renderBuffers().bufferSource();
