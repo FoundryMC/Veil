@@ -184,4 +184,15 @@ public class SpaceHelper {
 
         return position;
     }
+
+    public static Vec3 clipNormalizedDir(Vec3 normalizeDir){
+        // remove the lowest axis
+        if (Math.abs(normalizeDir.x) < Math.abs(normalizeDir.y) && Math.abs(normalizeDir.x) < Math.abs(normalizeDir.z)) {
+            return new Vec3(0, normalizeDir.y, normalizeDir.z);
+        } else if (Math.abs(normalizeDir.y) < Math.abs(normalizeDir.x) && Math.abs(normalizeDir.y) < Math.abs(normalizeDir.z)) {
+            return new Vec3(normalizeDir.x, 0, normalizeDir.z);
+        } else {
+            return new Vec3(normalizeDir.x, normalizeDir.y, 0);
+        }
+    }
 }

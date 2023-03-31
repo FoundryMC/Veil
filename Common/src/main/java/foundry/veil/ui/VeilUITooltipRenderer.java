@@ -120,8 +120,11 @@ public class VeilUITooltipRenderer {
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
             // offset corner to the closest top corner to the player
-            Vec3i normalizedPlayerDir = blockHitResult.getDirection().getNormal();
-            corner = corner.add(normalizedPlayerDir.getX() * 0.5, 0.5, normalizedPlayerDir.getZ() * 0.5);
+            Vec3 playerPos = mc.player.position();
+            Vec3 diff = corner.subtract(playerPos);
+            diff.normalize();
+            diff = SpaceHelper.clipNormalizedDir(diff);
+            corner = corner.add(diff.x() * 0.5, 0.5, diff.z() * 0.5);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(corner, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             tooltipX = (int)screenSpacePos.x();
