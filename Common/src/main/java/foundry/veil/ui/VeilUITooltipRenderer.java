@@ -34,6 +34,8 @@ public class VeilUITooltipRenderer {
 
     public static int hoverTicks = 0;
     public static BlockPos lastHoveredPos = null;
+    public static Vec3 currentPos = null;
+    public static Vec3 desiredPos = null;
 
     public static void renderOverlay(Gui gui, PoseStack stack, float partialTicks, int width, int height){
         stack.pushPose();
@@ -119,14 +121,15 @@ public class VeilUITooltipRenderer {
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
+            currentPos = currentPos == null ? corner : currentPos;
             // move corner to the closest top corner to the player
             Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
             Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
-            // TODO: Make this only do corners and not half way along edges
-            corner = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(corner, partialTicks);
+            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            currentPos = currentPos.lerp(desiredPos, 0.05f);
+            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             tooltipX = (int)screenSpacePos.x();
             tooltipY = (int)screenSpacePos.y();
