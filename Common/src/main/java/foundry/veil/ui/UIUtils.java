@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UIUtils {
-    public static void drawHoverText(@Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
+    public static void drawHoverText(float pticks, @Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
                                      int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items) {
         if(textLines.isEmpty())
             return;
@@ -112,10 +112,10 @@ public class UIUtils {
         tooltipHeight += tooltipTextHeightBonus;
 
 
-        drawTooltipRects(pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight, items);
+        drawTooltipRects(pticks, pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight, items);
     }
 
-    private static void drawTooltipRects(PoseStack pStack, int z, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, List<ClientTooltipComponent> list, int tooltipTextWidth, int titleLinesCount, int tooltipX, int tooltipY, int tooltipHeight, List<VeilUIItemTooltipDataHolder> items) {
+    private static void drawTooltipRects(float pticks, PoseStack pStack, int z, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, List<ClientTooltipComponent> list, int tooltipTextWidth, int titleLinesCount, int tooltipX, int tooltipY, int tooltipHeight, List<VeilUIItemTooltipDataHolder> items) {
         pStack.pushPose();
         Matrix4f mat = pStack.last()
                 .pose();
@@ -156,7 +156,7 @@ public class UIUtils {
 
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
         for (VeilUIItemTooltipDataHolder item : items) {
-            Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX(), tooltipY + item.getY());
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
         }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 

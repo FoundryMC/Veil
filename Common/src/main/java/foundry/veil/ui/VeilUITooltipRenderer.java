@@ -143,7 +143,7 @@ public class VeilUITooltipRenderer {
 //            borderBottom = borderBottom.multiply(1,1,1,fade);
 //        }
 
-        UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items);
+        UIUtils.drawHoverText(partialTicks, istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items);
         stack.popPose();
     }
 }
