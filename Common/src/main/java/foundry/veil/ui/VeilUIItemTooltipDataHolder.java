@@ -7,10 +7,10 @@ import java.util.function.Supplier;
 
 public class VeilUIItemTooltipDataHolder {
     private ItemStack itemStack;
-    private Function<Float, Integer> x;
-    private Function<Float, Integer> y;
+    private Function<Float, Float> x;
+    private Function<Float, Float> y;
 
-    public VeilUIItemTooltipDataHolder(ItemStack itemStack, Function<Float, Integer> x, Function<Float, Integer> y) {
+    public VeilUIItemTooltipDataHolder(ItemStack itemStack, Function<Float, Float> x, Function<Float, Float> y) {
         this.itemStack = itemStack;
         this.x = x;
         this.y = y;
@@ -20,11 +20,11 @@ public class VeilUIItemTooltipDataHolder {
         return itemStack;
     }
 
-    public Function<Float, Integer> getX() {
+    public Function<Float, Float> getX() {
         return x;
     }
 
-    public Function<Float, Integer> getY() {
+    public Function<Float, Float> getY() {
         return y;
     }
 
@@ -32,11 +32,11 @@ public class VeilUIItemTooltipDataHolder {
         this.itemStack = itemStack;
     }
 
-    public void setX(Function<Float, Integer> x) {
+    public void setX(Function<Float, Float> x) {
         this.x = x;
     }
 
-    public void setY(Function<Float, Integer> y) {
+    public void setY(Function<Float, Float> y) {
         this.y = y;
     }
 }

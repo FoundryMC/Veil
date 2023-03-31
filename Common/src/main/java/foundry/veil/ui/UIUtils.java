@@ -1,9 +1,14 @@
 package foundry.veil.ui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -11,13 +16,17 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -156,7 +165,7 @@ public class UIUtils {
 
         Minecraft.getInstance().getItemRenderer().blitOffset += 300;
         for (VeilUIItemTooltipDataHolder item : items) {
-            Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
+            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
         }
         Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
@@ -164,6 +173,12 @@ public class UIUtils {
         pStack.popPose();
 
         RenderSystem.enableDepthTest();
+    }
+    public static void renderAndDecorateItem(ItemStack $$0, float $$1, float $$2) {
+        tryRenderGuiItem(Minecraft.getInstance().player, $$0, $$1, $$2, 0);
+    }
+    public static void tryRenderGuiItem(@Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4) {
+        tryRenderGuiItem($$0, $$1, $$2, $$3, $$4, 0);
     }
 
     public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, Optional<TooltipComponent> itemComponent, int mouseX, int screenWidth, int screenHeight, @Nullable Font forcedFont, Font fallbackFont)
@@ -249,5 +264,65 @@ public class UIUtils {
 
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
+    }
+
+    public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
+        if (!$$1.isEmpty()) {
+            BakedModel $$6 = Minecraft.getInstance().getItemRenderer().getModel($$1, (Level)null, $$0, $$4);
+            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F + (float)$$5 : Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F;
+
+            try {
+                renderGuiItem($$1, $$2, $$3, $$6);
+            } catch (Throwable var11) {
+                CrashReport $$8 = CrashReport.forThrowable(var11, "Rendering item");
+                CrashReportCategory $$9 = $$8.addCategory("Item being rendered");
+                $$9.setDetail("Item Type", () -> {
+                    return String.valueOf($$1.getItem());
+                });
+                $$9.setDetail("Item Damage", () -> {
+                    return String.valueOf($$1.getDamageValue());
+                });
+                $$9.setDetail("Item NBT", () -> {
+                    return String.valueOf($$1.getTag());
+                });
+                $$9.setDetail("Item Foil", () -> {
+                    return String.valueOf($$1.hasFoil());
+                });
+                throw new ReportedException($$8);
+            }
+
+            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F - (float)$$5 : Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F;
+        }
+    }
+
+    public static void renderGuiItem(ItemStack stack, float x, float y, BakedModel bakedModel) {
+        Minecraft.getInstance().getItemRenderer().textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        PoseStack $$4 = RenderSystem.getModelViewStack();
+        $$4.pushPose();
+        $$4.translate((double)x, (double)y, (double)(100.0F + Minecraft.getInstance().getItemRenderer().blitOffset));
+        $$4.translate(8.0, 8.0, 0.0);
+        $$4.scale(1.0F, -1.0F, 1.0F);
+        $$4.scale(16.0F, 16.0F, 16.0F);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack $$5 = new PoseStack();
+        MultiBufferSource.BufferSource $$6 = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean $$7 = !bakedModel.usesBlockLight();
+        if ($$7) {
+            Lighting.setupForFlatItems();
+        }
+
+        Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, $$5, $$6, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+        $$6.endBatch();
+        RenderSystem.enableDepthTest();
+        if ($$7) {
+            Lighting.setupFor3DItems();
+        }
+
+        $$4.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 }
