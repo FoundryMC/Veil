@@ -167,7 +167,7 @@ public class SpaceHelper {
         Vector3f position = new Vector3f((float) (cameraPosition.x - pos.x), (float) (cameraPosition.y - pos.y), (float) (cameraPosition.z - pos.z));
         Quaternion cameraRotation = camera.rotation().copy();
         cameraRotation.conj();
-        cameraRotation = restrictAxis(new Vec3(1, 1, 0), cameraRotation);
+        //cameraRotation = restrictAxis(new Vec3(1, 1, 0), cameraRotation);
         position.transform(cameraRotation);
 
         // Account for view bobbing
