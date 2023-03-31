@@ -276,7 +276,6 @@ public class UIUtils {
         float f = 1.0F / textureWidth;
         float f1 = 1.0F / textureHeight;
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(mat, x,     y + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
