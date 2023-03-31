@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import foundry.veil.Veil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -338,6 +339,7 @@ public class UIUtils {
         $$4.translate(8.0, 8.0, 0.0);
         $$4.scale(1.0F, -1.0F, 1.0F);
         $$4.scale(16.0F, 16.0F, 16.0F);
+        $$4.mulPose(Vector3f.YP.rotationDegrees(Minecraft.getInstance().level.getGameTime() / 20F));
         RenderSystem.applyModelViewMatrix();
         PoseStack $$5 = new PoseStack();
         MultiBufferSource.BufferSource $$6 = Minecraft.getInstance().renderBuffers().bufferSource();
