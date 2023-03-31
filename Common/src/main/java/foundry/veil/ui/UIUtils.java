@@ -235,7 +235,7 @@ public class UIUtils {
             tooltipY += 10;
         }
 
-        Minecraft.getInstance().getItemRenderer().renderStatic(Items.ACACIA_BOAT.getDefaultInstance(), ItemTransforms.TransformType.GUI, 15728640, OverlayTexture.NO_OVERLAY, pStack, renderType, 1);
+        Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(Items.ACACIA_BOAT.getDefaultInstance(), tooltipX, tooltipY);
 
         renderType.endBatch();
         pStack.popPose();
