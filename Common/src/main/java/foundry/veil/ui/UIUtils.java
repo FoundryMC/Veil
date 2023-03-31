@@ -149,6 +149,13 @@ public class UIUtils {
         drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 2,
                 tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
+        Minecraft.getInstance().getItemRenderer().blitOffset += 300;
+        for (VeilUIItemTooltipDataHolder item : items) {
+            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
+            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow"));
+        }
+        Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
+
         MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance()
                 .getBuilder());
         pStack.translate(0.0D, 0.0D, z);
@@ -156,21 +163,17 @@ public class UIUtils {
         for (int lineNumber = 0; lineNumber < list.size(); ++lineNumber) {
             ClientTooltipComponent line = list.get(lineNumber);
 
-            if (line != null)
+            if (line != null) {
                 line.renderText(font, tooltipX, tooltipY, mat, renderType);
+            }
 
-            if (lineNumber + 1 == titleLinesCount)
+            if (lineNumber + 1 == titleLinesCount) {
                 tooltipY += 2;
+            }
 
             tooltipY += 10;
         }
 
-        Minecraft.getInstance().getItemRenderer().blitOffset += 300;
-        for (VeilUIItemTooltipDataHolder item : items) {
-            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks));
-            drawTexturedRect(mat, z, tooltipX + item.getX().apply(pticks), tooltipY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow"));
-        }
-        Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
 
         renderType.endBatch();
         pStack.popPose();
@@ -271,17 +274,23 @@ public class UIUtils {
 
     public static void drawTexturedRect(Matrix4f mat, int zLevel, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int textureWidth, int textureHeight, ResourceLocation texture)
     {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableTexture();
+        RenderSystem.enableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texture);
         float f = 1.0F / textureWidth;
         float f1 = 1.0F / textureHeight;
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(mat, x,     y + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
         buffer.vertex(mat, x,     y,     zLevel).uv(u * f, v * f1).endVertex();
-        buffer.end();
-        Tesselator.getInstance().end();
+        tessellator.end();
+        RenderSystem.disableBlend();
     }
 
     public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
