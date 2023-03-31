@@ -7,6 +7,8 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import foundry.veil.color.Color;
 import foundry.veil.helper.SpaceHelper;
+import foundry.veil.ui.anim.TooltipKeyframe;
+import foundry.veil.ui.anim.TooltipTimeline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -87,36 +89,41 @@ public class VeilUITooltipRenderer {
         Color background = tooltippable.getTheme().getColor("background");
         Color borderTop = tooltippable.getTheme().getColor("topBorder");
         Color borderBottom = tooltippable.getTheme().getColor("bottomBorder");
-
+        float heightBonus = 0;
+        float widthBonus = 0;
+        float textXOffset = 0;
+        float textYOffset = 0;
+        ItemStack istack = ItemStack.EMPTY;
         if(fade < 1){
-            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
-            background = background.multiply(1,1,1,fade);
-            borderTop = borderTop.multiply(1,1,1,fade);
-            borderBottom = borderBottom.multiply(1,1,1,fade);
+            if(tooltippable.getTimeline() != null){
+                TooltipTimeline timeline = tooltippable.getTimeline();
+                TooltipKeyframe frame = timeline.getCurrentKeyframe();
+                if(frame != null){
+                    background = frame.getBackgroundColor();
+                    borderTop = frame.getTopBorderColor();
+                    borderBottom = frame.getBottomBorderColor();
+                    heightBonus = frame.getTooltipTextHeightBonus();
+                    widthBonus = frame.getTooltipTextWidthBonus();
+                    textXOffset = frame.getTooltipTextXOffset();
+                    textYOffset = frame.getTooltipTextYOffset();
+                    istack = frame.getItemStack();
+                }
+            }
+//            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
+//            background = background.multiply(1,1,1,fade);
+//            borderTop = borderTop.multiply(1,1,1,fade);
+//            borderBottom = borderBottom.multiply(1,1,1,fade);
         }
+
         if(tooltippable.getWorldspace()){
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
-            double cameraX = mc.gameRenderer.getMainCamera().getPosition().x;
-            double cameraY = mc.gameRenderer.getMainCamera().getPosition().y;
-            double cameraZ = mc.gameRenderer.getMainCamera().getPosition().z;
-            PoseStack modelView = RenderSystem.getModelViewStack();
-            Matrix4f projMat = RenderSystem.getProjectionMatrix();
-
-            Matrix4f viewMat = modelView.last().pose();
-            Vec3 ray = TargetPicker.getRay(projMat, viewMat, mc.getWindow().getGuiScaledWidth()/2f, mc.getWindow().getGuiScaledHeight()/2f);
-            Vec3 start = new Vec3(cameraX, cameraY, cameraZ);
-            Vec3 end = start.add(ray.scale(100));
-            if(mc.player == null) return;
-            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
-            Vec3 hitVec = blockHitResult1.getLocation();
-            Vector4f hitPos = new Vector4f((float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 1);
-            hitPos.transform(viewMat);
-            hitPos.transform(projMat);
-            tooltipX = (int) ((hitPos.x() / hitPos.w() + 1) * mc.getWindow().getGuiScaledWidth() / 2);
-            tooltipY = (int) ((-hitPos.y() / hitPos.w() + 1) * mc.getWindow().getGuiScaledHeight() / 2);
+            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(Vec3.atCenterOf(pos), partialTicks);
+            screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
+            tooltipX = (int)screenSpacePos.x();
+            tooltipY = (int)screenSpacePos.y();
         }
 
-        UIUtils.drawHoverText(ItemStack.EMPTY, stack, tooltip, tooltipX, tooltipY, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font);
+        UIUtils.drawHoverText(istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus);
         stack.popPose();
     }
 }

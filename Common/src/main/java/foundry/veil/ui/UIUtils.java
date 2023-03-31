@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public class UIUtils {
     public static void drawHoverText(@Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
-                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font) {
+                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, int tooltipTextWidthBonus, int tooltipTextHeightBonus) {
         if(textLines.isEmpty())
             return;
 
@@ -104,6 +104,9 @@ public class UIUtils {
             tooltipY = screenHeight - tooltipHeight - 4;
 
         final int zLevel = 400;
+        tooltipTextWidth += tooltipTextWidthBonus;
+        tooltipHeight += tooltipTextHeightBonus;
+
 
         drawTooltipRects(pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight);
     }

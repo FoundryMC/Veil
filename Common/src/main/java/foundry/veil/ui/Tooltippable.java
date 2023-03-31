@@ -1,6 +1,7 @@
 package foundry.veil.ui;
 
 import foundry.veil.color.ColorTheme;
+import foundry.veil.ui.anim.TooltipTimeline;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -17,5 +18,6 @@ public interface Tooltippable {
     void setTopBorderColor(int color);
     void setBottomBorderColor(int color);
     boolean getWorldspace();
+    TooltipTimeline getTimeline();
 
 }

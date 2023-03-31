@@ -1,10 +1,17 @@
 package foundry.veil.helper;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import foundry.veil.mixin.client.Matrix4fAccessor;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
 
@@ -141,5 +148,40 @@ public class SpaceHelper {
     private static float fma(float a, float b, float c)
     {
         return a * b + c;
+    }
+
+    public static Vector3f worldToScreenSpace(Vec3 pos, float partialTicks) {
+        Minecraft mc = Minecraft.getInstance();
+        Camera camera = mc.gameRenderer.getMainCamera();
+        Vec3 cameraPosition = camera.getPosition();
+
+        Vector3f position = new Vector3f((float) (cameraPosition.x - pos.x), (float) (cameraPosition.y - pos.y), (float) (cameraPosition.z - pos.z));
+        Quaternion cameraRotation = camera.rotation().copy();
+        cameraRotation.conj();
+        position.transform(cameraRotation);
+
+        // Account for view bobbing
+        if (mc.options.bobView.get() && mc.getCameraEntity() instanceof Player)
+        {
+            Player player = (Player) mc.getCameraEntity();
+            float playerStep = player.walkDist - player.walkDistO;
+            float stepSize = -(player.walkDist + playerStep * partialTicks);
+            float viewBob = Mth.lerp(partialTicks, player.oBob, player.bob);
+
+            Quaternion bobXRotation = Vector3f.XP.rotationDegrees(Math.abs(Mth.cos(stepSize * (float) Math.PI - 0.2f) * viewBob) * 5f);
+            Quaternion bobZRotation = Vector3f.ZP.rotationDegrees(Mth.sin(stepSize * (float) Math.PI) * viewBob * 3f);
+            bobXRotation.conj();
+            bobZRotation.conj();
+            position.transform(bobXRotation);
+            position.transform(bobZRotation);
+            position.add(Mth.sin(stepSize * (float) Math.PI) * viewBob * 0.5f, Math.abs(Mth.cos(stepSize * (float) Math.PI) * viewBob), 0f);
+        }
+
+        Window window = mc.getWindow();
+        float screenSize = window.getGuiScaledHeight() / 2f / position.z() / (float) Math.tan(Math.toRadians(mc.gameRenderer.getFov(camera, partialTicks, true) / 2f));
+        position.mul(-screenSize, -screenSize, 1f);
+        position.add(window.getGuiScaledWidth() / 2f, window.getGuiScaledHeight() / 2f, 0f);
+
+        return position;
     }
 }
