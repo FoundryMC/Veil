@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.Mth;
@@ -119,14 +120,9 @@ public class VeilUITooltipRenderer {
             // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
             // offset corner to the closest top corner to the player
-            corner = corner.add(0, 0.5, 0);
-            if(mc.player == null) return;
-            Vec3 playerPos = mc.player.position();
-            Vec3 playerDir = mc.player.getLookAngle();
-            Vec3 playerToCorner = corner.subtract(playerPos);
-            double dot = playerDir.dot(playerToCorner);
-            Vec3 closestCorner = corner.add(playerDir.scale(dot));
-            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(closestCorner, partialTicks);
+            Vec3i normalizedPlayerDir = blockHitResult.getDirection().getNormal();
+            corner = corner.add(normalizedPlayerDir.getX() * 0.5, 0.5, normalizedPlayerDir.getZ() * 0.5);
+            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(corner, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             tooltipX = (int)screenSpacePos.x();
             tooltipY = (int)screenSpacePos.y();
