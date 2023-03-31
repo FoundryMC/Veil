@@ -99,14 +99,14 @@ public class VeilUITooltipRenderer {
                 TooltipTimeline timeline = tooltippable.getTimeline();
                 TooltipKeyframe frame = timeline.getCurrentKeyframe();
                 if(frame != null){
-                    background = frame.getBackgroundColor();
-                    borderTop = frame.getTopBorderColor();
-                    borderBottom = frame.getBottomBorderColor();
+                    background = frame.getBackgroundColor() == null ? background : frame.getBackgroundColor();
+                    borderTop = frame.getTopBorderColor() == null ? borderTop : frame.getTopBorderColor();
+                    borderBottom = frame.getBottomBorderColor() == null ? borderBottom : frame.getBottomBorderColor();
                     heightBonus = frame.getTooltipTextHeightBonus();
                     widthBonus = frame.getTooltipTextWidthBonus();
                     textXOffset = frame.getTooltipTextXOffset();
                     textYOffset = frame.getTooltipTextYOffset();
-                    istack = frame.getItemStack();
+                    istack = frame.getItemStack() == null ? istack : frame.getItemStack();
                 }
             }
 //            stack.translate(-(Math.pow(fade, 2) * Math.signum(0.5d)*8), 0, 0);
