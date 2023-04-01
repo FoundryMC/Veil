@@ -1,6 +1,7 @@
 #version 150
 
 uniform sampler2D DiffuseSampler;
+uniform sampler2D Troll;
 
 in vec2 texCoord;
 in vec2 oneTexel;
@@ -31,6 +32,6 @@ void main()
         fragColor.a = dista/255.0;
         return;
     }
-    fragColor = texture(DiffuseSampler, texCoord) * vec4(dista, dista, dista, 1.0);
+    fragColor = texture(Troll, texCoord);// * vec4(dista, dista, dista, 1.0);
     //fragColor = vec4(lumav, lumav, lumav, 1.0);
 }

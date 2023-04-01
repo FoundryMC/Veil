@@ -8,7 +8,8 @@
   "fragment": "veil:area",
   "attributes": [ "Position" ],
   "samplers": [
-    { "name": "DiffuseSampler" }
+    { "name": "DiffuseSampler" },
+    { "name": "Troll" }
   ],
   "uniforms": [
     { "name": "InSize",      "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },

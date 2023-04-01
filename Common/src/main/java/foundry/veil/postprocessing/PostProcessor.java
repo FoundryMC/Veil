@@ -1,6 +1,8 @@
 package foundry.veil.postprocessing;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -13,6 +15,7 @@ import com.mojang.math.Vector3f;
 import foundry.veil.Veil;
 import foundry.veil.shader.RenderTargetRegistry;
 import foundry.veil.shader.RenderTypeRegistry;
+import foundry.veil.texture.DynamicRenderTargetTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.GameRenderer;
@@ -21,16 +24,16 @@ import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER;
 
 public abstract class PostProcessor {
     protected static final Minecraft MC = Minecraft.getInstance();
+
+    public static final Multimap<ResourceLocation, Pair<String, DynamicRenderTargetTexture>> TEXTURE_UNIFORMS = ArrayListMultimap.create();
 
     public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
             Pair.of("CameraPos", u -> u.set(new Vector3f(MC.gameRenderer.getMainCamera().getPosition()))),
@@ -153,7 +156,24 @@ public abstract class PostProcessor {
     }
 
     private void applyDefaultUniforms() {
-        Arrays.stream(effects).forEach(e -> e.safeGetUniform("time").set((float) time));
+        Arrays.stream(effects).forEach(e -> {
+            e.safeGetUniform("time").set((float) time);
+            Collection<Pair<String, DynamicRenderTargetTexture>> textures = TEXTURE_UNIFORMS.get(getPostChainLocation());
+            List<Pair<String, DynamicRenderTargetTexture>> sortedTextures = new ArrayList<>(textures);
+            for(int i = 0; i < textures.size(); i++) {
+                int finalI = i;
+                sortedTextures.get(finalI).getSecond().bindWrite();
+                sortedTextures.get(finalI).getSecond().initialize();
+                sortedTextures.get(finalI).getSecond().getRenderTarget().setClearColor(0, 0, 0, 0);
+                sortedTextures.get(finalI).getSecond().upload();
+                try {
+                    sortedTextures.get(finalI).getSecond().saveTextureToFile(Path.of("./"), "test" + finalI);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                e.setSampler(sortedTextures.get(i).getFirst(), () -> sortedTextures.get(finalI).getSecond().getRenderTarget().getColorTextureId());
+            }
+        });
 
         defaultUniforms.forEach(pair -> pair.getSecond().accept(pair.getFirst()));
     }

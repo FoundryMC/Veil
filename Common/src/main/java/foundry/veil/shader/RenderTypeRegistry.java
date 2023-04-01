@@ -5,6 +5,9 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import foundry.veil.Veil;
+import foundry.veil.postprocessing.PostProcessor;
+import foundry.veil.texture.DynamicRenderTargetTexture;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -27,6 +30,7 @@ public class RenderTypeRegistry {
         ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.WALL_TORCH);
         ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.TORCH, CUTOUT);
         ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.WALL_TORCH, CUTOUT);
+        PostProcessor.TEXTURE_UNIFORMS.put(Veil.veilPath("area"), Pair.of("Troll", new DynamicRenderTargetTexture(Veil.veilPath("textures/gui/troll.png"), Minecraft.getInstance().getMainRenderTarget().width, Minecraft.getInstance().getMainRenderTarget().height, (e) -> {})));
     }
 
     private static ShaderInstance transparentTexture;
