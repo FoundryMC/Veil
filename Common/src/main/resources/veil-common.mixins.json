@@ -18,7 +18,8 @@
     "client.HumanoidModelMixin",
     "client.ItemInHandRendererMixin",
     "client.LevelRendererMixin",
-    "client.ModelPartMixin"
+    "client.ModelPartMixin",
+    "client.PostChainMixin"
   ],
   "injectors": {
     "defaultRequire": 1

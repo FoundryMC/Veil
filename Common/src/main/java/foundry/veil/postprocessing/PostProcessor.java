@@ -11,6 +11,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import foundry.veil.Veil;
+import foundry.veil.shader.RenderTargetRegistry;
+import foundry.veil.shader.RenderTypeRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.GameRenderer;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER;
@@ -70,6 +73,10 @@ public abstract class PostProcessor {
      */
     public abstract ResourceLocation getPostChainLocation();
 
+    public EffectInstance[] getEffects() {
+        return effects;
+    }
+
     public void init() {
         loadPostChain();
 
@@ -109,7 +116,18 @@ public abstract class PostProcessor {
                     file
             );
             postChain.resize(MC.getWindow().getWidth(), MC.getWindow().getHeight());
+            List<String> tempTargets = new ArrayList<>();
+            RenderTargetRegistry.getRenderTargets().forEach((name, target) -> {
+                        if (target == null) return;
+                        postChain.addTempTarget(name, target.getFirst(), target.getSecond());
+                        tempTargets.add(name);
+                    }
+            );
+            tempTargets.forEach(targ -> {
+                RenderTargetRegistry.renderTargetObjects.put(targ, postChain.getTempTarget(targ));
+            });
             effects = postChain.passes.stream().map(PostPass::getEffect).toArray(EffectInstance[]::new);
+
         } catch (IOException | JsonParseException e) {
             Veil.LOGGER.error("Failed to load post-processing shader: ", e);
         }

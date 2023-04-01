@@ -40,3 +40,4 @@ accessible field com/mojang/math/Matrix4f m32 F
 accessible field com/mojang/math/Matrix4f m33 F
 accessible field net/minecraft/client/Options bobView Lnet/minecraft/client/OptionInstance;
 accessible field net/minecraft/client/renderer/entity/ItemRenderer textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
+accessible method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V

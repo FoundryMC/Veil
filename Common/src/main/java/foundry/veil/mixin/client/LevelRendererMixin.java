@@ -1,6 +1,7 @@
 package foundry.veil.mixin.client;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.datafixers.util.Pair;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.shader.RenderTargetRegistry;
 import net.minecraft.client.Minecraft;
@@ -29,7 +30,7 @@ public class LevelRendererMixin {
     private RenderTarget veilCustomRenderTarget;
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.PostChain.process(F)V", ordinal = 1))
-    public void injectionBeforeTransparencyChainProcess(CallbackInfo ci) {
+    public void veil$injectionBeforeTransparencyChainProcess(CallbackInfo ci) {
         PostProcessingHandler.copyDepth();
     }
 
@@ -45,14 +46,15 @@ public class LevelRendererMixin {
     @Inject(method = "initTransparency", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PostChain;getTempTarget(Ljava/lang/String;)Lcom/mojang/blaze3d/pipeline/RenderTarget;"), locals = LocalCapture.CAPTURE_FAILHARD)
     public void veil$injectCustomRenderTargets(CallbackInfo ci, ResourceLocation $$0, PostChain $$1) {
         for (String id : RenderTargetRegistry.getRenderTargets().keySet()) {
-            RenderTargetRegistry.renderTargets.replace(id, $$1.getTempTarget(id));
+            if($$1.getTempTarget(id) == null) continue;
+            RenderTargetRegistry.renderTargets.replace(id, Pair.of($$1.getTempTarget(id).width, $$1.getTempTarget(id).height));
         }
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;entitiesForRendering()Ljava/lang/Iterable;"))
     public void veil$injectCustomRenderTargets(CallbackInfo ci) {
         for (String id : RenderTargetRegistry.shouldCopyDepth) {
-            RenderTarget target = RenderTargetRegistry.renderTargets.get(id);
+            RenderTarget target = RenderTargetRegistry.renderTargetObjects.get(id);
             if (target == null) return;
             target.clear(Minecraft.ON_OSX);
             target.copyDepthFrom(Minecraft.getInstance().getMainRenderTarget());
@@ -62,7 +64,7 @@ public class LevelRendererMixin {
 
     @Inject(method = "deinitTransparency", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;destroyBuffers()V"))
     public void veil$deinitCustomRenderTargets(CallbackInfo ci) {
-        for (RenderTarget target : RenderTargetRegistry.renderTargets.values()) {
+        for (RenderTarget target : RenderTargetRegistry.renderTargetObjects.values()) {
             if (target == null) return;
             target.destroyBuffers();
             target = null;

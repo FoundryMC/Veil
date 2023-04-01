@@ -19,9 +19,9 @@ public class RenderStateShardRegistry {
      *     Example:
      * </p>
      */
-    public static final RenderStateShard.OutputStateShard VEIL_CUSTOM = new RenderStateShard.OutputStateShard("veil_custom", () -> {
-        RenderTargetRegistry.getRenderTargets().get("veil_custom").bindWrite(false);
+    public static final RenderStateShard.OutputStateShard VEIL_CUSTOM = new RenderStateShard.OutputStateShard("veil:custom", () -> {
+        RenderTargetRegistry.renderTargetObjects.get("veil:custom").bindWrite(false);
     }, () -> {
-        RenderTargetRegistry.getRenderTargets().get("veil_custom").bindWrite(false);
+        RenderTargetRegistry.renderTargetObjects.get("veil:custom").bindWrite(false);
     });
 }

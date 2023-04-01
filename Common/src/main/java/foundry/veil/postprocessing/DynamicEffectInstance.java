@@ -20,6 +20,10 @@ public abstract class DynamicEffectInstance {
      */
     public abstract void writeDataToBuffer(BiConsumer<Integer, Float> writer);
 
+    public String getName() {
+        return getClass().getSimpleName();
+    }
+
     public final void remove() {
         removed = true;
     }

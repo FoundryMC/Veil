@@ -24,6 +24,10 @@ public class BloomPostProcessor extends InstantiatedPostProcessor<BloomFx> {
         return 19;
     }
 
+    public EffectInstance getEffectBloom() {
+        return effectBloom;
+    }
+
     @Override
     public void init() {
         super.init();

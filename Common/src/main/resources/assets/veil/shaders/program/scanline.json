@@ -1,0 +1,17 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "one",
+    "dstrgb": "zero"
+  },
+  "vertex": "veil:postprocessing_base",
+  "fragment": "veil:scanline",
+  "attributes": [ "Position" ],
+  "samplers": [
+    { "name": "DiffuseSampler" }
+  ],
+  "uniforms": [
+    { "name": "InSize",      "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
+    { "name": "time", "type": "float", "count": 1, "values": [ 1.0 ] }
+  ]
+}

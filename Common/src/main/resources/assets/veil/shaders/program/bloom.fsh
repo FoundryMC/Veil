@@ -13,7 +13,7 @@ out vec4 fragColor;
 #moj_import <veil:luma>
 void main()
 {
-    float lumav = luma(texture(DiffuseSampler, texCoord).rgb);
+
 //    if(lumav < 0.75)
 //    {
 //        fragColor = texture(DiffuseSampler, texCoord);
@@ -23,6 +23,8 @@ void main()
     vec4 color = vec4(0.0);
     vec2 offset = vec2(1.3846153846) * oneTexel;
    // vec2 tcoord = texCoord.xy / InSize.xy;
+
+
     color += texture(DiffuseSampler, vec2(texCoord.x - 4.0*blurSize, texCoord.y)) * 0.05;
     color += texture(DiffuseSampler, vec2(texCoord.x - 3.0*blurSize, texCoord.y)) * 0.09;
     color += texture(DiffuseSampler, vec2(texCoord.x - 2.0*blurSize, texCoord.y)) * 0.12;
@@ -42,7 +44,14 @@ void main()
     color += texture(DiffuseSampler, vec2(texCoord.x, texCoord.y + 2.0*blurSize)) * 0.12;
     color += texture(DiffuseSampler, vec2(texCoord.x, texCoord.y + 3.0*blurSize)) * 0.09;
     color += texture(DiffuseSampler, vec2(texCoord.x, texCoord.y + 4.0*blurSize)) * 0.05;
-    //intensity = intensity * lumav;
-    fragColor = color * intensity + texture(DiffuseSampler, texCoord);
+
+    float lumav = luma(texture(DiffuseSampler, texCoord).rgb);
+    vec4 lumac = vec4(lumav, lumav, lumav, 1.0);
+//    if (lumav < 0.5)
+//    {
+//        fragColor = color * 0 + texture(DiffuseSampler, texCoord);
+//        return;
+//    }
+    fragColor = color * intensity + texture(DiffuseSampler, texCoord) * (1.0 - intensity);
     //fragColor = vec4(lumav, lumav, lumav, 1.0);
 }

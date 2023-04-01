@@ -2,7 +2,9 @@ package foundry.veil.postprocessing;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.Veil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -25,10 +27,25 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
      */
     protected abstract int getDataSizePerInstance();
 
+    public DynamicEffectInstance getFxInstance(int index) {
+        return instances.get(index);
+    }
+
+    public int getFxInstanceCount() {
+        return instances.size();
+    }
+
+    public DataBuffer getDataBuffer() {
+        return dataBuffer;
+    }
+
+    public List<DynamicEffectInstance> getFxInstances() {
+        return instances;
+    }
+
     @Override
     public void init() {
         super.init();
-
         dataBuffer.generate((long) getMaxInstances() * getDataSizePerInstance());
     }
 
@@ -45,6 +62,7 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
         instances.add(instance);
         setActive(true);
         Veil.LOGGER.warn("Added fx instance to " + this + ": " + instance);
+        Minecraft.getInstance().player.sendSystemMessage(Component.literal("Added fx instance " + instance.getName()));
         return instance;
     }
 
@@ -64,7 +82,7 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
         }
 
         float[] data = new float[instances.size() * getDataSizePerInstance()];
-        for (int ins=0; ins<instances.size(); ins++) {
+        for (int ins = 0; ins < instances.size(); ins++) {
             DynamicEffectInstance instance = instances.get(ins);
             int offset = ins * getDataSizePerInstance();
             instance.writeDataToBuffer((index, d) -> {
@@ -73,11 +91,6 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
                 data[offset + index] = d;
             });
         }
-
-//        float[] data = new float[getMaxInstances() * getDataSizePerInstance()];
-//        for (int i=0; i<getMaxInstances() * getDataSizePerInstance(); i++) {
-//            data[i] = (float) (time % 1F);
-//        }
 
         dataBuffer.upload(data);
     }
