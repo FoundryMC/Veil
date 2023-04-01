@@ -12,7 +12,6 @@ public class AreaFx extends DynamicEffectInstance {
 
     public AreaFx(Vector3f position) {
         this.position = position;
-        PostProcessor.TEXTURE_UNIFORMS.get(Veil.veilPath("area")).stream().toList().forEach(s->s.getSecond().initialize());
     }
     @Override
     public void writeDataToBuffer(BiConsumer<Integer, Float> writer) {

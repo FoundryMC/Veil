@@ -1,15 +1,18 @@
 #version 150
 
 uniform sampler2D DiffuseSampler;
+uniform samplerBuffer Data;
 
-float blurSize = 2.0 / 512.0;
-float intensity = 0.20;
+float blurSize = 4.0/512.0;
+float intensity = 0.7;
 in vec2 texCoord;
 in vec2 oneTexel;
 uniform vec2 InSize;
 
 out vec4 fragColor;
-
+float fetch(int index){
+    return texelFetch(Data, index).r;
+}
 #moj_import <veil:luma>
 void main()
 {
@@ -24,6 +27,14 @@ void main()
     vec2 offset = vec2(1.3846153846) * oneTexel;
    // vec2 tcoord = texCoord.xy / InSize.xy;
 
+    float inte = fetch(0);
+    if(inte > 0){
+        intensity = inte;
+    }
+    float blur = fetch(1);
+    if(blur > 0){
+        blurSize = blur;
+    }
 
     color += texture(DiffuseSampler, vec2(texCoord.x - 4.0*blurSize, texCoord.y)) * 0.05;
     color += texture(DiffuseSampler, vec2(texCoord.x - 3.0*blurSize, texCoord.y)) * 0.09;
@@ -52,6 +63,13 @@ void main()
 //        fragColor = color * 0 + texture(DiffuseSampler, texCoord);
 //        return;
 //    }
+    // test if difference between original and blurred is big enough
+    // if not, return original
+    if (abs(lumav - luma(color.rgb)) < intensity)
+    {
+        fragColor = texture(DiffuseSampler, texCoord);
+        return;
+    }
     fragColor = color * intensity + texture(DiffuseSampler, texCoord) * (1.0 - intensity);
     //fragColor = vec4(lumav, lumav, lumav, 1.0);
 }

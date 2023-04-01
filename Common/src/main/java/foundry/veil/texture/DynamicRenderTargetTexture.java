@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -25,136 +26,170 @@ import java.util.function.Consumer;
 
 public class DynamicRenderTargetTexture extends AbstractTexture {
 
-    protected final Consumer<DynamicRenderTargetTexture> updateCallback;
+    //runs when texture is initialized and populates it. Runs each tick if its tickable
+    protected final Consumer<DynamicRenderTargetTexture> drawingFunction;
     private boolean initialized = false;
 
-    private RenderTarget renderTarget;
+    //thing where it renders stuff on
+    private RenderTarget frameBuffer;
 
-    private final int width, height;
+    private final int width;
+    private final int height;
     private final ResourceLocation resourceLocation;
 
+    //cpu side of the texture. used to dynamically edit it
     @Nullable
     private NativeImage cpuImage;
 
-    public DynamicRenderTargetTexture(ResourceLocation location, int width, int height, @Nullable Consumer<DynamicRenderTargetTexture> updateCallback) {
-        this.resourceLocation = location;
+    public DynamicRenderTargetTexture(ResourceLocation resourceLocation, int width, int height,
+                                           @Nullable Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
         this.width = width;
         this.height = height;
-        this.updateCallback = updateCallback;
+        this.resourceLocation = resourceLocation;
+        this.drawingFunction = textureDrawingFunction;
     }
 
-    public DynamicRenderTargetTexture(ResourceLocation location, int size,  @Nullable Consumer<DynamicRenderTargetTexture> updateCallback) {
-        this(location, size, size, updateCallback);
+    public DynamicRenderTargetTexture(ResourceLocation resourceLocation, int size,
+                                           @Nullable Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
+        this(resourceLocation, size, size, textureDrawingFunction);
     }
 
-    public void initialize(){
+    @ApiStatus.Internal
+    public void initialize() {
         this.initialized = true;
+        //this.bind(); // assign gpu texture id
+        //register this texture. Call at the right time or stuff will get messed up
         Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
         redraw();
     }
 
-    public void redraw(){
-        if(!RenderSystem.isOnRenderThreadOrInit()){
+    /**
+     * Force redraw using provided render function. You can also redraw manually
+     */
+    public void redraw() {
+        if (!RenderSystem.isOnRenderThreadOrInit()) {
             RenderSystem.recordRenderCall(() -> {
                 bind();
-                if(updateCallback != null){
-                    updateCallback.accept(this);
+                if (drawingFunction != null) {
+                    drawingFunction.accept(this);
                 }
             });
         } else {
             bind();
-            if(updateCallback != null){
-                updateCallback.accept(this);
+            if (drawingFunction != null) {
+                drawingFunction.accept(this);
             }
         }
     }
 
-    public boolean isInitialized(){
+    /**
+     * Call to register this texture
+     */
+    public boolean isInitialized() {
         return initialized;
     }
 
     @Override
-    public void load(ResourceManager resourceManager) throws IOException {
+    public void load(ResourceManager manager) {
     }
 
-    public RenderTarget getRenderTarget(){
-        if(renderTarget == null){
-            renderTarget = new MainTarget(width, height);
-            this.id = this.renderTarget.getColorTextureId();
+    public RenderTarget getFrameBuffer() {
+        //initAfterSetup the frame buffer (do not touch, magic code)
+        if (this.frameBuffer == null) {
+            this.frameBuffer = new MainTarget(width, height);
+            this.id = this.frameBuffer.getColorTextureId(); // just in case
         }
-        return renderTarget;
-    }
-    public void bindWrite(){
-        getRenderTarget().bindWrite(true);
+        return this.frameBuffer;
     }
 
-    public int getWidth(){
+    //sets current frame buffer to this. Further, render calls will draw here
+    public void bindWrite() {
+        getFrameBuffer().bindWrite(true);
+    }
+
+    public int getWidth() {
         return width;
     }
 
-    public int getHeight(){
+    public int getHeight() {
         return height;
     }
 
-    public ResourceLocation getResourceLocation(){
+    public ResourceLocation getTextureLocation() {
         return resourceLocation;
     }
 
     @Override
     public int getId() {
-        return this.renderTarget.getColorTextureId();
+        return this.getFrameBuffer().getColorTextureId();
     }
 
     @Override
     public void releaseId() {
-        if(!RenderSystem.isOnRenderThread()){
+        if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(this::clearGlId0);
         } else {
             this.clearGlId0();
         }
     }
 
-    private void clearGlId0(){
-        if(this.renderTarget != null){
-            this.renderTarget.destroyBuffers();
-            this.renderTarget = null;
+    private void clearGlId0() {
+        if (this.frameBuffer != null) {
+            this.frameBuffer.destroyBuffers();
+            this.frameBuffer = null;
         }
         this.id = -1;
     }
 
     @Override
     public void close() {
+        //releases texture id
         this.releaseId();
-        if(this.cpuImage != null){
+        //closes native image and texture
+        if (this.cpuImage != null) {
             this.cpuImage.close();
             this.cpuImage = null;
         }
+        //destroy render buffer
+        //dont do this, it causes many issues
+        // if (this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
     }
 
-    public NativeImage getPixels(){
-        if(this.cpuImage == null){
+    public NativeImage getPixels() {
+        if (this.cpuImage == null) {
             this.cpuImage = new NativeImage(width, height, false);
         }
-        return this.cpuImage;
+        return cpuImage;
     }
 
-    public void download(){
+    /**
+     * Downloads the GPU texture to CPU for edit
+     */
+    public void download() {
         this.bind();
         getPixels().downloadTexture(0, false);
+        //cpuImage.flipY();
     }
 
-    public void upload(){
-        if(this.cpuImage != null){
+    /**
+     * Uploads the image to GPU and closes its CPU side one
+     */
+    public void upload() {
+        if (this.cpuImage != null) {
             this.bind();
-            this.cpuImage.upload(0,0,0,false);
+            this.cpuImage.upload(0, 0, 0, false);
             this.cpuImage.close();
             this.cpuImage = null;
         } else {
-            Veil.LOGGER.warn("Tried to upload pixels to texture {} but there were no pixels to upload!", resourceLocation);
+            Veil.LOGGER.warn("Trying to upload disposed texture {}", this.getId());
         }
     }
 
-    public List<Path> saveTextureToFile(Path texturePath, String name) throws IOException {
+    public List<Path> saveTextureToFile(Path texturesDir) throws IOException {
+        return saveTextureToFile(texturesDir, this.resourceLocation.getPath().replace("/", "_"));
+    }
+
+    public List<Path> saveTextureToFile(Path texturesDir, String name) throws IOException {
         this.bind();
 
         GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
@@ -170,7 +205,7 @@ public class DynamicRenderTargetTexture extends AbstractTexture {
         }
 
         BufferedImage bufferedimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Path output = texturePath.resolve(name + ".png");
+        Path output = texturesDir.resolve(name + ".png");
         IntBuffer buffer = BufferUtils.createIntBuffer(size);
         int[] data = new int[size];
 

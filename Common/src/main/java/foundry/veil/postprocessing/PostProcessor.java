@@ -16,12 +16,14 @@ import foundry.veil.Veil;
 import foundry.veil.shader.RenderTargetRegistry;
 import foundry.veil.shader.RenderTypeRegistry;
 import foundry.veil.texture.DynamicRenderTargetTexture;
+import foundry.veil.texture.RenderedTexturesManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,7 +35,7 @@ import static org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER;
 public abstract class PostProcessor {
     protected static final Minecraft MC = Minecraft.getInstance();
 
-    public static final Multimap<ResourceLocation, Pair<String, DynamicRenderTargetTexture>> TEXTURE_UNIFORMS = ArrayListMultimap.create();
+    public static final Multimap<ResourceLocation, ResourceLocation> TEXTURE_UNIFORMS = ArrayListMultimap.create();
 
     public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
             Pair.of("CameraPos", u -> u.set(new Vector3f(MC.gameRenderer.getMainCamera().getPosition()))),
@@ -158,20 +160,18 @@ public abstract class PostProcessor {
     private void applyDefaultUniforms() {
         Arrays.stream(effects).forEach(e -> {
             e.safeGetUniform("time").set((float) time);
-            Collection<Pair<String, DynamicRenderTargetTexture>> textures = TEXTURE_UNIFORMS.get(getPostChainLocation());
-            List<Pair<String, DynamicRenderTargetTexture>> sortedTextures = new ArrayList<>(textures);
+            Collection<ResourceLocation> textures = TEXTURE_UNIFORMS.get(getPostChainLocation());
+            List<ResourceLocation> sortedTextures = new ArrayList<>(textures);
             for(int i = 0; i < textures.size(); i++) {
-                int finalI = i;
-                sortedTextures.get(finalI).getSecond().bindWrite();
-                sortedTextures.get(finalI).getSecond().initialize();
-                sortedTextures.get(finalI).getSecond().getRenderTarget().setClearColor(0, 0, 0, 0);
-                sortedTextures.get(finalI).getSecond().upload();
-                try {
-                    sortedTextures.get(finalI).getSecond().saveTextureToFile(Path.of("./"), "test" + finalI);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                int offset = 3+i;
+                if (i > 8){
+                    Veil.LOGGER.warn("Too many textures for post processing shader! Only 9 textures are supported!");
+                    break;
                 }
-                e.setSampler(sortedTextures.get(i).getFirst(), () -> sortedTextures.get(finalI).getSecond().getRenderTarget().getColorTextureId());
+                RenderSystem.setShaderTexture(offset, sortedTextures.get(i));
+            }
+            if(this instanceof InstantiatedPostProcessor iep){
+                iep.setDataBufferUniform(e, "Data", "Data");
             }
         });
 

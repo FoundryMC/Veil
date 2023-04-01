@@ -2,6 +2,7 @@ package foundry.veil;
 
 import com.mojang.math.Vector3f;
 import foundry.veil.test.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,9 +24,11 @@ public class VeilForge {
         public static void onItemRightClick(PlayerInteractEvent.RightClickItem event) {
             if (event.getItemStack().getItem().equals(Items.ALLIUM)) {
                 if (event.getLevel().isClientSide) {
-                    PostProcessingEffectsRegistry.BLOOM.addFxInstance(new BloomFx(new Vector3f(Vec3.atCenterOf(event.getEntity().getOnPos()))) {
-                    });
-
+                    PostProcessingEffectsRegistry.BLOOM.addFxInstance(new BloomFx(() -> {
+                        return Minecraft.getInstance().level.isDay() ? 0.1f : (float)(Math.sin((Minecraft.getInstance().level.getGameTime()+Minecraft.getInstance().getPartialTick())/2f)+1) * 0.1f;
+                    }, () -> {
+                        return Minecraft.getInstance().level.isDay() ? 0.1f/512f : 2.0f/512f;
+                    }));
                 }
             } else if (event.getItemStack().getItem().equals(Items.POPPY)) {
                 if (event.getLevel().isClientSide) {
