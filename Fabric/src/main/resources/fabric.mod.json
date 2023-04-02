@@ -39,6 +39,7 @@
     },
     "suggests": {
       "another-mod": "*"
-    }
+    },
+  "accessWidener": "veil.accesswidener"
   }
   

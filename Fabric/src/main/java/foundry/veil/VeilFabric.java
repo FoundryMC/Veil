@@ -2,6 +2,8 @@ package foundry.veil;
 
 import com.mojang.math.Vector3f;
 import foundry.veil.postprocessing.DynamicEffectInstance;
+import foundry.veil.postprocessing.PostProcessingHandler;
+import foundry.veil.postprocessing.PostProcessor;
 import foundry.veil.test.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -15,6 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Objects;
 
 public class VeilFabric implements ModInitializer {
     @Override
@@ -27,6 +30,9 @@ public class VeilFabric implements ModInitializer {
             if(stack.getItem().equals(Items.RAW_GOLD)){
                 PostProcessingEffectsRegistry.INSTANCES.forEach(instantiatedPostProcessor -> instantiatedPostProcessor.getFxInstances().forEach(DynamicEffectInstance::remove));
                 Minecraft.getInstance().player.sendSystemMessage(Component.literal("Removed all effects"));
+            }
+            if(stack.getItem().equals(Items.AMETHYST_SHARD)){
+                PostProcessingHandler.getInstances().stream().filter(Objects::nonNull).forEach(PostProcessor::init);
             }
             if (stack.getItem().equals(Items.ALLIUM)) {
                 if (player.level.isClientSide) {

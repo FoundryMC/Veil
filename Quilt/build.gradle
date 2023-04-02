@@ -54,7 +54,7 @@ processResources {
 loom {
 	accessWidenerPath = project(":Common").file("src/main/resources/veil.accesswidener")
 	mixin {
-		defaultRefmapName.set("veil")
+		defaultRefmapName.set("veil.refmap.json")
 	}
 }
 
