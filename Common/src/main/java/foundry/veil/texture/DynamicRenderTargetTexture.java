@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -54,7 +53,6 @@ public class DynamicRenderTargetTexture extends AbstractTexture {
         this(resourceLocation, size, size, textureDrawingFunction);
     }
 
-    @ApiStatus.Internal
     public void initialize() {
         this.initialized = true;
         //this.bind(); // assign gpu texture id

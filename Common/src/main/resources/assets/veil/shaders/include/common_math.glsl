@@ -1,4 +1,3 @@
-// https://github.com/MightyPirates/Scannable/blob/1.18-forge/src/main/resources/assets/scannable/shaders/core/scan_effect.fsh
 vec3 getWorldPos(float depth, vec2 texCoord, mat4 invProjMat, mat4 invViewMat, vec3 cameraPos) {
     float z = depth * 2.0 - 1.0;
     vec4 clipSpacePosition = vec4(texCoord * 2.0 - 1.0, z, 1.0);
@@ -17,7 +16,7 @@ float linearizeDepth(float depth, float near, float far) {
 }
 
 float getWorldDepth(float depth, float near, float far, vec2 texCoord, float fov, float aspectRatio) {
-    return length(vec3(1., (2. * texCoord - 1.) * vec2(aspectRatio, 1.) * tan(fov / 2.)) * linearizeDepth(depth, near, far));
+    return linearizeDepth(depth, near, far);
 }
 
 vec2 texCoord2NDC(vec2 tc) {

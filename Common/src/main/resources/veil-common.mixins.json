@@ -8,8 +8,7 @@
     "BowItemMixin",
     "CrossbowItemMixin",
     "InstrumentItemMixin",
-    "TridentItemMixin",
-    "client.Matrix4fAccessor"
+    "TridentItemMixin"
   ],
   "client": [
     "client.AgeableListModelMixin",

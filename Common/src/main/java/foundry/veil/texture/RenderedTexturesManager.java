@@ -18,7 +18,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

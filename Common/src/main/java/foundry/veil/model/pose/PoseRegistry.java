@@ -32,11 +32,23 @@ public class PoseRegistry {
         return pose;
     }
 
+    /**
+     * Add a {@link ExtendedPose} to the registry.
+     *
+     * @param itemPredicate A predicate that determines if the pose should be applied to the item.
+     * @param pose The pose.
+     *             <p>
+     *             Create an {@link ExtendedPose}, either using an anonymous class or a separate class.
+     *             You are given a {@link PoseData} object which contains various state data of the model.
+     */
     public static ExtendedPose registerPose(Predicate<Item> itemPredicate, ExtendedPose pose) {
         poses.put(itemPredicate, pose);
         return pose;
     }
 
+    /**
+     * An example pose registered by Veil. This pose is applied when the player is using a bow. It slowly raises the arms as the bow is drawn.
+     */
     public static ExtendedPose BOW = registerPose(item -> item instanceof BowItem, new ExtendedPose() {
         @Override
         public void poseMainHand(ModelPart mainHand) {
@@ -110,6 +122,9 @@ public class PoseRegistry {
         }
     });
 
+    /**
+     * An example pose registered by Veil. This pose is applied when the player is using a trident. It captures some model data and uses it to pose the body.
+     */
     public static ExtendedPose TRIDENT = registerPose(i -> i instanceof TridentItem, new ExtendedPose() {
         float headXRot = 0;
         float headYRot = 0;

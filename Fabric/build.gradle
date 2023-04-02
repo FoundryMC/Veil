@@ -42,6 +42,9 @@ loom {
     }
 
     accessWidenerPath.set(project(":Common").file("src/main/resources/veil.accesswidener"))
+    mixin {
+        defaultRefmapName.set("veil")
+    }
 }
 
 

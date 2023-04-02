@@ -1,6 +1,6 @@
 {
   "blend": {
-    "func": "add",
+    "func": "max",
     "srcrgb": "one",
     "dstrgb": "zero"
   },

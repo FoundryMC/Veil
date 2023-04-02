@@ -35,8 +35,15 @@ import static org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER;
 public abstract class PostProcessor {
     protected static final Minecraft MC = Minecraft.getInstance();
 
+    /**
+     * A map of shader resource locations to the textures they should be given.
+     */
     public static final Multimap<ResourceLocation, ResourceLocation> TEXTURE_UNIFORMS = ArrayListMultimap.create();
 
+    /**
+     * A collection of common uniforms for post processing effects. These are added to any shader that is loaded via the
+     * {@link InstantiatedPostProcessor} system.
+     */
     public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
             Pair.of("CameraPos", u -> u.set(new Vector3f(MC.gameRenderer.getMainCamera().getPosition()))),
             Pair.of("LookVector", u -> u.set(MC.gameRenderer.getMainCamera().getLookVector())),
@@ -55,7 +62,8 @@ public abstract class PostProcessor {
             Pair.of("NearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
             Pair.of("FarPlaneDistance", u -> u.set(MC.gameRenderer.getDepthFar())),
             Pair.of("Fov", u -> u.set((float) Math.toRadians(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), MC.getFrameTime(), true)))),
-            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight()))
+            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight())),
+            Pair.of("Perspective", u -> u.set(MC.options.getCameraType().ordinal()))
     );
 
     /**
@@ -86,7 +94,7 @@ public abstract class PostProcessor {
         loadPostChain();
 
         if (postChain != null) {
-            tempDepthBuffer = postChain.getTempTarget("DepthMain");
+            tempDepthBuffer = postChain.getTempTarget("depthMain");
 
             defaultUniforms = new ArrayList<>();
             for (EffectInstance e : effects) {

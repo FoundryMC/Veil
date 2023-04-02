@@ -5,6 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * A color theme is a collection of colors. The colors can be accessed by name. Themes are intended to be used for color schemes.
+ * <p>
+ *     A color theme can be used to apply a color scheme to a {@link foundry.veil.ui.Tooltippable} tooltip.
+ *     Themes can also be used to hold arbitrary color data mapped to strings.
+ */
 public class ColorTheme {
     private Map<Optional<String>, Color> colors = new HashMap<>();
 

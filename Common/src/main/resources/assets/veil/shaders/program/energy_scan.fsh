@@ -1,7 +1,7 @@
 #version 330
 
 uniform sampler2D DiffuseSampler;
-uniform sampler2D DepthMain;
+uniform sampler2D MainDepth;
 
 uniform samplerBuffer Data;
 uniform int instanceCount;
@@ -66,7 +66,7 @@ vec3 magicEffect(float noiseValue, float distToCenter, float signedDistToRing, v
 void main() {
     vec3 orgCol = texture(DiffuseSampler, texCoord).xyz; // the original color of this pixel
 
-    float depth = texture(DepthMain, texCoord).r; // non-normalized depth
+    float depth = texture(MainDepth, texCoord).r; // non-normalized depth
     vec3 worldPos = getWorldPos(depth, texCoord, InvProjMat, InvViewMat, CameraPos); // world coordinate of this pixel
     worldPos = floor((worldPos+.001)*16.)/16.; // voxelize world position
 

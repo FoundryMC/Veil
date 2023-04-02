@@ -1,7 +1,7 @@
 #version 330
 
 uniform sampler2D DiffuseSampler;
-uniform sampler2D DepthMain;
+uniform sampler2D MainDepth;
 
 uniform samplerBuffer Data;
 uniform int instanceCount;
@@ -76,9 +76,8 @@ void main() {
 
     vec2 ndc = texCoord2NDC(texCoord); // normalized device coordinate (-1 to 1)
     vec3 ray = rayFromNDC(ndc, LookVector, LeftVector, UpVector, NearPlaneDistance, Fov, AspectRatio);
-    float depth = texture(DepthMain, texCoord).r;
+    float depth = texture(MainDepth, texCoord).r;
     float worldDepth = getWorldDepth(depth, NearPlaneDistance, FarPlaneDistance, texCoord, Fov, AspectRatio);
-    worldDepth = worldDepth * worldDepth * 100;
 
     fragColor = vec4(orgCol, 1.0);
 
@@ -90,13 +89,12 @@ void main() {
         fetch(i+2)
         );
         vec3 baseColor = vec3(
-        0.5,//fetch(i+3),
-        0.1,//fetch(i+4),
-        0.5//fetch(i+5)
+        fetch(i+3),
+        fetch(i+4),
+        fetch(i+5)
         );
-        float radius = 150;
-        float intensity = 0.5;
-        //fragColor += vec4(energySphere(ray, worldDepth, center, radius, baseColor, intensity), 0.);
-        fragColor = vec4(worldDepth, worldDepth, worldDepth,1);
+        float radius = fetch(i+6);
+        float intensity = fetch(i+7);
+        fragColor += vec4(energySphere(ray, worldDepth, center, radius, baseColor, intensity), 0.);
     }
 }

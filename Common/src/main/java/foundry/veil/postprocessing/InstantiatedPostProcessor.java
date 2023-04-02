@@ -82,7 +82,7 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
         }
 
         float[] data = new float[instances.size() * getDataSizePerInstance()];
-        for (int ins = 0; ins < instances.size(); ins++) {
+        for (int ins=0; ins<instances.size(); ins++) {
             DynamicEffectInstance instance = instances.get(ins);
             int offset = ins * getDataSizePerInstance();
             instance.writeDataToBuffer((index, d) -> {
@@ -95,6 +95,12 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
         dataBuffer.upload(data);
     }
 
+    /**
+     * Upload the data buffer to the shader.
+     * @param effectInstance the effect instance to upload to
+     * @param bufferName the name of the buffer in the shader
+     * @param countName the name of the count uniform in the shader
+     */
     protected void setDataBufferUniform(EffectInstance effectInstance, String bufferName, String countName) {
         dataBuffer.apply(effectInstance, bufferName);
         effectInstance.safeGetUniform(countName).set(instances.size());
