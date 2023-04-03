@@ -112,16 +112,11 @@ public class VeilUITooltipRenderer {
             Vec3 ray = TargetPicker.getRay(projectionMatrix, modelViewStack, mc.getWindow().getWidth()/2f, mc.getWindow().getHeight()/2f);
             Vec3 start = new Vec3(mc.gameRenderer.getMainCamera().getPosition().x, mc.gameRenderer.getMainCamera().getPosition().y + mc.player.getEyeHeight(), mc.gameRenderer.getMainCamera().getPosition().z);
             Vec3 end = start.add(ray.scale(10));
-            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, mc.player));
+            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
             Vec3 playerPos = blockHitResult1.getLocation();
-            // TODO: step in the direction of the face hit
-            Vec3 posOffset = new Vec3(blockHitResult1.getDirection().getNormal().getX(), blockHitResult1.getDirection().getNormal().getY(), blockHitResult1.getDirection().getNormal().getZ());
-            posOffset.multiply(-1f,-1,-1f);
-            playerPos.add(posOffset);
-            Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
-            Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
-            Vec3i diff = playerPosInt.subtract(cornerInt);
-            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            Vec3 cornerInt = new Vec3(corner.x, corner.y, corner.z);
+            Vec3 diff = playerPos.subtract(cornerInt);
+            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.x()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.z()), -1, 1) * 0.5f)-0.5f);
             if(fade == 0){
                 currentPos = currentPos.add(0, -0.25f, 0);
                 background = background.multiply(1,1,1,fade);
