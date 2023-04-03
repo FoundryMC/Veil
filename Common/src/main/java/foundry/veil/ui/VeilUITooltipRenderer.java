@@ -2,6 +2,7 @@ package foundry.veil.ui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
@@ -105,7 +106,14 @@ public class VeilUITooltipRenderer {
             Vec3 corner = Vec3.atCenterOf(pos);
             currentPos = currentPos == null ? corner : currentPos;
             // move corner to the closest top corner to the player
-            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
+//            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
+            Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
+            Matrix4f modelViewStack = RenderSystem.getModelViewStack().last().pose().copy();
+            Vec3 ray = TargetPicker.getRay(projectionMatrix, modelViewStack, mc.getWindow().getWidth()/2f, mc.getWindow().getHeight()/2f);
+            Vec3 start = new Vec3(mc.gameRenderer.getMainCamera().getPosition().x, mc.gameRenderer.getMainCamera().getPosition().y + mc.player.getEyeHeight(), mc.gameRenderer.getMainCamera().getPosition().z);
+            Vec3 end = start.add(ray.scale(10));
+            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+            Vec3 playerPos = blockHitResult1.getLocation();
             Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
