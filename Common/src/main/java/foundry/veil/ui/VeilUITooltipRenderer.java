@@ -114,6 +114,7 @@ public class VeilUITooltipRenderer {
             Vec3 end = start.add(ray.scale(10));
             BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
             Vec3 playerPos = blockHitResult1.getLocation();
+            playerPos.add(Mth.frac(playerPos.x), Mth.frac(playerPos.y), Mth.frac(playerPos.z));
             playerPos.subtract(corner);
             desiredPos = corner.add(Math.round(Mth.clamp(Math.round(playerPos.x()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(playerPos.z()), -1, 1) * 0.5f)-0.5f);
             if(fade == 0){
