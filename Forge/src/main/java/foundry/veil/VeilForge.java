@@ -3,6 +3,7 @@ package foundry.veil;
 import com.mojang.math.Vector3f;
 import foundry.veil.test.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -11,6 +12,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Random;
 
 import java.util.List;
 

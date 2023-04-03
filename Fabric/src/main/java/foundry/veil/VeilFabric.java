@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Random;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +48,10 @@ public class VeilFabric implements ModInitializer {
                             () -> Minecraft.getInstance().player.getAbsorptionAmount(),
                             pos::x,
                             pos::y,
-                            pos::z
+                            pos::z,
+                            () -> (float)player.position().x,
+                            () -> (float)player.position().y,
+                            () -> (float)player.position().z
                     )));
                 }
             } else if (stack.getItem().equals(Items.POPPY)) {

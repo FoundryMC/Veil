@@ -20,7 +20,9 @@ archivesBaseName = "${mod_name}-forge-${minecraft_version}"
 apply from: "https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-" +
         "${kotlinForForgeVersion}.gradle"
 
-
+configurations {
+    library
+}
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
@@ -93,6 +95,9 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":Common")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+    implementation(jarJar("org.joml:joml:1.10.5"){
+        jarJar.ranged(it, "[1.10.5,)")
+    })
 }
 
 tasks.withType(JavaCompile) {
@@ -106,6 +111,12 @@ processResources {
 sourceSets {
     main.kotlin.srcDirs += 'src/main/java'
     test.kotlin.srcDirs += 'src/main/java'
+}
+
+jarJar.enable()
+
+reobf {
+    jarJar{}
 }
 
 jar.finalizedBy('reobfJar')

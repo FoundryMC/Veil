@@ -30,11 +30,10 @@ pluginManagement {
             name = 'Cotton'
             url = 'https://server.bbkr.space/artifactory/libs-release/'
         }
-
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenCentral()
         gradlePluginPortal()
     }
 }
-
 rootProject.name = 'Veil'
 include("Common", "Fabric", "Forge", "Quilt")

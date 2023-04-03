@@ -35,6 +35,7 @@ dependencies {
 	modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilt_fabric_api_version}-${minecraft_version}"
 
 	implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+	include(implementation("org.joml:joml:1.10.5"))
 	implementation project(":Common")
 }
 
