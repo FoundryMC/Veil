@@ -114,7 +114,9 @@ public class VeilUITooltipRenderer {
             Vec3 end = start.add(ray.scale(10));
             BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, mc.player));
             Vec3 playerPos = blockHitResult1.getLocation();
-            Vec3 posOffset = Vec3.atCenterOf(blockHitResult1.getDirection().getNormal());
+            // TODO: step in the direction of the face hit
+            Vec3 posOffset = new Vec3(blockHitResult1.getDirection().getNormal().getX(), blockHitResult1.getDirection().getNormal().getY(), blockHitResult1.getDirection().getNormal().getZ());
+            posOffset.multiply(-1f,-1,-1f);
             playerPos.add(posOffset);
             Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
