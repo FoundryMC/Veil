@@ -23,6 +23,8 @@ public class PoseHelper {
             if (item.test(data.stack.getItem())) {
                 pose.poseItemUsing(pRenderer);
                 flag.set(pose.overrideItemTransform());
+                if(pose.overrideItemTransform())
+                    data.stackPoseStack.popPose();
             }
         });
         return flag.get();
@@ -36,6 +38,8 @@ public class PoseHelper {
             if (item.test(data.stack.getItem())) {
                 pose.poseItem(pRenderer);
                 flag.set(pose.overrideItemTransform());
+                if(pose.overrideItemTransform())
+                    data.stackPoseStack.popPose();
             }
         });
         return flag.get();
@@ -49,13 +53,15 @@ public class PoseHelper {
                     pMatrixStack.pushPose();
                     pose.getValue().poseMainHandFirstPerson(pMatrixStack);
                     pRenderer.renderPlayerArm(pMatrixStack, pBuffer, pCombinedLight, pEquippedProgress, pSwingProgress, Minecraft.getInstance().player.getMainArm());
-                    pMatrixStack.popPose();
+                    if(pose.getValue().overrideItemTransform())
+                        pMatrixStack.popPose();
                 }
                 if(pose.getValue().forceRenderOffhand()){
                     pMatrixStack.pushPose();
                     pose.getValue().poseOffHandFirstPerson(pMatrixStack);
                     pRenderer.renderPlayerArm(pMatrixStack, pBuffer, pCombinedLight, pEquippedProgress, pSwingProgress, Minecraft.getInstance().player.getMainArm().getOpposite());
-                    pMatrixStack.popPose();
+                    if(pose.getValue().overrideItemTransform())
+                        pMatrixStack.popPose();
                 }
             }
         }
