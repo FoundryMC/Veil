@@ -81,46 +81,46 @@ public class PoseRegistry {
         }
     });
 
-    public static ExtendedPose SHIELD = registerPose(i -> i instanceof ShieldItem, new ExtendedPose() {
-        float headXRot = 0;
-        float headYRot = 0;
-
-        @Override
-        public void pose(HumanoidModel<?> model) {
-            super.pose(model);
-            headXRot = model.head.xRot;
-            headYRot = model.head.yRot;
-        }
-
-        @Override
-        public void poseItem(ItemInHandRenderer itemRenderer) {
-            data.stackPoseStack.translate(0,0.25,0);
-        }
-
-        @Override
-        public void poseMainHand(ModelPart offHand) {
-            if (!data.swapped) {
-                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
-                offHand.yRot = ((float) -Math.PI / 8F) + headYRot / 3f;
-                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
-                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
-                offHand.xRot *= mult * 1.2f;
-                offHand.yRot *= mult * 1.75f;
-            }
-        }
-
-        @Override
-        public void poseOffHand(ModelPart offHand) {
-            if (data.swapped) {
-                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
-                offHand.yRot = -((float) -Math.PI / 8F) + headYRot / 3f;
-                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
-                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
-                offHand.xRot *= mult * 1.2f;
-                offHand.yRot *= mult * 1.75f;
-            }
-        }
-    });
+//    public static ExtendedPose SHIELD = registerPose(i -> i instanceof ShieldItem, new ExtendedPose() {
+//        float headXRot = 0;
+//        float headYRot = 0;
+//
+//        @Override
+//        public void pose(HumanoidModel<?> model) {
+//            super.pose(model);
+//            headXRot = model.head.xRot;
+//            headYRot = model.head.yRot;
+//        }
+//
+//        @Override
+//        public void poseItem(ItemInHandRenderer itemRenderer) {
+//            data.stackPoseStack.translate(0,0.25,0);
+//        }
+//
+//        @Override
+//        public void poseMainHand(ModelPart offHand) {
+//            if (!data.swapped) {
+//                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
+//                offHand.yRot = ((float) -Math.PI / 8F) + headYRot / 3f;
+//                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
+//                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
+//                offHand.xRot *= mult * 1.2f;
+//                offHand.yRot *= mult * 1.75f;
+//            }
+//        }
+//
+//        @Override
+//        public void poseOffHand(ModelPart offHand) {
+//            if (data.swapped) {
+//                offHand.xRot = -((float) Math.PI / 4F) + headXRot / 3f;
+//                offHand.yRot = -((float) -Math.PI / 8F) + headYRot / 3f;
+//                float mult = Math.min(data.useTime + data.partialTick, data.maxUseTime) / data.maxUseTime;
+//                mult = Easings.ease(mult, Easings.Easing.easeInOutSine);
+//                offHand.xRot *= mult * 1.2f;
+//                offHand.yRot *= mult * 1.75f;
+//            }
+//        }
+//    });
 
     /**
      * An example pose registered by Veil. This pose is applied when the player is using a trident. It captures some model data and uses it to pose the body.
