@@ -29,7 +29,7 @@ public class ItemInHandRendererMixin {
     public void veil$poseItemHead(AbstractClientPlayer pPlayer, float pPartialTicks, float pPitch, InteractionHand pHand, float pSwingProgress, ItemStack pStack, float pEquippedProgress, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, CallbackInfo ci){
         int chargeTime = pStack.getItem() instanceof IChargableItem ? ((IChargableItem) pStack.getItem()).getCharge() - Minecraft.getInstance().player.getUseItemRemainingTicks() : 1;
         int maxChargeTime = pStack.getItem() instanceof IChargableItem ? ((IChargableItem) pStack.getItem()).getMaxCharge() : 1;
-        veil$poseData = new PoseData(pMatrixStack, pStack, pSwingProgress, chargeTime, maxChargeTime);
+        veil$poseData = new PoseData(pMatrixStack, pStack, pSwingProgress, chargeTime, maxChargeTime, pHand);
     }
 
     @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/UseAnim;"))
