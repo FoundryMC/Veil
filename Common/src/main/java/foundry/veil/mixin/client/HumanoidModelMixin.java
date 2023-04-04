@@ -3,6 +3,7 @@ package foundry.veil.mixin.client;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.model.anim.IChargableItem;
+import foundry.veil.model.anim.IPoseable;
 import foundry.veil.model.anim.OffsetModelPart;
 import foundry.veil.model.pose.ExtendedPose;
 import foundry.veil.model.pose.PoseData;
@@ -27,14 +28,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(HumanoidModel.class)
-public class HumanoidModelMixin<T extends LivingEntity> {
+public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
     @Unique
     public VeilPoseable leftArmPose;// = PoseRegistry.TEST;
     @Unique
     public VeilPoseable rightArmPose;
 
+    @Unique
+    public boolean hasActivePose;
+
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private void veil$poseRightArmMixin(T $$0, float $$1, float $$2, float $$3, float $$4, float $$5, CallbackInfo ci) {
+        hasActivePose = false;
         ItemStack i = $$0.getMainHandItem();
         int chargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getCharge() - Minecraft.getInstance().player.getUseItemRemainingTicks() : 1;
         int maxChargeTime = i.getItem() instanceof IChargableItem ? ((IChargableItem) i.getItem()).getMaxCharge() : 1;
@@ -51,6 +56,7 @@ public class HumanoidModelMixin<T extends LivingEntity> {
             pose.data = poseData;
             if ($$0 instanceof Player && item.test(((Player) $$0).getUseItem().getItem())) {
                 pose.pose((HumanoidModel<?>) (Object) this);
+                hasActivePose = true;
             }
         });
     }
@@ -80,28 +86,40 @@ public class HumanoidModelMixin<T extends LivingEntity> {
 
     @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;crouching:Z"))
     private boolean veil$cancelSneak(boolean original) {
-        return false;
+        if (hasActivePose) return false;
+        return original;
     }
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;body:Lnet/minecraft/client/model/geom/ModelPart;", ordinal = 4, shift = At.Shift.AFTER))
     private void veil$sneaktwo(T livingEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
-        if (this.crouching) {
+        if (this.crouching && hasActivePose) {
             this.body.xRot += 0.5f;
             this.head.xRot -= 0.5f;
             this.body.x = 3.2F;
+        } else {
+            this.body.x = 0;
         }
     }
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void veil$e(T livingEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
-        if (livingEntity instanceof Player) {
+        if (livingEntity instanceof Player && hasActivePose) {
             this.body.setPos(0, 12, 0);
             ((OffsetModelPart) (Object) this.body).setOffset(0, -12, 0);
+        } else {
+            this.body.setPos(0, 0, 0);
+            ((OffsetModelPart) (Object) this.body).setOffset(0, 0, 0);
         }
     }
 
     @Inject(method = "translateToHand", at = @At("TAIL"))
     private void veilm$setArmAngle(HumanoidArm arm, PoseStack matrices, CallbackInfo ci) {
-        this.body.translateAndRotate(matrices);
+        if(this.hasActivePose)
+            this.body.translateAndRotate(matrices);
+    }
+
+    @Override
+    public boolean isPosing() {
+        return hasActivePose;
     }
 }

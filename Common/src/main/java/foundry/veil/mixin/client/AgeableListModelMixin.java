@@ -3,6 +3,7 @@ package foundry.veil.mixin.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.model.anim.CrackCocaine;
+import foundry.veil.model.anim.IPoseable;
 import foundry.veil.model.anim.OffsetModelPart;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.EndermanModel;
@@ -51,22 +52,37 @@ public class AgeableListModelMixin {
         this.blue = blue;
         this.alpha = alpha;
     }
+
     @ModifyArg(method = "renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V", at = @At(value = "INVOKE", target = "Ljava/lang/Iterable;forEach(Ljava/util/function/Consumer;)V"))
     private Consumer<? super ModelPart> veil$doublethecursed(Consumer<? super ModelPart> action) {
-        if(((AgeableListModel)(Object)this) instanceof HumanoidModel<?> biped && !(biped instanceof EndermanModel)) {
-            return ((Consumer<ModelPart>)(headPart) -> {
-                PoseStack temp = matrices.get();
-                temp.pushPose();
-                boolean b = headPart.equals(biped.leftArm) || headPart.equals(biped.head) || headPart.equals(biped.rightArm) || headPart.equals(biped.hat) || ((OffsetModelPart)(Object)biped.rightArm).isChild(headPart) || ((OffsetModelPart)(Object)biped.head).isChild(headPart) || ((OffsetModelPart)(Object)biped.leftArm).isChild(headPart);
-                if(biped instanceof PlayerModel<?> p && !b) {
-                    b = headPart.equals(p.leftSleeve) || headPart.equals(p.rightSleeve);
-                }
-                if(b && ((CrackCocaine)(Object)headPart).getParent().get() == null) {
-                    ((CrackCocaine)(Object)headPart).setParent(() -> biped.body);
-                }
-                headPart.render(temp, vertices, light, overlay, red, green, blue, alpha);
-                temp.popPose();
-            });
+        if (((AgeableListModel) (Object) this) instanceof HumanoidModel<?> biped && !(biped instanceof EndermanModel)) {
+            if (((IPoseable) biped).isPosing()) {
+                return ((Consumer<ModelPart>) (headPart) -> {
+                    PoseStack temp = matrices.get();
+                    temp.pushPose();
+                    boolean b = headPart.equals(biped.leftArm) || headPart.equals(biped.head) || headPart.equals(biped.rightArm) || headPart.equals(biped.hat) || ((OffsetModelPart) (Object) biped.rightArm).isChild(headPart) || ((OffsetModelPart) (Object) biped.head).isChild(headPart) || ((OffsetModelPart) (Object) biped.leftArm).isChild(headPart);
+                    if (biped instanceof PlayerModel<?> p && !b) {
+                        b = headPart.equals(p.leftSleeve) || headPart.equals(p.rightSleeve);
+                    }
+                    if (b && ((CrackCocaine) (Object) headPart).getParent().get() == null) {
+                        ((CrackCocaine) (Object) headPart).setParent(() -> biped.body);
+                    }
+                    headPart.render(temp, vertices, light, overlay, red, green, blue, alpha);
+                    temp.popPose();
+                });
+            } else {
+                return ((Consumer<ModelPart>) (headPart) -> {
+                    PoseStack temp = matrices.get();
+                    temp.pushPose();
+                    boolean b = headPart.equals(biped.leftArm) || headPart.equals(biped.head) || headPart.equals(biped.rightArm) || headPart.equals(biped.hat) || ((OffsetModelPart) (Object) biped.rightArm).isChild(headPart) || ((OffsetModelPart) (Object) biped.head).isChild(headPart) || ((OffsetModelPart) (Object) biped.leftArm).isChild(headPart);
+                    if (biped instanceof PlayerModel<?> p && !b) {
+                        b = headPart.equals(p.leftSleeve) || headPart.equals(p.rightSleeve);
+                    }
+                    ((CrackCocaine) (Object) headPart).setParent(() -> null);
+                    headPart.render(temp, vertices, light, overlay, red, green, blue, alpha);
+                    temp.popPose();
+                });
+            }
         }
         return action;
     }
