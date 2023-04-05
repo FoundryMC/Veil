@@ -30,6 +30,8 @@ public class PoseData{
     public InteractionHand hand;
 
     public float partialTick = Minecraft.getInstance().timer.partialTick;
+    public float equipProgress;
+
 
     /**
      * PoseData constructor for a 3rd person pose.
@@ -67,12 +69,13 @@ public class PoseData{
      * @param useTime the time the player has been using an item for
      * @param maxUseTime the max time the player can use an item for
      */
-    public PoseData(PoseStack stackPoseStack, ItemStack stack, float limbSwingAmount, float useTime, float maxUseTime, InteractionHand hand) {
+    public PoseData(PoseStack stackPoseStack, ItemStack stack, float limbSwingAmount, float useTime, float maxUseTime, InteractionHand hand, float equipProgress) {
         this.stackPoseStack = stackPoseStack;
         this.stack = stack;
         this.limbSwingAmount = limbSwingAmount;
         this.useTime = useTime;
         this.maxUseTime = maxUseTime;
         this.hand = hand;
+        this.equipProgress = equipProgress;
     }
 }
