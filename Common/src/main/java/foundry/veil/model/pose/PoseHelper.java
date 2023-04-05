@@ -35,7 +35,7 @@ public class PoseHelper {
             pose.data = data;
             if (item.test(data.stack.getItem())) {
                 pose.poseItem(pRenderer);
-                flag.set(pose.overrideItemTransform())
+                flag.set(pose.overrideItemTransform());
             }
         });
         return flag.get();
