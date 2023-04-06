@@ -28,13 +28,25 @@ minecraft {
     accessWideners(project.file("src/main/resources/veil.accesswidener"))
 }
 project.ext.jomlVersion = "1.10.5"
+repositories {
+    maven {
+        setUrl("https://dl.bintray.com/s1m0nw1/KtsRunner")
+    }
+    flatDir {
+        dirs project(":Common").file("libs")
+    }
+}
 dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
      compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     shadow("org.joml:joml:1.10.5")
-
+    shadow("de.swirtz:ktsRunner:0.0.9")
+    shadow("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.7.20")
+    shadow("org.jetbrains.kotlin:kotlin-main-kts:1.7.20"){
+        exclude group: "org.slf4j"
+    }
 }
 shadowJar{
     configurations = [project.configurations.shadow]

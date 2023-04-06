@@ -1,5 +1,5 @@
 plugins {
-	id 'org.quiltmc.loom' version '0.12.+'
+	id 'org.quiltmc.loom' version '1.0.+'
 	id 'maven-publish'
 }
 
@@ -22,6 +22,12 @@ repositories {
 			includeGroupByRegex 'org\\.quiltmc\\.qsl(?:\\.[a-z_]+)?'
 		}
 	}
+	maven {
+		setUrl("https://dl.bintray.com/s1m0nw1/KtsRunner")
+	}
+	flatDir {
+		dirs project(":Common").file("libs")
+	}
 }
 dependencies {
 	annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
@@ -36,6 +42,8 @@ dependencies {
 
 	implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
 	include(implementation("org.joml:joml:1.10.5"))
+	include(implementation("de.swirtz:ktsRunner:0.0.9"))
+	include(implementation("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.7.20"))
 	implementation project(":Common")
 }
 

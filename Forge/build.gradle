@@ -88,7 +88,14 @@ minecraft {
     }
 }
 sourceSets.main.resources.srcDir 'src/generated/resources'
-
+repositories {
+    maven {
+        setUrl("https://dl.bintray.com/s1m0nw1/KtsRunner")
+    }
+    flatDir {
+        dirs project(":Common").file("libs")
+    }
+}
 dependencies {
     implementation project(path: ':Common')
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
@@ -97,6 +104,12 @@ dependencies {
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     implementation(jarJar("org.joml:joml:1.10.5"){
         jarJar.ranged(it, "[1.10.5,)")
+    })
+    implementation(jarJar("de.swirtz:ktsRunner:0.0.9"){
+        jarJar.ranged(it, "[0.0.9,)")
+    })
+    implementation(jarJar("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.7.20"){
+        jarJar.ranged(it, "[1.7.20,)")
     })
 }
 

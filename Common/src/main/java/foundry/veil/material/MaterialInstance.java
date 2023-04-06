@@ -2,15 +2,22 @@ package foundry.veil.material;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.shaders.Shader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.HashMap;
+
+import static net.minecraft.client.renderer.RenderStateShard.LIGHTMAP;
+import static net.minecraft.client.renderer.RenderStateShard.TRANSLUCENT_TRANSPARENCY;
 
 // TODO: implement the bridge between this class and the actual rendering using the material. Needs more research but definitely doable.
 public class MaterialInstance {
@@ -26,6 +33,8 @@ public class MaterialInstance {
     private HashMap<String, ResourceLocation> textures = new HashMap<>();
     private int[] rawData;
 
+    private RenderType renderType;
+
     // TODO: This holds all of the passes for the material, this is where we contain them and store them
 
     public MaterialInstance(Material material, ResourceLocation passJson) throws IOException {
@@ -40,6 +49,10 @@ public class MaterialInstance {
         rawData = new int[0];
         postChain = new PostChain(textureManager, resourceManager, renderTarget, passJson);
     }
+
+//    private RenderType constructRenderType(){
+//        TODO();
+//    }
 
     public void setRenderTarget(RenderTarget renderTarget) {
         this.renderTarget = renderTarget;

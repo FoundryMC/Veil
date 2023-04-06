@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.11-SNAPSHOT'
+    id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'maven-publish'
     id 'idea'
 }
@@ -7,6 +7,14 @@ plugins {
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
+}
+repositories {
+    maven {
+        setUrl("https://dl.bintray.com/s1m0nw1/KtsRunner")
+    }
+    flatDir {
+        dirs project(":Common").file("libs")
+    }
 }
 dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
@@ -19,6 +27,8 @@ dependencies {
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     implementation project(":Common")
     include(implementation("org.joml:joml:1.10.5"))
+    include(implementation("de.swirtz:ktsRunner:0.0.9"))
+    include(implementation("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.7.20"))
 }
 
 compileKotlin {
