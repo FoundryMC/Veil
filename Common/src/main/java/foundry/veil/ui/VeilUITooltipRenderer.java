@@ -53,14 +53,14 @@ public class VeilUITooltipRenderer {
         ClientLevel world = mc.level;
         BlockPos pos = blockHitResult.getBlockPos();
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if(!(blockEntity instanceof Tooltippable)){
+        Tooltippable tooltippable = (Tooltippable) blockEntity;
+        if(!tooltippable.isTooltipEnabled()){
             hoverTicks = 0;
             lastHoveredPos = null;
             currentPos = null;
             desiredPos = null;
             return;
         }
-        Tooltippable tooltippable = (Tooltippable) blockEntity;
         int prevHoverTicks = hoverTicks;
         hoverTicks++;
         lastHoveredPos = pos;

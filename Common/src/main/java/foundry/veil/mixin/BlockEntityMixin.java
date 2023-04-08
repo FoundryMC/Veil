@@ -39,7 +39,7 @@ public class BlockEntityMixin implements Tooltippable {
     private boolean worldspace;
 
     @Unique
-    private boolean tooltipEnabled;
+    private boolean tooltipEnabled = false;
 
     @Unique
     private int tooltipX;
