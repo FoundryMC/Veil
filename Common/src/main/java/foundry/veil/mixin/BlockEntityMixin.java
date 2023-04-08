@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,34 +25,34 @@ import java.util.Optional;
 @Mixin(BlockEntity.class)
 public class BlockEntityMixin implements Tooltippable {
     @Unique
-    private List<Component> tooltip;
+    private List<Component> tooltip = new ArrayList<>();
 
     @Unique
     private ColorTheme theme;
 
     @Unique
-    private List<VeilUIItemTooltipDataHolder> tooltipDataHolder;
+    private List<VeilUIItemTooltipDataHolder> tooltipDataHolder = new ArrayList<>();
 
     @Unique
-    private TooltipTimeline timeline;
+    private TooltipTimeline timeline = null;
 
     @Unique
-    private boolean worldspace;
+    private boolean worldspace = true;
 
     @Unique
     private boolean tooltipEnabled = false;
 
     @Unique
-    private int tooltipX;
+    private int tooltipX = 0;
 
     @Unique
-    private int tooltipY;
+    private int tooltipY = 0;
 
     @Unique
-    private int tooltipWidth;
+    private int tooltipWidth = 0;
 
     @Unique
-    private int tooltipHeight;
+    private int tooltipHeight = 0;
 
 
     @Override
@@ -73,12 +74,14 @@ public class BlockEntityMixin implements Tooltippable {
         tag.putInt("tooltipWidth", tooltipWidth);
         tag.putInt("tooltipHeight", tooltipHeight);
         tag.putBoolean("worldspace", worldspace);
-        CompoundTag themeTag = new CompoundTag();
-        for(Map.Entry<Optional<String>, Color> entry : theme.getColorsMap().entrySet()){
-            String key = entry.getKey().isPresent() ? entry.getKey().get() : "";
-            themeTag.putInt(key, entry.getValue().getRGB());
+        if(this.theme != null){
+            CompoundTag themeTag = new CompoundTag();
+            for(Map.Entry<Optional<String>, Color> entry : theme.getColorsMap().entrySet()){
+                String key = entry.getKey().isPresent() ? entry.getKey().get() : "";
+                themeTag.putInt(key, entry.getValue().getRGB());
+            }
+            tag.put("theme", themeTag);
         }
-        tag.put("theme", themeTag);
         return tag;
     }
 
