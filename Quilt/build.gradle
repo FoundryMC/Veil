@@ -42,8 +42,6 @@ dependencies {
 
 	implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
 	include(implementation("org.joml:joml:1.10.5"))
-	include(implementation("de.swirtz:ktsRunner:0.0.9"))
-	include(implementation("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.7.20"))
 	implementation project(":Common")
 }
 

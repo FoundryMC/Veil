@@ -2,7 +2,9 @@ package foundry.veil.material
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
+import foundry.veil.extension.lightmapShard
 import foundry.veil.extension.textureShard
+import foundry.veil.material.SimpleRenderTypeBuilder.Companion.renderType
 import net.minecraft.client.renderer.RenderStateShard.*
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.resources.ResourceLocation
@@ -64,6 +66,17 @@ class SimpleRenderTypeBuilder {
         set(value) {
             line(value!!)
         }
+
+    var shaderShard: ShaderStateShard?
+        get() = null
+        set(value) {
+            shader(value!!)
+        }
+
+    fun shader(value: ShaderStateShard) {
+        shaderShard = value
+    }
+
     var vertexFormat: VertexFormat
         get() = DefaultVertexFormat.POSITION_COLOR_TEX
         set(value) {
@@ -109,6 +122,7 @@ class SimpleRenderTypeBuilder {
         if (texturingShard != null) builder.setTexturingState(texturingShard)
         if (writeMaskShard != null) builder.setWriteMaskState(writeMaskShard)
         if (lineShard != null) builder.setLineState(lineShard)
+        if (shaderShard != null) builder.setShaderState(shaderShard)
         return RenderType.create(
             name,
             vertexFormat,

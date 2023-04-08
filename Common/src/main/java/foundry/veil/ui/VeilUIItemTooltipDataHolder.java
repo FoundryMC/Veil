@@ -1,5 +1,6 @@
 package foundry.veil.ui;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
@@ -75,4 +76,5 @@ public class VeilUIItemTooltipDataHolder {
     public void setY(Function<Float, Float> y) {
         this.y = y;
     }
+
 }

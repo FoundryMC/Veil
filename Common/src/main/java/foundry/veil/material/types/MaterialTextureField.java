@@ -3,7 +3,7 @@ package foundry.veil.material.types;
 import foundry.veil.material.IMaterialField;
 import net.minecraft.resources.ResourceLocation;
 
-public class MaterialTextureField implements IMaterialField {
+public class MaterialTextureField implements IMaterialField<ResourceLocation> {
     private ResourceLocation texture;
 
     public MaterialTextureField(ResourceLocation texture) {
@@ -14,13 +14,13 @@ public class MaterialTextureField implements IMaterialField {
         this.texture = new ResourceLocation("veil", "textures/white.png");
     }
     @Override
-    public Object getValue() {
+    public ResourceLocation getValue() {
         return texture;
     }
 
     @Override
-    public void setValue(Object value) {
-        this.texture = (ResourceLocation) value;
+    public void setValue(ResourceLocation value) {
+        this.texture = value;
     }
 
     @Override

@@ -2,7 +2,7 @@ package foundry.veil.material.types;
 
 import foundry.veil.material.IMaterialField;
 
-public class MaterialValueField implements IMaterialField {
+public class MaterialValueField implements IMaterialField<Object> {
     private Object value;
 
     public MaterialValueField(Object value) {

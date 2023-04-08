@@ -2,7 +2,7 @@ package foundry.veil.material.types;
 
 import foundry.veil.material.IMaterialField;
 
-public class MaterialSliderField implements IMaterialField {
+public class MaterialSliderField implements IMaterialField<Float> {
 
     float value;
     float min;
@@ -24,14 +24,14 @@ public class MaterialSliderField implements IMaterialField {
     }
 
     @Override
-    public Object getValue() {
+    public Float getValue() {
         return value;
     }
 
 
     @Override
-    public void setValue(Object value) {
-        this.value = (float) value;
+    public void setValue(Float value) {
+        this.value = value;
     }
 
     @Override

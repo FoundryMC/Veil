@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class MaterialColorField implements IMaterialField {
+public class MaterialColorField implements IMaterialField<Color> {
 
     private Color color;
 
@@ -64,12 +64,12 @@ public class MaterialColorField implements IMaterialField {
     }
 
     @Override
-    public Object getValue() {
+    public Color getValue() {
         return null;
     }
 
     @Override
-    public void setValue(Object value) {
+    public void setValue(Color value) {
 
     }
 

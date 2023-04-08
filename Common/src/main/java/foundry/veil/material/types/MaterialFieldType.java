@@ -5,11 +5,17 @@ import foundry.veil.material.IMaterialField;
 import java.util.function.Consumer;
 
 public enum MaterialFieldType {
-    SLIDER,
-    COLOR,
-    TEXTURE,
-    VECTOR,
-    VALUE;
+    SLIDER(MaterialSliderField.class),
+    COLOR(MaterialColorField.class),
+    TEXTURE(MaterialTextureField.class),
+    VECTOR(MaterialVectorValue.class),
+    VALUE(MaterialValueField.class);
+
+    Class<?> type;
+
+    MaterialFieldType(Class<?> type) {
+        this.type = type;
+    }
 
     public IMaterialField createField() {
         return switch (this) {
@@ -20,5 +26,9 @@ public enum MaterialFieldType {
             case VALUE -> new MaterialValueField();
             default -> null;
         };
+    }
+
+    public Class<?> getType() {
+        return this.type;
     }
 }
