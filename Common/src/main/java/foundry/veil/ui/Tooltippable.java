@@ -2,6 +2,7 @@ package foundry.veil.ui;
 
 import foundry.veil.color.ColorTheme;
 import foundry.veil.ui.anim.TooltipTimeline;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -22,6 +23,12 @@ public interface Tooltippable {
      * @return the tooltip components
      */
     List<Component> getTooltip();
+
+    boolean isTooltipEnabled();
+
+    CompoundTag saveTooltipData();
+
+    void loadTooltipData(CompoundTag tag);
 
     /**
      * Set the tooltip components for the block entity
