@@ -59,4 +59,8 @@ public class ColorTheme {
     public List<Color> getColors(){
         return (List<Color>) colors.values();
     }
+
+    public Map<Optional<String>, Color> getColorsMap(){
+        return colors;
+    }
 }
