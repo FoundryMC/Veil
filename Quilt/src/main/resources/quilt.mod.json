@@ -5,20 +5,19 @@
     "id": "veil",
     "version": "${version}",
     "intermediate_mappings": "net.fabricmc:intermediary",
-
-    "name": "Veil",
-    "description": "This is an example description! Tell everyone what your mod is about!",
-    "authors": [
-      "Me!"
-    ],
-    "contact": {
-      "homepage": "https://quiltmc.org/",
-      "sources": "https://github.com/Oliver-makes-code/quilt-example-mod"
+    "metadata": {
+      "name": "Veil",
+      "description": "This is an example description! Tell everyone what your mod is about!",
+      "authors": [
+        "Me!"
+      ],
+      "contact": {
+        "homepage": "https://quiltmc.org/",
+        "sources": "https://github.com/Oliver-makes-code/quilt-example-mod"
+      },
+      "license": "CC0-1.0",
+      "icon": "assets/modid/icon.png"
     },
-
-    "license": "CC0-1.0",
-    "icon": "assets/modid/icon.png",
-
     "environment": "*",
     "entrypoints": {
       "init": [
