@@ -45,5 +45,5 @@
     "veil-common.mixins.json",
     "veil-quilt.mixins.json"
   ],
-  "accessWidener": "veil.accesswidener"
+  "access_widener": "veil.accesswidener"
 }
