@@ -18,14 +18,9 @@
       "license": "CC0-1.0",
       "icon": "assets/modid/icon.png"
     },
-    "environment": "*",
     "entrypoints": {
-      "init": [
-        "foundry.veil.VeilQuilt"
-      ],
-      "client_init": [
-        "foundry.veil.VeilQuiltClient"
-      ]
+      "init": "foundry.veil.VeilQuilt",
+      "client_init": "foundry.veil.VeilQuiltClient"
     },
     "depends": [
       {
