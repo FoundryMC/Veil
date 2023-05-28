@@ -105,16 +105,22 @@ public class VeilUITooltipRenderer {
             currentPos = currentPos == null ? corner : currentPos;
             // move corner to the closest top corner to the player
 //            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
-            Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
-            Matrix4f modelViewStack = RenderSystem.getModelViewStack().last().pose().copy();
-            Vec3 ray = TargetPicker.getRay(projectionMatrix, modelViewStack, mc.getWindow().getWidth()/2f, mc.getWindow().getHeight()/2f);
-            Vec3 start = new Vec3(mc.gameRenderer.getMainCamera().getPosition().x, mc.gameRenderer.getMainCamera().getPosition().y + mc.player.getEyeHeight(), mc.gameRenderer.getMainCamera().getPosition().z);
-            Vec3 end = start.add(ray.scale(10));
-            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
-            Vec3 playerPos = blockHitResult1.getLocation();
-            playerPos.add(Mth.frac(playerPos.x), Mth.frac(playerPos.y), Mth.frac(playerPos.z));
-            playerPos.subtract(corner);
-            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(playerPos.x()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(playerPos.z()), -1, 1) * 0.5f)-0.5f);
+//            Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
+//            Matrix4f modelViewStack = RenderSystem.getModelViewStack().last().pose().copy();
+//            Vec3 ray = TargetPicker.getRay(projectionMatrix, modelViewStack, mc.getWindow().getWidth()/2f, mc.getWindow().getHeight()/2f);
+//            Vec3 start = new Vec3(mc.gameRenderer.getMainCamera().getPosition().x, mc.gameRenderer.getMainCamera().getPosition().y + mc.player.getEyeHeight(), mc.gameRenderer.getMainCamera().getPosition().z);
+//            Vec3 end = start.add(ray.scale(10));
+//            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+//            Vec3 playerPos = blockHitResult1.getLocation();
+//            playerPos.add(Mth.frac(playerPos.x), Mth.frac(playerPos.y), Mth.frac(playerPos.z));
+//            playerPos.subtract(corner);
+//            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(playerPos.x()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(playerPos.z()), -1, 1) * 0.5f)-0.5f);
+            // move corner to the closest top corner to the player
+            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
+            Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
+            Vec3i diff = playerPosInt.subtract(cornerInt);
+            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
             if(fade == 0){
                 currentPos = currentPos.add(0, -0.25f, 0);
                 background = background.multiply(1,1,1,fade);
