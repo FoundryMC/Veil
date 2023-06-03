@@ -16,6 +16,17 @@ public class Path {
         populateFrames();
     }
 
+    public Path(List<Frame> frames, boolean loop, boolean bezier) {
+        this.frames = frames;
+        this.loop = loop;
+        currentFrame = frames.get(0);
+        if(bezier) {
+            populateFramesBezier();
+        } else {
+            populateFrames();
+        }
+    }
+
     private void populateFrames() {
         List<Frame> newFrames = new ArrayList<>();
         for(int i = 0; i < frames.size(); i++){
@@ -25,6 +36,23 @@ public class Path {
                 for(int j = 0; j < ((Keyframe) frame).getDuration(); j++){
                     int frameIndex = i+1 >= frames.size() ? loop ? 0 : i : i +1;
                     newFrames.add(frame.interpolate(frames.get(frameIndex), j/((float)((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
+                }
+            } else {
+                newFrames.add(frame);
+            }
+        }
+        frames = newFrames;
+    }
+
+    private void populateFramesBezier() {
+        List<Frame> newFrames = new ArrayList<>();
+        for(int i = 0; i < frames.size(); i++){
+            Frame frame = frames.get(i);
+            newFrames.add(frame);
+            if(frame instanceof Keyframe) {
+                for(int j = 0; j < ((Keyframe) frame).getDuration(); j++){
+                    int frameIndex = i+1 >= frames.size() ? loop ? 0 : i : i +1;
+                    newFrames.add(frame.bezierInterpolate(frames.get(frameIndex), j/((float)((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
                 }
             } else {
                 newFrames.add(frame);
