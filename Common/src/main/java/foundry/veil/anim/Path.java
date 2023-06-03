@@ -13,6 +13,7 @@ public class Path {
         this.frames = frames;
         this.loop = loop;
         currentFrame = frames.get(0);
+        populateFrames();
     }
 
     private void populateFrames() {
