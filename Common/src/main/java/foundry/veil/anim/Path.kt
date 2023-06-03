@@ -1,10 +1,11 @@
 package foundry.veil.anim
 
-class Path(var frames: MutableList<Frame>, var duration: Int, var loop: Boolean, var pingPong: Boolean = false) {
-    private var currentFrame: Frame = frames[0]
+class Path(var frames: MutableList<Frame>, private var loop: Boolean, var pingPong: Boolean = false) {
+    private var currentFrame: Frame
 
     init {
         populateFrames()
+        currentFrame = frames[0]
     }
 
     private fun populateFrames(){
@@ -14,13 +15,24 @@ class Path(var frames: MutableList<Frame>, var duration: Int, var loop: Boolean,
             newFrames.add(frame)
             if(frame is KeyFrame){
                 for(j in 0 .. frame.duration){
-                    newFrames.add(frame.interpolate(frames[i+1], j/frame.duration.toFloat()))
+                    val frameIndex = if(i+1 >= frames.size) if(loop) 0 else i else i+1
+                    newFrames.add(frame.interpolate(frames[frameIndex], j/frame.duration.toFloat(), frame.easing))
                 }
             } else {
                 newFrames.add(frame)
             }
         }
         frames = newFrames
+    }
+
+    fun duration(): Int {
+        var duration = 0
+        for(frame in frames){
+            if(frame is KeyFrame){
+                duration += frame.duration
+            }
+        }
+        return duration
     }
 
     fun reverse(){
@@ -53,6 +65,19 @@ class Path(var frames: MutableList<Frame>, var duration: Int, var loop: Boolean,
         } else {
             next()
         }
+        println(currentFrame.pos)
+    }
+
+    /*
+     * Returns the frame at the given progress
+     * Use ticks from the block, not frames. Lerp between frames in the renderer
+     */
+    fun frameAtProgress(progress: Float): Frame {
+        return frames[(frames.size * progress).toInt()]
+    }
+
+    fun getCurrentFrame(): Frame {
+        return currentFrame
     }
 
 
