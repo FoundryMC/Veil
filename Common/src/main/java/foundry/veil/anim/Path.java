@@ -46,6 +46,19 @@ public class Path {
         }
     }
 
+    public Keyframe getKeyframeBefore(Frame frame) {
+        int index = frames.indexOf(frame);
+        if(index == -1) {
+            return null;
+        }
+        for(int i = index; i >= 0; i--) {
+            if(frames.get(i) instanceof Keyframe) {
+                return (Keyframe) frames.get(i);
+            }
+        }
+        return null;
+    }
+
     private void populateFrames() {
         List<Frame> newFrames = new ArrayList<>();
         for(int i = 0; i < frames.size(); i++){
