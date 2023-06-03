@@ -27,6 +27,20 @@ public class Path {
         }
     }
 
+    public Keyframe getCurrentKeyframeAtProgress(float progress) {
+        // find the keyframe before the current frame if the current frame is not a keyframe
+        int index = frames.indexOf(frameAtProgress(progress));
+        if(index == -1) {
+            for(int i = 0; i < frames.size(); i++) {
+                if(frames.get(i) instanceof Keyframe) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        return (Keyframe) frames.get(index);
+    }
+
     private void populateFrames() {
         List<Frame> newFrames = new ArrayList<>();
         for(int i = 0; i < frames.size(); i++){
