@@ -6,14 +6,6 @@ import net.minecraft.world.phys.Vec3
 
 open class Frame(open var pos: Vec3) {
 
-    fun getPos(): Vec3 {
-        return pos
-    }
-
-    fun setPos(pos: Vec3) {
-        this.pos = pos
-    }
-
     fun interpolate(frame: Frame, progress: Float, easing: Easing): Frame {
         val x = Mth.lerp(easing.ease(progress).toDouble(), pos.x, frame.pos.x)
         val y = Mth.lerp(easing.ease(progress).toDouble(), pos.y, frame.pos.y)
