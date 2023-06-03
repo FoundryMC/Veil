@@ -8,6 +8,8 @@ public class Keyframe extends Frame {
     Easings.Easing easing;
     public Keyframe(Vec3 position, Vec3 rotation, Vec3 scale, int duration, Easings.Easing easing) {
         super(position, rotation, scale);
+        this.duration = duration;
+        this.easing = easing;
     }
 
     public Keyframe copy(){
