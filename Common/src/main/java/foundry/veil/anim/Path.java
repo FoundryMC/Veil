@@ -38,7 +38,12 @@ public class Path {
                 }
             }
         }
-        return (Keyframe) frames.get(index);
+        Frame frame = frames.get(index);
+        if(frame instanceof Keyframe) {
+            return (Keyframe) frame;
+        } else {
+            return null;
+        }
     }
 
     private void populateFrames() {
