@@ -123,10 +123,10 @@ public class VeilUITooltipRenderer {
             Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
-            tooltipX = (int)screenSpacePos.x();
-            tooltipY = (int)screenSpacePos.y();
-            desiredX = (int)desiredScreenSpacePos.x()+(int)textXOffset;
-            desiredY = (int)desiredScreenSpacePos.y()+(int)textYOffset;
+            tooltipX = (int)screenSpacePos.x()+(int)textXOffset;
+            tooltipY = (int)screenSpacePos.y()+(int)textYOffset;
+            desiredX = (int)desiredScreenSpacePos.x();
+            desiredY = (int)desiredScreenSpacePos.y();
         }
         if(tooltippable.getTheme().getColor("connectingLine") != null) {
             stack.pushPose();
