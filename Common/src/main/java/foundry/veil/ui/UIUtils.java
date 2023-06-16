@@ -41,8 +41,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UIUtils {
-    public static void drawHoverText(float pticks, @Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
-                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font, int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items) {
+    public static void drawHoverText(Tooltippable tooltippable, float pticks, @Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
+                                     int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font,
+                                     int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items,
+                                     int desiredX, int desiredY) {
         if(textLines.isEmpty())
             return;
 
@@ -124,6 +126,7 @@ public class UIUtils {
         tooltipHeight += tooltipTextHeightBonus;
 
 
+        VeilUITooltipRenderer.drawConnectionLine(pStack, tooltippable, tooltipX, tooltipY, desiredX, desiredY);
         drawTooltipRects(pticks, pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight, items);
     }
 
@@ -131,24 +134,15 @@ public class UIUtils {
         pStack.pushPose();
         Matrix4f mat = pStack.last()
                 .pose();
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3,
-                tooltipY - 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 3,
-                tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
-                tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, z, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3,
-                backgroundColor, backgroundColor);
-        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 3, tooltipY - 3,
-                tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1,
-                tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1,
-                tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3,
-                tooltipY - 3 + 1, borderColorStart, borderColorStart);
-        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 2,
-                tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+        drawGradientRect(mat, z, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+        drawGradientRect(mat, z, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
+        drawGradientRect(mat, z, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
         int itemY = tooltipY;
         for (int lineNumber = 0; lineNumber < list.size(); ++lineNumber) {

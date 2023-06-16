@@ -128,10 +128,15 @@ public class VeilUITooltipRenderer {
             desiredX = (int)desiredScreenSpacePos.x();
             desiredY = (int)desiredScreenSpacePos.y();
         }
+        UIUtils.drawHoverText(tooltippable, partialTicks, istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items, desiredX, desiredY);
+        stack.popPose();
+    }
+
+    public static void drawConnectionLine(PoseStack stack, Tooltippable tooltippable, int tooltipX, int tooltipY, int desiredX, int desiredY) {
         if(tooltippable.getTheme().getColor("connectingLine") != null) {
             stack.pushPose();
             Color color = tooltippable.getTheme().getColor("connectingLine");
-            float thickness = ((NumberThemeProperty)tooltippable.getTheme().getProperty("connectingLineThickness")).getValue(Float.class);
+            float thickness = ((NumberThemeProperty) tooltippable.getTheme().getProperty("connectingLineThickness")).getValue(Float.class);
 //            stack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
 //            stack.mulPose(Vector3f.YP.rotationDegrees(180));
             Matrix4f mat = stack.last().pose();
@@ -144,16 +149,14 @@ public class VeilUITooltipRenderer {
             BufferBuilder buffer = Tesselator.getInstance().getBuilder();
             // draw a quad of thickness thickness from desiredX, desiredY to tooltipX, tooltipY with a z value of 399, starting from the top right corner and going anti-clockwise
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            buffer.vertex(mat, desiredX+thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, desiredX-thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX-thickness, tooltipY+(int)textYOffset, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX+thickness, tooltipY+(int)textYOffset, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, desiredX +thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, desiredX -thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX -thickness, tooltipY + 3 + tooltippable.getTooltipHeight(), 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX +thickness, tooltipY + 3 + tooltippable.getTooltipHeight(), 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             Tesselator.getInstance().end();
             RenderSystem.disableBlend();
             RenderSystem.enableTexture();
             stack.popPose();
         }
-        UIUtils.drawHoverText(partialTicks, istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items);
-        stack.popPose();
     }
 }
