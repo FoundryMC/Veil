@@ -33,9 +33,9 @@ public class NumberThemeProperty implements IThemeProperty<Number>{
 
     public void setType(Class<?> type) {
         // check if type is a subclass of Number
-        if(Number.class.isAssignableFrom(type)) {
+        if(Number.class.isAssignableFrom(type)){
             this.type = type;
-        } else {
+        }else{
             throw new IllegalArgumentException("Type must be a subclass of Number");
         }
     }
