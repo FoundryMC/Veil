@@ -123,8 +123,8 @@ public class VeilUITooltipRenderer {
             Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
-            tooltipX = (int)screenSpacePos.x()+(int)textXOffset;
-            tooltipY = (int)screenSpacePos.y()+(int)textYOffset;
+            tooltipX = (int)screenSpacePos.x();
+            tooltipY = (int)screenSpacePos.y();
             desiredX = (int)desiredScreenSpacePos.x();
             desiredY = (int)desiredScreenSpacePos.y();
         }
@@ -146,8 +146,8 @@ public class VeilUITooltipRenderer {
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             buffer.vertex(mat, desiredX+thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             buffer.vertex(mat, desiredX-thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX-thickness, tooltipY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX+thickness, tooltipY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX+(int)textXOffset-thickness, tooltipY+(int)textYOffset, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX+(int)textXOffset+thickness, tooltipY+(int)textYOffset, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             Tesselator.getInstance().end();
             RenderSystem.disableBlend();
             RenderSystem.enableTexture();
