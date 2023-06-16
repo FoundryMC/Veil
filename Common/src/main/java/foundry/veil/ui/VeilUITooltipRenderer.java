@@ -132,7 +132,7 @@ public class VeilUITooltipRenderer {
             stack.pushPose();
             Color color = tooltippable.getTheme().getColor("connectingLine");
             float thickness = ((NumberThemeProperty)tooltippable.getTheme().getProperty("connectingLineThickness")).getValue(Float.class);
-            stack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+//            stack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
 //            stack.mulPose(Vector3f.YP.rotationDegrees(180));
             Matrix4f mat = stack.last().pose();
             RenderSystem.enableDepthTest();
