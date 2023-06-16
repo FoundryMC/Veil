@@ -1,18 +1,20 @@
 package foundry.veil.ui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import foundry.veil.color.Color;
+import foundry.veil.color.theme.NumberThemeProperty;
 import foundry.veil.helper.SpaceHelper;
 import foundry.veil.ui.anim.TooltipKeyframe;
 import foundry.veil.ui.anim.TooltipTimeline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
@@ -25,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +84,8 @@ public class VeilUITooltipRenderer {
             tooltipHeight += 2 + (tooltip.size() - 1) * 10;
         int tooltipX = (width / 2) + 20;
         int tooltipY = (height / 2);
+        int desiredX = tooltipX;
+        int desiredY = tooltipY;
 
         tooltipX = Math.min(tooltipX, width - tooltipTextWidth - 20);
         tooltipY = Math.min(tooltipY, height - tooltipHeight - 20);
@@ -100,22 +105,8 @@ public class VeilUITooltipRenderer {
             desiredPos = null;
         }
         if(tooltippable.getWorldspace()){
-            // translate and scale based on players position relative to the block, and rotate to face the player around the left edge
             Vec3 corner = Vec3.atCenterOf(pos);
             currentPos = currentPos == null ? corner : currentPos;
-            // move corner to the closest top corner to the player
-//            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
-//            Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
-//            Matrix4f modelViewStack = RenderSystem.getModelViewStack().last().pose().copy();
-//            Vec3 ray = TargetPicker.getRay(projectionMatrix, modelViewStack, mc.getWindow().getWidth()/2f, mc.getWindow().getHeight()/2f);
-//            Vec3 start = new Vec3(mc.gameRenderer.getMainCamera().getPosition().x, mc.gameRenderer.getMainCamera().getPosition().y + mc.player.getEyeHeight(), mc.gameRenderer.getMainCamera().getPosition().z);
-//            Vec3 end = start.add(ray.scale(10));
-//            BlockHitResult blockHitResult1 = world.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
-//            Vec3 playerPos = blockHitResult1.getLocation();
-//            playerPos.add(Mth.frac(playerPos.x), Mth.frac(playerPos.y), Mth.frac(playerPos.z));
-//            playerPos.subtract(corner);
-//            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(playerPos.x()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(playerPos.z()), -1, 1) * 0.5f)-0.5f);
-            // move corner to the closest top corner to the player
             Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
             Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
@@ -129,31 +120,33 @@ public class VeilUITooltipRenderer {
             }
             currentPos = currentPos.lerp(desiredPos, 0.05f);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
+            Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
+            desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
             tooltipX = (int)screenSpacePos.x();
             tooltipY = (int)screenSpacePos.y();
+            desiredX = (int)desiredScreenSpacePos.x();
+            desiredY = (int)desiredScreenSpacePos.y();
         }
-//        if(fade < 1){
-//            if(tooltippable.getTimeline() != null){
-//                TooltipTimeline timeline = tooltippable.getTimeline();
-//                TooltipKeyframe frame = timeline.getCurrentKeyframe();
-//                if(frame != null){
-//                    background = frame.getBackgroundColor() == null ? background : frame.getBackgroundColor();
-//                    borderTop = frame.getTopBorderColor() == null ? borderTop : frame.getTopBorderColor();
-//                    borderBottom = frame.getBottomBorderColor() == null ? borderBottom : frame.getBottomBorderColor();
-//                    heightBonus = frame.getTooltipTextHeightBonus();
-//                    widthBonus = frame.getTooltipTextWidthBonus();
-//                    textXOffset = frame.getTooltipTextXOffset();
-//                    textYOffset = frame.getTooltipTextYOffset();
-//                    istack = frame.getItemStack() == null ? istack : frame.getItemStack();
-//                }
-//            }
-//            stack.translate(-(Math.pow(fade, 2)*8), 0, 0);
-//            background = background.multiply(1,1,1,fade);
-//            borderTop = borderTop.multiply(1,1,1,fade);
-//            borderBottom = borderBottom.multiply(1,1,1,fade);
-//        }
-
+        if(tooltippable.getTheme().getProperty("connectingLine") != null) {
+            stack.pushPose();
+            Color color = new Color(((NumberThemeProperty)tooltippable.getTheme().getProperty("connectingLine")).getValue(Integer.class));
+            Matrix4f mat = stack.last().pose();
+            RenderSystem.enableDepthTest();
+            RenderSystem.disableTexture();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.lineWidth(2);
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+            buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+            buffer.vertex(mat, desiredX, desiredY, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX, tooltipY, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            Tesselator.getInstance().end();
+            RenderSystem.disableBlend();
+            RenderSystem.enableTexture();
+            stack.popPose();
+        }
         UIUtils.drawHoverText(partialTicks, istack, stack, tooltip, tooltipX+(int)textXOffset, tooltipY+(int)textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int)widthBonus, (int)heightBonus, items);
         stack.popPose();
     }

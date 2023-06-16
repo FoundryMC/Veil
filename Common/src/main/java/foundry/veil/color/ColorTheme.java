@@ -1,5 +1,7 @@
 package foundry.veil.color;
 
+import foundry.veil.color.theme.IThemeProperty;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Optional;
  */
 public class ColorTheme {
     private Map<Optional<String>, Color> colors = new HashMap<>();
+    private Map<Optional<String>, IThemeProperty<?>> properties = new HashMap<>();
 
     public ColorTheme(){
 
@@ -22,6 +25,31 @@ public class ColorTheme {
         for(Color color : colors){
             addColor(color);
         }
+    }
+
+    public void addProperty(String name, IThemeProperty<?> property){
+        properties.put(Optional.ofNullable(name), property);
+    }
+
+    public void addProperty(IThemeProperty<?> property){
+        properties.put(Optional.empty(), property);
+    }
+
+    public Object getAndCastProperty(String name){
+        IThemeProperty<?> property = properties.get(Optional.ofNullable(name));
+        return property.getType().cast(property);
+    }
+
+    public IThemeProperty<?> getProperty(String name){
+        return properties.get(Optional.ofNullable(name));
+    }
+
+    public void removeProperty(String name){
+        properties.remove(Optional.ofNullable(name));
+    }
+
+    public void clearProperties(){
+        properties.clear();
     }
 
     public void addColor(String name, Color color){
