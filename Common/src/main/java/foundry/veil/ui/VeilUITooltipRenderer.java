@@ -128,9 +128,10 @@ public class VeilUITooltipRenderer {
             desiredX = (int)desiredScreenSpacePos.x();
             desiredY = (int)desiredScreenSpacePos.y();
         }
-        if(tooltippable.getTheme().getProperty("connectingLine") != null) {
+        if(tooltippable.getTheme().getColor("connectingLine") != null) {
             stack.pushPose();
-            Color color = new Color(((NumberThemeProperty)tooltippable.getTheme().getProperty("connectingLine")).getValue(Integer.class));
+            Color color = tooltippable.getTheme().getColor("connectingLine");
+            float thickness = ((NumberThemeProperty)tooltippable.getTheme().getProperty("connectingLineThickness")).getValue(Float.class);
             Matrix4f mat = stack.last().pose();
             RenderSystem.enableDepthTest();
             RenderSystem.disableTexture();
@@ -139,9 +140,12 @@ public class VeilUITooltipRenderer {
             RenderSystem.lineWidth(2);
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-            buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
-            buffer.vertex(mat, desiredX, desiredY, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX, tooltipY, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            // draw a quad of thickness thickness from desiredX, desiredY to tooltipX, tooltipY with a z value of 399, starting from the top right corner and going anti-clockwise
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            buffer.vertex(mat, desiredX+thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, desiredX-thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX-thickness, tooltipY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX+thickness, tooltipY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             Tesselator.getInstance().end();
             RenderSystem.disableBlend();
             RenderSystem.enableTexture();

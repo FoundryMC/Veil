@@ -235,4 +235,7 @@ public class Color {
     public int getRGB() {
         return (getRedInt() << 16) | (getGreenInt() << 8) | getBlueInt();
     }
+    public int getRGBA() {
+        return (getRedInt() << 24) | (getGreenInt() << 16) | (getBlueInt() << 8) | getAlphaInt();
+    }
 }
