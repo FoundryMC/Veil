@@ -8,6 +8,7 @@ import foundry.veil.render.shader.processor.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL20C;
 
@@ -23,6 +24,7 @@ import static org.lwjgl.opengl.GL20C.*;
  * This should only be used for compiling single shaders.
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class DirectShaderCompiler implements ShaderCompiler {
 
     private static final boolean VERBOSE_ERRORS;

@@ -3,6 +3,7 @@ package foundry.veil.render.shader.compiler;
 import foundry.veil.render.shader.ShaderException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Objects;
  *
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class CachedShaderCompiler extends DirectShaderCompiler {
 
     private final Map<Integer, CompiledShader> shaders;

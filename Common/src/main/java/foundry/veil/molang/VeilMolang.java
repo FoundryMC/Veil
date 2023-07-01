@@ -18,7 +18,7 @@ public final class VeilMolang {
     }
 
     /**
-     * @return The global veil molang compiler
+     * @return The global Veil molang compiler
      */
     public static MolangCompiler get() {
         return COMPILER;

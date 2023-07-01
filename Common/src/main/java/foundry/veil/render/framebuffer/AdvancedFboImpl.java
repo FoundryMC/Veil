@@ -67,7 +67,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
             GL_OUT_OF_MEMORY, "GL_OUT_OF_MEMORY"
     );
 
-    public static final AdvancedFbo MAIN_WRAPPER = new VanillaAdvancedFboWrapper(Minecraft.getInstance()::getMainRenderTarget);
+    public static final AdvancedFbo MAIN_WRAPPER = AdvancedFbo.wrap(Minecraft.getInstance()::getMainRenderTarget);
 
     private int id;
     private int width;

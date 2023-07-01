@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class RenderSystemMixin {
 
     @Inject(method = "flipFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;replayQueue()V", shift = At.Shift.BEFORE), remap = false)
-    private static void flipFrame(long window, CallbackInfo ci) {
+    private static void veil$flipFrame(long window, CallbackInfo ci) {
         VeilRenderSystem.flipFrame(window);
     }
 }

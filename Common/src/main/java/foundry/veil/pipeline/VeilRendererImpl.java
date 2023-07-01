@@ -9,6 +9,9 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 
+/**
+ * @author Ocelot
+ */
 @ApiStatus.Internal
 public class VeilRendererImpl implements VeilRenderer, NativeResource {
 

@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
  *
  * @author Ocelot
  */
-@FunctionalInterface
 public interface ShaderPreProcessor {
 
     Pattern UNIFORM_PATTERN = Pattern.compile(".*uniform\\s+(?<type>\\w+)\\W(?<name>\\w*)");

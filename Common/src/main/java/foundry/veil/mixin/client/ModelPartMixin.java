@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 
 @Mixin(ModelPart.class)
 public class ModelPartMixin implements OffsetModelPart, CrackCocaine {
+
     @Unique
     public float offsetX = 0;
     @Unique

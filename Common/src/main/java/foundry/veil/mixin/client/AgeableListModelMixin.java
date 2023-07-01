@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 @Mixin(AgeableListModel.class)
 public class AgeableListModelMixin {
+    
     @Unique
     Supplier<PoseStack> matrices;
     @Unique

@@ -29,13 +29,11 @@ public class ShaderProgram implements NativeResource, MutableUniformAccess {
 
     private final ResourceLocation id;
     private final Set<Integer> shaders;
-    private final Set<Integer> shadersView;
     private final Map<CharSequence, Integer> uniforms;
     private final Map<CharSequence, Integer> blocks;
     private final Map<CharSequence, Integer> textures;
     private final Map<String, ShaderTextureSource> textureSources;
     private final Set<String> definitionDependencies;
-    private final Set<String> definitionDependenciesView;
     private int program;
 
     /**
@@ -46,13 +44,11 @@ public class ShaderProgram implements NativeResource, MutableUniformAccess {
     public ShaderProgram(@NotNull ResourceLocation id) {
         this.id = Objects.requireNonNull(id, "name");
         this.shaders = new HashSet<>(2);
-        this.shadersView = Collections.unmodifiableSet(this.shaders);
         this.uniforms = new Object2IntArrayMap<>();
         this.blocks = new Object2IntArrayMap<>();
         this.textures = new HashMap<>();
         this.textureSources = new HashMap<>();
         this.definitionDependencies = new HashSet<>();
-        this.definitionDependenciesView = Collections.unmodifiableSet(this.definitionDependencies);
     }
 
     private void clearShader() {
@@ -149,14 +145,14 @@ public class ShaderProgram implements NativeResource, MutableUniformAccess {
      * @return An immutable view of the shader types attached to this program
      */
     public @NotNull Set<Integer> getShaders() {
-        return this.shadersView;
+        return this.shaders;
     }
 
     /**
      * @return All shader definitions this program depends on
      */
     public @NotNull Set<String> getDefinitionDependencies() {
-        return this.definitionDependenciesView;
+        return this.definitionDependencies;
     }
 
     /**

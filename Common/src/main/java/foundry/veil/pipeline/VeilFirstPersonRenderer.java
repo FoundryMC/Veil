@@ -15,12 +15,15 @@ import org.slf4j.Logger;
  * @author Ocelot
  */
 @ApiStatus.Internal
-public final class VeilFirstPerson {
+public final class VeilFirstPersonRenderer {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation FIRST_PERSON = new ResourceLocation(Veil.MODID, "first_person");
 
     private static PostPipeline pipeline;
+
+    private VeilFirstPersonRenderer() {
+    }
 
     public static void setup() {
         VeilRenderer renderer = VeilRenderSystem.renderer();

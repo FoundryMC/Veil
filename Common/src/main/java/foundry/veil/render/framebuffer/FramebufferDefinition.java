@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.molang.MolangExpressionCodec;
 import foundry.veil.molang.VeilMolang;
 import foundry.veil.pipeline.VeilRenderSystem;
+import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import org.apache.commons.lang3.Validate;
@@ -153,9 +154,19 @@ public record FramebufferDefinition(MolangExpression width,
                 .setQuery("screen_width", screenWidth)
                 .setQuery("screen_height", screenHeight)
                 .create();
+        return this.createBuilder(runtime);
+    }
 
-        int width = (int) runtime.safeResolve(this.width);
-        int height = (int) runtime.safeResolve(this.height);
+    /**
+     * Creates a new builder from this framebuffer.
+     *
+     * @param environment The environment to evaluate the size in
+     * @return A new {@link AdvancedFbo.Builder} that can be turned into a framebuffer.
+     * All defined attachments are created and added to the builder
+     */
+    public AdvancedFbo.Builder createBuilder(MolangEnvironment environment) {
+        int width = (int) environment.safeResolve(this.width);
+        int height = (int) environment.safeResolve(this.height);
         Validate.inclusiveBetween(0, VeilRenderSystem.maxFramebufferWidth(), width, "width must be between 0 to " + VeilRenderSystem.maxFramebufferWidth());
         Validate.inclusiveBetween(0, VeilRenderSystem.maxFramebufferHeight(), height, "height must be between 0 to " + VeilRenderSystem.maxFramebufferHeight());
         AdvancedFbo.Builder builder = AdvancedFbo.withSize(width, height);

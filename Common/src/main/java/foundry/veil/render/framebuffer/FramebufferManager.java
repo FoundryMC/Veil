@@ -6,12 +6,14 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import foundry.veil.resource.CodecReloadListener;
+import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
@@ -23,8 +25,6 @@ import java.util.*;
  * <p>Manages all framebuffers and custom definitions specified in files.
  * All framebuffers except for the main one can be customized from the
  * <code>modid:pinwheel/framebuffers</code> folder in the assets.</p>
- *
- * <p>This should only be used for framebuffers that act as full-screen sources.</p>
  *
  * @author Ocelot
  */
@@ -60,19 +60,20 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
         this.framebuffersView = Collections.unmodifiableMap(this.framebuffers);
     }
 
-    private void init(AdvancedFbo fbo) {
-        fbo.bindDraw(false);
-        fbo.clear();
-    }
-
     public void resizeFramebuffers(int width, int height) {
         this.free();
+
+        MolangRuntime runtime = MolangRuntime.runtime()
+                .setQuery("screen_width", width)
+                .setQuery("screen_height", height)
+                .create();
 
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
         this.framebufferDefinitions.forEach((name, definition) -> {
             try {
-                AdvancedFbo fbo = definition.createBuilder(width, height).build(true);
-                this.init(fbo);
+                AdvancedFbo fbo = definition.createBuilder(runtime).build(true);
+                fbo.bindDraw(false);
+                fbo.clear();
                 this.framebuffers.put(name, fbo);
             } catch (Exception e) {
                 LOGGER.error("Failed to initialize framebuffer: {}", name, e);
@@ -105,6 +106,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     /**
      * Clears all framebuffers at the start of the next frame.
      */
+    @ApiStatus.Internal
     public void clear() {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
         this.framebuffers.forEach((name, fbo) -> {

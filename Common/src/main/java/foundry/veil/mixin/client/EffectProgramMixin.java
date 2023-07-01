@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(EffectProgram.class)
 public class EffectProgramMixin {
+
     @ModifyArg(
             method = "compileShader",
             at = @At(
@@ -17,7 +18,7 @@ public class EffectProgramMixin {
             ),
             index = 4
     )
-    private static GlslPreprocessor useCustomPreprocessor(GlslPreprocessor preprocessor){
+    private static GlslPreprocessor veil$useCustomPreprocessor(GlslPreprocessor preprocessor){
         return new PreProcessor();
     }
 }

@@ -13,6 +13,7 @@ import org.lwjgl.system.NativeResource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11C.glReadBuffer;
@@ -368,6 +369,26 @@ public interface AdvancedFbo extends NativeResource {
      * @return A {@link RenderTarget} that uses this advanced fbo as the target
      */
     RenderTarget toRenderTarget();
+
+    /**
+     * Wraps the specified render target in a new advanced fbo.
+     *
+     * @param renderTarget The render target instance
+     * @return A new advanced fbo that wraps the target in the api
+     */
+    static AdvancedFbo wrap(RenderTarget renderTarget) {
+        return AdvancedFbo.wrap(() -> renderTarget);
+    }
+
+    /**
+     * Wraps the specified render target in a new advanced fbo.
+     *
+     * @param renderTargetSupplier The supplier to the render target instance
+     * @return A new advanced fbo that wraps the target in the api
+     */
+    static AdvancedFbo wrap(Supplier<RenderTarget> renderTargetSupplier) {
+        return new VanillaAdvancedFboWrapper(renderTargetSupplier);
+    }
 
     /**
      * Creates a new {@link AdvancedFbo} with the provided width and height.

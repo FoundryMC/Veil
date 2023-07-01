@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(HumanoidModel.class)
 public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
+
     @Unique
     public VeilPoseable leftArmPose;// = PoseRegistry.TEST;
     @Unique

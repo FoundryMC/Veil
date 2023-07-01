@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
  *
  * @author Ocelot
  */
-public class VeilFramebuffers {
+public final class VeilFramebuffers {
 
     private VeilFramebuffers() {
     }

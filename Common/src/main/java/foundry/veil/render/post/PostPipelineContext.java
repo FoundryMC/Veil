@@ -9,6 +9,7 @@ import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.ShaderProgram;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 /**
  * Default implementation of {@link PostPipeline.Context}.
  */
+@ApiStatus.Internal
 public class PostPipelineContext implements PostPipeline.Context, NativeResource {
 
     private final FramebufferManager framebufferManager;

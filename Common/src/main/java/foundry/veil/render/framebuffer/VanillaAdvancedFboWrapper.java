@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL30;
 
@@ -20,13 +21,14 @@ import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT0;
  *
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class VanillaAdvancedFboWrapper implements AdvancedFbo {
 
     private final Supplier<RenderTarget> renderTargetSupplier;
     private final Supplier<AttachmentWrapper> colorBuffer;
     private final Supplier<AttachmentWrapper> depthBuffer;
 
-    public VanillaAdvancedFboWrapper(Supplier<RenderTarget> renderTargetSupplier) {
+    VanillaAdvancedFboWrapper(Supplier<RenderTarget> renderTargetSupplier) {
         this.renderTargetSupplier = Suppliers.memoize(renderTargetSupplier::get);
         this.colorBuffer = Suppliers.memoize(() -> new AttachmentWrapper(this, () -> this.toRenderTarget().getColorTextureId(), GL_COLOR_ATTACHMENT0));
         this.depthBuffer = Suppliers.memoize(() -> new AttachmentWrapper(this, () -> this.toRenderTarget().getDepthTextureId(), GL_DEPTH_ATTACHMENT));

@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixin {
+
     @Shadow
     @Final
     private Minecraft minecraft;
