@@ -94,7 +94,11 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":Common")
+    compileOnly 'org.jetbrains:annotations:24.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+    implementation(jarJar("gg.moonflower:molang-compiler:${molang_compiler_version}"){
+        jarJar.ranged(it, "[3.0.0,)")
+    })
 }
 
 tasks.withType(JavaCompile) {

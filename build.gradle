@@ -49,19 +49,22 @@ subprojects {
     }
     
     repositories {
-
+        mavenLocal()
         mavenCentral()
-
         maven {
             name = 'Sponge / Mixin'
             url = 'https://repo.spongepowered.org/repository/maven-public/'
         }
-
         maven {
             name = 'BlameJared Maven (CrT / Bookshelf)'
             url = 'https://maven.blamejared.com'
         }
-        maven { url 'https://jitpack.io' }
+        maven {
+            url "https://jitpack.io"
+            content {
+                includeGroupByRegex "com\\.github.*"
+            }
+        }
     }
 
     sourceSets.main.kotlin.srcDirs += 'src/main/java'

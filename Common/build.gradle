@@ -31,8 +31,9 @@ project.ext.jomlVersion = "1.10.5"
 dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    compileOnly 'org.jetbrains:annotations:24.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+    implementation("gg.moonflower:molang-compiler:${molang_compiler_version}")
 }
 shadowJar {
     configurations = [project.configurations.shadow]

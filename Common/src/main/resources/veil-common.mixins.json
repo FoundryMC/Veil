@@ -19,7 +19,8 @@
     "client.ItemInHandRendererMixin",
     "client.LevelRendererMixin",
     "client.ModelPartMixin",
-    "client.PostChainMixin"
+    "client.PostChainMixin",
+    "client.RenderSystemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
