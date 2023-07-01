@@ -1,0 +1,37 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "veil:blit_first_person",
+      "in": "minecraft:main",
+      "out": "copy"
+    },
+    {
+      "type": "veil:copy",
+      "in": "copy",
+      "out": "minecraft:main",
+      "color": true,
+      "depth": true
+    },
+    {
+      "type": "veil:copy",
+      "in": "copy",
+      "out": "veil:post"
+    }
+  ],
+  "textures": {
+    "FirstPersonSampler": {
+      "type": "framebuffer",
+      "name": "veil:first_person"
+    },
+    "FirstPersonDepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:first_person:depth"
+    }
+  },
+  "framebuffers": {
+    "copy": {
+      "depth": true
+    }
+  }
+}

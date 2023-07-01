@@ -6,7 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL30;
 
 import java.util.function.IntSupplier;
@@ -151,7 +151,16 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
         this.toRenderTarget().destroyBuffers();
     }
 
-    private record AttachmentWrapper(AdvancedFbo parent, IntSupplier id, int format) implements AdvancedFboAttachment {
+    private static class AttachmentWrapper extends AdvancedFboTextureAttachment {
+
+        private final AdvancedFbo parent;
+        private final IntSupplier id;
+
+        private AttachmentWrapper(AdvancedFbo parent, IntSupplier id, int type) {
+            super(type, 0, 0, 0, 0, 0, 0, false, null);
+            this.parent = parent;
+            this.id = id;
+        }
 
         @Override
         public void create() {
@@ -164,23 +173,8 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
         }
 
         @Override
-        public void bindAttachment() {
-            RenderSystem.bindTexture(this.id.getAsInt());
-        }
-
-        @Override
-        public void unbindAttachment() {
-            RenderSystem.bindTexture(0);
-        }
-
-        @Override
-        public int getAttachmentType() {
-            return GL_COLOR_ATTACHMENT0;
-        }
-
-        @Override
-        public int getFormat() {
-            return this.format;
+        public int getId() {
+            return this.id.getAsInt();
         }
 
         @Override
@@ -194,23 +188,8 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
         }
 
         @Override
-        public int getLevels() {
-            return 1;
-        }
-
-        @Override
-        public boolean canSample() {
-            return true;
-        }
-
-        @Override
-        public @Nullable String getName() {
-            return null;
-        }
-
-        @Override
-        public AdvancedFboAttachment createCopy() {
-            return new AttachmentWrapper(this.parent, this.id, this.format);
+        public @NotNull AdvancedFboTextureAttachment createCopy() {
+            return new VanillaAdvancedFboWrapper.AttachmentWrapper(this.parent, this.id, this.getAttachmentType());
         }
 
         @Override

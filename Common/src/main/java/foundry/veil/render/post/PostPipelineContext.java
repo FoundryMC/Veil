@@ -64,7 +64,8 @@ public class PostPipelineContext implements PostPipeline.Context, NativeResource
      */
     public void begin() {
         this.framebufferManager.getFramebuffers().forEach(this::setFramebuffer);
-        this.setFramebuffer(VeilFramebuffers.MAIN, this.getDrawFramebuffer());
+        this.setFramebuffer(VeilFramebuffers.MAIN, AdvancedFbo.getMainFramebuffer());
+        this.setFramebuffer(VeilFramebuffers.POST, this.getDrawFramebuffer());
     }
 
     /**

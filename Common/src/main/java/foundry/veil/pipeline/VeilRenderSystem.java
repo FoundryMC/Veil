@@ -274,11 +274,10 @@ public final class VeilRenderSystem {
         FramebufferManager framebufferManager = renderer.getFramebufferManager();
         PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
 
-        // TODO deferred renderer into post framebuffer
+        // TODO deferred renderer
 
         AdvancedFbo main = AdvancedFbo.getMainFramebuffer();
         AdvancedFbo postFramebuffer = framebufferManager.getFramebuffer(VeilFramebuffers.POST);
-        main.resolveToAdvancedFbo(postFramebuffer);
 
         postProcessingManager.runPipeline();
         if (postFramebuffer != null) {

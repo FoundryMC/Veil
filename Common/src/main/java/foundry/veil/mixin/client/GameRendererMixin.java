@@ -1,5 +1,7 @@
 package foundry.veil.mixin.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import foundry.veil.pipeline.VeilFirstPerson;
 import foundry.veil.pipeline.VeilRenderSystem;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import net.minecraft.client.renderer.GameRenderer;
@@ -25,5 +27,15 @@ public class GameRendererMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V", shift = At.Shift.BEFORE))
     public void veil$updateGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderer().getCameraMatrices().updateGui();
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", shift = At.Shift.BEFORE))
+    public void veil$setupFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+        VeilFirstPerson.setup();
+    }
+
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/Camera;F)V", shift = At.Shift.AFTER))
+    public void veil$drawsetupFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+        VeilFirstPerson.blit();
     }
 }

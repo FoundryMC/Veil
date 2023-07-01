@@ -269,8 +269,7 @@ public interface AdvancedFbo extends NativeResource {
      * @return Whether there is a valid attachment in the specified slot
      */
     default boolean isColorTextureAttachment(int attachment) {
-        return this.hasColorAttachment(attachment) &&
-                this.getColorAttachment(attachment) instanceof AdvancedFboTextureAttachment;
+        return this.hasColorAttachment(attachment) && this.getColorAttachment(attachment) instanceof AdvancedFboTextureAttachment;
     }
 
     /**
@@ -280,8 +279,7 @@ public interface AdvancedFbo extends NativeResource {
      * @return Whether there is a valid attachment in the specified slot
      */
     default boolean isColorRenderAttachment(int attachment) {
-        return this.hasColorAttachment(attachment) &&
-                this.getColorAttachment(attachment) instanceof AdvancedFboRenderAttachment;
+        return this.hasColorAttachment(attachment) && this.getColorAttachment(attachment) instanceof AdvancedFboRenderAttachment;
     }
 
     /**
@@ -296,9 +294,7 @@ public interface AdvancedFbo extends NativeResource {
      */
     default AdvancedFboTextureAttachment getColorTextureAttachment(int attachment) {
         AdvancedFboAttachment advancedFboAttachment = this.getColorAttachment(attachment);
-        Validate.isTrue(this.isColorTextureAttachment(attachment),
-                "Color attachment " + attachment +
-                        " must be a texture attachment to modify texture information.");
+        Validate.isTrue(this.isColorTextureAttachment(attachment), "Color attachment " + attachment + " must be a texture attachment to modify texture information.");
         return (AdvancedFboTextureAttachment) advancedFboAttachment;
     }
 
@@ -314,9 +310,7 @@ public interface AdvancedFbo extends NativeResource {
      */
     default AdvancedFboRenderAttachment getColorRenderAttachment(int attachment) {
         AdvancedFboAttachment advancedFboAttachment = this.getColorAttachment(attachment);
-        Validate.isTrue(this.isColorRenderAttachment(attachment),
-                "Color attachment " + attachment +
-                        " must be a render attachment to modify render information.");
+        Validate.isTrue(this.isColorRenderAttachment(attachment), "Color attachment " + attachment + " must be a render attachment to modify render information.");
         return (AdvancedFboRenderAttachment) advancedFboAttachment;
     }
 
@@ -351,8 +345,7 @@ public interface AdvancedFbo extends NativeResource {
      */
     default AdvancedFboTextureAttachment getDepthTextureAttachment() {
         AdvancedFboAttachment advancedFboAttachment = this.getDepthAttachment();
-        Validate.isTrue(this.isDepthTextureAttachment(),
-                "Depth attachment must be a texture attachment to modify texture information.");
+        Validate.isTrue(this.isDepthTextureAttachment(), "Depth attachment must be a texture attachment to modify texture information.");
         return (AdvancedFboTextureAttachment) advancedFboAttachment;
     }
 
@@ -367,8 +360,7 @@ public interface AdvancedFbo extends NativeResource {
      */
     default AdvancedFboRenderAttachment getDepthRenderAttachment() {
         AdvancedFboAttachment advancedFboAttachment = this.getDepthAttachment();
-        Validate.isTrue(this.isDepthRenderAttachment(),
-                "Depth attachment must be a render attachment to modify render information.");
+        Validate.isTrue(this.isDepthRenderAttachment(), "Depth attachment must be a render attachment to modify render information.");
         return (AdvancedFboRenderAttachment) advancedFboAttachment;
     }
 

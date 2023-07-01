@@ -2,6 +2,7 @@ package foundry.veil.pipeline;
 
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.framebuffer.FramebufferManager;
+import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
@@ -25,9 +26,18 @@ public interface VeilRenderer {
      */
     ShaderManager getShaderManager();
 
+    /**
+     * @return The manager for all custom veil framebuffers
+     */
     FramebufferManager getFramebufferManager();
 
+    /**
+     * @return The manager for all {@link PostPipeline} instances
+     */
     PostProcessingManager getPostProcessingManager();
 
+    /**
+     * @return The camera matrices instance
+     */
     CameraMatrices getCameraMatrices();
 }

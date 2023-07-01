@@ -11,6 +11,6 @@ public class MainMixin {
 
     @Inject(method = "main", at = @At("HEAD"), remap = false)
     private static void main(String[] pArgs, CallbackInfo ci) {
-        System.loadLibrary("renderdoc");
+//        System.loadLibrary("renderdoc");
     }
 }
