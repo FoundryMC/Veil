@@ -36,4 +36,6 @@ pluginManagement {
     }
 }
 rootProject.name = 'Veil'
-include("Common", "Fabric", "Forge", "Quilt")
+// Quilt isn't 1.20, so it has to be excluded for now
+// include("Common", "Fabric", "Forge", "Quilt")
+include("Common", "Fabric", "Forge")

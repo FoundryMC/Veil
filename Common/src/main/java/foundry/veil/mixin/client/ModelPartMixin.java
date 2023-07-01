@@ -1,7 +1,7 @@
 package foundry.veil.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import foundry.veil.model.anim.CrackCocaine;
 import foundry.veil.model.anim.OffsetModelPart;
 import net.minecraft.client.model.geom.ModelPart;
@@ -61,20 +61,22 @@ public class ModelPartMixin implements OffsetModelPart, CrackCocaine {
     @Inject(method = "translateAndRotate(Lcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At("TAIL"))
     public void veil$rotato(PoseStack matrix, CallbackInfo ci) {
         if (this.offsetX != 0F || this.offsetY != 0F || this.offsetZ != 0F) {
-            matrix.translate(this.offsetX/16F, this.offsetY/16F, this.offsetZ/16F);
+            matrix.translate(this.offsetX / 16F, this.offsetY / 16F, this.offsetZ / 16F);
         }
     }
+
     @Inject(method = "translateAndRotate(Lcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At("HEAD"))
     public void veil$protato(PoseStack matrix, CallbackInfo ci) {
-        if(this.parent.get() != null) {
+        if (this.parent.get() != null) {
             act(parent.get(), matrix);
         }
     }
+
     @Inject(method = "copyFrom", at = @At("TAIL"))
     public void veil$copyTrans(ModelPart part, CallbackInfo ci) {
-        this.offsetX = ((OffsetModelPart)(Object)part).getOffsetX();
-        this.offsetY = ((OffsetModelPart)(Object)part).getOffsetY();
-        this.offsetZ = ((OffsetModelPart)(Object)part).getOffsetZ();
+        this.offsetX = ((OffsetModelPart) (Object) part).getOffsetX();
+        this.offsetY = ((OffsetModelPart) (Object) part).getOffsetY();
+        this.offsetZ = ((OffsetModelPart) (Object) part).getOffsetZ();
     }
 
     @Override
@@ -86,27 +88,28 @@ public class ModelPartMixin implements OffsetModelPart, CrackCocaine {
     public void setParent(Supplier<ModelPart> parent) {
         this.parent = parent;
     }
+
     @Unique
     private void act(ModelPart part, PoseStack matrix) {
-        matrix.translate((double)(part.x / 16.0F), (double)(part.y / 16.0F), (double)(part.z / 16.0F));
+        matrix.translate((part.x / 16.0F), (part.y / 16.0F), (part.z / 16.0F));
         if (part.zRot != 0.0F) {
-            matrix.mulPose(Vector3f.ZP.rotation(part.zRot));
+            matrix.mulPose(Axis.ZP.rotation(part.zRot));
         }
 
         if (part.yRot != 0.0F) {
-            matrix.mulPose(Vector3f.YP.rotation(part.yRot));
+            matrix.mulPose(Axis.YP.rotation(part.yRot));
         }
 
         if (part.xRot != 0.0F) {
-            matrix.mulPose(Vector3f.XP.rotation(part.xRot));
+            matrix.mulPose(Axis.XP.rotation(part.xRot));
         }
 
         if (part.xScale != 1.0F || part.yScale != 1.0F || part.zScale != 1.0F) {
             matrix.scale(part.xScale, part.yScale, part.zScale);
         }
 
-        if (((OffsetModelPart)(Object)part).getOffsetX() != 0F || ((OffsetModelPart)(Object)part).getOffsetY() != 0F || ((OffsetModelPart)(Object)part).getOffsetZ() != 0F) {
-            matrix.translate((((OffsetModelPart)(Object)part).getOffsetX() / 16F), (((OffsetModelPart)(Object)part).getOffsetY() / 16F), (((OffsetModelPart)(Object)part).getOffsetZ() / 16F));
+        if (((OffsetModelPart) (Object) part).getOffsetX() != 0F || ((OffsetModelPart) (Object) part).getOffsetY() != 0F || ((OffsetModelPart) (Object) part).getOffsetZ() != 0F) {
+            matrix.translate((((OffsetModelPart) (Object) part).getOffsetX() / 16F), (((OffsetModelPart) (Object) part).getOffsetY() / 16F), (((OffsetModelPart) (Object) part).getOffsetZ() / 16F));
         }
     }
 }

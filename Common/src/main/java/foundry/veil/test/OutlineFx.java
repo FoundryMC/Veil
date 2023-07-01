@@ -1,12 +1,13 @@
 package foundry.veil.test;
 
-import com.mojang.math.Vector3f;
 import foundry.veil.postprocessing.DynamicEffectInstance;
+import org.joml.Vector3f;
 
 import java.util.function.BiConsumer;
 
 public class OutlineFx extends DynamicEffectInstance {
-    public OutlineFx(){
+
+    public OutlineFx() {
     }
 
     public OutlineFx(Vector3f center) {

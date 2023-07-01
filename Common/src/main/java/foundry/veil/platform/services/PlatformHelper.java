@@ -1,6 +1,6 @@
 package foundry.veil.platform.services;
 
-public interface IPlatformHelper {
+public interface PlatformHelper {
 
     /**
      * Gets the name of the current platform

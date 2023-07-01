@@ -18,7 +18,6 @@ dependencies {
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     implementation project(":Common")
-    include(implementation("org.joml:joml:1.10.5"))
 }
 
 compileKotlin {

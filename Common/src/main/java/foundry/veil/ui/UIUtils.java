@@ -5,8 +5,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import foundry.veil.Veil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -27,10 +25,11 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class UIUtils {
                                      int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font,
                                      int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items,
                                      int desiredX, int desiredY) {
-        if(textLines.isEmpty())
+        if (textLines.isEmpty())
             return;
 
         List<ClientTooltipComponent> list = gatherTooltipComponents(stack, textLines,
@@ -152,12 +151,13 @@ public class UIUtils {
 
             itemY += 10;
         }
-        Minecraft.getInstance().getItemRenderer().blitOffset += 300;
+        pStack.pushPose();
+        pStack.translate(0, 0, 300);
         for (VeilUIItemTooltipDataHolder item : items) {
             renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
-            drawTexturedRect(mat, z+100, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+            drawTexturedRect(pStack.last().pose(), z + 100, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
         }
-        Minecraft.getInstance().getItemRenderer().blitOffset -= 300;
+        pStack.popPose();
 
         MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance()
                 .getBuilder());
@@ -183,15 +183,16 @@ public class UIUtils {
 
         RenderSystem.enableDepthTest();
     }
+
     public static void renderAndDecorateItem(ItemStack $$0, float $$1, float $$2) {
         tryRenderGuiItem(Minecraft.getInstance().player, $$0, $$1, $$2, 0);
     }
+
     public static void tryRenderGuiItem(@Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4) {
         tryRenderGuiItem($$0, $$1, $$2, $$3, $$4, 0);
     }
 
-    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, Optional<TooltipComponent> itemComponent, int mouseX, int screenWidth, int screenHeight, @Nullable Font forcedFont, Font fallbackFont)
-    {
+    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, Optional<TooltipComponent> itemComponent, int mouseX, int screenWidth, int screenHeight, @Nullable Font forcedFont, Font fallbackFont) {
         Font font = forcedFont != null ? forcedFont : fallbackFont;
         List<Either<FormattedText, TooltipComponent>> elements = textElements.stream()
                 .map((Function<FormattedText, Either<FormattedText, TooltipComponent>>) Either::left)
@@ -208,8 +209,7 @@ public class UIUtils {
         boolean needsWrap = false;
 
         int tooltipX = mouseX + 12;
-        if (tooltipX + tooltipTextWidth + 4 > screenWidth)
-        {
+        if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
             tooltipX = mouseX - 16 - tooltipTextWidth;
             if (tooltipX < 4) // if the tooltip doesn't fit on the screen
             {
@@ -228,8 +228,7 @@ public class UIUtils {
 //        }
 
         int tooltipTextWidthF = tooltipTextWidth;
-        if (needsWrap)
-        {
+        if (needsWrap) {
             return elements.stream()
                     .flatMap(either -> either.map(
                             text -> font.split(text, tooltipTextWidthF).stream().map(ClientTooltipComponent::create),
@@ -245,19 +244,17 @@ public class UIUtils {
                 .toList();
     }
 
-    public static void drawGradientRect(Matrix4f mat, int zLevel, int left, int top, int right, int bottom, int startColor, int endColor)
-    {
-        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
-        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
-        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
-        float startBlue  = (float)(startColor       & 255) / 255.0F;
-        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
-        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
-        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
-        float endBlue    = (float)(endColor         & 255) / 255.0F;
+    public static void drawGradientRect(Matrix4f mat, int zLevel, int left, int top, int right, int bottom, int startColor, int endColor) {
+        float startAlpha = (float) (startColor >> 24 & 255) / 255.0F;
+        float startRed = (float) (startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float) (startColor >> 8 & 255) / 255.0F;
+        float startBlue = (float) (startColor & 255) / 255.0F;
+        float endAlpha = (float) (endColor >> 24 & 255) / 255.0F;
+        float endRed = (float) (endColor >> 16 & 255) / 255.0F;
+        float endGreen = (float) (endColor >> 8 & 255) / 255.0F;
+        float endBlue = (float) (endColor & 255) / 255.0F;
 
         RenderSystem.enableDepthTest();
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -265,19 +262,16 @@ public class UIUtils {
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        buffer.vertex(mat, right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        buffer.vertex(mat,  left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        buffer.vertex(mat,  left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        buffer.vertex(mat, right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        buffer.vertex(mat, right, top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        buffer.vertex(mat, left, top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        buffer.vertex(mat, left, bottom, zLevel).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+        buffer.vertex(mat, right, bottom, zLevel).color(endRed, endGreen, endBlue, endAlpha).endVertex();
         tessellator.end();
 
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
-    public static void drawTexturedRect(Matrix4f mat, int zLevel, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int textureWidth, int textureHeight, ResourceLocation texture)
-    {
-        RenderSystem.enableTexture();
+    public static void drawTexturedRect(Matrix4f mat, int zLevel, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int textureWidth, int textureHeight, ResourceLocation texture) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texture);
         float f = 1.0F / textureWidth;
@@ -285,40 +279,40 @@ public class UIUtils {
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(mat, x,     y + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
+        buffer.vertex(mat, x, y + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
         buffer.vertex(mat, x + width, y + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
-        buffer.vertex(mat, x + width, y,     zLevel).uv((u + uWidth) * f, v * f1).endVertex();
-        buffer.vertex(mat, x,     y,     zLevel).uv(u * f, v * f1).endVertex();
+        buffer.vertex(mat, x + width, y, zLevel).uv((u + uWidth) * f, v * f1).endVertex();
+        buffer.vertex(mat, x, y, zLevel).uv(u * f, v * f1).endVertex();
         tessellator.end();
     }
 
     public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
-        if (!$$1.isEmpty()) {
-            BakedModel $$6 = Minecraft.getInstance().getItemRenderer().getModel($$1, (Level)null, $$0, $$4);
-            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F + (float)$$5 : Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F;
-
-            try {
-                renderGuiItem($$1, $$2, $$3, $$6);
-            } catch (Throwable var11) {
-                CrashReport $$8 = CrashReport.forThrowable(var11, "Rendering item");
-                CrashReportCategory $$9 = $$8.addCategory("Item being rendered");
-                $$9.setDetail("Item Type", () -> {
-                    return String.valueOf($$1.getItem());
-                });
-                $$9.setDetail("Item Damage", () -> {
-                    return String.valueOf($$1.getDamageValue());
-                });
-                $$9.setDetail("Item NBT", () -> {
-                    return String.valueOf($$1.getTag());
-                });
-                $$9.setDetail("Item Foil", () -> {
-                    return String.valueOf($$1.hasFoil());
-                });
-                throw new ReportedException($$8);
-            }
-
-            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F - (float)$$5 : Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F;
-        }
+//        if (!$$1.isEmpty()) {
+//            BakedModel $$6 = Minecraft.getInstance().getItemRenderer().getModel($$1, (Level) null, $$0, $$4);
+//            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F + (float) $$5 : Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F;
+//
+//            try {
+//                renderGuiItem($$1, $$2, $$3, $$6);
+//            } catch (Throwable var11) {
+//                CrashReport $$8 = CrashReport.forThrowable(var11, "Rendering item");
+//                CrashReportCategory $$9 = $$8.addCategory("Item being rendered");
+//                $$9.setDetail("Item Type", () -> {
+//                    return String.valueOf($$1.getItem());
+//                });
+//                $$9.setDetail("Item Damage", () -> {
+//                    return String.valueOf($$1.getDamageValue());
+//                });
+//                $$9.setDetail("Item NBT", () -> {
+//                    return String.valueOf($$1.getTag());
+//                });
+//                $$9.setDetail("Item Foil", () -> {
+//                    return String.valueOf($$1.hasFoil());
+//                });
+//                throw new ReportedException($$8);
+//            }
+//
+//            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F - (float) $$5 : Minecraft.getInstance().getItemRenderer().blitOffset - 50.0F;
+//        }
     }
 
     public static void renderGuiItem(ItemStack stack, float x, float y, BakedModel bakedModel) {
@@ -329,7 +323,7 @@ public class UIUtils {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         PoseStack $$4 = RenderSystem.getModelViewStack();
         $$4.pushPose();
-        $$4.translate((double)x, (double)y, (double)(100.0F + Minecraft.getInstance().getItemRenderer().blitOffset));
+//        $$4.translate((double) x, (double) y, (double) (100.0F + Minecraft.getInstance().getItemRenderer().blitOffset));
         $$4.translate(8.0, 8.0, 0.0);
         $$4.scale(1.0F, -1.0F, 1.0F);
         $$4.scale(16.0F, 16.0F, 16.0F);
@@ -343,7 +337,7 @@ public class UIUtils {
             Lighting.setupFor3DItems();
         }
 
-        Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, $$5, $$6, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+        Minecraft.getInstance().getItemRenderer().render(stack, ItemDisplayContext.GUI, false, $$5, $$6, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
         $$6.endBatch();
         RenderSystem.enableDepthTest();
         if ($$7) {

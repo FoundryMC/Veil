@@ -95,9 +95,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":Common")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
-    implementation(jarJar("org.joml:joml:1.10.5"){
-        jarJar.ranged(it, "[1.10.5,)")
-    })
 }
 
 tasks.withType(JavaCompile) {

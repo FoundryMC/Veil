@@ -1,9 +1,9 @@
 package foundry.veil.platform;
 
-import foundry.veil.platform.services.IPlatformHelper;
+import foundry.veil.platform.services.PlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
-public class FabricPlatformHelper implements IPlatformHelper {
+public class FabricPlatformHelper implements PlatformHelper {
 
     @Override
     public String getPlatformName() {

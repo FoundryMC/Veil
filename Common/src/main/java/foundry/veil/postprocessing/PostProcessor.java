@@ -10,24 +10,22 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import foundry.veil.Veil;
 import foundry.veil.shader.RenderTargetRegistry;
-import foundry.veil.shader.RenderTypeRegistry;
-import foundry.veil.texture.DynamicRenderTargetTexture;
-import foundry.veil.texture.RenderedTexturesManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL30.GL_DRAW_FRAMEBUFFER;
@@ -44,27 +42,27 @@ public abstract class PostProcessor {
      * A collection of common uniforms for post processing effects. These are added to any shader that is loaded via the
      * {@link InstantiatedPostProcessor} system.
      */
-    public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
-            Pair.of("CameraPos", u -> u.set(new Vector3f(MC.gameRenderer.getMainCamera().getPosition()))),
-            Pair.of("LookVector", u -> u.set(MC.gameRenderer.getMainCamera().getLookVector())),
-            Pair.of("UpVector", u -> u.set(MC.gameRenderer.getMainCamera().getUpVector())),
-            Pair.of("LeftVector", u -> u.set(MC.gameRenderer.getMainCamera().getLeftVector())),
-            Pair.of("InvViewMat", u -> {
-                Matrix4f invertedViewMatrix = PostProcessor.viewModelStack.last().pose().copy();
-                invertedViewMatrix.invert();
-                u.set(invertedViewMatrix);
-            }),
-            Pair.of("InvProjMat", u -> {
-                Matrix4f invertedProjectionMatrix = RenderSystem.getProjectionMatrix().copy();
-                invertedProjectionMatrix.invert();
-                u.set(invertedProjectionMatrix);
-            }),
-            Pair.of("NearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
-            Pair.of("FarPlaneDistance", u -> u.set(MC.gameRenderer.getDepthFar())),
-            Pair.of("Fov", u -> u.set((float) Math.toRadians(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), MC.getFrameTime(), true)))),
-            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight())),
-            Pair.of("Perspective", u -> u.set(MC.options.getCameraType().ordinal()))
-    );
+//    public static final Collection<Pair<String, Consumer<Uniform>>> COMMON_UNIFORMS = Lists.newArrayList(
+//            Pair.of("CameraPos", u -> u.set(new Vector3f(MC.gameRenderer.getMainCamera().getPosition()))),
+//            Pair.of("LookVector", u -> u.set(MC.gameRenderer.getMainCamera().getLookVector())),
+//            Pair.of("UpVector", u -> u.set(MC.gameRenderer.getMainCamera().getUpVector())),
+//            Pair.of("LeftVector", u -> u.set(MC.gameRenderer.getMainCamera().getLeftVector())),
+//            Pair.of("InvViewMat", u -> {
+//                Matrix4f invertedViewMatrix = PostProcessor.viewModelStack.last().pose().copy();
+//                invertedViewMatrix.invert();
+//                u.set(invertedViewMatrix);
+//            }),
+//            Pair.of("InvProjMat", u -> {
+//                Matrix4f invertedProjectionMatrix = RenderSystem.getProjectionMatrix().copy();
+//                invertedProjectionMatrix.invert();
+//                u.set(invertedProjectionMatrix);
+//            }),
+//            Pair.of("NearPlaneDistance", u -> u.set(GameRenderer.PROJECTION_Z_NEAR)),
+//            Pair.of("FarPlaneDistance", u -> u.set(MC.gameRenderer.getDepthFar())),
+//            Pair.of("Fov", u -> u.set((float) Math.toRadians(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), MC.getFrameTime(), true)))),
+//            Pair.of("AspectRatio", u -> u.set((float) MC.getWindow().getWidth() / (float) MC.getWindow().getHeight())),
+//            Pair.of("Perspective", u -> u.set(MC.options.getCameraType().ordinal()))
+//    );
 
     /**
      * Updated every frame before calling applyPostProcess() by PostProcessingHandler
@@ -98,12 +96,12 @@ public abstract class PostProcessor {
 
             defaultUniforms = new ArrayList<>();
             for (EffectInstance e : effects) {
-                for (Pair<String, Consumer<Uniform>> pair : COMMON_UNIFORMS) {
-                    Uniform u = e.getUniform(pair.getFirst());
-                    if (u != null) {
-                        defaultUniforms.add(Pair.of(u, pair.getSecond()));
-                    }
-                }
+//                for (Pair<String, Consumer<Uniform>> pair : COMMON_UNIFORMS) {
+//                    Uniform u = e.getUniform(pair.getFirst());
+//                    if (u != null) {
+//                        defaultUniforms.add(Pair.of(u, pair.getSecond()));
+//                    }
+//                }
             }
         }
 
@@ -170,15 +168,15 @@ public abstract class PostProcessor {
             e.safeGetUniform("time").set((float) time);
             Collection<ResourceLocation> textures = TEXTURE_UNIFORMS.get(getPostChainLocation());
             List<ResourceLocation> sortedTextures = new ArrayList<>(textures);
-            for(int i = 0; i < textures.size(); i++) {
-                int offset = 3+i;
-                if (i > 8){
+            for (int i = 0; i < textures.size(); i++) {
+                int offset = 3 + i;
+                if (i > 8) {
                     Veil.LOGGER.warn("Too many textures for post processing shader! Only 9 textures are supported!");
                     break;
                 }
                 RenderSystem.setShaderTexture(offset, sortedTextures.get(i));
             }
-            if(this instanceof InstantiatedPostProcessor iep){
+            if (this instanceof InstantiatedPostProcessor iep) {
                 iep.setDataBufferUniform(e, "Data", "Data");
             }
         });
