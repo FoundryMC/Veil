@@ -3,7 +3,7 @@ package foundry.veil;
 import foundry.veil.postprocessing.DynamicEffectInstance;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.test.PostProcessingEffectsRegistry;
-import foundry.veil.ui.VeilUITooltipRenderer;
+import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;

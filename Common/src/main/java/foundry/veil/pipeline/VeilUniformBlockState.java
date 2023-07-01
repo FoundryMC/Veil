@@ -1,7 +1,7 @@
 package foundry.veil.pipeline;
 
-import foundry.veil.shader.definition.ShaderBlock;
-import foundry.veil.shader.definition.ShaderBlockImpl;
+import foundry.veil.render.shader.definition.ShaderBlock;
+import foundry.veil.render.shader.definition.ShaderBlockImpl;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.ApiStatus;
@@ -94,7 +94,7 @@ public class VeilUniformBlockState {
         CharSequence boundName = this.shaderBindings.get(binding);
         if (!Objects.equals(name, boundName)) {
             this.shaderBindings.put(binding, name);
-            VeilRenderSystem.getRenderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, binding));
+            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, binding));
         }
     }
 
@@ -126,7 +126,7 @@ public class VeilUniformBlockState {
 
         CharSequence name = this.shaderBindings.remove(binding);
         if (name != null) {
-            VeilRenderSystem.getRenderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, 0));
+            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, 0));
         }
 
         // Fill the gap since the spot is open now

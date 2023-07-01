@@ -1,7 +1,6 @@
 package foundry.veil.postprocessing;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -11,15 +10,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import foundry.veil.Veil;
-import foundry.veil.shader.RenderTargetRegistry;
+import foundry.veil.render.shader.RenderTargetRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.util.ArrayList;

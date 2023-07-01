@@ -6,9 +6,13 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.logging.LogUtils;
-import foundry.veil.shader.ShaderManager;
-import foundry.veil.shader.ShaderProgram;
-import foundry.veil.shader.definition.ShaderBlock;
+import foundry.veil.render.framebuffer.AdvancedFbo;
+import foundry.veil.render.framebuffer.FramebufferManager;
+import foundry.veil.render.framebuffer.VeilFramebuffers;
+import foundry.veil.render.post.PostProcessingManager;
+import foundry.veil.render.shader.ShaderManager;
+import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.definition.ShaderBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +32,7 @@ import java.util.concurrent.Executor;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import static org.lwjgl.opengl.GL11C.glGetInteger;
+import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL30C.GL_MAX_COLOR_ATTACHMENTS;
 import static org.lwjgl.opengl.GL31C.GL_MAX_UNIFORM_BUFFER_BINDINGS;
 import static org.lwjgl.opengl.GL43C.GL_MAX_FRAMEBUFFER_HEIGHT;
@@ -224,7 +228,7 @@ public final class VeilRenderSystem {
     /**
      * @return The veil renderer instance
      */
-    public static VeilRenderer getRenderer() {
+    public static VeilRenderer renderer() {
         return renderer;
     }
 
@@ -251,7 +255,7 @@ public final class VeilRenderSystem {
             return;
         }
 
-        renderer.getFramebufferManager().resizeFramebuffers(window.getWidth(), window.getHeight());
+        renderer.getFramebufferManager().clear();
     }
 
     @ApiStatus.Internal
@@ -262,5 +266,23 @@ public final class VeilRenderSystem {
     @ApiStatus.Internal
     public static void close() {
         renderer.free();
+    }
+
+    @ApiStatus.Internal
+    public static void renderPost(float partialTicks) {
+        VeilRenderer renderer = VeilRenderSystem.renderer();
+        FramebufferManager framebufferManager = renderer.getFramebufferManager();
+        PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
+
+        // TODO deferred renderer into post framebuffer
+
+        AdvancedFbo main = AdvancedFbo.getMainFramebuffer();
+        AdvancedFbo postFramebuffer = framebufferManager.getFramebuffer(VeilFramebuffers.POST);
+        main.resolveToAdvancedFbo(postFramebuffer);
+
+        postProcessingManager.runPipeline();
+        if (postFramebuffer != null) {
+            postFramebuffer.resolveToAdvancedFbo(main, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
     }
 }

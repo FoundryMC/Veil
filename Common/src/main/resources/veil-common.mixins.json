@@ -20,7 +20,8 @@
     "client.LevelRendererMixin",
     "client.ModelPartMixin",
     "client.PostChainMixin",
-    "client.RenderSystemMixin"
+    "client.RenderSystemMixin",
+    "debug.MainMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,6 +1,7 @@
 package foundry.veil.color;
 
 import foundry.veil.color.theme.IThemeProperty;
+import foundry.veil.render.ui.Tooltippable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Optional;
 /**
  * A color theme is a collection of colors. The colors can be accessed by name. Themes are intended to be used for color schemes.
  * <p>
- *     A color theme can be used to apply a color scheme to a {@link foundry.veil.ui.Tooltippable} tooltip.
+ *     A color theme can be used to apply a color scheme to a {@link Tooltippable} tooltip.
  *     Themes can also be used to hold arbitrary color data mapped to strings.
  */
 public class ColorTheme {
