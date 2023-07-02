@@ -1,7 +1,7 @@
 package foundry.veil.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.definition.ShaderBlock;
 import org.joml.*;
 import org.lwjgl.system.NativeResource;

@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;

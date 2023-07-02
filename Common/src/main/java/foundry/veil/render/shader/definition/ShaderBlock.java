@@ -1,6 +1,6 @@
 package foundry.veil.render.shader.definition;
 
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 

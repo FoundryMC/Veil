@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.shader.RenderTargetRegistry;

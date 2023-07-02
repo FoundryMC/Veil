@@ -1,4 +1,4 @@
-package foundry.veil.pipeline;
+package foundry.veil.render.pipeline;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.GlStateManager;

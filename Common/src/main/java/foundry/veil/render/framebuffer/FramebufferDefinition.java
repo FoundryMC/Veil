@@ -6,7 +6,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.molang.MolangExpressionCodec;
 import foundry.veil.molang.VeilMolang;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;

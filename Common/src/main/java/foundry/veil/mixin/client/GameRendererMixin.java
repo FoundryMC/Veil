@@ -1,8 +1,8 @@
 package foundry.veil.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.pipeline.VeilFirstPersonRenderer;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.postprocessing.PostProcessingHandler;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,7 +1,7 @@
 package foundry.veil.mixin;
 
 import foundry.veil.VeilClient;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,7 +3,7 @@ package foundry.veil.render.framebuffer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,6 @@ import org.lwjgl.system.NativeResource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11C.glReadBuffer;

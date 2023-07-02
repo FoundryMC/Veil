@@ -1,4 +1,4 @@
-package foundry.veil.pipeline;
+package foundry.veil.render.pipeline;
 
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;

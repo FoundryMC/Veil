@@ -1,4 +1,4 @@
-package foundry.veil.pipeline;
+package foundry.veil.render.pipeline;
 
 import foundry.veil.render.shader.definition.ShaderBlock;
 import foundry.veil.render.shader.definition.ShaderBlockImpl;
