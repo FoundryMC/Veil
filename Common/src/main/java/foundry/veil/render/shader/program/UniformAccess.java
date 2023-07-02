@@ -1,12 +1,11 @@
 package foundry.veil.render.shader.program;
 
-import org.jetbrains.annotations.NotNull;
 import org.joml.*;
+import org.lwjgl.opengl.GL31C;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Objects;
 
 import static org.lwjgl.opengl.GL20C.*;
 
@@ -23,15 +22,15 @@ public interface UniformAccess {
      * @param name The name of the uniform to get
      * @return The location of that uniform or <code>-1</code> if not found
      */
-    int getUniform(@NotNull CharSequence name);
+    int getUniform(CharSequence name);
 
     /**
      * Retrieves the location of a uniform block.
      *
      * @param name The name of the uniform block to get
-     * @return The location of that uniform block or <code>-1</code> if not found
+     * @return The location of that uniform block or {@value GL31C#GL_INVALID_INDEX} if not found
      */
-    int getUniformBlock(@NotNull CharSequence name);
+    int getUniformBlock(CharSequence name);
 
     /**
      * @return The OpenGL id of this program
@@ -44,7 +43,7 @@ public interface UniformAccess {
      * @param name The name of the uniform to get
      * @return The float value of that uniform
      */
-    default float getFloat(@NotNull CharSequence name) {
+    default float getFloat(CharSequence name) {
         return glGetUniformf(this.getProgram(), this.getUniform(name));
     }
 
@@ -54,7 +53,7 @@ public interface UniformAccess {
      * @param name The name of the uniform to get
      * @return The int value of that uniform
      */
-    default int getInt(@NotNull CharSequence name) {
+    default int getInt(CharSequence name) {
         return glGetUniformi(this.getProgram(), this.getUniform(name));
     }
 
@@ -64,8 +63,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getFloats(@NotNull CharSequence name, float @NotNull [] values) {
-        Objects.requireNonNull(values, "values");
+    default void getFloats(CharSequence name, float[] values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(values.length);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -81,8 +79,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector2f @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector2f... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(values.length * 2);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -98,8 +95,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector3f @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector3f... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(values.length * 3);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -115,8 +111,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector4f @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector4f... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(values.length * 4);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -132,8 +127,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getInts(@NotNull CharSequence name, int @NotNull [] values) {
-        Objects.requireNonNull(values, "values");
+    default void getInts(CharSequence name, int[] values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer buffer = stack.callocInt(values.length);
             glGetUniformiv(this.getProgram(), this.getUniform(name), buffer);
@@ -149,8 +143,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector2i @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector2i... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer buffer = stack.callocInt(values.length * 2);
             glGetUniformiv(this.getProgram(), this.getUniform(name), buffer);
@@ -166,8 +159,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector3i @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector3i... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer buffer = stack.callocInt(values.length * 3);
             glGetUniformiv(this.getProgram(), this.getUniform(name), buffer);
@@ -183,8 +175,7 @@ public interface UniformAccess {
      * @param name   The name of the uniform to get
      * @param values The values to set
      */
-    default void getVector(@NotNull CharSequence name, Vector4i @NotNull ... values) {
-        Objects.requireNonNull(values, "values");
+    default void getVector(CharSequence name, Vector4i... values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer buffer = stack.callocInt(values.length * 4);
             glGetUniformiv(this.getProgram(), this.getUniform(name), buffer);
@@ -200,8 +191,7 @@ public interface UniformAccess {
      * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void getMatrix(@NotNull CharSequence name, @NotNull Matrix2f value) {
-        Objects.requireNonNull(value, "value");
+    default void getMatrix(CharSequence name, Matrix2f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(2 * 2);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -215,8 +205,7 @@ public interface UniformAccess {
      * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void getMatrix(@NotNull CharSequence name, @NotNull Matrix3f value) {
-        Objects.requireNonNull(value, "value");
+    default void getMatrix(CharSequence name, Matrix3f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(3 * 3);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -230,8 +219,7 @@ public interface UniformAccess {
      * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void getMatrix(@NotNull CharSequence name, @NotNull Matrix3x2f value) {
-        Objects.requireNonNull(value, "value");
+    default void getMatrix(CharSequence name, Matrix3x2f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(3 * 2);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -245,8 +233,7 @@ public interface UniformAccess {
      * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void getMatrix(@NotNull CharSequence name, @NotNull Matrix4f value) {
-        Objects.requireNonNull(value, "value");
+    default void getMatrix(CharSequence name, Matrix4f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(4 * 4);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);
@@ -260,8 +247,7 @@ public interface UniformAccess {
      * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void getMatrix(@NotNull CharSequence name, @NotNull Matrix4x3f value) {
-        Objects.requireNonNull(value, "value");
+    default void getMatrix(CharSequence name, Matrix4x3f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.callocFloat(4 * 3);
             glGetUniformfv(this.getProgram(), this.getUniform(name), buffer);

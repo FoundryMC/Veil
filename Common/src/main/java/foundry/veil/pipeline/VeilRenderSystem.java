@@ -13,6 +13,7 @@ import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderBlock;
 import foundry.veil.render.shader.program.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgramImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -111,9 +112,9 @@ public final class VeilRenderSystem {
      *
      * @param shader The shader instance to use
      */
-    public static void setShader(@Nullable ShaderProgram shader) {
+    public static void setShader(ShaderProgram shader) {
         VeilRenderSystem.setShader(() -> shader);
-        VeilRenderSystem.shaderLocation = shader != null ? shader.getId() : null;
+        VeilRenderSystem.shaderLocation = shader.getId();
     }
 
     /**
@@ -237,7 +238,7 @@ public final class VeilRenderSystem {
      */
     public static @Nullable ShaderProgram getShader() {
         ShaderInstance shader = RenderSystem.getShader();
-        return shader instanceof ShaderProgram.Wrapper wrapper ? wrapper.program() : null;
+        return shader instanceof ShaderProgramImpl.Wrapper wrapper ? wrapper.program() : null;
     }
 
     // Internal

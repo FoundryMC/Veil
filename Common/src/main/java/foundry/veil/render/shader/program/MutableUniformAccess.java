@@ -11,10 +11,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Objects;
 
-import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
-import static org.lwjgl.opengl.GL31C.glUniformBlockBinding;
 import static org.lwjgl.opengl.GL41C.*;
 
 /**
@@ -33,6 +30,15 @@ public interface MutableUniformAccess extends UniformAccess {
         float[] color = RenderSystem.getShaderColor();
         this.setVector("ColorModulator", color[0], color[1], color[2], color[3]);
         this.setFloat("GameTime", RenderSystem.getShaderGameTime());
+    }
+
+    /**
+     * Applies the {@link RenderSystem} textures to <code>Sampler0</code>-<code>Sampler11</code>.
+     */
+    default void addRenderSystemTextures() {
+        for (int i = 0; i < 12; ++i) {
+            this.addSampler("Sampler" + i, RenderSystem.getShaderTexture(i));
+        }
     }
 
     /**
@@ -183,7 +189,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVector(CharSequence name, Vector2fc value) {
-        Objects.requireNonNull(value, "value");
         this.setVector(name, value.x(), value.y());
     }
 
@@ -194,7 +199,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVector(CharSequence name, Vector3fc value) {
-        Objects.requireNonNull(value, "value");
         this.setVector(name, value.x(), value.y(), value.z());
     }
 
@@ -205,7 +209,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVector(CharSequence name, Vector4fc value) {
-        Objects.requireNonNull(value, "value");
         this.setVector(name, value.x(), value.y(), value.z(), value.w());
     }
 
@@ -274,7 +277,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVectorI(CharSequence name, Vector2ic value) {
-        Objects.requireNonNull(value, "value");
         this.setVectorI(name, value.x(), value.y());
     }
 
@@ -285,7 +287,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVectorI(CharSequence name, Vector3ic value) {
-        Objects.requireNonNull(value, "value");
         this.setVectorI(name, value.x(), value.y(), value.z());
     }
 
@@ -296,7 +297,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setVectorI(CharSequence name, Vector4ic value) {
-        Objects.requireNonNull(value, "value");
         this.setVectorI(name, value.x(), value.y(), value.z(), value.w());
     }
 
@@ -320,7 +320,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector2fc... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -342,7 +341,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector3fc... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -364,7 +362,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector4fc... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -399,7 +396,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector2ic... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -421,7 +417,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector3ic... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -443,7 +438,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param values The values to set in order
      */
     default void setVectors(CharSequence name, Vector4ic... values) {
-        Objects.requireNonNull(values, "values");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -465,7 +459,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setMatrix(CharSequence name, Matrix2fc value) {
-        Objects.requireNonNull(value, "value");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -485,7 +478,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setMatrix(CharSequence name, Matrix3fc value) {
-        Objects.requireNonNull(value, "value");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -505,7 +497,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setMatrix(CharSequence name, Matrix3x2fc value) {
-        Objects.requireNonNull(value, "value");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -525,7 +516,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setMatrix(CharSequence name, Matrix4fc value) {
-        Objects.requireNonNull(value, "value");
         int location = this.getUniform(name);
         if (location == -1) {
             return;
@@ -545,7 +535,6 @@ public interface MutableUniformAccess extends UniformAccess {
      * @param value The value to set
      */
     default void setMatrix(CharSequence name, Matrix4x3fc value) {
-        Objects.requireNonNull(value, "value");
         int location = this.getUniform(name);
         if (location == -1) {
             return;

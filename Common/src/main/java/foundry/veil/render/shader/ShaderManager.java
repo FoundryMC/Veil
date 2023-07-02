@@ -13,6 +13,7 @@ import foundry.veil.render.shader.compiler.ShaderCompiler;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.program.ProgramDefinition;
 import foundry.veil.render.shader.program.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgramImpl;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
@@ -205,7 +206,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     private ShaderProgram preload(ResourceProvider resourceProvider, ShaderCompiler compiler, ResourceLocation name) {
         try {
             ProgramDefinition definition = this.parseDefinition(name, resourceProvider);
-            ShaderProgram shader = new ShaderProgram(name);
+            ShaderProgram shader = ShaderProgram.create(name);
             this.compile(shader, definition, compiler);
             return shader;
         } catch (Exception exception) {
@@ -323,7 +324,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         try (ShaderCompiler compiler = ShaderCompiler.cached(sourceProvider).addDefaultProcessors()) {
             for (Map.Entry<ResourceLocation, ProgramDefinition> entry : reloadState.definitions().entrySet()) {
                 ResourceLocation id = entry.getKey();
-                ShaderProgram program = new ShaderProgram(id);
+                ShaderProgram program = ShaderProgram.create(id);
                 this.compile(program, entry.getValue(), compiler);
                 this.shaders.put(id, program);
             }
