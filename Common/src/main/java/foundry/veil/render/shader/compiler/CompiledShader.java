@@ -1,6 +1,6 @@
 package foundry.veil.render.shader.compiler;
 
-import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgram;
 
 import java.util.Map;
 import java.util.Set;

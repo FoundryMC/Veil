@@ -371,26 +371,6 @@ public interface AdvancedFbo extends NativeResource {
     RenderTarget toRenderTarget();
 
     /**
-     * Wraps the specified render target in a new advanced fbo.
-     *
-     * @param renderTarget The render target instance
-     * @return A new advanced fbo that wraps the target in the api
-     */
-    static AdvancedFbo wrap(RenderTarget renderTarget) {
-        return AdvancedFbo.wrap(() -> renderTarget);
-    }
-
-    /**
-     * Wraps the specified render target in a new advanced fbo.
-     *
-     * @param renderTargetSupplier The supplier to the render target instance
-     * @return A new advanced fbo that wraps the target in the api
-     */
-    static AdvancedFbo wrap(Supplier<RenderTarget> renderTargetSupplier) {
-        return new VanillaAdvancedFboWrapper(renderTargetSupplier);
-    }
-
-    /**
      * Creates a new {@link AdvancedFbo} with the provided width and height.
      *
      * @param width  The width of the canvas

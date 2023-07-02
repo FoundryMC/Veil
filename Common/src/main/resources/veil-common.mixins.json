@@ -17,10 +17,13 @@
     "client.GameRendererMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandRendererMixin",
-    "client.LevelRendererMixin",
     "client.ModelPartMixin",
     "client.PostChainMixin",
-    "client.RenderSystemMixin",
+    "client.pipeline.LevelRendererMixin",
+    "client.pipeline.RenderSystemMixin",
+    "client.pipeline.RenderTargetAccessor",
+    "client.shader.ProgramManagerMixin",
+    "client.shader.ShaderInstanceMixin",
     "debug.MainMixin"
   ],
   "injectors": {

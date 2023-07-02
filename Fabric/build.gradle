@@ -15,7 +15,7 @@ dependencies {
 //    modImplementation("net.fabricmc:fabric-language-kotlin:1.7.4+kotlin.1.6.21")
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    compileOnly 'org.jetbrains:annotations:24.0.1'
+    implementation 'org.jetbrains:annotations:24.0.1'
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
     implementation project(":Common")
     include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))

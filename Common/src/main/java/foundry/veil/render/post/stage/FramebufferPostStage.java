@@ -3,7 +3,7 @@ package foundry.veil.render.post.stage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.post.PostPipeline;
-import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 

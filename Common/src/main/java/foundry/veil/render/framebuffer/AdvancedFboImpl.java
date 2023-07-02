@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.render.wrapper.VeilRenderBridge;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
@@ -67,7 +68,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
             GL_OUT_OF_MEMORY, "GL_OUT_OF_MEMORY"
     );
 
-    public static final AdvancedFbo MAIN_WRAPPER = AdvancedFbo.wrap(Minecraft.getInstance()::getMainRenderTarget);
+    public static final AdvancedFbo MAIN_WRAPPER = VeilRenderBridge.wrap(Minecraft.getInstance()::getMainRenderTarget);
 
     private int id;
     private int width;

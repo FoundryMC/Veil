@@ -11,14 +11,14 @@ import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
-import foundry.veil.render.shader.ShaderProgram;
 import foundry.veil.render.shader.definition.ShaderBlock;
+import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
@@ -26,7 +26,6 @@ import org.lwjgl.opengl.GL;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.IntSupplier;
@@ -65,13 +64,12 @@ public final class VeilRenderSystem {
     });
 
     private static VeilRendererImpl renderer;
-    private static Supplier<ShaderProgram> shader;
     private static ResourceLocation shaderLocation;
 
     private VeilRenderSystem() {
     }
 
-    private static @NotNull IntSupplier glGetter(@NotNull IntSupplier delegate) {
+    private static IntSupplier glGetter(IntSupplier delegate) {
         return new IntSupplier() {
             private int value = Integer.MAX_VALUE;
 
@@ -102,8 +100,7 @@ public final class VeilRenderSystem {
      *
      * @param shader The name of the shader to use
      */
-    public static void setShader(@NotNull ResourceLocation shader) {
-        Objects.requireNonNull(shader, "shader");
+    public static void setShader(ResourceLocation shader) {
         ShaderManager shaderManager = renderer.getShaderManager();
         VeilRenderSystem.setShader(() -> shaderManager.getShader(shader));
         VeilRenderSystem.shaderLocation = shader;
@@ -124,8 +121,8 @@ public final class VeilRenderSystem {
      *
      * @param shader The reference to the shader to use
      */
-    public static void setShader(@NotNull Supplier<ShaderProgram> shader) {
-        VeilRenderSystem.shader = Objects.requireNonNull(shader, "shader");
+    public static void setShader(Supplier<ShaderProgram> shader) {
+        RenderSystem.setShader(() -> shader.get().toShaderInstance());
     }
 
     /**
@@ -181,9 +178,8 @@ public final class VeilRenderSystem {
      *
      * @param block The block to bind
      */
-    public static void bind(@NotNull ShaderBlock<?> block) {
+    public static void bind(ShaderBlock<?> block) {
         RenderSystem.assertOnRenderThreadOrInit();
-        Objects.requireNonNull(block, "block");
         UNIFORM_BLOCK_STATE.bind(block);
     }
 
@@ -196,10 +192,8 @@ public final class VeilRenderSystem {
      * @param name  The name of the block in shader code
      * @param block The block to bind
      */
-    public static void bind(@NotNull CharSequence name, @NotNull ShaderBlock<?> block) {
+    public static void bind(CharSequence name, ShaderBlock<?> block) {
         RenderSystem.assertOnRenderThreadOrInit();
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(block, "block");
         UNIFORM_BLOCK_STATE.bind(name, block);
     }
 
@@ -209,9 +203,8 @@ public final class VeilRenderSystem {
      *
      * @param block The block to unbind
      */
-    public static void unbind(@NotNull ShaderBlock<?> block) {
+    public static void unbind(ShaderBlock<?> block) {
         RenderSystem.assertOnRenderThreadOrInit();
-        Objects.requireNonNull(block, "block");
         UNIFORM_BLOCK_STATE.unbind(block);
     }
 
@@ -235,15 +228,16 @@ public final class VeilRenderSystem {
     /**
      * @return An executor for the main render thread
      */
-    public static @NotNull Executor renderThreadExecutor() {
+    public static Executor renderThreadExecutor() {
         return RENDER_THREAD_EXECUTOR;
     }
 
     /**
-     * @return The actual shader reference to use while rendering or <code>null</code> if no shader is selected
+     * @return The actual shader reference to use while rendering or <code>null</code> if no shader is selected or the selected shader is from Vanilla Minecraft
      */
     public static @Nullable ShaderProgram getShader() {
-        return VeilRenderSystem.shader.get();
+        ShaderInstance shader = RenderSystem.getShader();
+        return shader instanceof ShaderProgram.Wrapper wrapper ? wrapper.program() : null;
     }
 
     // Internal
@@ -256,6 +250,11 @@ public final class VeilRenderSystem {
         }
 
         renderer.getFramebufferManager().clear();
+    }
+
+    @ApiStatus.Internal
+    public static void shaderUpdate() {
+        VeilRenderSystem.shaderLocation = null;
     }
 
     @ApiStatus.Internal

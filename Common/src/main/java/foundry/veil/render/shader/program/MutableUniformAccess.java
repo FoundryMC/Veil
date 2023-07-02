@@ -1,4 +1,4 @@
-package foundry.veil.render.shader;
+package foundry.veil.render.shader.program;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

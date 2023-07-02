@@ -2,7 +2,7 @@ package foundry.veil.render.post;
 
 import com.mojang.serialization.Codec;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.render.shader.texture.ShaderTextureSource;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;

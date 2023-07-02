@@ -7,7 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostPipelineStageRegistry;
-import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

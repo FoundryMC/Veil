@@ -9,7 +9,7 @@ import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.stage.CompositePostPipeline;
 import foundry.veil.resource.CodecReloadListener;
 import foundry.veil.render.shader.ShaderManager;
-import foundry.veil.render.shader.ShaderProgram;
+import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;

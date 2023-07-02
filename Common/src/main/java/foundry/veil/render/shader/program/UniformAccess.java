@@ -1,4 +1,4 @@
-package foundry.veil.render.shader;
+package foundry.veil.render.shader.program;
 
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;

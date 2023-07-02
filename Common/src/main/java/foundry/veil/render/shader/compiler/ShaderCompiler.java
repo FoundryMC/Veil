@@ -1,6 +1,6 @@
 package foundry.veil.render.shader.compiler;
 
-import foundry.veil.render.shader.ProgramDefinition;
+import foundry.veil.render.shader.program.ProgramDefinition;
 import foundry.veil.render.shader.ShaderException;
 import foundry.veil.render.shader.processor.ShaderPreProcessor;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;

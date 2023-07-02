@@ -1,20 +1,22 @@
-package foundry.veil.render.framebuffer;
+package foundry.veil.render.wrapper;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.mixin.client.pipeline.RenderTargetAccessor;
+import foundry.veil.render.framebuffer.AdvancedFbo;
+import foundry.veil.render.framebuffer.AdvancedFboAttachment;
+import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opengl.GL30;
 
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT0;
+import static org.lwjgl.opengl.GL30C.*;
 
 /**
  * Wraps any render target with an {@link AdvancedFbo}.
@@ -41,7 +43,18 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
 
     @Override
     public void clear() {
-        this.toRenderTarget().clear(Minecraft.ON_OSX);
+        RenderSystem.assertOnRenderThreadOrInit();
+        RenderTarget renderTarget = this.toRenderTarget();
+
+        float[] clearChannels = ((RenderTargetAccessor) renderTarget).getClearChannels();
+        RenderSystem.clearColor(clearChannels[0], clearChannels[1], clearChannels[2], clearChannels[3]);
+        int mask = GL_COLOR_BUFFER_BIT;
+        if (renderTarget.useDepth) {
+            RenderSystem.clearDepth(1.0);
+            mask |= GL_DEPTH_BUFFER_BIT;
+        }
+
+        RenderSystem.clear(mask, Minecraft.ON_OSX);
     }
 
     @Override
@@ -52,7 +65,7 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
     @Override
     public void bindRead() {
         RenderSystem.assertOnRenderThreadOrInit();
-        glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, this.toRenderTarget().frameBufferId);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, this.toRenderTarget().frameBufferId);
     }
 
     @Override

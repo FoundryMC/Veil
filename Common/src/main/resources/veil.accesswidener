@@ -25,3 +25,30 @@ accessible method net/minecraft/client/renderer/ItemInHandRenderer renderPlayerA
 accessible field net/minecraft/client/Options bobView Lnet/minecraft/client/OptionInstance;
 accessible field net/minecraft/client/renderer/entity/ItemRenderer textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
 accessible method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
+
+# Uniform Wrapper
+extendable method com/mojang/blaze3d/shaders/Uniform set (F)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (FF)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (IF)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (FFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Vector3f;)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (FFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Vector4f;)V
+extendable method com/mojang/blaze3d/shaders/Uniform setSafe (FFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setSafe (IIII)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (I)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (II)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (III)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (IIII)V
+extendable method com/mojang/blaze3d/shaders/Uniform set ([F)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat2x2 (FFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat2x3 (FFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat2x4 (FFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat3x2 (FFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat3x3 (FFFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat3x4 (FFFFFFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat4x2 (FFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat4x3 (FFFFFFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform setMat4x4 (FFFFFFFFFFFFFFFF)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Matrix4f;)V
+extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Matrix3f;)V

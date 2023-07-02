@@ -1,4 +1,4 @@
-package foundry.veil.render.shader;
+package foundry.veil.render.shader.program;
 
 import com.google.common.collect.Iterables;
 import com.google.gson.*;

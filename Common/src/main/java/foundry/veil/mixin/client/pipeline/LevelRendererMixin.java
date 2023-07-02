@@ -1,4 +1,4 @@
-package foundry.veil.mixin.client;
+package foundry.veil.mixin.client.pipeline;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
