@@ -1,9 +1,10 @@
 package foundry.veil.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.postprocessing.PostProcessingHandler;
+import foundry.veil.render.pipeline.VeilRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +27,14 @@ public class GameRendererMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V", shift = At.Shift.BEFORE))
     public void veil$updateGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
-        VeilRenderSystem.renderer().getCameraMatrices().updateGui();
+        VeilRenderer renderer = VeilRenderSystem.renderer();
+        renderer.getCameraMatrices().updateGui();
+        renderer.getGuiInfo().update();
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V", shift = At.Shift.AFTER))
+    public void veil$unbindGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
+        VeilRenderSystem.renderer().getGuiInfo().unbind();
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", shift = At.Shift.BEFORE))

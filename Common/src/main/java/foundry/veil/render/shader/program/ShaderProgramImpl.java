@@ -233,10 +233,10 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         public static boolean constructing = false;
 
-        private final ShaderProgramImpl program;
+        private final ShaderProgram program;
         private final Map<String, UniformWrapper> uniforms;
 
-        private Wrapper(ShaderProgramImpl program) throws IOException {
+        private Wrapper(ShaderProgram program) throws IOException {
             super(name -> Optional.of(RESOURCE), "", null);
             this.program = program;
             this.uniforms = new Object2ObjectArrayMap<>();
@@ -294,7 +294,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         /**
          * @return The backing shader program
          */
-        public ShaderProgramImpl program() {
+        public ShaderProgram program() {
             return this.program;
         }
 
@@ -330,7 +330,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         private final MutableUniformAccess access;
 
         public UniformWrapper(MutableUniformAccess access, String name) {
-            super(name, UT_INT1, 0, null);
+            super(name, UT_INT1, 1, null);
             this.close(); // Free constructor allocated resources
             this.access = access;
         }
