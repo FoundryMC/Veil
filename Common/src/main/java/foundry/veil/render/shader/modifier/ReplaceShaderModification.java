@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 public record ReplaceShaderModification(int priority, ResourceLocation veilShader) implements ShaderModification {
 
     @Override
-    public String inject(String source, boolean allowIncludes) throws IOException {
+    public String inject(String source, int flags) throws IOException {
         throw new UnsupportedEncodingException("Replace modification replaces file");
     }
 

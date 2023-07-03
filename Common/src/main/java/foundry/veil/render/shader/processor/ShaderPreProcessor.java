@@ -1,7 +1,10 @@
 package foundry.veil.render.shader.processor;
 
-import foundry.veil.render.shader.program.ProgramDefinition;
+import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
+import foundry.veil.render.shader.program.ProgramDefinition;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -39,10 +42,12 @@ public interface ShaderPreProcessor {
         /**
          * Runs the specified source through the entire processing list.
          *
+         * @param name   The name of the shader file to modify or <code>null</code> if the source is a raw string
+         * @param source The shader source code to modify
          * @return The modified source
          * @throws IOException If any error occurs while editing the source
          */
-        String modify(String source) throws IOException;
+        String modify(@Nullable ResourceLocation name, String source) throws IOException;
 
         /**
          * Sets the uniform binding for a shader.
@@ -61,9 +66,38 @@ public interface ShaderPreProcessor {
         void addDefinitionDependency(String name);
 
         /**
+         * @return The id of the shader being compiled or <code>null</code> if the shader is compiled from a raw string
+         */
+        @Nullable ResourceLocation getName();
+
+        /**
          * @return The input source code. This is GLSL
          */
         String getInput();
+
+        /**
+         * @return The OpenGL type of the shader being compiled
+         */
+        int getType();
+
+        /**
+         * @return The file to id converter for the loading shader file type
+         */
+        default FileToIdConverter getConverter() {
+            return ShaderManager.getTypeConverter(this.getType());
+        }
+
+        /**
+         * @return The readable name of the loading shader file type
+         */
+        default String getTypeName() {
+            return ShaderManager.getTypeName(this.getType());
+        }
+
+        /**
+         * @return Whether the processor is being run for a source file and not an include file
+         */
+        boolean isSourceFile();
 
         /**
          * @return The definition of the program this is being compiled for or <code>null</code> if the shader is standalone

@@ -18,7 +18,7 @@ public class InputShaderModification implements ShaderModification {
     }
 
     @Override
-    public String inject(String source, boolean allowIncludes) throws IOException {
+    public String inject(String source, int flags) throws IOException {
         StringBuilder result = new StringBuilder(source);
 
         int pointer = 0;

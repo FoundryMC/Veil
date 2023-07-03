@@ -64,7 +64,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
 
                 try {
                     if (!this.imports.containsKey(source)) {
-                        this.imports.put(source, this.loadImport(context, source));
+                        this.imports.put(source, this.loadImport(source));
                     }
 
                     String importString = this.imports.get(source);
@@ -74,7 +74,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
 
                     int lineNumber = output.size();
                     output.add("#line 1");
-                    output.add(context.modify(importString));
+                    output.add(context.modify(source, importString));
                     output.add("#line " + lineNumber);
                 } catch (Exception e) {
                     throw new IOException("Failed to add import: " + line, e);
@@ -87,7 +87,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
         return String.join("\n", output);
     }
 
-    private String loadImport(Context context, ResourceLocation source) throws IOException {
+    private String loadImport(ResourceLocation source) throws IOException {
         Resource resource = this.resourceProvider.getResourceOrThrow(ShaderManager.INCLUDE_LISTER.idToFile(source));
         try (Reader reader = resource.openAsReader()) {
             return IOUtils.toString(reader);

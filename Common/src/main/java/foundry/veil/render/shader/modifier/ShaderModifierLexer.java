@@ -80,11 +80,12 @@ public final class ShaderModifierLexer {
         NUMERAL("-?\\d+"),
         ALPHANUMERIC("\\w+"),
         COLON(":"),
+        NAMESPACE("[a-z0-9_\\-.]+"),
+        PATH("[a-z0-9_\\-./]+"),
         LEFT_BRACKET("\\["),
         RIGHT_BRACKET("\\]"),
         LEFT_PARENTHESIS("\\("),
         RIGHT_PARENTHESIS("\\)"),
-        FOLDER("\\/"),
         NEWLINE("\n"),
         CODE(".+");
 
@@ -96,6 +97,10 @@ public final class ShaderModifierLexer {
 
         public Pattern getPattern() {
             return this.pattern;
+        }
+
+        public boolean isValidLocation() {
+            return this == ALPHANUMERIC || this == NAMESPACE || this == PATH || this == COLON;
         }
     }
 }

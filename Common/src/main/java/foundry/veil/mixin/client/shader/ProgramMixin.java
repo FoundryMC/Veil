@@ -3,6 +3,7 @@ package foundry.veil.mixin.client.shader;
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Program;
 import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.render.shader.modifier.ShaderModification;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,6 +34,6 @@ public class ProgramMixin {
 
     @ModifyVariable(method = "compileShaderInternal", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/preprocessor/GlslPreprocessor;process(Ljava/lang/String;)Ljava/util/List;", shift = At.Shift.BEFORE), ordinal = 2)
     private static String veil$modifyVanillaShader(String value) {
-        return VeilRenderSystem.renderer().getShaderModificationManager().applyModifiers(captureId, value);
+        return VeilRenderSystem.renderer().getShaderModificationManager().applyModifiers(captureId, value, ShaderModification.APPLY_VERSION | ShaderModification.ALLOW_OUT);
     }
 }

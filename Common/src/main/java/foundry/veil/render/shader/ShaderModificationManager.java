@@ -52,12 +52,14 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
      *
      * @param shaderId The id of the shader to get modifiers for
      * @param source   The shader source text
+     * @param flags    Additional flags for applying
      * @return The modified shader source
+     * @see ShaderModification
      */
-    public String applyModifiers(ResourceLocation shaderId, String source) {
+    public String applyModifiers(ResourceLocation shaderId, String source, int flags) {
         for (ShaderModification modification : this.getModifiers(shaderId)) {
             try {
-                source = modification.inject(source, false);
+                source = modification.inject(source, flags);
             } catch (Exception e) {
                 Veil.LOGGER.error("Failed to apply modification {} to shader instance {}. Skipping", this.names.get(modification), shaderId, e);
             }

@@ -1,0 +1,15 @@
+#priority 1000
+#include veil:color_utilities
+
+// Replaces this with the defined shader
+// #replace veil:shader/test
+
+[OUTPUT] // Outputs are guaranteed to be unique
+out vec4 Test;
+out vec3 TestNormal;
+
+[UNIFORM]
+uniform sampler2D Sampler8;
+
+[FUNCTION worldToViewSpaceDirection HEAD]
+vec3 testCopy = viewSpace;

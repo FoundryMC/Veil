@@ -38,6 +38,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
     private final List<ShaderPreProcessor> preProcessors;
     private final List<ShaderPreProcessor> importProcessors;
     private final Set<Integer> shaders;
+    private ResourceLocation compilingName;
 
     DirectShaderCompiler(@Nullable ResourceProvider provider) {
         this.provider = provider;
@@ -46,19 +47,11 @@ public class DirectShaderCompiler implements ShaderCompiler {
         this.shaders = new HashSet<>();
     }
 
-    private String modifySource(ShaderCompiler.Context context,
-                                List<ShaderPreProcessor> preProcessors,
-                                Map<String, Integer> uniformBindings,
-                                Set<String> dependencies,
-                                String source) throws IOException {
+    private String modifySource(ShaderCompiler.Context context, List<ShaderPreProcessor> preProcessors, Map<String, Integer> uniformBindings, Set<String> dependencies, @Nullable ResourceLocation name, String source, int type, boolean sourceFile) throws IOException {
         for (ShaderPreProcessor preProcessor : preProcessors) {
-            source = this.runProcessor(preProcessor, context, uniformBindings, dependencies, source);
+            source = preProcessor.modify(new PreProcessorContext(this, context, uniformBindings, dependencies, name, source, type, sourceFile));
         }
         return source;
-    }
-
-    private String runProcessor(ShaderPreProcessor processor, ShaderCompiler.Context context, Map<String, Integer> uniformBindings, Set<String> dependencies, String source) throws IOException {
-        return processor.modify(new PreProcessorContext(this, context, uniformBindings, dependencies, source));
     }
 
     @Override
@@ -69,7 +62,10 @@ public class DirectShaderCompiler implements ShaderCompiler {
 
         ResourceLocation location = ShaderManager.getTypeConverter(type).idToFile(id);
         try (Reader reader = this.provider.openAsReader(location)) {
+            this.compilingName = id;
             return this.compile(context, type, IOUtils.toString(reader));
+        } finally {
+            this.compilingName = null;
         }
     }
 
@@ -79,7 +75,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
 
         Map<String, Integer> uniformBindings = new HashMap<>();
         Set<String> dependencies = new HashSet<>();
-        source = this.modifySource(context, this.preProcessors, uniformBindings, dependencies, source);
+        source = this.modifySource(context, this.preProcessors, uniformBindings, dependencies, this.compilingName, source, type, true);
 
         int shader = glCreateShader(type);
         glShaderSource(shader, source);
@@ -127,11 +123,14 @@ public class DirectShaderCompiler implements ShaderCompiler {
                                        ShaderCompiler.Context context,
                                        Map<String, Integer> uniformBindings,
                                        Set<String> dependencies,
-                                       String input) implements ShaderPreProcessor.Context {
+                                       @Nullable ResourceLocation name,
+                                       String input,
+                                       int type,
+                                       boolean sourceFile) implements ShaderPreProcessor.Context {
 
         @Override
-        public String modify(String source) throws IOException {
-            return this.compiler.modifySource(this.context, this.compiler.importProcessors, this.uniformBindings, this.dependencies, source);
+        public String modify(@Nullable ResourceLocation name, String source) throws IOException {
+            return this.compiler.modifySource(this.context, this.compiler.importProcessors, this.uniformBindings, this.dependencies, name, source, this.type, false);
         }
 
         @Override
@@ -145,8 +144,23 @@ public class DirectShaderCompiler implements ShaderCompiler {
         }
 
         @Override
+        public @Nullable ResourceLocation getName() {
+            return this.name;
+        }
+
+        @Override
         public String getInput() {
             return this.input;
+        }
+
+        @Override
+        public int getType() {
+            return this.type;
+        }
+
+        @Override
+        public boolean isSourceFile() {
+            return this.sourceFile;
         }
 
         @Override

@@ -28,34 +28,42 @@ public class SimpleShaderModification implements ShaderModification {
     }
 
     @Override
-    public String inject(String source, boolean allowIncludes) throws IOException {
-        Matcher versionMatcher = VERSION_PATTERN.matcher(source);
-        if (!versionMatcher.find()) {
-            throw new IOException("Failed to find version");
-        }
-
-        try {
-            int version = Integer.parseInt(versionMatcher.group(1));
-            if (version < this.version) {
-                source = versionMatcher.replaceAll("#version " + this.version + "\n\n");
-
-                // Look for the ending again
-                versionMatcher.reset(source);
-                if (!versionMatcher.find()) {
-                    throw new IllegalStateException();
-                }
+    public String inject(String source, int flags) throws IOException {
+        int pointer;
+        if ((flags & APPLY_VERSION) > 0) {
+            Matcher versionMatcher = VERSION_PATTERN.matcher(source);
+            if (!versionMatcher.find()) {
+                throw new IOException("Failed to find version");
             }
-        } catch (Exception e) {
-            throw new IOException("Failed to inject version", e);
+
+            if (this.version == -1) {
+                throw new IOException("Missing #version field");
+            }
+
+            try {
+                int version = Integer.parseInt(versionMatcher.group(1));
+                if (version < this.version) {
+                    source = versionMatcher.replaceAll("#version " + this.version + "\n\n");
+
+                    versionMatcher.reset(source);
+                    if (!versionMatcher.find()) {
+                        throw new IllegalStateException();
+                    }
+                }
+            } catch (Exception e) {
+                throw new IOException("Failed to inject version", e);
+            }
+
+            pointer = versionMatcher.end();
+        } else {
+            pointer = 0;
         }
 
-        StringBuilder result = new StringBuilder(source);
-
-        if (!allowIncludes && this.includes.length > 0) {
+        if ((flags & ALLOW_INCLUDES) == 0 && this.includes.length > 0) {
             throw new IOException("Vanilla shaders do not support import injection");
         }
 
-        int pointer = versionMatcher.end();
+        StringBuilder result = new StringBuilder(source);
         for (ResourceLocation include : this.includes) {
             String code = "#include " + include + "\n";
             result.insert(pointer, code);

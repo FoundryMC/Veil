@@ -5,18 +5,47 @@ import org.jetbrains.annotations.ApiStatus;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+/**
+ * Allows shader source files to be modified without overwriting the file.
+ *
+ * @author Ocelot
+ */
 @ApiStatus.Internal
 public interface ShaderModification {
 
-    Pattern VERSION_PATTERN = Pattern.compile("^#version\\s+(\\d+)\\s*", Pattern.MULTILINE);
+    Pattern VERSION_PATTERN = Pattern.compile("^#version\\s+(\\d+)\\s*\\w*\\s*", Pattern.MULTILINE);
     Pattern OUT_PATTERN = Pattern.compile("^out (\\w+) (\\w+)\\s*;\\s*", Pattern.MULTILINE);
     Pattern IN_PATTERN = Pattern.compile("^(?:layout\\(.*\\))?\\s*in (\\w+) (\\w+)\\s*;\\s*", Pattern.MULTILINE);
     Pattern UNIFORM_PATTERN = Pattern.compile("^uniform \\w+ \\w+\\s*;\\s*", Pattern.MULTILINE);
     Pattern RETURN_PATTERN = Pattern.compile("return\\s+.+;");
     Pattern PLACEHOLDER_PATTERN = Pattern.compile("#(\\w+)");
 
-    String inject(String source, boolean allowIncludes) throws IOException;
+    /**
+     * Whether #include is allowed
+     */
+    int ALLOW_INCLUDES = 0b001;
+    /**
+     * Whether the version is required and will be applied
+     */
+    int APPLY_VERSION = 0b010;
+    /**
+     * Whether [OUT] is a valid command
+     */
+    int ALLOW_OUT = 0b100;
 
+    /**
+     * Injects this modification into the specified shader source.
+     *
+     * @param source The source to inject into
+     * @param flags  The flags to use when injecting
+     * @return The injected shader source
+     * @throws IOException If an error occurs with the format or applying the modifications
+     */
+    String inject(String source, int flags) throws IOException;
+
+    /**
+     * @return The priority of this modification. A higher priority will be applied before a lower priority modification
+     */
     int getPriority();
 
     static ShaderModification parse(String input, boolean vertex) throws ShaderModificationSyntaxException {

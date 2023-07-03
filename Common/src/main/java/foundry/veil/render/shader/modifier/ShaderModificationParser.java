@@ -49,7 +49,7 @@ public final class ShaderModificationParser {
                     return new ReplaceShaderModification(priority, file);
                 }
                 case INCLUDE -> {
-                    while (reader.peek().type() == ShaderModifierLexer.TokenType.INCLUDE) {
+                    while (reader.canRead() && reader.peek().type() == ShaderModifierLexer.TokenType.INCLUDE) {
                         reader.skip();
                         includes.add(consumeLocation(reader));
                         reader.skipWhitespace();
@@ -58,10 +58,6 @@ public final class ShaderModificationParser {
                 }
             }
             break;
-        }
-
-        if (version == -1) {
-            throw error("Missing #version field", reader);
         }
 
         Context context = new Context(new ArrayList<>(), new StringBuilder(), new StringBuilder(), new HashMap<>());
@@ -182,9 +178,7 @@ public final class ShaderModificationParser {
             reader.skip();
 
             StringBuilder path = new StringBuilder();
-            while (reader.canRead() &&
-                    reader.peek().type() == ShaderModifierLexer.TokenType.ALPHANUMERIC ||
-                    reader.peek().type() == ShaderModifierLexer.TokenType.FOLDER) {
+            while (reader.canRead() && reader.peek().type().isValidLocation()) {
                 path.append(reader.peek().value());
                 reader.skip();
             }
