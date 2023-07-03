@@ -1,0 +1,21 @@
+#version 330 // required
+#priority 1000 // default 1000
+// #include veil:test // Add include. Only supported for Veil Shaders
+
+// Replaces this with the defined shader
+// #replace veil:shader/test
+
+// Vertex Only
+[GET_ATTRIBUTE 0] vec3 InPos; // test
+[GET_ATTRIBUTE 4] vec3 Nom;
+
+[OUTPUT] // Outputs are guaranteed to be unique
+out vec4 Test;
+out vec3 TestNormal;
+
+[UNIFORM]
+uniform sampler2D Sampler8;
+
+[FUNCTION main(0) TAIL]
+TestNormal = #Nom;
+Test = vec4(#InPos, 1.0);

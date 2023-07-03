@@ -9,7 +9,8 @@
     "BowItemMixin",
     "CrossbowItemMixin",
     "InstrumentItemMixin",
-    "TridentItemMixin"
+    "TridentItemMixin",
+    "client.ReloadableResourceManagerAccessor"
   ],
   "client": [
     "client.AgeableListModelMixin",
@@ -23,6 +24,7 @@
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
     "client.shader.ProgramManagerMixin",
+    "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",
     "debug.MainMixin"
   ],

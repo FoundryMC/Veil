@@ -1,10 +1,12 @@
 package foundry.veil.render.pipeline;
 
 import foundry.veil.render.CameraMatrices;
+import foundry.veil.render.GuiInfo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
+import foundry.veil.render.shader.ShaderModificationManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 
 /**
@@ -20,6 +22,11 @@ public interface VeilRenderer {
     default ShaderPreDefinitions getDefinitions() {
         return this.getShaderManager().getDefinitions();
     }
+
+    /**
+     * @return The manager for all custom shader modifications
+     */
+    ShaderModificationManager getShaderModificationManager();
 
     /**
      * @return The manager for all veil shaders
@@ -40,4 +47,9 @@ public interface VeilRenderer {
      * @return The camera matrices instance
      */
     CameraMatrices getCameraMatrices();
+
+    /**
+     * @return The gui info instance
+     */
+    GuiInfo getGuiInfo();
 }

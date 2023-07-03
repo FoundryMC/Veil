@@ -1,10 +1,10 @@
 package foundry.veil.render.shader.compiler;
 
-import foundry.veil.render.shader.program.ProgramDefinition;
 import foundry.veil.render.shader.ShaderException;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.processor.*;
+import foundry.veil.render.shader.program.ProgramDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
@@ -22,6 +22,7 @@ import static org.lwjgl.opengl.GL20C.*;
 /**
  * Creates a new shader and compiles each time {@link #compile(ShaderCompiler.Context, int, String)} is called.
  * This should only be used for compiling single shaders.
+ *
  * @author Ocelot
  */
 @ApiStatus.Internal
@@ -34,24 +35,23 @@ public class DirectShaderCompiler implements ShaderCompiler {
     }
 
     private final ResourceProvider provider;
-    private final ShaderVersionProcessor versionProcessor;
-    private final ShaderPredefinitionProcessor predefinitionProcessor;
     private final List<ShaderPreProcessor> preProcessors;
+    private final List<ShaderPreProcessor> importProcessors;
     private final Set<Integer> shaders;
 
     DirectShaderCompiler(@Nullable ResourceProvider provider) {
         this.provider = provider;
-        this.versionProcessor = new ShaderVersionProcessor();
-        this.predefinitionProcessor = new ShaderPredefinitionProcessor();
         this.preProcessors = new LinkedList<>();
+        this.importProcessors = new LinkedList<>();
         this.shaders = new HashSet<>();
     }
 
     private String modifySource(ShaderCompiler.Context context,
+                                List<ShaderPreProcessor> preProcessors,
                                 Map<String, Integer> uniformBindings,
                                 Set<String> dependencies,
                                 String source) throws IOException {
-        for (ShaderPreProcessor preProcessor : this.preProcessors) {
+        for (ShaderPreProcessor preProcessor : preProcessors) {
             source = this.runProcessor(preProcessor, context, uniformBindings, dependencies, source);
         }
         return source;
@@ -79,10 +79,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
 
         Map<String, Integer> uniformBindings = new HashMap<>();
         Set<String> dependencies = new HashSet<>();
-        source = this.modifySource(context, uniformBindings, dependencies, source);
-        // These only run on shaders, not imports
-        source = this.runProcessor(this.predefinitionProcessor, context, uniformBindings, dependencies, source);
-        source = this.runProcessor(this.versionProcessor, context, uniformBindings, dependencies, source);
+        source = this.modifySource(context, this.preProcessors, uniformBindings, dependencies, source);
 
         int shader = glCreateShader(type);
         glShaderSource(shader, source);
@@ -101,8 +98,11 @@ public class DirectShaderCompiler implements ShaderCompiler {
     }
 
     @Override
-    public void addPreprocessor(ShaderPreProcessor processor) {
+    public void addPreprocessor(ShaderPreProcessor processor, boolean modifyImports) {
         this.preProcessors.add(processor);
+        if (modifyImports) {
+            this.importProcessors.add(processor);
+        }
     }
 
     @Override
@@ -111,6 +111,8 @@ public class DirectShaderCompiler implements ShaderCompiler {
             this.addPreprocessor(new ShaderImportProcessor(this.provider));
         }
         this.addPreprocessor(new ShaderBindingProcessor());
+        this.addPreprocessor(new ShaderPredefinitionProcessor(), false);
+        this.addPreprocessor(new ShaderVersionProcessor(), false);
         return this;
     }
 
@@ -129,7 +131,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
 
         @Override
         public String modify(String source) throws IOException {
-            return this.compiler.modifySource(this.context, this.uniformBindings, this.dependencies, source);
+            return this.compiler.modifySource(this.context, this.compiler.importProcessors, this.uniformBindings, this.dependencies, source);
         }
 
         @Override

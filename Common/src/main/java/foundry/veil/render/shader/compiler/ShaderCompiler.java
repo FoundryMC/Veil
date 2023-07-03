@@ -1,9 +1,9 @@
 package foundry.veil.render.shader.compiler;
 
-import foundry.veil.render.shader.program.ProgramDefinition;
 import foundry.veil.render.shader.ShaderException;
-import foundry.veil.render.shader.processor.ShaderPreProcessor;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
+import foundry.veil.render.shader.processor.ShaderPreProcessor;
+import foundry.veil.render.shader.program.ProgramDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.jetbrains.annotations.Nullable;
@@ -50,9 +50,19 @@ public interface ShaderCompiler extends NativeResource {
     /**
      * Adds the specified pre-processor to the end of the stack.
      *
+     * @param processor     The processor to add
+     * @param modifyImports Whether the processor will also be run on imports
+     */
+    void addPreprocessor(ShaderPreProcessor processor, boolean modifyImports);
+
+    /**
+     * Adds the specified pre-processor to the end of the stack.
+     *
      * @param processor The processor to add
      */
-    void addPreprocessor(ShaderPreProcessor processor);
+    default void addPreprocessor(ShaderPreProcessor processor) {
+        this.addPreprocessor(processor, true);
+    }
 
     /**
      * Adds the default preprocessors for shader code.
