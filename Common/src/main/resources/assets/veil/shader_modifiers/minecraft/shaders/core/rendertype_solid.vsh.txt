@@ -16,6 +16,6 @@ out vec3 TestNormal;
 [UNIFORM]
 uniform sampler2D Sampler8;
 
-[FUNCTION main(0) TAIL]
+[FUNCTION main(0) HEAD]
 TestNormal = #Nom;
 Test = vec4(#InPos, 1.0);
