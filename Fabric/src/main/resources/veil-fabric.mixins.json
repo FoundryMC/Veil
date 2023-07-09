@@ -7,7 +7,6 @@
   "mixins": [
   ],
   "client": [
-    "EffectInstanceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
