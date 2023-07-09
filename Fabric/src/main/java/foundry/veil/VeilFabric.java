@@ -1,9 +1,6 @@
 package foundry.veil;
 
 import com.mojang.math.Vector3f;
-import foundry.veil.postprocessing.DynamicEffectInstance;
-import foundry.veil.postprocessing.PostProcessingHandler;
-import foundry.veil.postprocessing.PostProcessor;
 import foundry.veil.test.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
