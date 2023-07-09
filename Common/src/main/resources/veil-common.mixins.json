@@ -13,11 +13,8 @@
   ],
   "client": [
     "client.AgeableListModelMixin",
-    "client.EffectProgramMixin",
-    "client.GameRendererMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandRendererMixin",
-    "client.LevelRendererMixin",
     "client.ModelPartMixin",
     "client.PostChainMixin"
   ],

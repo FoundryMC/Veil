@@ -1,7 +1,7 @@
 package foundry.veil.shader;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import foundry.veil.postprocessing.PostProcessingHandler;
+//import foundry.veil.postprocessing.PostProcessingHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;

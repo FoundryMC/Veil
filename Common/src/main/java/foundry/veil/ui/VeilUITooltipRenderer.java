@@ -151,8 +151,8 @@ public class VeilUITooltipRenderer {
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             buffer.vertex(mat, desiredX +thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             buffer.vertex(mat, desiredX -thickness, desiredY, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX -thickness, tooltipY + 3 - (tooltippable.getTooltipHeight()/2f), 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
-            buffer.vertex(mat, tooltipX +thickness, tooltipY + 3 - (tooltippable.getTooltipHeight()/2f), 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX -thickness - 4, tooltipY-3, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            buffer.vertex(mat, tooltipX +thickness-4, tooltipY-3, 399).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
             Tesselator.getInstance().end();
             RenderSystem.disableBlend();
             RenderSystem.enableTexture();
