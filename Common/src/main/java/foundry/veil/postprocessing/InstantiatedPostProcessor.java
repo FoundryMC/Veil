@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.network.chat.Component;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +52,6 @@ public abstract class InstantiatedPostProcessor<I extends DynamicEffectInstance>
      * Add an fx instance
      * @return the instance added or null if the amount of instances has reached max
      */
-    @Nullable
     public I addFxInstance(I instance) {
         if (instances.size() >= getMaxInstances()) {
             Veil.LOGGER.warn("Failed to add fx instance to " + this + ": reached max instance count of " + getMaxInstances());

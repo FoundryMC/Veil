@@ -13,7 +13,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -37,11 +36,11 @@ public class DynamicRenderTargetTexture extends AbstractTexture {
     private final ResourceLocation resourceLocation;
 
     //cpu side of the texture. used to dynamically edit it
-    @Nullable
+    
     private NativeImage cpuImage;
 
     public DynamicRenderTargetTexture(ResourceLocation resourceLocation, int width, int height,
-                                           @Nullable Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
+                                            Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
         this.width = width;
         this.height = height;
         this.resourceLocation = resourceLocation;
@@ -49,7 +48,7 @@ public class DynamicRenderTargetTexture extends AbstractTexture {
     }
 
     public DynamicRenderTargetTexture(ResourceLocation resourceLocation, int size,
-                                           @Nullable Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
+                                            Consumer<DynamicRenderTargetTexture> textureDrawingFunction) {
         this(resourceLocation, size, size, textureDrawingFunction);
     }
 

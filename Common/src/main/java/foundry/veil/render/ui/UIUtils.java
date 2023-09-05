@@ -26,7 +26,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UIUtils {
-    public static void drawHoverText(Tooltippable tooltippable, float pticks, @Nonnull final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
+    public static void drawHoverText(Tooltippable tooltippable, float pticks, final ItemStack stack, PoseStack pStack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight,
                                      int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, Font font,
                                      int tooltipTextWidthBonus, int tooltipTextHeightBonus, List<VeilUIItemTooltipDataHolder> items,
                                      int desiredX, int desiredY) {
@@ -120,7 +119,7 @@ public class UIUtils {
         tooltipHeight += tooltipTextHeightBonus;
 
 
-        VeilUITooltipRenderer.drawConnectionLine(pStack, tooltippable, tooltipX, tooltipY, desiredX, desiredY);
+//        VeilUITooltipRenderer.drawConnectionLine(pStack, tooltippable, tooltipX, tooltipY, desiredX, desiredY);
         drawTooltipRects(pticks, pStack, zLevel, backgroundColor, borderColorStart, borderColorEnd, font, list, tooltipTextWidth, titleLinesCount, tooltipX, tooltipY, tooltipHeight, items);
     }
 
@@ -281,7 +280,7 @@ public class UIUtils {
         tessellator.end();
     }
 
-    public static void tryRenderGuiItem(@javax.annotation.Nullable LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
+    public static void tryRenderGuiItem(LivingEntity $$0, ItemStack $$1, float $$2, float $$3, int $$4, float $$5) {
 //        if (!$$1.isEmpty()) {
 //            BakedModel $$6 = Minecraft.getInstance().getItemRenderer().getModel($$1, (Level) null, $$0, $$4);
 //            Minecraft.getInstance().getItemRenderer().blitOffset = $$6.isGui3d() ? Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F + (float) $$5 : Minecraft.getInstance().getItemRenderer().blitOffset + 50.0F;

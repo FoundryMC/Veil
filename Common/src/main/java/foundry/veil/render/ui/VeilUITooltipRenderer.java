@@ -4,12 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import foundry.veil.color.Color;
 import foundry.veil.color.theme.NumberThemeProperty;
+import foundry.veil.helper.SpaceHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.Mth;
@@ -20,6 +22,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,28 +101,28 @@ public class VeilUITooltipRenderer {
             desiredPos = null;
         }
         if (tooltippable.getWorldspace()) {
-//            Vec3 corner = Vec3.atCenterOf(pos);
-//            currentPos = currentPos == null ? corner : currentPos;
-//            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
-//            Vec3i playerPosInt = new Vec3i(playerPos.x, playerPos.y, playerPos.z);
-//            Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
-//            Vec3i diff = playerPosInt.subtract(cornerInt);
-//            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-//            if(fade == 0){
-//                currentPos = currentPos.add(0, -0.25f, 0);
-//                background = background.multiply(1,1,1,fade);
-//                borderTop = borderTop.multiply(1,1,1,fade);
-//                borderBottom = borderBottom.multiply(1,1,1,fade);
-//            }
-//            currentPos = currentPos.lerp(desiredPos, 0.05f);
-//            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
-//            Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
-//            screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
-//            desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
-//            tooltipX = (int)screenSpacePos.x();
-//            tooltipY = (int)screenSpacePos.y();
-//            desiredX = (int)desiredScreenSpacePos.x();
-//            desiredY = (int)desiredScreenSpacePos.y();
+            Vec3 corner = Vec3.atCenterOf(pos);
+            currentPos = currentPos == null ? corner : currentPos;
+            Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3i playerPosInt = new Vec3i((int) playerPos.x, (int) playerPos.y, (int) playerPos.z);
+            Vec3i cornerInt = new Vec3i((int) corner.x, (int) corner.y, (int) corner.z);
+            Vec3i diff = playerPosInt.subtract(cornerInt);
+            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            if(fade == 0){
+                currentPos = currentPos.add(0, -0.25f, 0);
+                background = background.multiply(1,1,1,fade);
+                borderTop = borderTop.multiply(1,1,1,fade);
+                borderBottom = borderBottom.multiply(1,1,1,fade);
+            }
+            currentPos = currentPos.lerp(desiredPos, 0.05f);
+            Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
+            Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
+            screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
+            desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
+            tooltipX = (int)screenSpacePos.x();
+            tooltipY = (int)screenSpacePos.y();
+            desiredX = (int)desiredScreenSpacePos.x();
+            desiredY = (int)desiredScreenSpacePos.y();
         }
         UIUtils.drawHoverText(tooltippable, partialTicks, istack, stack, tooltip, tooltipX + (int) textXOffset, tooltipY + (int) textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int) widthBonus, (int) heightBonus, items, desiredX, desiredY);
         stack.popPose();

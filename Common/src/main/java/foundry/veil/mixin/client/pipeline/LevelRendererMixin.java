@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import javax.annotation.Nullable;
 
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixin {
@@ -36,7 +35,6 @@ public class LevelRendererMixin {
     @Final
     private Minecraft minecraft;
     @Unique
-    @Nullable
     private RenderTarget veilCustomRenderTarget;
 
     @Unique

@@ -7,13 +7,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class PreProcessor extends GlslPreprocessor {
-    @Nullable
     @Override
     public String applyImport(boolean pUseFullPath, String pDirectory) {
         Veil.LOGGER.debug("Loading moj_import in EffectProgram: " + pDirectory);

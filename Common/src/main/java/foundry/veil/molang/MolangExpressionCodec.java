@@ -11,6 +11,8 @@ import gg.moonflower.molangcompiler.api.exception.MolangException;
 import gg.moonflower.molangcompiler.api.exception.MolangRuntimeException;
 import gg.moonflower.molangcompiler.api.object.MolangObject;
 
+import java.util.Collection;
+
 /**
  * Defines a codec for MoLang expressions.
  *
@@ -101,6 +103,11 @@ public final class MolangExpressionCodec {
         @Override
         public int getParameters() {
             return 0;
+        }
+
+        @Override
+        public Collection<String> getObjects() {
+            return null;
         }
 
         @Override
