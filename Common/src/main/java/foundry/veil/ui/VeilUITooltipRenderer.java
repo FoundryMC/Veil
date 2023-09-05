@@ -24,9 +24,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -112,6 +114,9 @@ public class VeilUITooltipRenderer {
             Vec3i cornerInt = new Vec3i(corner.x, corner.y, corner.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
             desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            BlockState state = world.getBlockState(pos);
+            VoxelShape shape = state.getShape(world, pos);
+            shape.closestPointTo(desiredPos).ifPresent(vec3 -> desiredPos = vec3);
             if(fade == 0){
                 currentPos = currentPos.add(0, -0.25f, 0);
                 background = background.multiply(1,1,1,fade);
