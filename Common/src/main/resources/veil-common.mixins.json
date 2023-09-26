@@ -14,7 +14,6 @@
   ],
   "client": [
     "client.AgeableListModelMixin",
-    "client.EffectProgramMixin",
     "client.GameRendererMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandRendererMixin",

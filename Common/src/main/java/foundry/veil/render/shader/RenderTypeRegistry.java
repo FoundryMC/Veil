@@ -3,7 +3,6 @@ package foundry.veil.render.shader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
-import foundry.veil.postprocessing.PostProcessor;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -23,7 +22,6 @@ public class RenderTypeRegistry {
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.WALL_TORCH);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.TORCH, CUTOUT);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.put(Blocks.WALL_TORCH, CUTOUT);
-        PostProcessor.TEXTURE_UNIFORMS.put(Veil.veilPath("area"), Veil.veilPath("textures/gui/troll.png"));
     }
 
     private static ShaderInstance transparentTexture;

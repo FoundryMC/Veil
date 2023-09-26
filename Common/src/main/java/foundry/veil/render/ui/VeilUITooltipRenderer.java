@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -32,7 +33,7 @@ public class VeilUITooltipRenderer {
     public static final VeilIGuiOverlay OVERLAY = VeilUITooltipRenderer::renderOverlay;
 
     public static int hoverTicks = 0;
-    public static BlockPos lastHoveredPos = null;
+    public static Vec3 lastHoveredPos = null;
     public static Vec3 currentPos = null;
     public static Vec3 desiredPos = null;
 
@@ -43,17 +44,33 @@ public class VeilUITooltipRenderer {
         if (mc.options.hideGui || mc.gameMode.getPlayerMode() == GameType.SPECTATOR)
             return;
         HitResult result = mc.hitResult;
-        if (!(result instanceof BlockHitResult)) {
-            hoverTicks = 0;
-            lastHoveredPos = null;
-            return;
+        Vec3 pos = null;
+        Tooltippable tooltippable = null;
+        if(result instanceof EntityHitResult) {
+            EntityHitResult entityHitResult = (EntityHitResult) result;
+            if(entityHitResult.getEntity() instanceof Tooltippable tooltippable1)
+                tooltippable = tooltippable1;
+            else {
+                hoverTicks = 0;
+                lastHoveredPos = null;
+                return;
+            }
+            pos = entityHitResult.getEntity().getPosition(0f).add(0.0, entityHitResult.getEntity().getEyeHeight()/2f, 0.0);
         }
-        BlockHitResult blockHitResult = (BlockHitResult) result;
-        ClientLevel world = mc.level;
-        BlockPos pos = blockHitResult.getBlockPos();
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        Tooltippable tooltippable = (Tooltippable) blockEntity;
-        if (tooltippable == null || !tooltippable.isTooltipEnabled()) {
+        if (result instanceof BlockHitResult blockHitResult) {
+            ClientLevel world = mc.level;
+            pos = Vec3.atCenterOf(blockHitResult.getBlockPos());
+            BlockEntity blockEntity = world.getBlockEntity(BlockPos.containing(pos));
+            if(blockEntity instanceof Tooltippable tooltippable1) {
+                tooltippable = tooltippable1;
+            }
+            else {
+                hoverTicks = 0;
+                lastHoveredPos = null;
+                return;
+            }
+        }
+        if (tooltippable == null || !tooltippable.isTooltipEnabled() || pos == null) {
             hoverTicks = 0;
             lastHoveredPos = null;
             return;
@@ -101,13 +118,12 @@ public class VeilUITooltipRenderer {
             desiredPos = null;
         }
         if (tooltippable.getWorldspace()) {
-            Vec3 corner = Vec3.atCenterOf(pos);
-            currentPos = currentPos == null ? corner : currentPos;
+            currentPos = currentPos == null ? pos : currentPos;
             Vec3 playerPos = mc.gameRenderer.getMainCamera().getPosition();
             Vec3i playerPosInt = new Vec3i((int) playerPos.x, (int) playerPos.y, (int) playerPos.z);
-            Vec3i cornerInt = new Vec3i((int) corner.x, (int) corner.y, (int) corner.z);
+            Vec3i cornerInt = new Vec3i((int) pos.x, (int) pos.y, (int) pos.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
-            desiredPos = corner.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
+            desiredPos = pos.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
             if(fade == 0){
                 currentPos = currentPos.add(0, -0.25f, 0);
                 background = background.multiply(1,1,1,fade);

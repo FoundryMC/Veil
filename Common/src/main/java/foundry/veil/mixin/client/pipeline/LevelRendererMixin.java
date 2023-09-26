@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.shader.RenderTargetRegistry;
 import net.minecraft.client.Minecraft;
@@ -39,11 +38,6 @@ public class LevelRendererMixin {
 
     @Unique
     private final Vector3f tempCameraPos = new Vector3f();
-
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "net.minecraft.client.renderer.PostChain.process(F)V", ordinal = 1))
-    public void veil$injectionBeforeTransparencyChainProcess(CallbackInfo ci) {
-        PostProcessingHandler.copyDepth();
-    }
 
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void injectionAfterLevelRendererConstructor(Minecraft $$0, EntityRenderDispatcher $$1, BlockEntityRenderDispatcher $$2, RenderBuffers $$3, CallbackInfo ci) {

@@ -1,7 +1,6 @@
 package foundry.veil.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.postprocessing.PostProcessingHandler;
 import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.pipeline.VeilRenderer;
@@ -17,7 +16,6 @@ public class GameRendererMixin {
     @Inject(method = "resize", at = @At(value = "HEAD"))
     public void veil$resizeListener(int pWidth, int pHeight, CallbackInfo ci) {
         VeilRenderSystem.resize(pWidth, pHeight);
-        PostProcessingHandler.resize(pWidth, pHeight);
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;tryTakeScreenshotIfNeeded()V", shift = At.Shift.BEFORE))

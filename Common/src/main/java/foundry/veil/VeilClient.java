@@ -3,12 +3,10 @@ package foundry.veil;
 import foundry.veil.color.Color;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.RenderTypeRegistry;
-import foundry.veil.test.PostProcessingEffectsRegistry;
 
 public class VeilClient {
 
     public static void init() {
-        PostProcessingEffectsRegistry.init();
         RenderTypeRegistry.init();
     }
 

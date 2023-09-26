@@ -147,9 +147,11 @@ public class UIUtils {
         }
         pStack.pushPose();
         pStack.translate(0, 0, 300);
-        for (VeilUIItemTooltipDataHolder item : items) {
-            renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
-            drawTexturedRect(pStack.last().pose(), z + 100, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+        if(items != null && !items.isEmpty()){
+            for (VeilUIItemTooltipDataHolder item : items) {
+                renderAndDecorateItem(item.getItemStack(), tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks));
+                drawTexturedRect(pStack.last().pose(), z + 100, tooltipX + item.getX().apply(pticks), itemY + item.getY().apply(pticks), 16, 16, 0, 0, 0, 0, 16, 16, Veil.veilPath("textures/gui/item_shadow.png"));
+            }
         }
         pStack.popPose();
 
