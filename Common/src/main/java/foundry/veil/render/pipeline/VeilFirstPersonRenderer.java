@@ -31,7 +31,7 @@ public final class VeilFirstPersonRenderer {
         pipeline = renderer.getPostProcessingManager().getPipeline(FIRST_PERSON);
 
         if (pipeline == null || buffer == null) {
-            LOGGER.warn("Failed to render first person with pipeline: {}, {}", pipeline, buffer);
+            LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
             return;
         }
 
