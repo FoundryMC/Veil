@@ -63,4 +63,10 @@ public class SizedShaderBlockImpl<T> extends ShaderBlockImpl<T> {
 
         glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
     }
+
+    @Override
+    public void unbind(int index) {
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
+        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+    }
 }

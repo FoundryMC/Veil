@@ -77,4 +77,10 @@ public class DynamicShaderBlockImpl<T> extends ShaderBlockImpl<T> implements Dyn
 
         glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
     }
+
+    @Override
+    public void unbind(int index) {
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
+        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+    }
 }

@@ -51,10 +51,7 @@ public abstract class ShaderBlockImpl<T> implements ShaderBlock<T> {
      *
      * @param index The index to unbind this block from
      */
-    public void unbind(int index) {
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
-        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, 0);
-    }
+    public abstract void unbind(int index);
 
     @Override
     public @Nullable T getValue() {
