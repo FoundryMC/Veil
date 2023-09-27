@@ -68,7 +68,7 @@ public class ShaderProgramImpl implements ShaderProgram {
             try {
                 return new Wrapper(this);
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to wrap shader program: " + this.getId());
+                throw new IllegalStateException("Failed to wrap shader program: " + this.getId(), e);
             } finally {
                 Wrapper.constructing = false;
             }
@@ -223,23 +223,21 @@ public class ShaderProgramImpl implements ShaderProgram {
      */
     public static class Wrapper extends ShaderInstance {
 
-        private static final String DUMMY_SHADER = """
+        private static final byte[] DUMMY_SHADER = """
                 {
                     "vertex": "dummy",
                     "fragment": "dummy"
                 }
-                """;
-        private static final DummyResource RESOURCE = new DummyResource(() -> new ByteArrayInputStream(DUMMY_SHADER.getBytes(StandardCharsets.UTF_8)));
+                """.getBytes(StandardCharsets.UTF_8);
+        private static final DummyResource RESOURCE = new DummyResource(() -> new ByteArrayInputStream(DUMMY_SHADER));
 
         public static boolean constructing = false;
 
         private final ShaderProgram program;
-        private final Map<String, UniformWrapper> uniforms;
 
         private Wrapper(ShaderProgram program) throws IOException {
             super(name -> Optional.of(RESOURCE), "", null);
             this.program = program;
-            this.uniforms = new Object2ObjectArrayMap<>();
         }
 
         @Override
@@ -259,20 +257,26 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         @Override
+        public void attachToProgram() {
+            throw new UnsupportedOperationException("Cannot attach shader program wrapper");
+        }
+
+        @Override
         public void markDirty() {
         }
 
         @Override
         public @Nullable UniformWrapper getUniform(String name) {
-            UniformWrapper uniform = this.uniforms.get(name);
+            UniformWrapper uniform = (UniformWrapper) this.uniformMap.get(name);
             if (uniform != null) {
                 return uniform.getLocation() == -1 ? null : uniform;
             }
 
-            if (this.program.getUniform(name) == -1) {
+            // program is null in the constructor, so this allows the default uniforms to be accessed
+            if (this.program != null && this.program.getUniform(name) == -1) {
                 return null;
             }
-            return this.uniforms.computeIfAbsent(name, unused -> new UniformWrapper(this.program, name));
+            return (UniformWrapper) this.uniformMap.computeIfAbsent(name, unused -> new UniformWrapper(() -> this.program, name));
         }
 
         @Override
@@ -327,9 +331,9 @@ public class ShaderProgramImpl implements ShaderProgram {
      */
     public static class UniformWrapper extends Uniform {
 
-        private final MutableUniformAccess access;
+        private final Supplier<MutableUniformAccess> access;
 
-        public UniformWrapper(MutableUniformAccess access, String name) {
+        public UniformWrapper(Supplier<MutableUniformAccess> access, String name) {
             super(name, UT_INT1, 1, null);
             this.close(); // Free constructor allocated resources
             this.access = access;
@@ -346,32 +350,32 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public void set(float value) {
-            this.access.setFloat(this.getName(), value);
+            this.access.get().setFloat(this.getName(), value);
         }
 
         @Override
         public void set(float x, float y) {
-            this.access.setVector(this.getName(), x, y);
+            this.access.get().setVector(this.getName(), x, y);
         }
 
         @Override
         public void set(float x, float y, float z) {
-            this.access.setVector(this.getName(), x, y, z);
+            this.access.get().setVector(this.getName(), x, y, z);
         }
 
         @Override
         public void set(float x, float y, float z, float w) {
-            this.access.setVector(this.getName(), x, y, z, w);
+            this.access.get().setVector(this.getName(), x, y, z, w);
         }
 
         @Override
         public void set(@NotNull Vector3f value) {
-            this.access.setVector(this.getName(), value);
+            this.access.get().setVector(this.getName(), value);
         }
 
         @Override
         public void set(@NotNull Vector4f value) {
-            this.access.setVector(this.getName(), value);
+            this.access.get().setVector(this.getName(), value);
         }
 
         @Override
@@ -381,22 +385,22 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public void set(int value) {
-            this.access.setInt(this.getName(), value);
+            this.access.get().setInt(this.getName(), value);
         }
 
         @Override
         public void set(int x, int y) {
-            this.access.setVector(this.getName(), x, y);
+            this.access.get().setVector(this.getName(), x, y);
         }
 
         @Override
         public void set(int x, int y, int z) {
-            this.access.setVector(this.getName(), x, y, z);
+            this.access.get().setVector(this.getName(), x, y, z);
         }
 
         @Override
         public void set(int x, int y, int z, int w) {
-            this.access.setVector(this.getName(), x, y, z, w);
+            this.access.get().setVector(this.getName(), x, y, z, w);
         }
 
         @Override
@@ -462,12 +466,12 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public void set(@NotNull Matrix3f value) {
-            this.access.setMatrix(this.getName(), value);
+            this.access.get().setMatrix(this.getName(), value);
         }
 
         @Override
         public void set(@NotNull Matrix4f value) {
-            this.access.setMatrix(this.getName(), value);
+            this.access.get().setMatrix(this.getName(), value);
         }
 
         @Override
@@ -476,7 +480,7 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public int getLocation() {
-            return this.access.getUniform(this.getName());
+            return this.access.get().getUniform(this.getName());
         }
     }
 }

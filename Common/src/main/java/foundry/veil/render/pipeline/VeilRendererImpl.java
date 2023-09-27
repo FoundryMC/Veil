@@ -8,9 +8,12 @@ import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.ShaderModificationManager;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
+
+import java.util.List;
 
 /**
  * @author Ocelot
@@ -33,9 +36,12 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
 
+        List<PreparableReloadListener> listeners = ((ReloadableResourceManagerAccessor) resourceManager).getListeners();
+
         // This must finish loading before the game renderer so modifications can apply on load
-        ((ReloadableResourceManagerAccessor) resourceManager).getListeners().add(0, this.shaderModificationManager);
-        resourceManager.registerReloadListener(this.shaderManager);
+        listeners.add(0, this.shaderModificationManager);
+        // This must be before vanilla shaders so vanilla shaders can be replaced
+        listeners.add(1, this.shaderManager);
         resourceManager.registerReloadListener(this.framebufferManager);
         resourceManager.registerReloadListener(this.postProcessingManager);
     }

@@ -22,6 +22,7 @@
     "client.pipeline.LevelRendererMixin",
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
+    "client.shader.GameRendererMixin",
     "client.shader.ProgramManagerMixin",
     "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",

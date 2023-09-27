@@ -1,0 +1,5 @@
+#version 330 // required
+#priority 1000 // default 1000
+
+// Replaces this with the defined shader
+#replace veil:test
