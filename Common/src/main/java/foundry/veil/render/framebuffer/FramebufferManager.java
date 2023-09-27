@@ -40,7 +40,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
 
             return DataResult.success(new ResourceLocation(name));
         } catch (ResourceLocationException e) {
-            return DataResult.error(() -> "Not a valid resource location: " + name + " " + e.getMessage());
+            return DataResult.error(() -> "Not a valid resource location: " + name + ". " + e.getMessage());
         }
     }, location -> "temp".equals(location.getNamespace()) ? location.getPath() : location.toString()).stable();
 
