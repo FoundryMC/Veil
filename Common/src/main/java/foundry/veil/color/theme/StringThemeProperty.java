@@ -23,7 +23,7 @@ public class StringThemeProperty implements IThemeProperty<String> {
 
     @Override
     public Class<?> getType() {
-        return String.class;
+        return StringThemeProperty.class;
     }
 
     public void setValue(String value) {

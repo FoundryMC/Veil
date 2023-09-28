@@ -26,6 +26,6 @@ public class BooleanThemeProperty implements IThemeProperty<Boolean> {
 
     @Override
     public Class<?> getType() {
-        return Boolean.class;
+        return BooleanThemeProperty.class;
     }
 }

@@ -3,7 +3,7 @@ package foundry.veil.color.theme;
 public class NumberThemeProperty implements IThemeProperty<Number>{
     private String name;
     private Number value;
-    private Class<?> type = Number.class;
+    private Class<?> type = NumberThemeProperty.class;
     @Override
     public String getName() {
         return null;

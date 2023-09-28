@@ -25,7 +25,7 @@ public class ConsumerThemeProperty implements IThemeProperty<Consumer<?>>{
 
     @Override
     public Class<?> getType() {
-        return Consumer.class;
+        return ConsumerThemeProperty.class;
     }
 
     public void setValue(Consumer<?> value) {
