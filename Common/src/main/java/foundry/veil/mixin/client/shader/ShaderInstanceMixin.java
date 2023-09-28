@@ -1,7 +1,6 @@
 package foundry.veil.mixin.client.shader;
 
 import com.mojang.blaze3d.shaders.Program;
-import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.render.shader.program.ShaderProgramImpl;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.packs.resources.ResourceProvider;

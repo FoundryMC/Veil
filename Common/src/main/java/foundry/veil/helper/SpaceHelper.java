@@ -1,16 +1,14 @@
 package foundry.veil.helper;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.joml.*;
-
-import java.lang.Math;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class SpaceHelper {
 //    public static Vector3f getNormalizedDeviceCoordsFromViewport(float x, float y, float z, float width, float height) {

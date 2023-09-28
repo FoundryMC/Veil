@@ -12,7 +12,6 @@ import org.lwjgl.system.NativeResource;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11C.glReadBuffer;
@@ -148,7 +147,6 @@ public interface AdvancedFbo extends NativeResource {
      * @param target The target framebuffer to copy data into
      */
     default void resolveToAdvancedFbo(AdvancedFbo target) {
-        Objects.requireNonNull(target, "target");
         this.resolveToFbo(target.getId(),
                 target.getWidth(),
                 target.getHeight(),
@@ -164,7 +162,6 @@ public interface AdvancedFbo extends NativeResource {
      * @param filtering The filter to use if this framebuffer and the provided framebuffer are different sizes
      */
     default void resolveToAdvancedFbo(AdvancedFbo target, int mask, int filtering) {
-        Objects.requireNonNull(target, "target");
         this.resolveToFbo(target.getId(), target.getWidth(), target.getHeight(), mask, filtering);
     }
 
@@ -174,7 +171,6 @@ public interface AdvancedFbo extends NativeResource {
      * @param target The target framebuffer to copy data into
      */
     default void resolveToFramebuffer(RenderTarget target) {
-        Objects.requireNonNull(target, "target");
         this.resolveToFbo(target.frameBufferId,
                 target.viewWidth,
                 target.viewHeight,
@@ -190,7 +186,6 @@ public interface AdvancedFbo extends NativeResource {
      * @param filtering The filter to use if this framebuffer and the provided framebuffer are different sizes
      */
     default void resolveToFramebuffer(RenderTarget target, int mask, int filtering) {
-        Objects.requireNonNull(target, "target");
         this.resolveToFbo(target.frameBufferId, target.viewWidth, target.viewHeight, mask, filtering);
     }
 
@@ -387,7 +382,6 @@ public interface AdvancedFbo extends NativeResource {
      * @return A builder to construct a new FBO
      */
     static Builder copy(AdvancedFbo parent) {
-        Objects.requireNonNull(parent, "parent");
         return new Builder(parent.getWidth(), parent.getHeight()).addAttachments(parent);
     }
 
@@ -448,7 +442,6 @@ public interface AdvancedFbo extends NativeResource {
          * @param parent The parent to add the attachments for
          */
         public Builder addAttachments(AdvancedFbo parent) {
-            Objects.requireNonNull(parent, "parent");
             for (int i = 0; i < parent.getColorAttachments(); i++) {
                 this.colorAttachments.add(parent.getColorAttachment(i).createCopy());
             }
@@ -466,7 +459,6 @@ public interface AdvancedFbo extends NativeResource {
          * @param parent The parent to add the attachments for
          */
         public Builder addAttachments(RenderTarget parent) {
-            Objects.requireNonNull(parent, "parent");
             this.setMipmaps(0);
             this.addColorTextureBuffer(parent.width, parent.height, GL_UNSIGNED_BYTE);
             if (parent.useDepth) {
@@ -534,7 +526,6 @@ public interface AdvancedFbo extends NativeResource {
          * @param attachment The attachment to add
          */
         public Builder addColorBuffer(AdvancedFboAttachment attachment) {
-            Objects.requireNonNull(attachment, "attachment");
             this.colorAttachments.add(attachment);
             this.validateColorSize();
             return this;

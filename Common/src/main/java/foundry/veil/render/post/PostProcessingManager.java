@@ -7,9 +7,9 @@ import foundry.veil.Veil;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.stage.CompositePostPipeline;
-import foundry.veil.resource.CodecReloadListener;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.program.ShaderProgram;
+import foundry.veil.resource.CodecReloadListener;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +22,8 @@ import org.slf4j.Logger;
 
 import java.util.*;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11C.GL_ALWAYS;
+import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
 
 /**
  * <p>Manages all post pipelines.</p>
@@ -167,8 +168,6 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @param pipeline The pipeline to run
      */
     public void runPipeline(PostPipeline pipeline) {
-        Objects.requireNonNull(pipeline, "pipeline");
-
         this.context.begin();
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();

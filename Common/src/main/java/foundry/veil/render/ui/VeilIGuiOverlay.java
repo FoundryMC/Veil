@@ -1,6 +1,5 @@
 package foundry.veil.render.ui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 

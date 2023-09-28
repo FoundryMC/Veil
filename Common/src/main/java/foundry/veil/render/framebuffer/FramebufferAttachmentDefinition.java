@@ -7,7 +7,6 @@ import foundry.veil.render.post.PostProcessingManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11C.*;
@@ -68,11 +67,6 @@ public record FramebufferAttachmentDefinition(@NotNull FramebufferAttachmentDefi
                             .forGetter(attachment -> Optional.ofNullable(attachment.name()))
             ).apply(instance, (type, format, linear, levels, name) ->
                     new FramebufferAttachmentDefinition(type, format, false, linear, levels, name.orElse(null))));
-
-    public FramebufferAttachmentDefinition {
-        Objects.requireNonNull(type, "type");
-        Objects.requireNonNull(format, "format");
-    }
 
     /**
      * @return Whether this attachment can be represented as <code>"depth": true</code> in the JSON

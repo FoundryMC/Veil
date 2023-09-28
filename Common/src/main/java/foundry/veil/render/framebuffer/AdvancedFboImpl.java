@@ -258,7 +258,6 @@ public class AdvancedFboImpl implements AdvancedFbo {
      * @return A new builder
      */
     public static Builder copy(RenderTarget parent) {
-        Objects.requireNonNull(parent, "parent");
         if (parent instanceof Wrapper wrapper) {
             AdvancedFbo fbo = wrapper.fbo();
             return new AdvancedFbo.Builder(fbo.getWidth(), fbo.getHeight()).addAttachments(fbo);

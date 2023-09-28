@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -44,7 +43,7 @@ public class BlitPostStage extends FramebufferPostStage {
      */
     public BlitPostStage(ResourceLocation shader, @Nullable ResourceLocation in, ResourceLocation out, boolean clear) {
         super(in, out, clear);
-        this.shader = Objects.requireNonNull(shader, "shader");
+        this.shader = shader;
     }
 
     @Override

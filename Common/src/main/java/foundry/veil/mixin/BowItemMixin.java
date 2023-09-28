@@ -2,7 +2,6 @@ package foundry.veil.mixin;
 
 import foundry.veil.model.anim.IChargableItem;
 import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

@@ -1,7 +1,6 @@
 package foundry.veil.render.shader.definition;
 
 import foundry.veil.render.pipeline.VeilRenderSystem;
-import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,8 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
 
 import static org.lwjgl.opengl.GL15C.glDeleteBuffers;
-import static org.lwjgl.opengl.GL30C.glBindBufferRange;
-import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 
 /**
  * Abstract implementation of {@link ShaderBlock}.

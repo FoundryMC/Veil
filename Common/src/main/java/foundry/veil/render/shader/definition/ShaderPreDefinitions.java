@@ -1,6 +1,5 @@
 package foundry.veil.render.shader.definition;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -32,8 +31,7 @@ public class ShaderPreDefinitions {
         this.staticDefinitions = new HashMap<>();
     }
 
-    private @NotNull String getDefinition(@NotNull String name, @Nullable String definition) {
-        Objects.requireNonNull(name, "name");
+    private String getDefinition(String name, @Nullable String definition) {
         name = name.toUpperCase(Locale.ROOT);
         if (definition == null) {
             return "#define " + name;
@@ -46,7 +44,7 @@ public class ShaderPreDefinitions {
      *
      * @param name The name of the definition to set
      */
-    public void define(@NotNull String name) {
+    public void define(String name) {
         this.define(name, null);
     }
 
@@ -56,7 +54,7 @@ public class ShaderPreDefinitions {
      * @param name       The name of the definition to set
      * @param definition The value to associate with it or <code>null</code> to only add <code>#define name</code>
      */
-    public void define(@NotNull String name, @Nullable String definition) {
+    public void define(String name, @Nullable String definition) {
         this.set(name, this.getDefinition(name, definition));
     }
 
@@ -66,9 +64,7 @@ public class ShaderPreDefinitions {
      * @param name       The name of the definition to set
      * @param definition The value to associate with it
      */
-    public void set(@NotNull String name, @NotNull String definition) {
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(definition, "definition");
+    public void set(String name, String definition) {
         String previous = this.definitions.put(name, definition);
         if (this.definitionCallback != null && !Objects.equals(previous, definition)) {
             this.definitionCallback.accept(name);
@@ -80,7 +76,7 @@ public class ShaderPreDefinitions {
      *
      * @param name The name of the definition to set
      */
-    public void defineStatic(@NotNull String name) {
+    public void defineStatic(String name) {
         this.defineStatic(name, null);
     }
 
@@ -90,7 +86,7 @@ public class ShaderPreDefinitions {
      * @param name       The name of the definition to set
      * @param definition The value to associate with it or <code>null</code> to only add <code>#define name</code>
      */
-    public void defineStatic(@NotNull String name, @Nullable String definition) {
+    public void defineStatic(String name, @Nullable String definition) {
         this.setStatic(name, this.getDefinition(name, definition));
     }
 
@@ -100,9 +96,7 @@ public class ShaderPreDefinitions {
      * @param name       The name of the definition to set
      * @param definition The value to associate with it
      */
-    public void setStatic(@NotNull String name, @NotNull String definition) {
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(definition, "definition");
+    public void setStatic(String name, String definition) {
         this.staticDefinitions.put(name, definition);
     }
 
@@ -111,7 +105,7 @@ public class ShaderPreDefinitions {
      *
      * @param name The name of the definition to remove
      */
-    public void remove(@NotNull String name) {
+    public void remove(String name) {
         if (this.definitionCallback != null && this.definitions.remove(name) != null) {
             this.definitionCallback.accept(name);
         }
@@ -122,7 +116,7 @@ public class ShaderPreDefinitions {
      *
      * @param definitionConsumer The consumer for definition lines
      */
-    public void addStaticDefinitions(@NotNull Consumer<String> definitionConsumer) {
+    public void addStaticDefinitions(Consumer<String> definitionConsumer) {
         this.staticDefinitions.values().forEach(definitionConsumer);
     }
 
@@ -132,7 +126,7 @@ public class ShaderPreDefinitions {
      * @param name The name of the definition
      * @return The definition with that name or <code>null</code> if it doesn't exist
      */
-    public @Nullable String getDefinition(@NotNull String name) {
+    public @Nullable String getDefinition(String name) {
         return this.definitions.get(name);
     }
 }

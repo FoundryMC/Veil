@@ -10,8 +10,6 @@ import foundry.veil.render.post.stage.CopyPostStage;
 import foundry.veil.render.post.stage.MaskPostStage;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Objects;
-
 // TODO use registry
 /**
  * Registry for all post pipeline stages.
@@ -47,13 +45,6 @@ public class PostPipelineStageRegistry {
         return pipelineType;
     }
 
-    public static void bootstrap() {
-    }
-
     public record PipelineType<T extends PostPipeline>(Codec<T> codec) {
-
-        public PipelineType {
-            Objects.requireNonNull(codec);
-        }
     }
 }

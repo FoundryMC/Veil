@@ -3,7 +3,6 @@ package foundry.veil.render.ui;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class VeilUIItemTooltipDataHolder {
     private ItemStack itemStack;

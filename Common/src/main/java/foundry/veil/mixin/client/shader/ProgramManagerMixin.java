@@ -2,7 +2,6 @@ package foundry.veil.mixin.client.shader;
 
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Shader;
-import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.render.shader.program.ShaderProgramImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

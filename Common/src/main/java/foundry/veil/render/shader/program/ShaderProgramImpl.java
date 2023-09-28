@@ -10,13 +10,11 @@ import foundry.veil.render.shader.compiler.CompiledShader;
 import foundry.veil.render.shader.compiler.ShaderCompiler;
 import foundry.veil.render.shader.texture.ShaderTextureSource;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.Resource;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +26,6 @@ import org.joml.Vector4f;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
@@ -36,6 +33,7 @@ import java.util.function.Supplier;
 import static org.lwjgl.opengl.GL11C.GL_TRUE;
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
 
@@ -86,7 +84,7 @@ public class ShaderProgramImpl implements ShaderProgram {
 
     @Override
     public void compile(ShaderCompiler.Context context, ShaderCompiler compiler) throws Exception {
-        ProgramDefinition definition = Objects.requireNonNull(context.definition(), "definition");
+        ProgramDefinition definition = Objects.requireNonNull(context.definition());
 
         this.clearShader();
         this.textureSources.putAll(definition.textures());
@@ -165,11 +163,17 @@ public class ShaderProgramImpl implements ShaderProgram {
 
     @Override
     public int getUniform(CharSequence name) {
+        if (this.program == 0) {
+            return -1;
+        }
         return this.uniforms.computeIfAbsent(name, k -> glGetUniformLocation(this.program, k));
     }
 
     @Override
     public int getUniformBlock(CharSequence name) {
+        if (this.program == 0) {
+            return GL_INVALID_INDEX;
+        }
         return this.blocks.computeIfAbsent(name, k -> glGetUniformBlockIndex(this.program, name));
     }
 
@@ -229,7 +233,22 @@ public class ShaderProgramImpl implements ShaderProgram {
                     "fragment": "dummy"
                 }
                 """.getBytes(StandardCharsets.UTF_8);
-        private static final DummyResource RESOURCE = new DummyResource(() -> new ByteArrayInputStream(DUMMY_SHADER));
+        private static final Resource RESOURCE = new Resource(null, () -> new ByteArrayInputStream(DUMMY_SHADER)) {
+            @Override
+            public PackResources source() {
+                throw new UnsupportedOperationException("No pack source");
+            }
+
+            @Override
+            public String sourcePackId() {
+                return "dummy";
+            }
+
+            @Override
+            public boolean isBuiltin() {
+                return true;
+            }
+        };
 
         public static boolean constructing = false;
 
@@ -301,29 +320,6 @@ public class ShaderProgramImpl implements ShaderProgram {
         public ShaderProgram program() {
             return this.program;
         }
-
-        @ApiStatus.Internal
-        private static class DummyResource extends Resource {
-
-            public DummyResource(IoSupplier<InputStream> dataStream) {
-                super(null, dataStream);
-            }
-
-            @Override
-            public PackResources source() {
-                throw new UnsupportedOperationException("No pack source");
-            }
-
-            @Override
-            public String sourcePackId() {
-                return "dummy";
-            }
-
-            @Override
-            public boolean isBuiltin() {
-                return true;
-            }
-        }
     }
 
     /**
@@ -334,13 +330,13 @@ public class ShaderProgramImpl implements ShaderProgram {
         private final Supplier<MutableUniformAccess> access;
 
         public UniformWrapper(Supplier<MutableUniformAccess> access, String name) {
-            super(name, UT_INT1, 1, null);
+            super(name, UT_INT1, 0, null);
             this.close(); // Free constructor allocated resources
             this.access = access;
         }
 
         @Override
-        public void setLocation(int unused) {
+        public void setLocation(int location) {
         }
 
         @Override

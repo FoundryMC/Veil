@@ -19,7 +19,7 @@ public interface VeilRenderer {
     /**
      * @return The set of shader pre-definitions. Changes are automatically synced the next frame
      */
-    default ShaderPreDefinitions getDefinitions() {
+    default ShaderPreDefinitions shaderDefinitions() {
         return this.getShaderManager().getDefinitions();
     }
 
