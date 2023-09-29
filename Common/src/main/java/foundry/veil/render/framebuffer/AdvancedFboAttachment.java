@@ -92,7 +92,7 @@ public interface AdvancedFboAttachment extends NativeResource {
      *     </tr>
      * </table>
      *
-     * @return OpneGL attachment point
+     * @return OpenGL attachment point
      */
     int getAttachmentType();
 

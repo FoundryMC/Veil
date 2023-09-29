@@ -1,44 +1,34 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
+plugins {
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle'
+    id 'org.spongepowered.mixin'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'kotlin'
 }
-apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'maven-publish'
+apply from: "https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-${kotlinForForgeVersion}.gradle"
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
-
-apply from: "https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-" +
-        "${kotlinForForgeVersion}.gradle"
-
-configurations {
-    library
-}
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
+
 mixin {
-    add sourceSets.main, "veil-forge-${minecraft_version}"
-    config "veil-common.mixins.json"
-    //config "veil.forge.mixins.json"
+    add(sourceSets.main, "${mod_id}.refmap.json")
+
+    config("${mod_id}.mixins.json")
+    config("${mod_id}-forge.mixins.json")
 }
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
-    
+
     if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
         // This location is hardcoded in Forge and can not be changed.
         // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
-        accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+        if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
+            accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+        }
         project.logger.debug('Forge Access Transformers are enabled for this project.')
     }
 
@@ -87,53 +77,51 @@ minecraft {
         }
     }
 }
+
 sourceSets.main.resources.srcDir 'src/generated/resources'
+jarJar.enable()
 
 dependencies {
-    implementation project(path: ':Common')
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":Common")
+    annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+
     compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
-    implementation(jarJar("gg.moonflower:molang-compiler:${molang_compiler_version}"){
-        jarJar.ranged(it, "[3.0.0,)")
-    })
-}
 
-tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
+    minecraftLibrary "gg.moonflower:molang-compiler:${molang_compiler_version}"
+    jarJar "gg.moonflower:molang-compiler:[3.0.0,)"
 }
-processResources {
-    from project(":Common").sourceSets.main.resources
-}
-
 
 sourceSets {
     main.kotlin.srcDirs += 'src/main/java'
     test.kotlin.srcDirs += 'src/main/java'
 }
 
-jarJar.enable()
+tasks.withType(JavaCompile).configureEach {
+    source(project(":Common").sourceSets.main.allSource)
+}
+tasks.withType(Javadoc).configureEach {
+    source(project(":Common").sourceSets.main.allJava)
+}
+tasks.named("sourcesJar", Jar) {
+    from(project(":Common").sourceSets.main.allSource)
+}
 
-reobf {
-    jarJar{}
+processResources {
+    from project(":Common").sourceSets.main.resources
 }
 
 jar.finalizedBy('reobfJar')
-tasks.withType(Javadoc) {
-    failOnError false
-    options.addStringOption('Xdoclint:none', '-quiet')
-    options.addStringOption('encoding', 'UTF-8')
-    options.addStringOption('charSet', 'UTF-8')
-}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            artifact jar
+            artifactId base.archivesName.get()
+            from components.java
+            fg.component(it)
         }
     }
     repositories {

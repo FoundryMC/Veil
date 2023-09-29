@@ -1,19 +1,22 @@
 plugins {
+    id 'idea'
     id 'java'
-    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'org.spongepowered.gradle.vanilla'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'kotlin'
 }
 
 archivesBaseName = "${mod_name}-common-${minecraft_version}"
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
-configurations {
-    implementation.extendsFrom(shadow)
-}
+
 minecraft {
     version(minecraft_version)
+    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
+        accessWideners(file("src/main/resources/${mod_id}.accesswidener"))
+    }
     runs {
         if (project.hasProperty('common_runs_enabled') ? project.findProperty('common_runs_enabled').toBoolean() : true) {
 
@@ -25,46 +28,25 @@ minecraft {
             }
         }
     }
-    accessWideners(project.file("src/main/resources/veil.accesswidener"))
 }
-project.ext.jomlVersion = "1.10.5"
+
 dependencies {
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+
     implementation("gg.moonflower:molang-compiler:${molang_compiler_version}")
 }
-shadowJar {
-    configurations = [project.configurations.shadow]
-    relocate 'org.joml', 'veil.joml'
-    mergeServiceFiles()
-}
-processResources {
 
-    def buildProps = project.properties.clone()
-
-    filesMatching(['pack.mcmeta']) {
-
-        expand buildProps
-    }
-}
-tasks.withType(Javadoc) {
-    failOnError false
-    options.addStringOption('Xdoclint:none', '-quiet')
-    options.addStringOption('encoding', 'UTF-8')
-    options.addStringOption('charSet', 'UTF-8')
-}
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
+            artifactId base.archivesName.get()
             from components.java
         }
     }
-
     repositories {
         maven {
             url "file://" + System.getenv("local_maven")

@@ -1,42 +1,30 @@
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        mavenCentral()
-    }
-    dependencies{
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0"
-    }
-}
-
 plugins {
-    id 'java'
-    id 'idea'
-    id "org.jetbrains.kotlin.jvm" version "1.7.21"
+    id 'fabric-loom' version '1.2-SNAPSHOT' apply(false)
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)' apply(false)
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply(false)
+    id "org.spongepowered.mixin" version "0.7-SNAPSHOT" apply(false)
+    id "org.jetbrains.kotlin.jvm" version "1.9.10" apply(false)
 }
 
-repositories {
-    mavenCentral()
-}
 tasks.withType(Javadoc) {
     failOnError false
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('encoding', 'UTF-8')
     options.addStringOption('charSet', 'UTF-8')
 }
+
 subprojects {
     
     apply plugin: 'java'
-    apply plugin: 'kotlin'
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
-
-    dependencies {
-        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    }
         
     jar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
+        }
         manifest {
             attributes([
                 'Specification-Title'     : mod_name,
@@ -72,13 +60,16 @@ subprojects {
         }
     }
 
-    sourceSets.main.kotlin.srcDirs += 'src/main/java'
-
-
     tasks.withType(JavaCompile).configureEach {
-    
+
         it.options.encoding = 'UTF-8'
-        it.options.release = 17
+        it.options.getRelease().set(17)
+    }
+
+    processResources {
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'mods.toml', '*.mixins.json']) {
+            expand project.properties
+        }
     }
 
     // Disables Gradle's custom module metadata from being published to maven. The
@@ -87,16 +78,5 @@ subprojects {
     tasks.withType(GenerateModuleMetadata) {
 
         enabled = false
-    }
-}
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "17"
     }
 }

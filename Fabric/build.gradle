@@ -1,32 +1,22 @@
 plugins {
-    id 'fabric-loom' version '1.2-SNAPSHOT'
-    id 'maven-publish'
+    id 'java'
     id 'idea'
+    id 'maven-publish'
+    id 'fabric-loom'
 }
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
-dependencies {
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.officialMojangMappings()
-//    modImplementation("net.fabricmc:fabric-language-kotlin:1.7.4+kotlin.1.6.21")
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    implementation 'org.jetbrains:annotations:24.0.1'
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
-    implementation project(":Common")
-    include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))
-}
-
-//compileKotlin {
-//    source(project(":Common").sourceSets.main.kotlin)
-//}
-
 
 loom {
+    if (project(":Common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
+        accessWidenerPath.set(project(":Common").file("src/main/resources/${mod_id}.accesswidener"))
+    }
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
+    }
     runs {
         client {
             client()
@@ -41,48 +31,44 @@ loom {
             runDir("run")
         }
     }
-
-    accessWidenerPath.set(project(":Common").file("src/main/resources/veil.accesswidener"))
-    mixin {
-        defaultRefmapName.set("veil.refmap.json")
-    }
 }
 
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    implementation 'org.jetbrains:annotations:24.0.1'
+    implementation project(":Common")
+
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
+    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.10.10+kotlin.1.9.10")
+    include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))
+}
+
+tasks.withType(JavaCompile).configureEach {
+    source(project(":Common").sourceSets.main.allSource)
+}
+tasks.withType(Javadoc).configureEach {
+    source(project(":Common").sourceSets.main.allJava)
+}
+tasks.named("sourcesJar", Jar) {
+    from(project(":Common").sourceSets.main.allSource)
+}
 
 processResources {
     from project(":Common").sourceSets.main.resources
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
 }
 
-tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${mod_name}" }
-    }
-}
-tasks.withType(Javadoc) {
-    failOnError false
-    options.addStringOption('Xdoclint:none', '-quiet')
-    options.addStringOption('encoding', 'UTF-8')
-    options.addStringOption('charSet', 'UTF-8')
-}
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
+            artifactId base.archivesName.get()
             from components.java
         }
     }
-
     repositories {
         maven {
             url "file://" + System.getenv("local_maven")

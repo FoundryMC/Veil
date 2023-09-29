@@ -1,40 +1,39 @@
 pluginManagement {
 
     repositories {
-        
+        gradlePluginPortal()
         maven {
-        
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+        maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
-        
         maven {
-        
             name = 'Sponge Snapshots'
             url = 'https://repo.spongepowered.org/repository/maven-public/'
         }
-        
         maven {
-        
             name = 'Quilt (Release)'
             url = 'https://maven.quiltmc.org/repository/release'
         }
-        
         maven {
-        
             name = 'Quilt (Snapshot)'
             url = 'https://maven.quiltmc.org/repository/snapshot'
         }
-
         maven {
             name = 'Cotton'
             url = 'https://server.bbkr.space/artifactory/libs-release/'
         }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        mavenCentral()
-        gradlePluginPortal()
     }
 }
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+}
+
 rootProject.name = 'Veil'
 // Quilt isn't 1.20, so it has to be excluded for now
 // include("Common", "Fabric", "Forge", "Quilt")
