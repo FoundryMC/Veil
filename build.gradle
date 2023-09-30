@@ -2,8 +2,9 @@ plugins {
     id 'fabric-loom' version '1.2-SNAPSHOT' apply(false)
     id 'net.minecraftforge.gradle' version '[6.0,6.2)' apply(false)
     id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply(false)
-    id "org.spongepowered.mixin" version "0.7-SNAPSHOT" apply(false)
-    id "org.jetbrains.kotlin.jvm" version "1.9.10" apply(false)
+    id "org.spongepowered.mixin" version '0.7-SNAPSHOT' apply(false)
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10' apply(false)
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply(false)
 }
 
 tasks.withType(Javadoc) {

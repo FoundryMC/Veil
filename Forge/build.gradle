@@ -4,9 +4,9 @@ plugins {
     id 'net.minecraftforge.gradle'
     id 'org.spongepowered.mixin'
     id 'org.jetbrains.kotlin.jvm'
+    id 'com.github.johnrengelman.shadow'
     id 'kotlin'
 }
-apply from: "https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-${kotlinForForgeVersion}.gradle"
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -16,9 +16,11 @@ if (System.getenv('BUILD_NUMBER') != null) {
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
 
-    config("${mod_id}.mixins.json")
+    config("${mod_id}-common.mixins.json")
     config("${mod_id}-forge.mixins.json")
 }
+
+jarJar.enable()
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
@@ -79,7 +81,19 @@ minecraft {
 }
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
-jarJar.enable()
+
+configurations {
+    shade
+    minecraftLibrary.extendsFrom shade
+}
+
+repositories {
+    // Add KFF Maven repository
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+    }
+}
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
@@ -91,8 +105,10 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
-    minecraftLibrary "gg.moonflower:molang-compiler:${molang_compiler_version}"
-    jarJar "gg.moonflower:molang-compiler:[3.0.0,)"
+    // Adds KFF as dependency and Kotlin libs
+    implementation 'thedarkcolour:kotlinforforge:4.4.0'
+
+    shade "gg.moonflower:molang-compiler:${molang_compiler_version}"
 }
 
 sourceSets {
@@ -115,6 +131,22 @@ processResources {
 }
 
 jar.finalizedBy('reobfJar')
+
+jar {
+    archiveClassifier = 'slim'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+
+reobf {
+    shadowJar {}
+}
 
 publishing {
     publications {

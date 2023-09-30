@@ -12,7 +12,6 @@ public class RenderStateShardRegistry {
      * In order to use this, create a shader that has a target and an auxtarget with the same ID as your {@link RenderTarget}.
      * You can now use this auxtarget as a sampler in your shader.
      * Remember to combine the output of your post-processing shader with the main {@link RenderTarget} in another post-processing shader.
-     * You can permanently add a post-processing shader to the screen by adding it to the {@link PostProcessingHandler}.
      * <p>
      *     Example:
      * </p>

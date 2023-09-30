@@ -37,6 +37,7 @@ public interface AdvancedFboAttachment extends NativeResource {
     /**
      * Returns the OpenGL attachment point. One of: <br>
      * <table>
+     *     <caption>All possible OpenGL attachment points</caption>
      *     <tr>
      *         <td>{@link GL30C#GL_COLOR_ATTACHMENT0 COLOR_ATTACHMENT0}</td>
      *         <td>{@link GL30C#GL_COLOR_ATTACHMENT1 COLOR_ATTACHMENT1}</td>
@@ -127,7 +128,7 @@ public interface AdvancedFboAttachment extends NativeResource {
     @Nullable String getName();
 
     /**
-     * A new identical attachment to this one.
+     * @return A new identical attachment to this one
      */
     AdvancedFboAttachment createCopy();
 }
