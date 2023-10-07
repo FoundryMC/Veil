@@ -11,6 +11,11 @@ public class Veil {
     public static final String MODID = "veil";
     public static final String NAME = "Veil";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+    public static final boolean DEBUG;
+
+    static {
+        DEBUG = System.getProperty("veil.debug") != null;
+    }
 
     public static void init() {
         LOGGER.info("Veil is initializing.");
