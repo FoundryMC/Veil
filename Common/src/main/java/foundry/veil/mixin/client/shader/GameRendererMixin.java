@@ -28,8 +28,9 @@ public class GameRendererMixin {
     static Logger LOGGER;
 
     /**
+     * This is needed to replace the shader instance value when shader replacement is used
+     *
      * @author Ocelot
-     * @reason This is needed to replace the shader instance value when shader replacement is used
      */
     @Redirect(method = "reloadShaders", at = @At(value = "NEW", args = "class=net/minecraft/client/renderer/ShaderInstance"))
     public ShaderInstance veil$replaceShaders(ResourceProvider resourceProvider, String name, VertexFormat vertexFormat) throws IOException {
