@@ -1,5 +1,6 @@
 package foundry.veil.mixin.debug;
 
+import foundry.veil.Veil;
 import net.minecraft.client.main.Main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,6 +12,8 @@ public class MainMixin {
 
     @Inject(method = "main", at = @At("HEAD"), remap = false)
     private static void main(String[] pArgs, CallbackInfo ci) {
-//        System.loadLibrary("renderdoc");
+        if (Veil.RENDER_DOC) {
+            System.loadLibrary("renderdoc");
+        }
     }
 }

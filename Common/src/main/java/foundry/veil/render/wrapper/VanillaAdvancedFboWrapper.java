@@ -16,6 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
+import static org.lwjgl.opengl.GL11.GL_BACK;
+import static org.lwjgl.opengl.GL11.GL_FRONT;
+import static org.lwjgl.opengl.GL11.glDrawBuffer;
+import static org.lwjgl.opengl.GL30.glBlitFramebuffer;
 import static org.lwjgl.opengl.GL30C.*;
 
 /**
@@ -86,7 +90,9 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
 
         this.bindRead();
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+        glReadBuffer(GL_BACK);
         glBlitFramebuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, width, height, mask, filtering);
+        glDrawBuffer(GL_FRONT);
         AdvancedFbo.unbind();
     }
 
@@ -98,10 +104,10 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
 
         this.bindRead();
         AdvancedFbo.unbindDraw();
-        glDrawBuffer(GL_BACK);
+        glReadBuffer(GL_BACK);
         glBlitFramebuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, window.getWidth(), window.getHeight(), mask, filtering);
         glDrawBuffer(GL_FRONT);
-        AdvancedFbo.unbindRead();
+        AdvancedFbo.unbind();
     }
 
     @Override

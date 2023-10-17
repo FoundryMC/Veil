@@ -53,9 +53,6 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.context = new PostPipelineContext(framebufferManager, textureManager, shaderManager);
         this.activePipelines = new LinkedList<>();
         this.pipelines = new HashMap<>();
-        this.add(new ResourceLocation(Veil.MODID, "fog"));
-        this.add(new ResourceLocation(Veil.MODID, "tonemap"));
-        this.add(new ResourceLocation(Veil.MODID, "vignette"));
     }
 
     /**

@@ -32,7 +32,7 @@ import java.util.concurrent.Executor;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11C.glGetInteger;
 import static org.lwjgl.opengl.GL30C.GL_MAX_COLOR_ATTACHMENTS;
 import static org.lwjgl.opengl.GL31C.GL_MAX_UNIFORM_BUFFER_BINDINGS;
 import static org.lwjgl.opengl.GL43C.GL_MAX_FRAMEBUFFER_HEIGHT;
@@ -276,12 +276,19 @@ public final class VeilRenderSystem {
 
         // TODO deferred renderer
 
-        AdvancedFbo main = AdvancedFbo.getMainFramebuffer();
+        if (postProcessingManager.getActivePipelines().isEmpty()) {
+            return;
+        }
+
         AdvancedFbo postFramebuffer = framebufferManager.getFramebuffer(VeilFramebuffers.POST);
+
+        if (postFramebuffer != null) {
+            AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(postFramebuffer);
+        }
 
         postProcessingManager.runPipeline();
         if (postFramebuffer != null) {
-            postFramebuffer.resolveToAdvancedFbo(main, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            postFramebuffer.resolveToScreen();
         }
     }
 }

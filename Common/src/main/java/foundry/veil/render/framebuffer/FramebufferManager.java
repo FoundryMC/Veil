@@ -19,7 +19,9 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>Manages all framebuffers and custom definitions specified in files.
@@ -45,7 +47,6 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     }, location -> "temp".equals(location.getNamespace()) ? location.getPath() : location.toString()).stable();
 
     private final Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions;
-    private final Set<ResourceLocation> staticFramebuffers;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
     private final Map<ResourceLocation, AdvancedFbo> framebuffersView;
 
@@ -55,7 +56,6 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     public FramebufferManager() {
         super(FramebufferDefinition.CODEC, FileToIdConverter.json("pinwheel/framebuffers"));
         this.framebufferDefinitions = new HashMap<>();
-        this.staticFramebuffers = new HashSet<>();
         this.framebuffers = new HashMap<>();
         this.framebuffersView = Collections.unmodifiableMap(this.framebuffers);
     }
@@ -83,37 +83,14 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     }
 
     /**
-     * Adds a new static buffer. Static buffers must be freed and cleared manually.
-     *
-     * @param name The name of the buffer
-     */
-    public void addStatic(ResourceLocation name) {
-        this.staticFramebuffers.add(name);
-    }
-
-    /**
-     * Removes the specified static fbo, and frees it.
-     *
-     * @param name The name of the buffer to remove
-     */
-    public void removeStatic(ResourceLocation name) {
-        AdvancedFbo fbo = this.framebuffers.remove(name);
-        if (fbo != null) {
-            fbo.free();
-        }
-    }
-
-    /**
      * Clears all framebuffers at the start of the next frame.
      */
     @ApiStatus.Internal
     public void clear() {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
         this.framebuffers.forEach((name, fbo) -> {
-            if (!this.staticFramebuffers.contains(name)) {
-                fbo.bindDraw(false);
-                fbo.clear();
-            }
+            fbo.bindDraw(false);
+            fbo.clear();
         });
         AdvancedFbo.unbindDraw();
     }
@@ -146,9 +123,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
 
     @Override
     public void free() {
-        this.framebuffers.keySet().removeAll(this.staticFramebuffers);
         this.framebuffers.values().forEach(AdvancedFbo::free);
-        this.staticFramebuffers.clear();
         this.framebuffers.clear();
     }
 }

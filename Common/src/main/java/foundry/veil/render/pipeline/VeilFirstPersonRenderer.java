@@ -25,24 +25,25 @@ public final class VeilFirstPersonRenderer {
     private VeilFirstPersonRenderer() {
     }
 
+    // TODO re-enable first person if needed
     public static void setup() {
-        VeilRenderer renderer = VeilRenderSystem.renderer();
-        AdvancedFbo buffer = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.FIRST_PERSON);
-        pipeline = renderer.getPostProcessingManager().getPipeline(FIRST_PERSON);
-
-        if (pipeline == null || buffer == null) {
-            LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
-            return;
-        }
-
-        buffer.bind(false);
+//        VeilRenderer renderer = VeilRenderSystem.renderer();
+//        AdvancedFbo buffer = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.FIRST_PERSON);
+//        pipeline = renderer.getPostProcessingManager().getPipeline(FIRST_PERSON);
+//
+//        if (pipeline == null || buffer == null) {
+//            LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
+//            return;
+//        }
+//
+//        buffer.bind(false);
     }
 
     public static void blit() {
-        if (pipeline != null) {
-            VeilRenderSystem.renderer().getPostProcessingManager().runPipeline(pipeline);
-        }
-
-        AdvancedFbo.unbind();
+//        if (pipeline != null) {
+//            VeilRenderSystem.renderer().getPostProcessingManager().runPipeline(pipeline);
+//        }
+//
+//        AdvancedFbo.unbind();
     }
 }

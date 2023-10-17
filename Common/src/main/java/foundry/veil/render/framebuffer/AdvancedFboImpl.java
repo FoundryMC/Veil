@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.render.wrapper.VanillaAdvancedFboWrapper;
 import foundry.veil.render.wrapper.VeilRenderBridge;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
@@ -19,6 +20,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static org.lwjgl.opengl.GL11C.GL_OUT_OF_MEMORY;
+import static org.lwjgl.opengl.GL11C.glReadBuffer;
 import static org.lwjgl.opengl.GL20C.glDrawBuffers;
 import static org.lwjgl.opengl.GL30.GL_BACK;
 import static org.lwjgl.opengl.GL30.GL_COLOR_BUFFER_BIT;
@@ -161,9 +163,12 @@ public class AdvancedFboImpl implements AdvancedFbo {
     @Override
     public void resolveToFbo(int id, int width, int height, int mask, int filtering) {
         RenderSystem.assertOnRenderThreadOrInit();
+
         this.bindRead();
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+        glDrawBuffer(GL_BACK);
         glBlitFramebuffer(0, 0, this.width, this.height, 0, 0, width, height, mask, filtering);
+        glDrawBuffer(GL_FRONT);
         AdvancedFbo.unbind();
     }
 
@@ -171,6 +176,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
     public void resolveToScreen(int mask, int filtering) {
         RenderSystem.assertOnRenderThreadOrInit();
         Window window = Minecraft.getInstance().getWindow();
+
         this.bindRead();
         AdvancedFbo.unbindDraw();
         glDrawBuffer(GL_BACK);
@@ -251,12 +257,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
         return this.wrapper.get();
     }
 
-    /**
-     * Copies the attachments from the specified render target.
-     *
-     * @param parent The parent to copy from
-     * @return A new builder
-     */
+    @ApiStatus.Internal
     public static Builder copy(RenderTarget parent) {
         if (parent instanceof Wrapper wrapper) {
             AdvancedFbo fbo = wrapper.fbo();
