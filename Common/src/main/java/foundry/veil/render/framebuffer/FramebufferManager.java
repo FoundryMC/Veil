@@ -23,6 +23,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+
 /**
  * <p>Manages all framebuffers and custom definitions specified in files.
  * All framebuffers except for the main one can be customized from the
@@ -93,7 +96,9 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
             fbo.bindDraw(false);
             fbo.clear();
         });
-        AdvancedFbo.unbindDraw();
+
+        // Manual unbind to restore the default mc state
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     /**
