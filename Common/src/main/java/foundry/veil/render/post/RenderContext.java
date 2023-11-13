@@ -1,5 +1,6 @@
 package foundry.veil.render.post;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.shader.ShaderManager;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -12,7 +13,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 public interface RenderContext {
 
     /**
-     * Draws a quad onto the full screen.
+     * Draws a quad onto the full screen using {@link DefaultVertexFormat#POSITION}.
      */
     void drawScreenQuad();
 

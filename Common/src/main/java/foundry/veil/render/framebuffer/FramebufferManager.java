@@ -60,6 +60,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
         this.framebuffersView = Collections.unmodifiableMap(this.framebuffers);
     }
 
+    @ApiStatus.Internal
     public void resizeFramebuffers(int width, int height) {
         this.free();
 

@@ -2,7 +2,6 @@ package foundry.veil.render.wrapper;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.mixin.client.pipeline.RenderTargetAccessor;
 import foundry.veil.render.framebuffer.AdvancedFbo;
@@ -16,10 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import static org.lwjgl.opengl.GL11.GL_BACK;
-import static org.lwjgl.opengl.GL11.GL_FRONT;
-import static org.lwjgl.opengl.GL11.glDrawBuffer;
-import static org.lwjgl.opengl.GL30.glBlitFramebuffer;
 import static org.lwjgl.opengl.GL30C.*;
 
 /**
@@ -35,7 +30,7 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
     private final Supplier<AttachmentWrapper> depthBuffer;
 
     VanillaAdvancedFboWrapper(Supplier<RenderTarget> renderTargetSupplier) {
-        this.renderTargetSupplier = Suppliers.memoize(renderTargetSupplier::get);
+        this.renderTargetSupplier = renderTargetSupplier;
         this.colorBuffer = Suppliers.memoize(() -> new AttachmentWrapper(this, () -> this.toRenderTarget().getColorTextureId(), GL_COLOR_ATTACHMENT0));
         this.depthBuffer = Suppliers.memoize(() -> new AttachmentWrapper(this, () -> this.toRenderTarget().getDepthTextureId(), GL_DEPTH_ATTACHMENT));
     }
@@ -81,33 +76,6 @@ public class VanillaAdvancedFboWrapper implements AdvancedFbo {
         if (setViewport) {
             RenderSystem.viewport(0, 0, renderTarget.viewWidth, renderTarget.viewHeight);
         }
-    }
-
-    @Override
-    public void resolveToFbo(int id, int width, int height, int mask, int filtering) {
-        RenderSystem.assertOnRenderThreadOrInit();
-        RenderTarget renderTarget = this.toRenderTarget();
-
-        this.bindRead();
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
-        glReadBuffer(GL_BACK);
-        glBlitFramebuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, width, height, mask, filtering);
-        glDrawBuffer(GL_FRONT);
-        AdvancedFbo.unbind();
-    }
-
-    @Override
-    public void resolveToScreen(int mask, int filtering) {
-        RenderSystem.assertOnRenderThreadOrInit();
-        RenderTarget renderTarget = this.toRenderTarget();
-        Window window = Minecraft.getInstance().getWindow();
-
-        this.bindRead();
-        AdvancedFbo.unbindDraw();
-        glReadBuffer(GL_BACK);
-        glBlitFramebuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, window.getWidth(), window.getHeight(), mask, filtering);
-        glDrawBuffer(GL_FRONT);
-        AdvancedFbo.unbind();
     }
 
     @Override

@@ -161,31 +161,6 @@ public class AdvancedFboImpl implements AdvancedFbo {
     }
 
     @Override
-    public void resolveToFbo(int id, int width, int height, int mask, int filtering) {
-        RenderSystem.assertOnRenderThreadOrInit();
-
-        this.bindRead();
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
-        glDrawBuffer(GL_BACK);
-        glBlitFramebuffer(0, 0, this.width, this.height, 0, 0, width, height, mask, filtering);
-        glDrawBuffer(GL_FRONT);
-        AdvancedFbo.unbind();
-    }
-
-    @Override
-    public void resolveToScreen(int mask, int filtering) {
-        RenderSystem.assertOnRenderThreadOrInit();
-        Window window = Minecraft.getInstance().getWindow();
-
-        this.bindRead();
-        AdvancedFbo.unbindDraw();
-        glDrawBuffer(GL_BACK);
-        glBlitFramebuffer(0, 0, this.width, this.height, 0, 0, window.getWidth(), window.getHeight(), mask, filtering);
-        glDrawBuffer(GL_FRONT);
-        AdvancedFbo.unbindRead();
-    }
-
-    @Override
     public void free() {
         if (this.id == -1) {
             return;
@@ -248,8 +223,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
 
     @Override
     public AdvancedFboAttachment getDepthAttachment() {
-        Validate.isTrue(this.hasDepthAttachment(), "Depth attachment does not exist.");
-        return Objects.requireNonNull(this.depthAttachment);
+        return Objects.requireNonNull(this.depthAttachment, "Depth attachment does not exist.");
     }
 
     @Override

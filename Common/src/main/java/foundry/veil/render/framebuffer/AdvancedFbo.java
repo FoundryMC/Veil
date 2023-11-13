@@ -139,7 +139,16 @@ public interface AdvancedFbo extends NativeResource {
      * @param mask      The buffers to copy into the provided framebuffer
      * @param filtering The filter to use if this framebuffer and the provided framebuffer are different sizes
      */
-    void resolveToFbo(int id, int width, int height, int mask, int filtering);
+    default void resolveToFbo(int id, int width, int height, int mask, int filtering) {
+        RenderSystem.assertOnRenderThreadOrInit();
+
+        this.bindRead();
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+        glDrawBuffer(GL_BACK);
+        glBlitFramebuffer(0, 0, this.getWidth(), this.getHeight(), 0, 0, width, height, mask, filtering);
+        glDrawBuffer(GL_FRONT);
+        AdvancedFbo.unbind();
+    }
 
     /**
      * Resolves this framebuffer to the provided advanced framebuffer as the target.
@@ -202,7 +211,17 @@ public interface AdvancedFbo extends NativeResource {
      * @param mask      The buffers to copy into the provided framebuffer
      * @param filtering The filter to use if this framebuffer and the provided framebuffer are different sizes
      */
-    void resolveToScreen(int mask, int filtering);
+    default void resolveToScreen(int mask, int filtering) {
+        RenderSystem.assertOnRenderThreadOrInit();
+        Window window = Minecraft.getInstance().getWindow();
+
+        this.bindRead();
+        AdvancedFbo.unbindDraw();
+        glDrawBuffer(GL_BACK);
+        glBlitFramebuffer(0, 0, this.getWidth(), this.getHeight(), 0, 0, window.getWidth(), window.getHeight(), mask, filtering);
+        glDrawBuffer(GL_FRONT);
+        AdvancedFbo.unbindRead();
+    }
 
     /**
      * @return The id of this framebuffer or -1 if it has been deleted
