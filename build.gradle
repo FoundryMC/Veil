@@ -5,15 +5,30 @@ plugins {
     id "org.spongepowered.mixin" version '0.7-SNAPSHOT' apply(false)
     id 'org.jetbrains.kotlin.jvm' version '1.9.10' apply(false)
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply(false)
+    id 'witixin.accessconverter' version '1.0.+'
 }
-
+apply plugin: 'java'
 tasks.withType(Javadoc) {
     failOnError false
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('encoding', 'UTF-8')
     options.addStringOption('charSet', 'UTF-8')
 }
+dependencies {
+    implementation("witixin.accessconverter:AccessConverter:1.0.0")
+}
 
+accessConverter {
+    mcVersion "1.20.1"
+    convertAT {
+        //optional sorts the input file
+        it.convertFrom(rootProject.file("/quasar-forge-accesstransformer.cfg"))
+        it.saveConversionTo(rootProject.file("outputwidener.accesswidener"))
+        it.sortInput(true)
+    }
+    //It is not recommended to have both configurations enabled nor to have one of them depend on the files of the other one.
+    //Keep it mind convertAW is fired first and then convertAT
+}
 subprojects {
     
     apply plugin: 'java'
@@ -45,6 +60,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        gradlePluginPortal()
         maven {
             name = 'Sponge / Mixin'
             url = 'https://repo.spongepowered.org/repository/maven-public/'

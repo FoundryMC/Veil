@@ -32,7 +32,18 @@ loom {
         }
     }
 }
-
+repositories {
+    maven { url = "https://mvn.devos.one/snapshots/" }
+    maven { url = "https://jitpack.io/" } // for Porting Lib: Mixin Extras, Fabric ASM
+    maven { url = "https://cursemaven.com" } // Forge Config API Port
+    maven { url = "https://api.modrinth.com/maven" } // LazyDFU, Sodium, Sandwichable
+    maven { url = "https://maven.terraformersmc.com/" } // Mod Menu, Trinkets
+    maven { // Reach Entity Attributes
+        url = "https://maven.jamieswhiteshirt.com/libs-release"
+        content { includeGroup("com.jamieswhiteshirt") }
+    }
+    maven { url = "https://maven.ladysnake.org/releases" } // CCA, for Trinkets
+}
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
@@ -46,6 +57,16 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-language-kotlin:1.10.10+kotlin.1.9.10")
     include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))
+    include(implementation(group: 'io.github.spair', name: 'imgui-java-binding', version: '1.86.10'))
+    include(implementation("io.github.spair:imgui-java-lwjgl3:1.86.10") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    })
+    include(implementation(group: 'io.github.spair', name: 'imgui-java-natives-linux', version: '1.86.10'))
+    include(implementation(group: 'io.github.spair', name: 'imgui-java-natives-macos', version: '1.86.10'))
+    include(implementation(group: 'io.github.spair', name: 'imgui-java-natives-windows', version: '1.86.10'))
+    modImplementation(include("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:2.1.1148+1.20-entity-refactor"))
+    include modImplementation("com.jamieswhiteshirt:reach-entity-attributes:2.4.0")
 }
 
 tasks.withType(JavaCompile).configureEach {

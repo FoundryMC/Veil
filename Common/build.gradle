@@ -38,6 +38,14 @@ dependencies {
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
     implementation("gg.moonflower:molang-compiler:${molang_compiler_version}")
+    (implementation(group: 'io.github.spair', name: 'imgui-java-binding', version: '1.86.10'))
+    (implementation("io.github.spair:imgui-java-lwjgl3:1.86.10") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    })
+    (implementation(group: 'io.github.spair', name: 'imgui-java-natives-linux', version: '1.86.10'))
+    (implementation(group: 'io.github.spair', name: 'imgui-java-natives-macos', version: '1.86.10'))
+    (implementation(group: 'io.github.spair', name: 'imgui-java-natives-windows', version: '1.86.10'))
 }
 
 publishing {

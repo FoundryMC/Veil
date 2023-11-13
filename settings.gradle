@@ -27,6 +27,15 @@ pluginManagement {
             url = 'https://server.bbkr.space/artifactory/libs-release/'
         }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven {
+            url "https://jitpack.io"
+            content {
+                includeGroupByRegex "com\\.github.*"
+            }
+        }
+        maven { url = "https://mvn.devos.one/snapshots/" }
+        mavenLocal()
+
     }
 }
 

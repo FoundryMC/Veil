@@ -109,6 +109,15 @@ dependencies {
     implementation 'thedarkcolour:kotlinforforge:4.4.0'
 
     shade "gg.moonflower:molang-compiler:${molang_compiler_version}"
+    jarJar "gg.moonflower:molang-compiler:[3.0.0,)"
+    (jarJar(group: 'io.github.spair', name: 'imgui-java-binding', version: '1.86.10'))
+    (jarJar("io.github.spair:imgui-java-lwjgl3:1.86.10") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    })
+    (jarJar(group: 'io.github.spair', name: 'imgui-java-natives-linux', version: '1.86.10'))
+    (jarJar(group: 'io.github.spair', name: 'imgui-java-natives-macos', version: '1.86.10'))
+    (jarJar(group: 'io.github.spair', name: 'imgui-java-natives-windows', version: '1.86.10'))
 }
 
 sourceSets {
