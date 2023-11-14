@@ -5,6 +5,7 @@ plugins {
     id "org.spongepowered.mixin" version '0.7-SNAPSHOT' apply(false)
     id 'org.jetbrains.kotlin.jvm' version '1.9.10' apply(false)
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply(false)
+    id "io.github.juuxel.loom-quiltflower" version "1.7.1" apply(false)
 }
 
 tasks.withType(Javadoc) {

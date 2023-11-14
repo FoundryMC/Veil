@@ -41,6 +41,11 @@ public class VeilImGuiImpl implements VeilImGui {
         ImGui.begin("Test");
         ImGui.text("string cheese");
         ImGui.end();
+
+        ImGui.showDemoWindow();
+        if (ImGui.beginMainMenuBar()) {
+            ImGui.endMainMenuBar();
+        }
     }
 
     @Override
@@ -71,31 +76,40 @@ public class VeilImGuiImpl implements VeilImGui {
     }
 
     @Override
-    public void mouseButtonCallback(long window, int button, int action, int mods) {
+    public boolean mouseButtonCallback(long window, int button, int action, int mods) {
         if (this.window == window) {
             this.implGlfw.mouseButtonCallback(window, button, action, mods);
         }
+        return ImGui.getIO().getWantCaptureMouse();
     }
 
     @Override
-    public void scrollCallback(long window, double xOffset, double yOffset) {
+    public boolean scrollCallback(long window, double xOffset, double yOffset) {
         if (this.window == window) {
             this.implGlfw.scrollCallback(window, xOffset, yOffset);
         }
+        return ImGui.getIO().getWantCaptureMouse();
     }
 
     @Override
-    public void keyCallback(long window, int key, int scancode, int action, int mods) {
+    public boolean keyCallback(long window, int key, int scancode, int action, int mods) {
         if (this.window == window) {
             this.implGlfw.keyCallback(window, key, scancode, action, mods);
         }
+        return ImGui.getIO().getWantCaptureKeyboard();
     }
 
     @Override
-    public void charCallback(long window, int codepoint) {
+    public boolean charCallback(long window, int codepoint) {
         if (this.window == window) {
             this.implGlfw.charCallback(window, codepoint);
         }
+        return ImGui.getIO().getWantCaptureKeyboard();
+    }
+
+    @Override
+    public boolean shouldHideMouse() {
+        return ImGui.getIO().getWantCaptureMouse();
     }
 
     @Override

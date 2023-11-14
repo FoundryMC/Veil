@@ -22,19 +22,28 @@ public class InactiveVeilImGuiImpl implements VeilImGui {
     }
 
     @Override
-    public void mouseButtonCallback(long window, int button, int action, int mods) {
+    public boolean mouseButtonCallback(long window, int button, int action, int mods) {
+        return false;
     }
 
     @Override
-    public void scrollCallback(long window, double xOffset, double yOffset) {
+    public boolean scrollCallback(long window, double xOffset, double yOffset) {
+        return false;
     }
 
     @Override
-    public void keyCallback(long window, int key, int scancode, int action, int mods) {
+    public boolean keyCallback(long window, int key, int scancode, int action, int mods) {
+        return false;
     }
 
     @Override
-    public void charCallback(long window, int codepoint) {
+    public boolean charCallback(long window, int codepoint) {
+        return false;
+    }
+
+    @Override
+    public boolean shouldHideMouse() {
+        return false;
     }
 
     @Override

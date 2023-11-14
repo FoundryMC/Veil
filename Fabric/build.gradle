@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'fabric-loom'
+    id 'io.github.juuxel.loom-quiltflower'
 }
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"

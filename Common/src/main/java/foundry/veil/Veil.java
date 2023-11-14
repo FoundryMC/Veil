@@ -16,7 +16,8 @@ public class Veil {
     public static final boolean IMGUI;
 
     static {
-        boolean arm = System.getProperty("os.arch").equals("arm") || System.getProperty("os.arch").startsWith("aarch64");
+        boolean arm = System.getProperty("os.arch").equals("arm") ||
+            System.getProperty("os.arch").startsWith("aarch64");
         DEBUG = System.getProperty("veil.debug") != null;
         RENDER_DOC = System.getProperty("veil.renderDoc") != null;
         IMGUI = !arm && System.getProperty("veil.disableImgui") == null;
@@ -27,7 +28,7 @@ public class Veil {
         if (DEBUG) {
             LOGGER.info("Veil Debug Enabled");
         }
-        if(IMGUI) {
+        if (!IMGUI) {
             LOGGER.info("ImGui Disabled");
         }
         VeilMolang.set(MolangCompiler.create(MolangCompiler.DEFAULT_FLAGS, Veil.class.getClassLoader()));
