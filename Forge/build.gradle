@@ -96,7 +96,7 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    minecraft "net.minecraftforge:forge:$minecraft_version-$forge_version"
     compileOnly project(":Common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
@@ -108,7 +108,17 @@ dependencies {
     // Adds KFF as dependency and Kotlin libs
     implementation 'thedarkcolour:kotlinforforge:4.4.0'
 
-    shade "gg.moonflower:molang-compiler:${molang_compiler_version}"
+    shade "gg.moonflower:molang-compiler:$molang_compiler_version"
+
+    shade "io.github.spair:imgui-java-binding:$imgui_version"
+    shade ("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+
+    shade "io.github.spair:imgui-java-natives-linux:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 }
 
 sourceSets {

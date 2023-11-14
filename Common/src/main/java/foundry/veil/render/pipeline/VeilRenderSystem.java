@@ -92,8 +92,9 @@ public final class VeilRenderSystem {
             throw new IllegalStateException("Client resource manager is " + client.getResourceManager().getClass());
         }
 
+        Window window = client.getWindow();
         TextureManager textureManager = client.getTextureManager();
-        renderer = new VeilRendererImpl(resourceManager, textureManager);
+        renderer = new VeilRendererImpl(resourceManager, window, textureManager);
     }
 
     /**
@@ -244,6 +245,11 @@ public final class VeilRenderSystem {
     // Internal
 
     @ApiStatus.Internal
+    public static void beginFrame() {
+        renderer.getImGui().begin();
+    }
+
+    @ApiStatus.Internal
     public static void flipFrame(long windowId) {
         Window window = Minecraft.getInstance().getWindow();
         if (window.getWindow() != windowId) {
@@ -251,6 +257,7 @@ public final class VeilRenderSystem {
         }
 
         renderer.getFramebufferManager().clear();
+        renderer.getImGui().end();
     }
 
     @ApiStatus.Internal
