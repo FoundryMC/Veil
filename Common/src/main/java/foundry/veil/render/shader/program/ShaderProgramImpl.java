@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
@@ -107,8 +108,10 @@ public class ShaderProgramImpl implements ShaderProgram {
             // Fragment shaders aren't strictly necessary if the fragment output isn't used,
             // however mac shaders just don't work without a fragment, shader. This adds a "dummy" fragment shader
             // on mac specifically for all rendering shaders.
-            if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) && !shaders.containsKey(GL_FRAGMENT_SHADER)) {
-                CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER, "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
+            if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) &&
+                !shaders.containsKey(GL_FRAGMENT_SHADER)) {
+                CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER,
+                    "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
                 glAttachShader(this.program, shader.id());
                 this.shaders.add(GL_FRAGMENT_SHADER);
                 compiledShaders.add(shader);
@@ -188,11 +191,13 @@ public class ShaderProgramImpl implements ShaderProgram {
             this.textureSources.forEach((name, source) -> this.addSampler(name, source.getId(context)));
         }
 
-        if (this.textures.isEmpty()) {
-            return sampler;
-        }
-
         int activeTexture = GlStateManager._getActiveTexture();
+
+        // Bind missing texture to 0
+        RenderSystem.activeTexture(GL_TEXTURE0);
+        RenderSystem.bindTexture(MissingTextureAtlasSprite.getTexture().getId());
+        sampler++;
+
         for (Map.Entry<CharSequence, Integer> entry : this.textures.entrySet()) {
             if (this.getUniform(entry.getKey()) == -1) {
                 continue;
@@ -228,11 +233,11 @@ public class ShaderProgramImpl implements ShaderProgram {
     public static class Wrapper extends ShaderInstance {
 
         private static final byte[] DUMMY_SHADER = """
-                {
-                    "vertex": "dummy",
-                    "fragment": "dummy"
-                }
-                """.getBytes(StandardCharsets.UTF_8);
+            {
+                "vertex": "dummy",
+                "fragment": "dummy"
+            }
+            """.getBytes(StandardCharsets.UTF_8);
         private static final Resource RESOURCE = new Resource(null, () -> new ByteArrayInputStream(DUMMY_SHADER)) {
             @Override
             public PackResources source() {
@@ -295,7 +300,8 @@ public class ShaderProgramImpl implements ShaderProgram {
             if (this.program != null && this.program.getUniform(name) == -1) {
                 return null;
             }
-            return (UniformWrapper) this.uniformMap.computeIfAbsent(name, unused -> new UniformWrapper(() -> this.program, name));
+            return (UniformWrapper) this.uniformMap.computeIfAbsent(name,
+                unused -> new UniformWrapper(() -> this.program, name));
         }
 
         @Override
@@ -436,12 +442,14 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         @Override
-        public void setMat3x3(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7, float $$8) {
+        public void setMat3x3(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7,
+                              float $$8) {
             throw new UnsupportedOperationException("Use #set(Matrix4fc) or #set(Matrix3fc) instead");
         }
 
         @Override
-        public void setMat3x4(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7, float $$8, float $$9, float $$10, float $$11) {
+        public void setMat3x4(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7,
+                              float $$8, float $$9, float $$10, float $$11) {
             throw new UnsupportedOperationException("Use #set(Matrix4fc) or #set(Matrix3fc) instead");
         }
 
@@ -451,12 +459,15 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         @Override
-        public void setMat4x3(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7, float $$8, float $$9, float $$10, float $$11) {
+        public void setMat4x3(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7,
+                              float $$8, float $$9, float $$10, float $$11) {
             throw new UnsupportedOperationException("Use #set(Matrix4fc) or #set(Matrix3fc) instead");
         }
 
         @Override
-        public void setMat4x4(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7, float $$8, float $$9, float $$10, float $$11, float $$12, float $$13, float $$14, float $$15) {
+        public void setMat4x4(float $$0, float $$1, float $$2, float $$3, float $$4, float $$5, float $$6, float $$7,
+                              float $$8, float $$9, float $$10, float $$11, float $$12, float $$13, float $$14,
+                              float $$15) {
             throw new UnsupportedOperationException("Use #set(Matrix4fc) or #set(Matrix3fc) instead");
         }
 
