@@ -10,11 +10,11 @@
     "CrossbowItemMixin",
     "InstrumentItemMixin",
     "TridentItemMixin",
-    "client.ReloadableResourceManagerAccessor"
+    "client.pipeline.ReloadableResourceManagerAccessor"
   ],
   "client": [
     "client.AgeableListModelMixin",
-    "client.GameRendererMixin",
+    "client.pipeline.GameRendererMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandRendererMixin",
     "client.ModelPartMixin",

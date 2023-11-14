@@ -36,16 +36,6 @@ public class VeilImGuiImpl implements VeilImGui {
     public void begin() {
         this.implGlfw.newFrame();
         ImGui.newFrame();
-
-        // Test code
-        ImGui.begin("Test");
-        ImGui.text("string cheese");
-        ImGui.end();
-
-        ImGui.showDemoWindow();
-        if (ImGui.beginMainMenuBar()) {
-            ImGui.endMainMenuBar();
-        }
     }
 
     @Override

@@ -76,7 +76,7 @@ public interface PostPipeline extends NativeResource {
          * @param name The name of the framebuffer to retrieve
          * @return The framebuffer with that id or the main framebuffer
          */
-        default AdvancedFbo getFramebufferOrMain(ResourceLocation name) {
+        default AdvancedFbo getFramebufferOrDraw(ResourceLocation name) {
             AdvancedFbo fbo = this.getFramebuffer(name);
             return fbo != null ? fbo : this.getDrawFramebuffer();
         }

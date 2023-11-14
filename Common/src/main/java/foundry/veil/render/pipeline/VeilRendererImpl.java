@@ -1,6 +1,6 @@
 package foundry.veil.render.pipeline;
 
-import foundry.veil.mixin.client.ReloadableResourceManagerAccessor;
+import foundry.veil.mixin.client.pipeline.ReloadableResourceManagerAccessor;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
 import foundry.veil.render.framebuffer.FramebufferManager;

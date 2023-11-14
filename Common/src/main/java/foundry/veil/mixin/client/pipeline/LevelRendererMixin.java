@@ -72,13 +72,12 @@ public class LevelRendererMixin {
         for (RenderTarget target : RenderTargetRegistry.renderTargetObjects.values()) {
             if (target == null) return;
             target.destroyBuffers();
-            target = null;
         }
     }
 
     @Inject(method = "prepareCullFrustum", at = @At("HEAD"))
     public void veil$setupLevelCamera(PoseStack modelViewStack, Vec3 pos, Matrix4f projection, CallbackInfo ci) {
         CameraMatrices matrices = VeilRenderSystem.renderer().getCameraMatrices();
-        matrices.update(RenderSystem.getProjectionMatrix(), modelViewStack.last().pose(), this.tempCameraPos.set(pos.x(), pos.y(), pos.z()), 0.05F, Minecraft.getInstance().gameRenderer.getDepthFar());
+        matrices.update(projection, modelViewStack.last().pose(), this.tempCameraPos.set(pos.x(), pos.y(), pos.z()), 0.05F, Minecraft.getInstance().gameRenderer.getDepthFar());
     }
 }

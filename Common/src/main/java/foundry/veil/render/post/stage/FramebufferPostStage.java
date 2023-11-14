@@ -40,15 +40,15 @@ public abstract class FramebufferPostStage implements PostPipeline {
      */
     protected void setupFramebuffer(Context context, ShaderProgram shader) {
         AdvancedFbo in = this.in != null ? context.getFramebuffer(this.in) : null;
-        AdvancedFbo out = context.getFramebufferOrMain(this.out);
+        AdvancedFbo out = context.getFramebufferOrDraw(this.out);
 
         if (in != null) {
             shader.setFramebufferSamplers(in);
         }
 
         out.bind(true);
-        RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
         if (this.clear) {
+            RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
             out.clear();
         }
 
