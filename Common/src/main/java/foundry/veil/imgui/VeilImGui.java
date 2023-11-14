@@ -1,69 +1,30 @@
 package foundry.veil.imgui;
 
-import imgui.ImGui;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 
-import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-
 /**
  * Manages the internal ImGui state.
+ *
+ * @author Ocelot
  */
 @ApiStatus.Internal
-public class VeilImGui implements NativeResource {
+public interface VeilImGui extends NativeResource {
 
-    private final long window;
-    private final ImGuiImplGlfw implGlfw;
-    private final ImGuiImplGl3 implGl3;
+    void begin();
 
-    public VeilImGui(long window) {
-        this.window = window;
-        this.implGlfw = new ImGuiImplGlfw();
-        this.implGl3 = new ImGuiImplGl3();
+    void end();
 
-        ImGui.createContext();
-        this.implGlfw.init(window, false);
-        this.implGl3.init("#version 410 core");
-    }
+    void windowFocusCallback(long window, boolean focused);
 
-    public void begin() {
-        this.implGlfw.newFrame();
-        ImGui.newFrame();
+    void cursorEnterCallback(long window, boolean entered);
 
-        // Test code
-        ImGui.begin("Test");
-        ImGui.text("string cheese");
-        ImGui.end();
-    }
+    void mouseButtonCallback(long window, int button, int action, int mods);
 
-    public void end() {
-        ImGui.render();
-        this.implGl3.renderDrawData(ImGui.getDrawData());
+    void scrollCallback(long window, double xOffset, double yOffset);
 
-        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            final long backupWindowPtr = glfwGetCurrentContext();
-            ImGui.updatePlatformWindows();
-            ImGui.renderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backupWindowPtr);
-        }
-    }
+    void keyCallback(long window, int key, int scancode, int action, int mods);
 
-    public ImGuiImplGlfw getImplGlfw() {
-        return this.implGlfw;
-    }
+    void charCallback(long window, int codepoint);
 
-    public long getWindow() {
-        return this.window;
-    }
-
-    @Override
-    public void free() {
-        this.implGlfw.dispose();
-        this.implGl3.dispose();
-        ImGui.destroyContext();
-    }
 }

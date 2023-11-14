@@ -1,7 +1,6 @@
 package foundry.veil.mixin.client.imgui;
 
-import foundry.veil.imgui.VeilImGui;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.imgui.VeilImGuiImpl;
 import net.minecraft.client.KeyboardHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,17 +12,11 @@ public class KeyboardHandlerMixin {
 
     @Inject(method = "keyPress", at = @At("TAIL"))
     public void keyCallback(long window, int key, int scancode, int action, int mods, CallbackInfo ci) {
-        VeilImGui imGui = VeilRenderSystem.renderer().getImGui();
-        if (imGui.getWindow() == window) {
-            imGui.getImplGlfw().keyCallback(window, key, scancode, action, mods);
-        }
+        VeilImGuiImpl.get().keyCallback(window, key, scancode, action, mods);
     }
 
     @Inject(method = "charTyped", at = @At("TAIL"))
     public void charCallback(long window, int codepoint, int mods, CallbackInfo ci) {
-        VeilImGui imGui = VeilRenderSystem.renderer().getImGui();
-        if (imGui.getWindow() == window) {
-            imGui.getImplGlfw().charCallback(window, codepoint);
-        }
+        VeilImGuiImpl.get().charCallback(window, codepoint);
     }
 }

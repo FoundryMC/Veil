@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.logging.LogUtils;
+import foundry.veil.imgui.VeilImGuiImpl;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
@@ -92,9 +93,10 @@ public final class VeilRenderSystem {
             throw new IllegalStateException("Client resource manager is " + client.getResourceManager().getClass());
         }
 
-        Window window = client.getWindow();
         TextureManager textureManager = client.getTextureManager();
-        renderer = new VeilRendererImpl(resourceManager, window, textureManager);
+        renderer = new VeilRendererImpl(resourceManager, textureManager);
+
+        VeilImGuiImpl.init(client.getWindow().getWindow());
     }
 
     /**
@@ -246,7 +248,7 @@ public final class VeilRenderSystem {
 
     @ApiStatus.Internal
     public static void beginFrame() {
-        renderer.getImGui().begin();
+        VeilImGuiImpl.get().begin();
     }
 
     @ApiStatus.Internal
@@ -257,7 +259,7 @@ public final class VeilRenderSystem {
         }
 
         renderer.getFramebufferManager().clear();
-        renderer.getImGui().end();
+        VeilImGuiImpl.get().end();
     }
 
     @ApiStatus.Internal
@@ -273,6 +275,7 @@ public final class VeilRenderSystem {
     @ApiStatus.Internal
     public static void close() {
         renderer.free();
+        VeilImGuiImpl.get().free();
     }
 
     @ApiStatus.Internal

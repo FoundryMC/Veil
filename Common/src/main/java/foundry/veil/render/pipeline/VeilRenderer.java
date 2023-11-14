@@ -53,9 +53,4 @@ public interface VeilRenderer {
      * @return The gui info instance
      */
     GuiInfo getGuiInfo();
-
-    /**
-     * @return The veil manager for imgui
-     */
-    VeilImGui getImGui();
 }
