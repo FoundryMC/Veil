@@ -15,10 +15,6 @@ public interface VeilImGui extends NativeResource {
 
     void end();
 
-    void windowFocusCallback(long window, boolean focused);
-
-    void cursorEnterCallback(long window, boolean entered);
-
     boolean mouseButtonCallback(long window, int button, int action, int mods);
 
     boolean scrollCallback(long window, double xOffset, double yOffset);

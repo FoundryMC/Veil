@@ -14,14 +14,6 @@ public class InactiveVeilImGuiImpl implements VeilImGui {
     }
 
     @Override
-    public void windowFocusCallback(long window, boolean focused) {
-    }
-
-    @Override
-    public void cursorEnterCallback(long window, boolean entered) {
-    }
-
-    @Override
     public boolean mouseButtonCallback(long window, int button, int action, int mods) {
         return false;
     }

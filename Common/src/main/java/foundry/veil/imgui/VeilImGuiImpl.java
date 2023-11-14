@@ -18,17 +18,15 @@ public class VeilImGuiImpl implements VeilImGui {
 
     private static VeilImGui instance;
 
-    private final long window;
     private final ImGuiImplGlfw implGlfw;
     private final ImGuiImplGl3 implGl3;
 
     private VeilImGuiImpl(long window) {
-        this.window = window;
         this.implGlfw = new ImGuiImplGlfw();
         this.implGl3 = new ImGuiImplGl3();
 
         ImGui.createContext();
-        this.implGlfw.init(window, false);
+        this.implGlfw.init(window, true);
         this.implGl3.init("#version 410 core");
     }
 
@@ -52,48 +50,22 @@ public class VeilImGuiImpl implements VeilImGui {
     }
 
     @Override
-    public void windowFocusCallback(long window, boolean focused) {
-        if (this.window == window) {
-            this.implGlfw.windowFocusCallback(window, focused);
-        }
-    }
-
-    @Override
-    public void cursorEnterCallback(long window, boolean entered) {
-        if (this.window == window) {
-            this.implGlfw.cursorEnterCallback(window, entered);
-        }
-    }
-
-    @Override
     public boolean mouseButtonCallback(long window, int button, int action, int mods) {
-        if (this.window == window) {
-            this.implGlfw.mouseButtonCallback(window, button, action, mods);
-        }
         return ImGui.getIO().getWantCaptureMouse();
     }
 
     @Override
     public boolean scrollCallback(long window, double xOffset, double yOffset) {
-        if (this.window == window) {
-            this.implGlfw.scrollCallback(window, xOffset, yOffset);
-        }
         return ImGui.getIO().getWantCaptureMouse();
     }
 
     @Override
     public boolean keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (this.window == window) {
-            this.implGlfw.keyCallback(window, key, scancode, action, mods);
-        }
         return ImGui.getIO().getWantCaptureKeyboard();
     }
 
     @Override
     public boolean charCallback(long window, int codepoint) {
-        if (this.window == window) {
-            this.implGlfw.charCallback(window, codepoint);
-        }
         return ImGui.getIO().getWantCaptureKeyboard();
     }
 
