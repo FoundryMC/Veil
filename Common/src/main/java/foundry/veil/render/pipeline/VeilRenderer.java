@@ -1,5 +1,6 @@
 package foundry.veil.render.pipeline;
 
+import foundry.veil.imgui.VeilImGui;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
 import foundry.veil.render.framebuffer.FramebufferManager;
@@ -52,4 +53,9 @@ public interface VeilRenderer {
      * @return The gui info instance
      */
     GuiInfo getGuiInfo();
+
+    /**
+     * @return The veil manager for imgui
+     */
+    VeilImGui getImGui();
 }

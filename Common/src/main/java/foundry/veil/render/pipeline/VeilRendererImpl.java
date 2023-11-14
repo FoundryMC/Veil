@@ -1,5 +1,7 @@
 package foundry.veil.render.pipeline;
 
+import com.mojang.blaze3d.platform.Window;
+import foundry.veil.imgui.VeilImGui;
 import foundry.veil.mixin.client.ReloadableResourceManagerAccessor;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
@@ -27,14 +29,16 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     private final PostProcessingManager postProcessingManager;
     private final CameraMatrices cameraMatrices;
     private final GuiInfo guiInfo;
+    private final VeilImGui imgui;
 
-    public VeilRendererImpl(ReloadableResourceManager resourceManager, TextureManager textureManager) {
+    public VeilRendererImpl(ReloadableResourceManager resourceManager, Window window, TextureManager textureManager) {
         this.shaderModificationManager = new ShaderModificationManager();
         this.shaderManager = new ShaderManager(this.shaderModificationManager);
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager(this.framebufferManager, textureManager, this.shaderManager);
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
+        this.imgui = new VeilImGui(window.getWindow());
 
         List<PreparableReloadListener> listeners = ((ReloadableResourceManagerAccessor) resourceManager).getListeners();
 
@@ -77,11 +81,17 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     }
 
     @Override
+    public VeilImGui getImGui() {
+        return this.imgui;
+    }
+
+    @Override
     public void free() {
         this.shaderManager.close();
         this.framebufferManager.free();
         this.postProcessingManager.free();
         this.cameraMatrices.free();
         this.guiInfo.free();
+        this.imgui.free();
     }
 }

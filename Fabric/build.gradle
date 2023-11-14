@@ -46,6 +46,16 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-language-kotlin:1.10.10+kotlin.1.9.10")
     include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))
+
+    include(implementation("io.github.spair:imgui-java-binding:$imgui_version"))
+    include(implementation("io.github.spair:imgui-java-lwjgl3:$imgui_version")) {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+
+    include(implementation("io.github.spair:imgui-java-natives-linux:$imgui_version"))
+    include(implementation("io.github.spair:imgui-java-natives-macos:$imgui_version"))
+    include(implementation("io.github.spair:imgui-java-natives-windows:$imgui_version"))
 }
 
 tasks.withType(JavaCompile).configureEach {

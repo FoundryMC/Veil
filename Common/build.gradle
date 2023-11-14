@@ -38,6 +38,12 @@ dependencies {
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
     implementation("gg.moonflower:molang-compiler:${molang_compiler_version}")
+
+    implementation "io.github.spair:imgui-java-binding:$imgui_version"
+    implementation ("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
 }
 
 publishing {
