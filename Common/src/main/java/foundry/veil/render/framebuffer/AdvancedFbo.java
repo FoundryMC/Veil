@@ -215,9 +215,7 @@ public interface AdvancedFbo extends NativeResource {
 
         this.bindRead();
         AdvancedFbo.unbindDraw();
-        glDrawBuffer(GL_BACK);
         glBlitFramebuffer(0, 0, this.getWidth(), this.getHeight(), 0, 0, window.getWidth(), window.getHeight(), mask, filtering);
-        glDrawBuffer(GL_FRONT);
         AdvancedFbo.unbindRead();
     }
 

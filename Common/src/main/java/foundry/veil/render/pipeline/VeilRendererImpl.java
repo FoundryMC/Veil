@@ -1,5 +1,6 @@
 package foundry.veil.render.pipeline;
 
+import foundry.veil.editor.EditorManager;
 import foundry.veil.mixin.client.pipeline.ReloadableResourceManagerAccessor;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
@@ -25,6 +26,7 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     private final ShaderManager shaderManager;
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
+    private final EditorManager editorManager;
     private final CameraMatrices cameraMatrices;
     private final GuiInfo guiInfo;
 
@@ -33,6 +35,7 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
         this.shaderManager = new ShaderManager(this.shaderModificationManager);
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager(this.framebufferManager, textureManager, this.shaderManager);
+        this.editorManager = new EditorManager();
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
 
@@ -64,6 +67,11 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     @Override
     public PostProcessingManager getPostProcessingManager() {
         return this.postProcessingManager;
+    }
+
+    @Override
+    public EditorManager getEditorManager() {
+        return this.editorManager;
     }
 
     @Override

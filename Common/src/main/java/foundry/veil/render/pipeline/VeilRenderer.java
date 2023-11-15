@@ -1,6 +1,6 @@
 package foundry.veil.render.pipeline;
 
-import foundry.veil.imgui.VeilImGui;
+import foundry.veil.editor.EditorManager;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
 import foundry.veil.render.framebuffer.FramebufferManager;
@@ -43,6 +43,11 @@ public interface VeilRenderer {
      * @return The manager for all {@link PostPipeline} instances
      */
     PostProcessingManager getPostProcessingManager();
+
+    /**
+     * @return The manager for all editors
+     */
+    EditorManager getEditorManager();
 
     /**
      * @return The camera matrices instance

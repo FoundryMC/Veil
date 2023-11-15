@@ -1,10 +1,13 @@
 package foundry.veil.imgui;
 
 import foundry.veil.Veil;
+import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderer;
 import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.type.ImString;
 import org.jetbrains.annotations.ApiStatus;
 
 import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
@@ -28,12 +31,16 @@ public class VeilImGuiImpl implements VeilImGui {
         ImGui.createContext();
         this.implGlfw.init(window, true);
         this.implGl3.init("#version 410 core");
+
+        ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable);
     }
 
     @Override
     public void begin() {
         this.implGlfw.newFrame();
         ImGui.newFrame();
+
+        VeilRenderSystem.renderer().getEditorManager().render();
     }
 
     @Override

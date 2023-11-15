@@ -3,7 +3,6 @@ package foundry.veil.render.post;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import foundry.veil.Veil;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.stage.CompositePostPipeline;
@@ -20,7 +19,13 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.lwjgl.opengl.GL11C.GL_ALWAYS;
 import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
@@ -35,7 +40,7 @@ import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
 public class PostProcessingManager extends CodecReloadListener<CompositePostPipeline> implements NativeResource {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Comparator<ProfileEntry> PIPELINE_SORTER = Comparator.comparingInt(ProfileEntry::priority).reversed();
+    private static final Comparator<ProfileEntry> PIPELINE_SORTER = Comparator.comparingInt(ProfileEntry::getPriority).reversed();
 
     private final PostPipelineContext context;
     private final List<ProfileEntry> activePipelines;
@@ -89,7 +94,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
             return false;
         }
         this.remove(pipeline);
-        this.activePipelines.add(new ProfileEntry(priority, pipeline));
+        this.activePipelines.add(new ProfileEntry(pipeline, priority));
         this.activePipelines.sort(PIPELINE_SORTER);
         return true;
     }
@@ -142,14 +147,15 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
+        this.activePipelines.sort(PIPELINE_SORTER);
         for (ProfileEntry entry : this.activePipelines) {
-            PostPipeline pipeline = this.pipelines.get(entry.pipeline());
+            PostPipeline pipeline = this.pipelines.get(entry.getPipeline());
             if (pipeline != null) {
                 try {
                     pipeline.apply(this.context);
                     this.clearPipeline();
                 } catch (Exception e) {
-                    LOGGER.error("Error running pipeline {}", entry.pipeline(), e);
+                    LOGGER.error("Error running pipeline {}", entry.getPipeline(), e);
                 }
             }
         }
@@ -203,18 +209,73 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
     }
 
     /**
+     * @return All available pipelines
+     */
+    public @NotNull Set<ResourceLocation> getPipelines() {
+        return this.pipelines.keySet();
+    }
+
+    /**
      * @return A list of all active profiles and their priorities
      */
     public List<ProfileEntry> getActivePipelines() {
+        this.activePipelines.sort(PIPELINE_SORTER);
         return this.activePipelines;
     }
 
     /**
      * A single active profile.
-     *
-     * @param priority The priority the profile is inserted at
-     * @param pipeline The id of the profile
      */
-    public record ProfileEntry(int priority, ResourceLocation pipeline) {
+    public static class ProfileEntry {
+
+        private final ResourceLocation pipeline;
+        private int priority;
+
+        public ProfileEntry(ResourceLocation pipeline, int priority) {
+            this.pipeline = pipeline;
+            this.priority = priority;
+        }
+
+        /**
+         * @return The id of the pipeline shader
+         */
+        public ResourceLocation getPipeline() {
+            return pipeline;
+        }
+
+        /**
+         * @return The priority the profile is inserted at
+         */
+        public int getPriority() {
+            return priority;
+        }
+
+        /**
+         * Sets the priority this effect is applied at.
+         *
+         * @param priority The new priority
+         */
+        public void setPriority(int priority) {
+            this.priority = priority;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ProfileEntry that = (ProfileEntry) o;
+            return this.priority == that.priority && Objects.equals(pipeline, that.pipeline);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = this.pipeline.hashCode();
+            result = 31 * result + this.priority;
+            return result;
+        }
     }
 }
