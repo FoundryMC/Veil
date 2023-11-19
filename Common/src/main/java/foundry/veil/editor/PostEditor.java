@@ -57,7 +57,7 @@ public class PostEditor extends SingleWindowEditor {
                 if (postProcessing.isActive(entry)) {
                     continue;
                 }
-                if (ImGui.selectable(entry.toString(), false, ImGuiSelectableFlags.AllowDoubleClick)) {
+                if (ImGui.selectable(entry.toString(), false)) {
                     postProcessing.add(entry);
                 }
             }

@@ -1,9 +1,11 @@
 package foundry.veil.platform;
 
-import foundry.veil.platform.services.PlatformHelper;
+import foundry.veil.platform.services.VeilPlatform;
 import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.ApiStatus;
 
-public class FabricPlatformHelper implements PlatformHelper {
+@ApiStatus.Internal
+public class FabricVeilPlatform implements VeilPlatform {
 
     @Override
     public String getPlatformName() {
@@ -12,13 +14,11 @@ public class FabricPlatformHelper implements PlatformHelper {
 
     @Override
     public boolean isModLoaded(String modId) {
-
         return FabricLoader.getInstance().isModLoaded(modId);
     }
 
     @Override
     public boolean isDevelopmentEnvironment() {
-
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

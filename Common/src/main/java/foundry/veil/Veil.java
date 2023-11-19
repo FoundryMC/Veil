@@ -1,10 +1,14 @@
 package foundry.veil;
 
 import foundry.veil.molang.VeilMolang;
+import foundry.veil.platform.services.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ServiceLoader;
 
 public class Veil {
 
@@ -15,6 +19,8 @@ public class Veil {
     public static final boolean RENDER_DOC;
     public static final boolean IMGUI;
 
+    private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
+
     static {
         boolean arm = System.getProperty("os.arch").equals("arm") ||
             System.getProperty("os.arch").startsWith("aarch64");
@@ -23,6 +29,7 @@ public class Veil {
         IMGUI = !arm && System.getProperty("veil.disableImgui") == null;
     }
 
+    @ApiStatus.Internal
     public static void init() {
         LOGGER.info("Veil is initializing.");
         if (DEBUG) {
@@ -36,5 +43,9 @@ public class Veil {
 
     public static ResourceLocation veilPath(String path) {
         return new ResourceLocation(MODID, path);
+    }
+
+    public static VeilPlatform platform() {
+        return PLATFORM;
     }
 }

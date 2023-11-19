@@ -3,7 +3,9 @@ package foundry.veil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @Mod(Veil.MODID)
 public class VeilForge {
 

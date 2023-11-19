@@ -1,7 +1,6 @@
 package foundry.veil.editor;
 
 import imgui.ImGui;
-import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,6 +15,7 @@ import java.util.Map;
 public class EditorManager {
 
     private final Map<Editor, ImBoolean> editors;
+    private boolean enabled;
 
     @ApiStatus.Internal
     public EditorManager() {
@@ -28,42 +28,44 @@ public class EditorManager {
 
     @ApiStatus.Internal
     public void render() {
-        if (!ImGui.beginMainMenuBar()) {
+        if (!this.enabled) {
             return;
         }
 
-        if (ImGui.beginMenu("Editor")) {
-            for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
-                Editor editor = entry.getKey();
-                ImBoolean enabled = entry.getValue();
+        if (ImGui.beginMainMenuBar()) {
+            if (ImGui.beginMenu("Editor")) {
+                for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
+                    Editor editor = entry.getKey();
+                    ImBoolean enabled = entry.getValue();
 
-                ImGui.beginDisabled(!editor.isEnabled());
-                if (ImGui.menuItem(editor.getDisplayName(), null, enabled.get())) {
-                    if (!enabled.get()) {
-                        this.show(editor);
-                    } else {
-                        this.hide(editor);
+                    ImGui.beginDisabled(!editor.isEnabled());
+                    if (ImGui.menuItem(editor.getDisplayName(), null, enabled.get())) {
+                        if (!enabled.get()) {
+                            this.show(editor);
+                        } else {
+                            this.hide(editor);
+                        }
+                    }
+                    ImGui.endDisabled();
+
+                    if (!editor.isEnabled()) {
+                        enabled.set(false);
                     }
                 }
-                ImGui.endDisabled();
+                ImGui.endMenu();
+            }
 
-                if (!editor.isEnabled()) {
-                    enabled.set(false);
+            for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
+                Editor editor = entry.getKey();
+                if (entry.getValue().get() && editor.isMenuBarEnabled()) {
+                    ImGui.separator();
+                    ImGui.textColored(0xFFAAAAAA, editor.getDisplayName());
+                    editor.renderMenuBar();
                 }
             }
-            ImGui.endMenu();
-        }
 
-        for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
-            Editor editor = entry.getKey();
-            if (entry.getValue().get() && editor.isMenuBarEnabled()) {
-                ImGui.separator();
-                ImGui.textColored(0xFFAAAAAA, editor.getDisplayName());
-                editor.renderMenuBar();
-            }
+            ImGui.endMainMenuBar();
         }
-
-        ImGui.endMainMenuBar();
 
         for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
             Editor editor = entry.getKey();
@@ -93,13 +95,6 @@ public class EditorManager {
         }
     }
 
-    public void show() {
-        // TODO
-    }
-
-    public void hide() {
-    }
-
     public synchronized void add(Editor editor) {
         this.editors.computeIfAbsent(editor, unused -> new ImBoolean());
     }
@@ -107,5 +102,13 @@ public class EditorManager {
     public synchronized void remove(Editor editor) {
         this.hide(editor);
         this.editors.remove(editor);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

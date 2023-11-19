@@ -1,6 +1,12 @@
 package foundry.veil.platform.services;
 
-public interface PlatformHelper {
+import org.jetbrains.annotations.ApiStatus;
+
+/**
+ * Manages common platform-specific features.
+ */
+@ApiStatus.Internal
+public interface VeilPlatform {
 
     /**
      * Gets the name of the current platform

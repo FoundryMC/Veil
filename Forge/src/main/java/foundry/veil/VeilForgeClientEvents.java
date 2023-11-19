@@ -7,7 +7,9 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID, value = Dist.CLIENT)
 public class VeilForgeClientEvents {
     public static final IGuiOverlay OVERLAY = VeilUITooltipRenderer::renderOverlay;
@@ -15,10 +17,7 @@ public class VeilForgeClientEvents {
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            if (Minecraft.getInstance().player == null)
-                return;
-            VeilClient.tickClient(Minecraft.getInstance().player.tickCount, Minecraft.getInstance().getFrameTime());
+            VeilClient.tickClient(Minecraft.getInstance().getFrameTime());
         }
     }
-
 }
