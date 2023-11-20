@@ -3,6 +3,7 @@ package foundry.veil.imgui;
 import foundry.veil.Veil;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import imgui.ImGui;
+import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -27,10 +28,9 @@ public class VeilImGuiImpl implements VeilImGui {
         this.implGl3 = new ImGuiImplGl3();
 
         ImGui.createContext();
+        ImPlot.createContext();
         this.implGlfw.init(window, true);
         this.implGl3.init("#version 410 core");
-
-        ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable);
     }
 
     @Override

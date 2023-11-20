@@ -1,5 +1,7 @@
 package foundry.veil.editor;
 
+import foundry.veil.render.pipeline.VeilRenderSystem;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.lwjgl.system.NativeResource;
 
 /**
@@ -49,6 +51,13 @@ public interface Editor extends NativeResource {
      * Called when this editor is no longer open.
      */
     default void onHide() {
+    }
+
+    /**
+     * @return Whether this editor is open
+     */
+    default boolean isOpen() {
+        return VeilRenderSystem.renderer().getEditorManager().isVisible(this);
     }
 
     /**

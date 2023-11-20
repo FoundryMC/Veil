@@ -26,7 +26,7 @@ public class PostEditor extends SingleWindowEditor {
         float lineHeight = ImGui.getTextLineHeightWithSpacing();
 
         ImGui.text("Active Pipelines:");
-        if (ImGui.beginListBox("##shaders", -Float.MIN_VALUE, 8 * lineHeight)) {
+        if (ImGui.beginListBox("##shaders", -Float.MIN_VALUE, 0)) {
             for (PostProcessingManager.ProfileEntry entry : postProcessing.getActivePipelines()) {
                 ResourceLocation id = entry.getPipeline();
                 ImInt editPriority = new ImInt(entry.getPriority());
@@ -52,7 +52,7 @@ public class PostEditor extends SingleWindowEditor {
         }
 
         ImGui.text("Add Pipeline:");
-        if (ImGui.beginListBox("##available_pipelines", -Float.MIN_VALUE, 8 * lineHeight)) {
+        if (ImGui.beginListBox("##available_pipelines", -Float.MIN_VALUE, 0)) {
             for (ResourceLocation entry : postProcessing.getPipelines()) {
                 if (postProcessing.isActive(entry)) {
                     continue;

@@ -83,6 +83,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     private final ShaderModificationManager shaderModificationManager;
     private final ShaderPreDefinitions definitions;
     private final Map<ResourceLocation, ShaderProgram> shaders;
+    private final Map<ResourceLocation, ShaderProgram> shadersView;
     private final Set<ResourceLocation> dirtyShaders;
     private CompletableFuture<Void> reloadFuture;
     private CompletableFuture<Void> recompileFuture;
@@ -96,6 +97,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         this.shaderModificationManager = shaderModificationManager;
         this.definitions = new ShaderPreDefinitions(this::onDefinitionChanged);
         this.shaders = new HashMap<>();
+        this.shadersView = Collections.unmodifiableMap(this.shaders);
         this.dirtyShaders = new HashSet<>();
         this.reloadFuture = CompletableFuture.completedFuture(null);
         this.recompileFuture = CompletableFuture.completedFuture(null);
@@ -261,6 +263,13 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
      */
     public @Nullable ShaderProgram getShader(ResourceLocation id) {
         return this.shaders.get(id);
+    }
+
+    /**
+     * @return All shader programs registered
+     */
+    public @NotNull Map<ResourceLocation, ShaderProgram> getShaders() {
+        return this.shadersView;
     }
 
     private ReloadState prepare(ResourceManager resourceManager) {

@@ -119,12 +119,12 @@ public class ShaderProgramImpl implements ShaderProgram {
 
             glLinkProgram(this.program);
             if (glGetProgrami(this.program, GL_LINK_STATUS) != GL_TRUE) {
-                throw new ShaderException("Failed to link shader", glGetProgramInfoLog(this.program));
+                String log = glGetProgramInfoLog(this.program);
+                throw new ShaderException("Failed to link shader", log);
             }
 
             this.bind();
             compiledShaders.forEach(shader -> {
-                glDetachShader(this.program, shader.id()); // Detach to allow the shaders to be deleted
                 shader.apply(this);
                 this.definitionDependencies.addAll(shader.definitionDependencies());
             });
