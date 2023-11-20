@@ -1,14 +1,11 @@
 package foundry.veil.editor;
 
+import foundry.veil.imgui.CodeEditor;
 import foundry.veil.mixin.client.GameRendererAccessor;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import imgui.ImGui;
-import imgui.ImVec2;
-import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
-import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -17,6 +14,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -37,7 +35,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
     private static final Pattern ERROR_PARSER = Pattern.compile("ERROR: (\\d+):(\\d+): (.+)");
 
-    private final TextEditor editor;
+    private final CodeEditor codeEditor;
     private final Map<ResourceLocation, Integer> shaders;
 
     private final ImString programFilterText;
@@ -48,13 +46,32 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     private int editProgramId;
     private int editShaderId;
 
-    private String oldShaderSource;
-
     public ShaderEditor() {
         this.shaders = new TreeMap<>();
-        this.editor = new TextEditor();
-        this.editor.setShowWhitespaces(false);
-        this.editor.setLanguageDefinition(TextEditorLanguageDefinition.glsl());
+        this.codeEditor = new CodeEditor("Upload");
+        this.codeEditor.setSaveCallback((source, errorConsumer) -> {
+            if (this.selectedProgram == null || !glIsShader(this.editShaderId)) {
+                errorConsumer.accept(0, "Invalid Shader");
+                return;
+            }
+
+            glShaderSource(this.editShaderId, source);
+            glCompileShader(this.editShaderId);
+            if (glGetShaderi(this.editShaderId, GL_COMPILE_STATUS) != GL_TRUE) {
+                String log = glGetShaderInfoLog(this.editShaderId);
+                this.parseErrors(log).forEach(errorConsumer);
+                System.out.println(log);
+                return;
+            }
+
+            glLinkProgram(this.editProgramId);
+            if (glGetProgrami(this.editProgramId, GL_LINK_STATUS) != GL_TRUE) {
+                String log = glGetProgramInfoLog(this.editProgramId);
+                this.parseErrors(log).forEach(errorConsumer);
+                System.out.println(log);
+            }
+        });
+        this.codeEditor.getEditor().setLanguageDefinition(TextEditorLanguageDefinition.glsl());
 
         this.programFilterText = new ImString(128);
         this.programFilter = null;
@@ -89,14 +106,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.editSourceOpen.set(true);
         this.editProgramId = program;
         this.editShaderId = shader;
-        this.editor.setText(glGetShaderSource(shader));
-        this.oldShaderSource = this.editor.getText();
-        ImGui.setWindowFocus("###editor");
-        ImGui.setWindowCollapsed("###editor", false);
-    }
-
-    private boolean hasTextChanged() {
-        return !this.oldShaderSource.equals(this.editor.getText());
+        this.codeEditor.show(glGetShaderSource(shader));
     }
 
     private Map<Integer, String> parseErrors(String log) {
@@ -115,37 +125,10 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
                 String error = matcher.group(3);
                 errors.put(lineNumber, error);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
         }
         return errors;
-    }
-
-    private void saveShaderSource() {
-        if (this.selectedProgram == null || !glIsShader(this.editShaderId) || !this.hasTextChanged()) {
-            return;
-        }
-
-        glShaderSource(this.editShaderId, this.editor.getText());
-        glCompileShader(this.editShaderId);
-        if (glGetShaderi(this.editShaderId, GL_COMPILE_STATUS) != GL_TRUE) {
-            String log = glGetShaderInfoLog(this.editShaderId);
-            this.editor.setErrorMarkers(this.parseErrors(log));
-            System.out.println(log);
-            return;
-        }
-
-        glLinkProgram(this.editProgramId);
-        if (glGetProgrami(this.editProgramId, GL_LINK_STATUS) != GL_TRUE) {
-            String log = glGetProgramInfoLog(this.editProgramId);
-            this.editor.setErrorMarkers(this.parseErrors(log));
-            System.out.println(log);
-            return;
-        }
-
-        this.oldShaderSource = this.editor.getText();
-        this.editor.setErrorMarkers(Collections.emptyMap());
     }
 
     private void reloadShaders() {
@@ -224,132 +207,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
         ImGui.endGroup();
 
-        if (this.oldShaderSource == null) {
-            return;
-        }
-
-        int flags = ImGuiWindowFlags.MenuBar;
-        if (this.hasTextChanged()) {
-            flags |= ImGuiWindowFlags.UnsavedDocument;
-        } else {
-            this.editor.setErrorMarkers(Collections.emptyMap());
-        }
-        boolean wasOpen = this.editSourceOpen.get();
-
-        ImGui.setNextWindowSizeConstraints(800, 600, Float.MAX_VALUE, Float.MAX_VALUE);
-        if (ImGui.begin("Edit Shader###editor", this.editSourceOpen, flags)) {
-            if (ImGui.beginMenuBar()) {
-                boolean immutable = this.editor.isReadOnly();
-                if (ImGui.menuItem("Read-only mode", "", immutable)) {
-                    this.editor.setReadOnly(!immutable);
-                }
-                if (ImGui.menuItem("Show Whitespace", "", this.editor.isShowingWhitespaces())) {
-                    this.editor.setShowWhitespaces(!this.editor.isShowingWhitespaces());
-                }
-
-                ImGui.beginDisabled(!this.hasTextChanged());
-                if (ImGui.menuItem("Upload")) {
-                    this.saveShaderSource();
-                }
-                ImGui.endDisabled();
-
-                ImGui.separator();
-
-                ImGui.beginDisabled(immutable);
-                {
-                    ImGui.beginDisabled(!this.editor.canUndo());
-                    if (ImGui.menuItem("Undo", "ALT-Backspace")) {
-                        this.editor.undo(1);
-                    }
-                    ImGui.endDisabled();
-
-                    ImGui.beginDisabled(!this.editor.canRedo());
-                    if (ImGui.menuItem("Redo", "Ctrl-Y")) {
-                        this.editor.redo(1);
-                    }
-                    ImGui.endDisabled();
-                }
-                ImGui.endDisabled();
-                ImGui.separator();
-
-                ImGui.beginDisabled(!this.editor.hasSelection());
-                if (ImGui.menuItem("Copy", "Ctrl-C")) {
-                    this.editor.copy();
-                }
-                ImGui.endDisabled();
-
-                ImGui.beginDisabled(immutable);
-                {
-                    ImGui.beginDisabled(!this.editor.hasSelection());
-                    if (ImGui.menuItem("Cut", "Ctrl-X")) {
-                        this.editor.cut();
-                    }
-                    if (ImGui.menuItem("Delete", "Del")) {
-                        this.editor.delete();
-                    }
-                    ImGui.endDisabled();
-
-                    ImGui.beginDisabled(ImGui.getClipboardText() == null);
-                    if (ImGui.menuItem("Paste", "Ctrl-V")) {
-                        this.editor.paste();
-                    }
-                    ImGui.endDisabled();
-                }
-                ImGui.endDisabled();
-
-                ImGui.endMenuBar();
-            }
-
-            int cposX = this.editor.getCursorPositionLine();
-            int cposY = this.editor.getCursorPositionColumn();
-
-            String overwrite = this.editor.isOverwrite() ? "Ovr" : "Ins";
-            String canUndo = this.editor.canUndo() ? "*" : " ";
-
-            ImGui.text(cposX + ":" + cposY + " " + this.editor.getTotalLines() + " lines | " + overwrite + " | " + canUndo);
-
-            this.editor.render("TextEditor");
-        }
-        ImGui.end();
-
-        if (!this.editSourceOpen.get() && wasOpen) {
-            if (this.hasTextChanged()) {
-                this.editSourceOpen.set(true);
-                ImGui.openPopup("Upload?");
-            } else {
-                this.oldShaderSource = null;
-            }
-        }
-
-        ImVec2 center = ImGui.getMainViewport().getCenter();
-        ImGui.setNextWindowPos(center.x, center.y, ImGuiCond.Appearing, 0.5f, 0.5f);
-
-        if (ImGui.beginPopupModal("Upload?", ImGuiWindowFlags.AlwaysAutoResize)) {
-            ImGui.text("Your changes have not been saved.\nThis operation cannot be undone!");
-            ImGui.separator();
-
-            ImGui.setItemDefaultFocus();
-            if (ImGui.button("Upload")) {
-                this.saveShaderSource();
-                this.editSourceOpen.set(false);
-                this.oldShaderSource = null;
-                ImGui.closeCurrentPopup();
-            }
-
-            ImGui.sameLine();
-            if (ImGui.button("Discard")) {
-                this.editSourceOpen.set(false);
-                this.oldShaderSource = null;
-                ImGui.closeCurrentPopup();
-            }
-
-            ImGui.sameLine();
-            if (ImGui.button("Cancel")) {
-                ImGui.closeCurrentPopup();
-            }
-
-            ImGui.endPopup();
-        }
+        this.codeEditor.renderWindow();
     }
 
     private void openShaderButton(String name, int type) {
@@ -375,11 +233,11 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     @Override
     public void free() {
         super.free();
-        this.editor.destroy();
+        this.codeEditor.free();
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
+    public void onResourceManagerReload(@NotNull ResourceManager resourceManager) {
         if (this.isOpen()) {
             this.reloadShaders();
         }
