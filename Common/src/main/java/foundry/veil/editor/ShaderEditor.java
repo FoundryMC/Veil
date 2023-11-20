@@ -1,11 +1,11 @@
 package foundry.veil.editor;
 
 import foundry.veil.imgui.CodeEditor;
+import foundry.veil.imgui.VeilLanguageDefinitions;
 import foundry.veil.mixin.client.GameRendererAccessor;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import imgui.ImGui;
-import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -71,7 +71,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                 System.out.println(log);
             }
         });
-        this.codeEditor.getEditor().setLanguageDefinition(TextEditorLanguageDefinition.glsl());
+        this.codeEditor.getEditor().setLanguageDefinition(VeilLanguageDefinitions.glsl());
 
         this.programFilterText = new ImString(128);
         this.programFilter = null;
@@ -206,6 +206,11 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.openShaderButton("Compute Shader", GL_COMPUTE_SHADER);
 
         ImGui.endGroup();
+    }
+
+    @Override
+    public void render() {
+        super.render();
 
         this.codeEditor.renderWindow();
     }
