@@ -44,6 +44,9 @@ dependencies {
         exclude group: 'org.lwjgl'
         exclude group: 'org.lwjgl.lwjgl'
     }
+
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
+    implementation "org.lwjgl:lwjgl-opencl"
 }
 
 publishing {

@@ -57,6 +57,9 @@ dependencies {
     include(implementation("io.github.spair:imgui-java-natives-linux:$imgui_version"))
     include(implementation("io.github.spair:imgui-java-natives-macos:$imgui_version"))
     include(implementation("io.github.spair:imgui-java-natives-windows:$imgui_version"))
+
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
+    include(implementation("org.lwjgl:lwjgl-opencl"))
 }
 
 tasks.withType(JavaCompile).configureEach {

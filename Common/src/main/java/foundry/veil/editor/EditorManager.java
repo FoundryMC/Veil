@@ -2,7 +2,6 @@ package foundry.veil.editor;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -27,12 +26,14 @@ public class EditorManager implements PreparableReloadListener {
 
     @ApiStatus.Internal
     public EditorManager(ReloadableResourceManager resourceManager) {
-        this.editors = new HashMap<>();
+        this.editors = new TreeMap<>(Comparator.comparing(Editor::getDisplayName));
 
         // debug editors
         this.add(new ExampleEditor());
         this.add(new PostEditor());
         this.add(new ShaderEditor());
+        this.add(new OpenCLEditor());
+        this.add(new DeviceInfoViewer());
 
         resourceManager.registerReloadListener(this);
     }
