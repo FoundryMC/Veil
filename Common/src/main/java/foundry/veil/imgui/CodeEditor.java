@@ -21,6 +21,7 @@ import java.util.function.BiConsumer;
  */
 public class CodeEditor implements NativeResource {
 
+    // TODO reimplement in Java
     private final TextEditor editor;
     private final String saveText;
     private String oldSource;

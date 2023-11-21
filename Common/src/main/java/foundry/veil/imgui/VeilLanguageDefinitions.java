@@ -649,7 +649,7 @@ proceeds as in texture""",
 Do a texture lookup as in texture but with
 explicit level-of-detail; lod specifies λbase] and
 sets the partial derivatives as follows:
-(See section 8.14 “Texture Minification” and
+(See section 8.14 "Texture Minification" and
 equations 8.4-8.6 of the OpenGL Specification)""",
 
                 "textureOffset", """
@@ -665,8 +665,8 @@ gl_MaxProgramTexelOffset, respectively.
 
 Note that offset does not apply to the layer
 coordinate for texture arrays. This is explained
-in detail in section 8.14.2 “Coordinate Wrapping
-and Texel Selection” of the OpenGL
+in detail in section 8.14.2 "Coordinate Wrapping
+and Texel Selection" of the OpenGL
 Specification, where offset is (δu, δv
 , δw).
 Note that texel offsets are also not supported for
@@ -872,9 +872,253 @@ Atomically
 Compares the value of compare and the contents
 of mem. If the values are equal, the new value is
 given by data; otherwise, it is taken from the
-original contents of mem"""
+original contents of mem""",
 
                 // 8.12. Image Functions
+
+                "imageSize" , """
+Returns the dimensions of the image or images
+bound to image. For arrayed images, the last
+component of the return value will hold the size
+of the array. Cube images only return the
+dimensions of one face, and the number of
+cubes in the cube map array, if arrayed.
+Note: The qualification readonly writeonly
+accepts a variable qualified with readonly,
+writeonly, both, or neither. It means the formal
+argument will be used for neither reading nor
+writing to the underlying memory""",
+
+                "imageSamples", "Returns the number of samples of the image or\nimages bound to image",
+
+                "imageLoad", """
+Loads the texel at the coordinate P from the
+image unit image (in IMAGE_PARAMS). For
+multisample loads, the sample number is given
+by sample. When image, P, and sample identify a
+valid texel, the bits used to represent the
+selected texel in memory are converted to a
+vec4, ivec4, or uvec4 in the manner described
+in section 8.26 "Texture Image Loads and Stores"
+of the OpenGL Specification and returned""",
+
+                "imageStore", """
+Stores data into the texel at the coordinate P
+from the image specified by image. For
+multisample stores, the sample number is given
+by sample. When image, P, and sample identify a
+valid texel, the bits used to represent data are
+converted to the format of the image unit in the
+manner described in section 8.26 "Texture
+Image Loads and Stores" of the OpenGL
+Specification and stored to the specified texel""",
+
+                "imageAtomicAdd", "Computes a new value by adding the value of\ndata to the contents of the selected texel",
+                "imageAtomicMin", "Computes a new value by taking the minimum\nof the value of data and the contents of the\nselected texel",
+                "imageAtomicMax", "Computes a new value by taking the maximum\nof the value data and the contents of the selected texel",
+                "imageAtomicAnd", "Computes a new value by performing a bit-wise\nAND of the value of data and the contents of the\nselected texel",
+                "imageAtomicOr", "Computes a new value by performing a bit-wise\nOR of the value of data and the contents of the\nselected texel",
+                "imageAtomicXor", "Computes a new value by performing a bit-wise\nEXCLUSIVE OR of the value of data and the\ncontents of the selected texel",
+                "imageAtomicExchange", "Computes a new value by simply copying the\nvalue of data",
+                "imageAtomicCompSwap", """
+Compares the value of compare and the contents
+of the selected texel. If the values are equal, the
+new value is given by data; otherwise, it is taken
+from the original value loaded from the texel""",
+
+                // 8.13. Geometry Shader Functions
+
+                "EmitStreamVertex", """
+Emits the current values of output variables to
+the current output primitive on stream stream.
+The argument to stream must be a constant
+integral expression. On return from this call, the
+values of all output variables are undefined.
+Can only be used if multiple output streams are
+supported""",
+
+                "EndStreamPrimitive", """
+Completes the current output primitive on
+stream stream and starts a new one. The
+argument to stream must be a constant integral
+expression. No vertex is emitted.
+Can only be used if multiple output streams
+are supported""",
+
+                "EmitVertex", """
+Emits the current values of output variables to
+the current output primitive. When multiple
+output streams are supported, this is equivalent
+to calling EmitStreamVertex(0).
+On return from this call, the values of output
+variables are undefined""",
+
+                "EndPrimitive", """
+Completes the current output primitive and
+starts a new one. When multiple output streams
+are supported, this is equivalent to calling
+EndStreamPrimitive(0).
+No vertex is emitted""",
+
+                // 8.14. Fragment Processing Functions
+
+                "dFdx", """
+Returns either dFdxFine(p) or dFdxCoarse(p),
+based on implementation choice, presumably
+whichever is the faster, or by whichever is
+selected in the API through quality-versus-speed
+hints""",
+
+                "dFdy", """
+Returns either dFdyFine(p) or dFdyCoarse(p),
+based on implementation choice, presumably
+whichever is the faster, or by whichever is
+selected in the API through quality-versus-speed
+hints""",
+
+                "dFdxFine", """
+Returns the partial derivative of p with respect
+to the window x coordinate. Will use local
+differencing based on the value of p for the
+current fragment and its immediate neighbor(s)""",
+
+                "dFdyFine", """
+Returns the partial derivative of p with respect
+to the window y coordinate. Will use local
+differencing based on the value of p for the
+current fragment and its immediate neighbor(s)""",
+
+                "dFdxCoarse", """
+Returns the partial derivative of p with respect
+to the window x coordinate. Will use local
+differencing based on the value of p for the
+current fragment’s neighbors, and will possibly,
+but not necessarily, include the value of p for the
+current fragment. That is, over a given area, the
+implementation can x compute derivatives in
+fewer unique locations than would be allowed
+for dFdxFine(p)""",
+
+                "dFdyCoarse", """
+Returns the partial derivative of p with respect
+to the window y coordinate. Will use local
+differencing based on the value of p for the
+current fragment’s neighbors, and will possibly,
+but not necessarily, include the value of p for the
+current fragment. That is, over a given area, the
+implementation can compute y derivatives in
+fewer unique locations than would be allowed
+for dFdyFine(p)""",
+
+                "fwidth", "Returns abs(dFdx(p)) + abs(dFdy(p))",
+                "fwidthFine", "Returns abs(dFdxFine(p)) + abs(dFdyFine(p))",
+                "fwidthCoarse", "Returns abs(dFdxCoarse(p)) + abs(dFdyCoarse(p))",
+
+                // 8.14.2. Interpolation Functions
+
+                "interpolateAtCentroid", """
+Returns the value of the input interpolant
+sampled at a location inside both the pixel and
+the primitive being processed. The value
+obtained would be the same value assigned to
+the input variable if declared with the centroid
+qualifier""",
+
+                "interpolateAtSample", """
+Returns the value of the input interpolant
+variable at the location of sample number
+sample. If multisample buffers are not available,
+the input variable will be evaluated at the center
+of the pixel. If sample sample does not exist, the
+position used to interpolate the input variable is
+undefined""",
+
+                "interpolateAtOffset", """
+Returns the value of the input interpolant
+variable sampled at an offset from the center of
+the pixel specified by offset. The two floating-
+point components of offset, give the offset in
+pixels in the x and y directions, respectively.
+An offset of (0, 0) identifies the center of the
+pixel. The range and granularity of offsets
+supported by this function is implementationdependent""",
+
+                // 8.15. Noise Functions
+
+                "noise1", """
+Returns a 1D noise value based on the input
+value x
+
+Deprecated starting with version
+4.4 of GLSL""",
+
+                "noise2", """
+Returns a 2D noise value based on the input
+value x
+
+Deprecated starting with version
+4.4 of GLSL""",
+
+                "noise3", """
+Returns a 3D noise value based on the input
+value x
+
+Deprecated starting with version
+4.4 of GLSL""",
+
+                "noise4", """
+Returns a 4D noise value based on the input
+value x
+
+Deprecated starting with version
+4.4 of GLSL""",
+
+                // 8.16. Shader Invocation Control Functions
+
+                "barrier", """
+For any given static instance of barrier(), all
+tessellation control shader invocations for a
+single input patch must enter it before any will
+be allowed to continue beyond it, or all compute
+shader invocations for a single workgroup must
+enter it before any will continue beyond it""",
+
+                // 8.17. Shader Memory Control Functions
+
+                "memoryBarrier", "Control the ordering of memory transactions\nissued by a single shader invocation",
+                "memoryBarrierAtomicCounter", "Control the ordering of accesses to atomic-\ncounter variables issued by a single shader invocation",
+                "memoryBarrierBuffer", "Control the ordering of memory transactions to\nbuffer variables issued within a single shader invocation",
+
+                "memoryBarrierShared", """
+Control the ordering of memory transactions to
+shared variables issued within a single shader
+invocation, as viewed by other invocations in
+the same workgroup.
+
+Only available in compute shaders""",
+
+                "memoryBarrierImage", "Control the ordering of memory transactions to\nimages issued within a single shader invocation",
+
+                "groupMemoryBarrier", """
+Control the ordering of all memory transactions
+issued within a single shader invocation, as
+viewed by other invocations in the same
+workgroup.
+
+Only available in compute shaders""",
+
+                // 8.18. Subpass-Input Functions
+
+                "subpassLoad", """
+Read from a subpass input, from the implicit
+location (x, y, layer) of the current fragment
+coordinate""",
+
+                // 8.19. Shader Invocation Group Functions
+
+                "anyInvocation", "Returns true if and only if value is true for at\nleast one active invocation in the group",
+                "allInvocations", "Returns true if and only if value is true for all\nactive invocations in the group",
+                "allInvocationsEqual", "Returns true if value is the same for all active\ninvocations in the group",
         };
 
         Map<String, String> identifiersMap = new HashMap<>(identifiers.length / 2);
