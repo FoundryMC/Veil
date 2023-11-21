@@ -210,6 +210,8 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
     @Override
     public void render() {
+        ImGui.setNextWindowSizeConstraints(600, 400, Float.MAX_VALUE, Float.MAX_VALUE);
+
         super.render();
 
         this.codeEditor.renderWindow();

@@ -82,7 +82,9 @@ public class CodeEditor implements NativeResource {
     public void hide() {
         if (this.hasTextChanged()) {
             this.open.set(true);
-            ImGui.openPopup(this.saveText + "?");
+            ImGui.pushID(this.hashCode());
+            ImGui.openPopup("###save_confirm");
+            ImGui.popID();
         } else {
             this.oldSource = null;
             this.open.set(false);
@@ -102,6 +104,7 @@ public class CodeEditor implements NativeResource {
             return;
         }
 
+        ImGui.pushID(this.hashCode());
         ImGui.setNextWindowSizeConstraints(800, 600, Float.MAX_VALUE, Float.MAX_VALUE);
         ImGui.begin("Editor###editor", this.open, flags);
 
@@ -111,6 +114,7 @@ public class CodeEditor implements NativeResource {
 
         this.render();
         ImGui.end();
+        ImGui.popID();
     }
 
     /**
@@ -201,7 +205,7 @@ public class CodeEditor implements NativeResource {
         ImVec2 center = ImGui.getMainViewport().getCenter();
         ImGui.setNextWindowPos(center.x, center.y, ImGuiCond.Appearing, 0.5f, 0.5f);
 
-        if (ImGui.beginPopupModal(this.saveText + "?", ImGuiWindowFlags.AlwaysAutoResize)) {
+        if (ImGui.beginPopupModal(this.saveText + "?###save_confirm", ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.text("Your changes have not been saved.\nThis operation cannot be undone!");
             ImGui.separator();
 
