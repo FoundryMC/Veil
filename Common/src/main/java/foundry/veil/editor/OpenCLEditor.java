@@ -2,10 +2,10 @@ package foundry.veil.editor;
 
 import com.mojang.logging.LogUtils;
 import foundry.veil.imgui.CodeEditor;
+import foundry.veil.opencl.OpenCLException;
 import foundry.veil.opencl.VeilOpenCL;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiSliderFlags;
 import imgui.type.ImInt;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -252,7 +252,7 @@ public class OpenCLEditor extends SingleWindowEditor {
             } finally {
                 for (long buffer : buffers) {
                     if (buffer != 0) {
-                        VeilOpenCL.checkCLError(clReleaseMemObject(buffer));
+                        clReleaseMemObject(buffer);
                     }
                 }
             }
@@ -261,13 +261,20 @@ public class OpenCLEditor extends SingleWindowEditor {
 
         ImGui.dragScalar("Elements", ImGuiDataType.U16, this.elements, 2, 0, 100_000_000);
 
-        ImGui.beginDisabled(this.deviceInfo == null);
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int max = Integer.MAX_VALUE;
             if (this.kernel != MemoryUtil.NULL && this.deviceInfo != null) {
-                PointerBuffer work_group_loc = stack.mallocPointer(1);
-                VeilOpenCL.checkCLError(clGetKernelWorkGroupInfo(this.kernel, this.deviceInfo.id(), CL_KERNEL_WORK_GROUP_SIZE, work_group_loc, null));
-                max = (int) work_group_loc.get(0);
+                try {
+                    PointerBuffer work_group_loc = stack.mallocPointer(1);
+                    VeilOpenCL.checkCLError(clGetKernelWorkGroupInfo(this.kernel, this.deviceInfo.id(), CL_KERNEL_WORK_GROUP_SIZE, work_group_loc, null));
+                    max = (int) work_group_loc.get(0);
+                    ImGui.beginDisabled(false);
+                } catch (OpenCLException e) {
+                    max = 0;
+                    ImGui.beginDisabled();
+                }
+            } else {
+                ImGui.beginDisabled();
             }
             ImGui.sliderScalar("Local Work Groups", ImGuiDataType.U32, this.workGroups, 2, max);
         }

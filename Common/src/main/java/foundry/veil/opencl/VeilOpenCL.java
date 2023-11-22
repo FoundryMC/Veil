@@ -1,5 +1,7 @@
 package foundry.veil.opencl;
 
+import foundry.veil.Veil;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL;
@@ -7,10 +9,12 @@ import org.lwjgl.opencl.CL10;
 import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.NativeResource;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.*;
 
 import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opencl.CL11.CL_DEVICE_OPENCL_C_VERSION;
@@ -21,14 +25,80 @@ import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
  *
  * @author Ocelot
  */
-public final class VeilOpenCL {
+public final class VeilOpenCL implements NativeResource {
+
+    // Prefer platforms that support GPU devices
+    private static final Comparator<DeviceInfo> COMPUTE_ORDER = (p1, p2) -> {
+        boolean gpu1 = p1.isGpu();
+        boolean gpu2 = p2.isGpu();
+        return gpu1 == gpu2 ? 0 : (gpu1 ? -1 : 1);
+    };
 
     private static VeilOpenCL instance;
 
+    private final Map<DeviceInfo, OpenCLEnvironment> environments;
+    private final Set<DeviceInfo> invalidPlatforms;
     private final PlatformInfo[] platforms;
+    private final List<DeviceInfo> priorityDevices;
 
     private VeilOpenCL() {
+        this.environments = new Object2ObjectArrayMap<>();
+        this.invalidPlatforms = new HashSet<>();
         this.platforms = VeilOpenCL.requestPlatforms();
+
+        List<DeviceInfo> priorityDevices = new ArrayList<>();
+        for (PlatformInfo platform : this.platforms) {
+            priorityDevices.addAll(Arrays.asList(platform.devices()));
+        }
+        priorityDevices.sort(COMPUTE_ORDER);
+
+        this.priorityDevices = Collections.unmodifiableList(priorityDevices);
+    }
+
+    /**
+     * @return The default OpenCL environment
+     */
+    public @Nullable OpenCLEnvironment getEnvironment() {
+        return this.getEnvironment(OpenCLEnvironmentOptions.DEFAULT);
+    }
+
+    /**
+     * Retrieves an environment that follows the specified requirements.
+     *
+     * @param options The requirements for the requested environment
+     * @return The environment for a device with those properties or <code>null</code> if no device was found
+     */
+    public @Nullable OpenCLEnvironment getEnvironment(OpenCLEnvironmentOptions options) {
+        for (DeviceInfo deviceInfo : this.getPriorityDevices()) {
+            if (options.testDevice(deviceInfo)) {
+                return this.getEnvironment(deviceInfo);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the environment for the specified device.
+     *
+     * @param deviceInfo The device to retrieve the environment for
+     * @return The environment for that device
+     */
+    public @Nullable OpenCLEnvironment getEnvironment(DeviceInfo deviceInfo) {
+        if (this.invalidPlatforms.contains(deviceInfo)) {
+            return null;
+        }
+
+        OpenCLEnvironment environment = this.environments.get(deviceInfo);
+        if (environment == null) {
+            try {
+                environment = new OpenCLEnvironment(deviceInfo);
+                this.environments.put(deviceInfo, environment);
+            } catch (OpenCLException e) {
+                Veil.LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
+                return null;
+            }
+        }
+        return environment;
     }
 
     /**
@@ -39,22 +109,35 @@ public final class VeilOpenCL {
     }
 
     /**
+     * @return All devices for all platforms sorted by compute priority
+     */
+    public List<DeviceInfo> getPriorityDevices() {
+        return this.priorityDevices;
+    }
+
+    @Override
+    public void free() {
+        this.environments.values().forEach(OpenCLEnvironment::free);
+        this.environments.clear();
+    }
+
+    /**
      * @return The static Veil OpenCL implementation
      */
     public static VeilOpenCL get() {
-        if (instance == null) {
+        if (instance != null) {
             instance = new VeilOpenCL();
         }
         return instance;
     }
 
-    public static void checkCLError(IntBuffer errcode) {
+    public static void checkCLError(IntBuffer errcode) throws OpenCLException {
         checkCLError(errcode.get(0));
     }
 
-    public static void checkCLError(int errcode) {
+    public static void checkCLError(int errcode) throws OpenCLException {
         if (errcode != CL_SUCCESS) {
-            throw new RuntimeException(String.format("OpenCL error: %d", errcode));
+            throw new OpenCLException(errcode);
         }
     }
 
@@ -76,10 +159,12 @@ public final class VeilOpenCL {
             }
 
             return platformInfos;
+        } catch (OpenCLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static String getProgramBuildInfo(long program, long device, int param) {
+    public static String getProgramBuildInfo(long program, long device, int param) throws OpenCLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer log_size = stack.mallocPointer(1);
             VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, (PointerBuffer) null, log_size));
@@ -91,7 +176,7 @@ public final class VeilOpenCL {
         }
     }
 
-    public static String getPlatformInfoStringUTF8(long platform, int param) {
+    public static String getPlatformInfoStringUTF8(long platform, int param) throws OpenCLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer pp = stack.mallocPointer(1);
             checkCLError(clGetPlatformInfo(platform, param, (ByteBuffer) null, pp));
@@ -104,7 +189,7 @@ public final class VeilOpenCL {
         }
     }
 
-    public static String getDeviceInfoStringUTF8(long platform, int param) {
+    public static String getDeviceInfoStringUTF8(long platform, int param) throws OpenCLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer pp = stack.mallocPointer(1);
             checkCLError(clGetDeviceInfo(platform, param, (ByteBuffer) null, pp));
@@ -117,7 +202,7 @@ public final class VeilOpenCL {
         }
     }
 
-    public static int getDeviceInfoInt(long device, int param) {
+    public static int getDeviceInfoInt(long device, int param) throws OpenCLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer pl = stack.mallocInt(1);
             checkCLError(clGetDeviceInfo(device, param, pl, null));
@@ -125,7 +210,7 @@ public final class VeilOpenCL {
         }
     }
 
-    public static long getDeviceInfoLong(long device, int param) {
+    public static long getDeviceInfoLong(long device, int param) throws OpenCLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             LongBuffer pl = stack.mallocLong(1);
             checkCLError(clGetDeviceInfo(device, param, pl, null));
@@ -153,7 +238,7 @@ public final class VeilOpenCL {
                                String vendor,
                                DeviceInfo[] devices) {
 
-        public static PlatformInfo create(long platform, MemoryStack stack) {
+        public static PlatformInfo create(long platform, MemoryStack stack) throws OpenCLException {
             CLCapabilities caps = CL.createPlatformCapabilities(platform);
             String profile = getPlatformInfoStringUTF8(platform, CL_PLATFORM_PROFILE);
             String version = getPlatformInfoStringUTF8(platform, CL_PLATFORM_VERSION);
@@ -188,6 +273,7 @@ public final class VeilOpenCL {
      * @param maxComputeUnits       The number of parallel compute units on the OpenCL device. A work-group executes on a single compute unit. The minimum value is 1
      * @param maxWorkItemDimensions Maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model. (Refer to {@link CL10#clEnqueueNDRangeKernel(long, long, int, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer) clEnqueueNDRangeKernel})
      * @param maxWorkGroupSize      Maximum number of work-items in a work-group that a device is capable of executing on a single compute unit, for any given kernel-instance running on the device
+     * @param maxMemAllocSize       Max size of memory object allocation in bytes
      * @param maxClockFrequency     Maximum configured clock frequency of the device in MHz
      * @param addressBits           The default compute device address space size of the global address space specified as an unsigned integer value in bits. Currently supported values are 32 or 64 bits
      * @param available             If this device is able to execute commands sent to it
@@ -208,6 +294,7 @@ public final class VeilOpenCL {
                              int maxComputeUnits,
                              int maxWorkItemDimensions,
                              long maxWorkGroupSize,
+                             long maxMemAllocSize,
                              int maxClockFrequency,
                              int addressBits,
                              boolean available,
@@ -220,7 +307,7 @@ public final class VeilOpenCL {
                              @Nullable String openclCVersion
     ) {
 
-        public static DeviceInfo create(long device, CLCapabilities platformCapabilities) {
+        public static DeviceInfo create(long device, CLCapabilities platformCapabilities) throws OpenCLException {
             CLCapabilities caps = CL.createDeviceCapabilities(device, platformCapabilities);
             long platform = getDeviceInfoLong(device, CL_DEVICE_PLATFORM);
             long deviceType = getDeviceInfoLong(device, CL_DEVICE_TYPE);
@@ -228,6 +315,7 @@ public final class VeilOpenCL {
             int maxComputeUnits = getDeviceInfoInt(device, CL_DEVICE_MAX_COMPUTE_UNITS);
             int maxWorkItemDimensions = getDeviceInfoInt(device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS);
             long maxWorkGroupSize = getDeviceInfoLong(device, CL_DEVICE_MAX_WORK_GROUP_SIZE);
+            long maxMemAllocSize = getDeviceInfoLong(device, CL_DEVICE_MAX_MEM_ALLOC_SIZE);
             int maxClockFrequency = getDeviceInfoInt(device, CL_DEVICE_MAX_CLOCK_FREQUENCY);
             int addressBits = getDeviceInfoInt(device, CL_DEVICE_ADDRESS_BITS);
             boolean available = getDeviceInfoInt(device, CL_DEVICE_AVAILABLE) == CL_TRUE;
@@ -238,7 +326,7 @@ public final class VeilOpenCL {
             String profile = getDeviceInfoStringUTF8(device, CL_DEVICE_PROFILE);
             String version = getDeviceInfoStringUTF8(device, CL_DEVICE_VERSION);
             String openclCVersion = caps.OpenCL11 ? getDeviceInfoStringUTF8(device, CL_DEVICE_OPENCL_C_VERSION) : null;
-            return new DeviceInfo(platform, device, caps, deviceType, vendorId, maxComputeUnits, maxWorkItemDimensions, maxWorkGroupSize, maxClockFrequency, addressBits, available, compilerAvailable, name, vendor, driverVersion, profile, version, openclCVersion);
+            return new DeviceInfo(platform, device, caps, deviceType, vendorId, maxComputeUnits, maxWorkItemDimensions, maxWorkGroupSize, maxMemAllocSize, maxClockFrequency, addressBits, available, compilerAvailable, name, vendor, driverVersion, profile, version, openclCVersion);
         }
 
         /**

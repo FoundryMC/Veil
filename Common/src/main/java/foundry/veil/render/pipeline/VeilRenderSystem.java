@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.logging.LogUtils;
 import foundry.veil.imgui.VeilImGuiImpl;
+import foundry.veil.opencl.VeilOpenCL;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
@@ -276,6 +277,7 @@ public final class VeilRenderSystem {
     public static void close() {
         renderer.free();
         VeilImGuiImpl.get().free();
+        VeilOpenCL.get().free();
     }
 
     @ApiStatus.Internal
