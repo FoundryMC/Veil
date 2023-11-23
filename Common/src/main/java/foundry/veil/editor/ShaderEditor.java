@@ -6,7 +6,9 @@ import foundry.veil.mixin.client.GameRendererAccessor;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import imgui.ImGui;
+import imgui.flag.ImGuiDataType;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.minecraft.client.Minecraft;
@@ -43,6 +45,8 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     private SelectedProgram selectedProgram;
 
     private final ImBoolean editSourceOpen;
+    private final ImBoolean scanIds;
+    private final ImInt scanIdCount;
     private int editProgramId;
     private int editShaderId;
 
@@ -78,6 +82,8 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.selectedProgram = null;
 
         this.editSourceOpen = new ImBoolean();
+        this.scanIds = new ImBoolean();
+        this.scanIdCount = new ImInt();
         this.editProgramId = 0;
         this.editShaderId = 0;
     }
@@ -144,6 +150,20 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
             this.shaders.put(shader.getId(), shader.getProgram());
         }
 
+        if (this.scanIds.get()) {
+            for (int i = 0; i < this.scanIdCount.get(); i++) {
+                if (!glIsProgram(i)) {
+                    continue;
+                }
+
+                if (this.shaders.containsValue(i)) {
+                    continue;
+                }
+
+                this.shaders.put(new ResourceLocation("unknown", Integer.toString(i)), i);
+            }
+        }
+
         if (this.selectedProgram != null && !this.shaders.containsKey(this.selectedProgram.name)) {
             this.setSelectedProgram(null);
         }
@@ -162,6 +182,13 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         if (ImGui.button("Refresh")) {
             this.reloadShaders();
         }
+        ImGui.sameLine();
+        ImGui.checkbox("Scan IDs", this.scanIds);
+        ImGui.sameLine();
+        ImGui.beginDisabled(!this.scanIds.get());
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() / 3);
+        ImGui.sliderScalar("Scan Count", ImGuiDataType.U16, this.scanIdCount, 1, 1000);
+        ImGui.endDisabled();
 
         if (ImGui.inputTextWithHint("##search", "Search...", this.programFilterText)) {
             String regex = this.programFilterText.get();
