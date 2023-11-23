@@ -36,12 +36,12 @@ public class GameRendererMixin {
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", shift = At.Shift.BEFORE))
-    public void veil$setupFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+    public void veil$preDrawFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
         VeilFirstPersonRenderer.setup();
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/Camera;F)V", shift = At.Shift.AFTER))
-    public void veil$drawsetupFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+    public void veil$postDrawFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
         VeilFirstPersonRenderer.blit();
     }
 }

@@ -167,8 +167,8 @@ public record FramebufferDefinition(MolangExpression width,
     public AdvancedFbo.Builder createBuilder(MolangEnvironment environment) {
         int width = (int) environment.safeResolve(this.width);
         int height = (int) environment.safeResolve(this.height);
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxFramebufferWidth(), width, "width must be between 0 to " + VeilRenderSystem.maxFramebufferWidth());
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxFramebufferHeight(), height, "height must be between 0 to " + VeilRenderSystem.maxFramebufferHeight());
+        Validate.inclusiveBetween(1, VeilRenderSystem.maxFramebufferWidth(), width, "width must be between 1 and " + VeilRenderSystem.maxFramebufferWidth());
+        Validate.inclusiveBetween(1, VeilRenderSystem.maxFramebufferHeight(), height, "height must be between 1 and " + VeilRenderSystem.maxFramebufferHeight());
         AdvancedFbo.Builder builder = AdvancedFbo.withSize(width, height);
 
         for (FramebufferAttachmentDefinition definition : this.colorBuffers) {

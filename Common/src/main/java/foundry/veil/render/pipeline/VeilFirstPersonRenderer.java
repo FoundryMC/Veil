@@ -21,6 +21,7 @@ public final class VeilFirstPersonRenderer {
     private static final ResourceLocation FIRST_PERSON = new ResourceLocation(Veil.MODID, "first_person");
 
     private static PostPipeline pipeline;
+    private static boolean printedError;
 
     private VeilFirstPersonRenderer() {
     }
@@ -31,11 +32,15 @@ public final class VeilFirstPersonRenderer {
         pipeline = renderer.getPostProcessingManager().getPipeline(FIRST_PERSON);
 
         if (pipeline == null || buffer == null) {
-            LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
+            if (!printedError) {
+                LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
+                printedError = true;
+            }
             return;
         }
 
         buffer.bind(false);
+        printedError = false;
     }
 
     public static void blit() {
