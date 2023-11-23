@@ -120,8 +120,7 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
-    shade "org.lwjgl:lwjgl-opencl"
+    shade "org.lwjgl:lwjgl-opencl:$lwjgl_version"
 }
 
 sourceSets {

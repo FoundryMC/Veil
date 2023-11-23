@@ -121,6 +121,7 @@ public class CLKernel implements NativeResource {
      * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
      *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
      *              <table>
+     *                  <caption>All possible OpenCL memory buffer flags</caption>
      *                  <tr>
      *                      <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
      *                      <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
@@ -154,6 +155,7 @@ public class CLKernel implements NativeResource {
      * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
      *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
      *              <table>
+     *                  <caption>All possible OpenCL memory buffer flags</caption>
      *                  <tr>
      *                      <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
      *                      <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
