@@ -3,9 +3,7 @@ plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle'
     id 'org.spongepowered.mixin'
-    id 'org.jetbrains.kotlin.jvm'
     id 'com.github.johnrengelman.shadow'
-    id 'kotlin'
 }
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
@@ -87,14 +85,6 @@ configurations {
     minecraftLibrary.extendsFrom shade
 }
 
-repositories {
-    // Add KFF Maven repository
-    maven {
-        name = 'Kotlin for Forge'
-        url = 'https://thedarkcolour.github.io/KotlinForForge/'
-    }
-}
-
 dependencies {
     minecraft "net.minecraftforge:forge:$minecraft_version-$forge_version"
     compileOnly project(":Common")
@@ -104,9 +94,6 @@ dependencies {
 
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
-
-    // Adds KFF as dependency and Kotlin libs
-    implementation 'thedarkcolour:kotlinforforge:4.4.0'
 
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
 
@@ -121,11 +108,6 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
     shade "org.lwjgl:lwjgl-opencl:$lwjgl_version"
-}
-
-sourceSets {
-    main.kotlin.srcDirs += 'src/main/java'
-    test.kotlin.srcDirs += 'src/main/java'
 }
 
 tasks.withType(JavaCompile).configureEach {

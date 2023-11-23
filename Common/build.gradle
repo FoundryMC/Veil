@@ -3,8 +3,6 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'org.spongepowered.gradle.vanilla'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'kotlin'
 }
 
 archivesBaseName = "${mod_name}-common-${minecraft_version}"

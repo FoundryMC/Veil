@@ -45,7 +45,6 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.10.10+kotlin.1.9.10")
     include(implementation("gg.moonflower:molang-compiler:${molang_compiler_version}"))
 
     include(implementation("io.github.spair:imgui-java-binding:$imgui_version"))
