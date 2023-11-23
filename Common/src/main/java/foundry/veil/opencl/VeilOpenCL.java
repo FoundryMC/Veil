@@ -37,21 +37,30 @@ public final class VeilOpenCL implements NativeResource {
     private static VeilOpenCL instance;
 
     private final Map<DeviceInfo, CLEnvironment> environments;
-    private final Set<DeviceInfo> invalidPlatforms;
+    private final Set<DeviceInfo> invalidDevices;
     private final PlatformInfo[] platforms;
     private final List<DeviceInfo> priorityDevices;
 
     private VeilOpenCL() {
         this.environments = new Object2ObjectArrayMap<>();
-        this.invalidPlatforms = new HashSet<>();
-        this.platforms = VeilOpenCL.requestPlatforms();
+        this.invalidDevices = new HashSet<>();
 
+        PlatformInfo[] platforms;
         List<DeviceInfo> priorityDevices = new ArrayList<>();
-        for (PlatformInfo platform : this.platforms) {
-            priorityDevices.addAll(Arrays.asList(platform.devices()));
-        }
-        priorityDevices.sort(COMPUTE_ORDER);
+        try {
+            platforms = VeilOpenCL.requestPlatforms();
 
+            for (PlatformInfo platform : platforms) {
+                priorityDevices.addAll(Arrays.asList(platform.devices()));
+            }
+            priorityDevices.sort(COMPUTE_ORDER);
+
+        } catch (Throwable t) {
+            Veil.LOGGER.warn("Failed to load OpenCL", t);
+            platforms = new PlatformInfo[0];
+        }
+
+        this.platforms = platforms;
         this.priorityDevices = Collections.unmodifiableList(priorityDevices);
     }
 
@@ -84,7 +93,7 @@ public final class VeilOpenCL implements NativeResource {
      * @return The environment for that device
      */
     public @Nullable CLEnvironment getEnvironment(DeviceInfo deviceInfo) {
-        if (this.invalidPlatforms.contains(deviceInfo)) {
+        if (this.invalidDevices.contains(deviceInfo)) {
             return null;
         }
 
@@ -94,6 +103,7 @@ public final class VeilOpenCL implements NativeResource {
                 environment = new CLEnvironment(deviceInfo);
                 this.environments.put(deviceInfo, environment);
             } catch (CLException e) {
+                this.invalidDevices.add(deviceInfo);
                 Veil.LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
                 return null;
             }
