@@ -33,7 +33,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final FileToIdConverter MODIFIER_LISTER = new FileToIdConverter("shader_modifiers", ".txt");
+    public static final FileToIdConverter MODIFIER_LISTER = new FileToIdConverter("pinwheel/shader_modifiers", ".txt");
     private static final Map<String, String> NEXT_STAGES = Map.of(
             "vsh", "gsh",
             "gsh", "fsh"
