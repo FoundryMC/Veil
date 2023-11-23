@@ -60,8 +60,8 @@ public class CLEnvironment implements NativeResource {
             long device = deviceInfo.id();
 
             this.errorCallback = CLContextCallback.create((errinfo, private_info, cb, user_data) -> {
-                Veil.LOGGER.error("[LWJGL] cl_context_callback");
-                Veil.LOGGER.error("\tInfo: " + MemoryUtil.memUTF8(errinfo));
+                VeilOpenCL.LOGGER.error("[LWJGL] cl_context_callback");
+                VeilOpenCL.LOGGER.error("\tInfo: " + MemoryUtil.memUTF8(errinfo));
             });
             IntBuffer errcode_ret = stack.callocInt(1);
 

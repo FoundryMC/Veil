@@ -1,5 +1,6 @@
 package foundry.veil.opencl;
 
+import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,8 @@ import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -26,6 +29,8 @@ import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
  * @author Ocelot
  */
 public final class VeilOpenCL implements NativeResource {
+
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     // Prefer platforms that support GPU devices
     private static final Comparator<DeviceInfo> COMPUTE_ORDER = (p1, p2) -> {
@@ -54,10 +59,11 @@ public final class VeilOpenCL implements NativeResource {
                 priorityDevices.addAll(Arrays.asList(platform.devices()));
             }
             priorityDevices.sort(COMPUTE_ORDER);
-
+            throw new LinkageError("test");
         } catch (Throwable t) {
-            Veil.LOGGER.warn("Failed to load OpenCL", t);
+            LOGGER.warn("Failed to load OpenCL");
             platforms = new PlatformInfo[0];
+            priorityDevices.clear();
         }
 
         this.platforms = platforms;
@@ -104,7 +110,7 @@ public final class VeilOpenCL implements NativeResource {
                 this.environments.put(deviceInfo, environment);
             } catch (CLException e) {
                 this.invalidDevices.add(deviceInfo);
-                Veil.LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
+                LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
                 return null;
             }
         }
@@ -151,7 +157,7 @@ public final class VeilOpenCL implements NativeResource {
         }
     }
 
-    private static PlatformInfo[] requestPlatforms() {
+    private static PlatformInfo[] requestPlatforms() throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer num_platforms = stack.mallocInt(1);
             checkCLError(clGetPlatformIDs(null, num_platforms));
@@ -169,8 +175,6 @@ public final class VeilOpenCL implements NativeResource {
             }
 
             return platformInfos;
-        } catch (CLException e) {
-            throw new RuntimeException(e);
         }
     }
 

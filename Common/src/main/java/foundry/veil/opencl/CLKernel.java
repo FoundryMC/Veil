@@ -144,7 +144,7 @@ public class CLKernel implements NativeResource {
         try {
             return createBuffer(flags, size);
         } catch (CLException e) {
-            Veil.LOGGER.error("Failed to create CL buffer", e);
+            VeilOpenCL.LOGGER.error("Failed to create CL buffer", e);
             return null;
         }
     }
