@@ -7,7 +7,6 @@ import foundry.veil.opencl.*;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -101,6 +100,10 @@ public class OpenCLEditor extends SingleWindowEditor {
 
         this.free();
         this.environment = environment;
+
+        if (!this.source.isBlank()) {
+            this.compileProgram(this.source);
+        }
     }
 
     private void compileProgram(String source) {
@@ -153,37 +156,40 @@ public class OpenCLEditor extends SingleWindowEditor {
             IntBuffer A = MemoryUtil.memAllocInt(itemCount);
             IntBuffer B = MemoryUtil.memAllocInt(itemCount);
             IntBuffer C = MemoryUtil.memAllocInt(itemCount);
-            for (int i = 0; i < itemCount; i++) {
-                A.put(i, i);
-                B.put(i, itemCount - i);
-                C.put(i, 2 * i);
-            }
-            upload.stop();
-
-            Stopwatch execute = Stopwatch.createStarted();
+            IntBuffer D = MemoryUtil.memAllocInt(itemCount);
             try {
-                this.initBuffers(itemCount);
+                for (int i = 0; i < itemCount; i++) {
+                    A.put(i, i);
+                    B.put(i, itemCount - i);
+                    C.put(i, 2 * i);
+                }
+                upload.stop();
 
-                this.bufferA.writeAsync(A, null);
-                this.bufferB.writeAsync(B, null);
-                this.bufferC.writeAsync(C, null);
-
-                this.kernel.setPointers(0, this.bufferA);
-                this.kernel.setPointers(1, this.bufferB);
-                this.kernel.setPointers(2, this.bufferC);
-                this.kernel.setPointers(3, this.bufferD);
-
-                this.kernel.execute(itemCount, 1);
-
-                IntBuffer D = MemoryUtil.memAllocInt(itemCount);
+                Stopwatch execute = Stopwatch.createStarted();
                 try {
+                    this.initBuffers(itemCount);
+
+                    this.bufferA.writeAsync(A, null);
+                    this.bufferB.writeAsync(B, null);
+                    this.bufferC.writeAsync(C, null);
+
+                    this.kernel.setPointers(0, this.bufferA);
+                    this.kernel.setPointers(1, this.bufferB);
+                    this.kernel.setPointers(2, this.bufferC);
+                    this.kernel.setPointers(3, this.bufferD);
+
+                    this.kernel.execute(itemCount, this.workGroups.get());
+
                     this.bufferD.readAsync(D, null);
 
                     this.environment.finish();
 
                     execute.stop();
-                    System.out.printf("Done (%s upload, %s execute, %sns/item)\n", upload, execute, execute.elapsed(TimeUnit.NANOSECONDS) / itemCount);
+                    System.out.printf("Done in " + (upload.elapsed(TimeUnit.NANOSECONDS) + execute.elapsed(TimeUnit.NANOSECONDS)) / 1_000_000 + "ms (%s upload, %s execute, %sns/item)\n", upload, execute, execute.elapsed(TimeUnit.NANOSECONDS) / itemCount);
                 } finally {
+                    MemoryUtil.memFree(A);
+                    MemoryUtil.memFree(B);
+                    MemoryUtil.memFree(C);
                     MemoryUtil.memFree(D);
                 }
             } catch (Throwable t) {
@@ -203,8 +209,13 @@ public class OpenCLEditor extends SingleWindowEditor {
     }
 
     @Override
+    public void onHide() {
+        super.onHide();
+        this.free();
+    }
+
+    @Override
     public void free() {
-        super.free();
         this.freeBuffers();
     }
 
