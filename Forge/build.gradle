@@ -82,7 +82,14 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 configurations {
     shade
-    minecraftLibrary.extendsFrom shade
+    library
+    implementation.extendsFrom library
+}
+
+minecraft.runs.configureEach {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
 }
 
 dependencies {
@@ -95,10 +102,21 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
     implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
+    minecraftLibrary "gg.moonflower:molang-compiler:$molang_compiler_version"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
 
+    implementation "io.github.spair:imgui-java-binding:$imgui_version"
+    implementation("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+
+    library "io.github.spair:imgui-java-natives-linux:$imgui_version"
+    library "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    library "io.github.spair:imgui-java-natives-windows:$imgui_version"
+
     shade "io.github.spair:imgui-java-binding:$imgui_version"
-    shade ("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+    shade("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
         exclude group: 'org.lwjgl'
         exclude group: 'org.lwjgl.lwjgl'
     }
@@ -107,6 +125,9 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
+    minecraftLibrary ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+        transitive false
+    }
     shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
@@ -139,6 +160,7 @@ shadowJar {
     relocate "org.lwjgl.opencl", "${project.group}.lib.opencl"
     relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
     relocate "imgui", "${project.group}.lib.imgui"
+    relocate "io.imgui", "${project.group}.lib.imgui-natives"
     finalizedBy 'reobfShadowJar'
 }
 
