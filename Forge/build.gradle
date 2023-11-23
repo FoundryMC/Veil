@@ -139,7 +139,7 @@ shadowJar {
     relocate "org.lwjgl.opencl", "${project.group}.lib.opencl"
     relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
     relocate "imgui", "${project.group}.lib.imgui"
-    relocate "io.imgui", "${project.group}.lib.imgui"
+    relocate "io.imgui.java.native-bin", "${project.group}.lib"
     finalizedBy 'reobfShadowJar'
 }
 
