@@ -158,10 +158,9 @@ shadowJar {
     configurations = [project.configurations.shade]
     relocate "org.objectweb.asm", "${project.group}.lib.asm"
     relocate "org.lwjgl.opencl", "${project.group}.lib.opencl"
-    relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
+//    relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
 //    relocate "imgui", "${project.group}.lib.imgui"
 //    relocate "io.imgui", "${project.group}.lib.imgui-natives"
-
     relocate "io.github.spair:imgui-java-binding:$imgui_version", "${project.group}.relocated.imgui-java-binding"
     relocate "io.github.spair:imgui-java-lwjgl3:$imgui_version", "${project.group}.relocated.imgui-java-lwjgl3"
     relocate "io.github.spair:imgui-java-natives-linux:$imgui_version", "${project.group}.relocated.imgui-java-natives-linux"
