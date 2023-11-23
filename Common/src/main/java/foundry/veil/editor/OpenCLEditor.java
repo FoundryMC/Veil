@@ -1,5 +1,6 @@
 package foundry.veil.editor;
 
+import com.google.common.base.Stopwatch;
 import com.mojang.logging.LogUtils;
 import foundry.veil.imgui.CodeEditor;
 import foundry.veil.opencl.OpenCLException;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opencl.CL20.clCreateCommandQueueWithProperties;
@@ -38,8 +40,8 @@ public class OpenCLEditor extends SingleWindowEditor {
 
     private VeilOpenCL.DeviceInfo deviceInfo;
 
-    private final ImInt elements = new ImInt(64);
-    private final ImInt workGroups = new ImInt(16);
+    private final ImInt elements = new ImInt(1_000_000);
+    private final ImInt workGroups = new ImInt(1);
 
     public OpenCLEditor() {
         this.codeEditor = new CodeEditor("Save");
@@ -193,32 +195,35 @@ public class OpenCLEditor extends SingleWindowEditor {
         if (ImGui.button("Run")) {
             LongSet buffers = new LongArraySet(3);
 
-            int LIST_SIZE = this.elements.get();
-            int[] A = new int[LIST_SIZE];
-            int[] B = new int[LIST_SIZE];
-            int[] C = new int[LIST_SIZE];
-            for (int i = 0; i < LIST_SIZE; i++) {
-                A[i] = i;
-                B[i] = LIST_SIZE - i;
-                C[i] = 2 * i;
+            Stopwatch upload = Stopwatch.createStarted();
+            int itemCount = this.elements.get();
+            IntBuffer A = MemoryUtil.memAllocInt(itemCount);
+            IntBuffer B = MemoryUtil.memAllocInt(itemCount);
+            IntBuffer C = MemoryUtil.memAllocInt(itemCount);
+            for (int i = 0; i < itemCount; i++) {
+                A.put(i, i);
+                B.put(i, itemCount - i);
+                C.put(i, 2 * i);
             }
+            upload.stop();
 
+            Stopwatch execute = Stopwatch.createStarted();
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer errcode_ret = stack.callocInt(1);
 
-                long memObjectA = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) LIST_SIZE * Integer.BYTES, errcode_ret);
+                long memObjectA = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) itemCount * Integer.BYTES, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
                 buffers.add(memObjectA);
 
-                long memObjectB = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) LIST_SIZE * Integer.BYTES, errcode_ret);
+                long memObjectB = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) itemCount * Integer.BYTES, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
                 buffers.add(memObjectB);
 
-                long memObjectC = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) LIST_SIZE * Integer.BYTES, errcode_ret);
+                long memObjectC = clCreateBuffer(this.context, CL_MEM_READ_ONLY, (long) itemCount * Integer.BYTES, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
                 buffers.add(memObjectC);
 
-                long memObjectD = clCreateBuffer(this.context, CL_MEM_WRITE_ONLY, (long) LIST_SIZE * Integer.BYTES, errcode_ret);
+                long memObjectD = clCreateBuffer(this.context, CL_MEM_WRITE_ONLY, (long) itemCount * Integer.BYTES, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
                 buffers.add(memObjectD);
 
@@ -231,25 +236,28 @@ public class OpenCLEditor extends SingleWindowEditor {
                 VeilOpenCL.checkCLError(clSetKernelArg1p(this.kernel, 2, memObjectC));
                 VeilOpenCL.checkCLError(clSetKernelArg1p(this.kernel, 3, memObjectD));
 
-                PointerBuffer work_group_loc = stack.mallocPointer(1);
-                VeilOpenCL.checkCLError(clGetKernelWorkGroupInfo(this.kernel, this.deviceInfo.id(), CL_KERNEL_WORK_GROUP_SIZE, work_group_loc, null));
+                VeilOpenCL.checkCLError(clFinish(this.queue));
 
                 PointerBuffer global_work_size = stack.mallocPointer(1);
-                global_work_size.put(0, LIST_SIZE);
+                global_work_size.put(0, itemCount);
                 PointerBuffer local_work_size = stack.mallocPointer(1);
-                local_work_size.put(0, Math.min(this.workGroups.get(), LIST_SIZE));
+                local_work_size.put(0, this.workGroups.get());
                 VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.queue, this.kernel, 1, null, global_work_size, local_work_size, null, null));
 
-                int[] D = new int[LIST_SIZE];
+                int[] D = new int[itemCount];
                 VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.queue, memObjectD, true, 0, D, null, null));
 
                 VeilOpenCL.checkCLError(clFlush(this.queue));
                 VeilOpenCL.checkCLError(clFinish(this.queue));
 
-                System.out.println("Done");
-            } catch (Exception e) {
-                LOGGER.error("Failed to run OpenCL", e);
+                execute.stop();
+                System.out.printf("Done (%s upload, %s execute, %sns/item)\n", upload, execute, execute.elapsed(TimeUnit.NANOSECONDS) / itemCount);
+            } catch (Throwable t) {
+                LOGGER.error("Failed to run OpenCL", t);
             } finally {
+                MemoryUtil.memFree(A);
+                MemoryUtil.memFree(B);
+                MemoryUtil.memFree(C);
                 for (long buffer : buffers) {
                     if (buffer != 0) {
                         clReleaseMemObject(buffer);
@@ -259,7 +267,7 @@ public class OpenCLEditor extends SingleWindowEditor {
         }
         ImGui.endDisabled();
 
-        ImGui.dragScalar("Elements", ImGuiDataType.U16, this.elements, 2, 0, 100_000_000);
+        ImGui.dragScalar("Elements", ImGuiDataType.U32, this.elements, 2, 0, 100_000_000);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int max = Integer.MAX_VALUE;
@@ -276,7 +284,7 @@ public class OpenCLEditor extends SingleWindowEditor {
             } else {
                 ImGui.beginDisabled();
             }
-            ImGui.sliderScalar("Local Work Groups", ImGuiDataType.U32, this.workGroups, 2, max);
+            ImGui.sliderScalar("Local Work Groups", ImGuiDataType.U32, this.workGroups, 1, max);
         }
         ImGui.endDisabled();
     }

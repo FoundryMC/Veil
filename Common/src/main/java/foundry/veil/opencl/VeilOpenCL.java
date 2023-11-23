@@ -125,7 +125,7 @@ public final class VeilOpenCL implements NativeResource {
      * @return The static Veil OpenCL implementation
      */
     public static VeilOpenCL get() {
-        if (instance != null) {
+        if (instance == null) {
             instance = new VeilOpenCL();
         }
         return instance;

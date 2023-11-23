@@ -2,6 +2,9 @@ package foundry.veil.opencl;
 
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.opencl.event.CLEventDispatcher;
+import foundry.veil.opencl.event.CLLegacyEventDispatcher;
+import foundry.veil.opencl.event.CLNativeEventDispatcher;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -40,8 +43,9 @@ public class OpenCLEnvironment implements NativeResource {
     private final VeilOpenCL.DeviceInfo device;
     private final CLContextCallback errorCallback;
     private final long context;
-    private final long queue;
+    private final long commandQueue;
     private final Map<ResourceLocation, ProgramData> programs;
+    private final CLEventDispatcher eventDispatcher;
 
     public OpenCLEnvironment(VeilOpenCL.DeviceInfo deviceInfo) throws OpenCLException {
         this.device = deviceInfo;
@@ -65,10 +69,10 @@ public class OpenCLEnvironment implements NativeResource {
                 this.context = clCreateContext(ctxProps, device, this.errorCallback, MemoryUtil.NULL, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
-                this.queue = clCreateCommandQueueWithProperties(this.context, device, null, errcode_ret);
+                this.commandQueue = clCreateCommandQueueWithProperties(this.context, device, null, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
-                if (this.queue == MemoryUtil.NULL) {
+                if (this.commandQueue == MemoryUtil.NULL) {
                     throw new IllegalStateException("Failed to create OpenCL queue");
                 }
             } catch (Exception e) {
@@ -78,6 +82,7 @@ public class OpenCLEnvironment implements NativeResource {
         }
 
         this.programs = new HashMap<>();
+        this.eventDispatcher = deviceInfo.capabilities().clSetEventCallback != 0 ? new CLNativeEventDispatcher() : new CLLegacyEventDispatcher();
     }
 
     /**
@@ -94,7 +99,7 @@ public class OpenCLEnvironment implements NativeResource {
                 program = clCreateProgramWithSource(this.context, source, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
-                long device = this.device.platform();
+                long device = this.device.id();
                 int programStatus = clBuildProgram(program, device, "", null, 0);
                 if (programStatus != CL_SUCCESS) {
                     System.err.println(VeilOpenCL.getProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG));
@@ -146,7 +151,7 @@ public class OpenCLEnvironment implements NativeResource {
         if (kernel == null) {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 IntBuffer errcode_ret = stack.callocInt(1);
-                long kernelId = clCreateKernel(programData.id, "test_add", errcode_ret);
+                long kernelId = clCreateKernel(programData.id, kernelName, errcode_ret);
                 if (errcode_ret.get(0) == CL_INVALID_KERNEL_NAME) {
                     throw new OpenCLException("Failed to find kernel: " + kernelName, errcode_ret.get(0));
                 }
@@ -162,17 +167,32 @@ public class OpenCLEnvironment implements NativeResource {
         return kernel;
     }
 
+    /**
+     * Blocks until all CL commands have completed.
+     *
+     * @throws OpenCLException If any error occurs while trying to block
+     */
+    public void finish() throws OpenCLException {
+        VeilOpenCL.checkCLError(clFinish(this.commandQueue));
+    }
+
     @Override
     public void free() {
         this.errorCallback.free();
-        if (this.queue != 0) {
-            clReleaseCommandQueue(this.queue);
+        if (this.commandQueue != 0) {
+            clReleaseCommandQueue(this.commandQueue);
         }
         if (this.context != 0) {
             clReleaseContext(this.context);
         }
         this.programs.values().forEach(NativeResource::free);
         this.programs.clear();
+
+        try {
+            this.eventDispatcher.close();
+        } catch (InterruptedException e) {
+            LOGGER.error("Failed to stop event dispatcher", e);
+        }
     }
 
     /**
@@ -180,6 +200,13 @@ public class OpenCLEnvironment implements NativeResource {
      */
     public VeilOpenCL.DeviceInfo getDevice() {
         return this.device;
+    }
+
+    /**
+     * @return The dispatcher for event callbacks
+     */
+    public CLEventDispatcher getEventDispatcher() {
+        return this.eventDispatcher;
     }
 
     /**
@@ -192,8 +219,8 @@ public class OpenCLEnvironment implements NativeResource {
     /**
      * @return The pointer to the OpenCL queue
      */
-    public long getQueue() {
-        return this.queue;
+    public long getCommandQueue() {
+        return this.commandQueue;
     }
 
     private record ProgramData(long id,

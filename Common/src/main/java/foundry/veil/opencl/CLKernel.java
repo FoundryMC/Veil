@@ -5,10 +5,11 @@ import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
+import org.lwjgl.opencl.CL12;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.NativeResource;
 
-import java.nio.*;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opencl.CL10.*;
 
@@ -22,18 +23,117 @@ public class CLKernel implements NativeResource {
 
     private final OpenCLEnvironment environment;
     private final long handle;
+    private final int maxWorkGroupSize;
     private final LongSet pointers;
 
-    CLKernel(OpenCLEnvironment environment, long handle) {
+    CLKernel(OpenCLEnvironment environment, long handle) throws OpenCLException {
         this.environment = environment;
         this.handle = handle;
         this.pointers = new LongArraySet();
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer work_group_loc = stack.mallocPointer(1);
+            VeilOpenCL.checkCLError(clGetKernelWorkGroupInfo(this.handle, environment.getDevice().id(), CL_KERNEL_WORK_GROUP_SIZE, work_group_loc, null));
+            this.maxWorkGroupSize = (int) work_group_loc.get(0);
+        }
+    }
+
+    /**
+     * Executes this kernel in 1 dimension. <code>globalWorkSize</code> must be evenly divisible by <code>localWorkSize</code>
+     *
+     * @param globalWorkSize The size of the global work group
+     * @param localWorkSize  The size of each local work group
+     * @throws OpenCLException If any error occurs while executing the kernel
+     */
+    public void execute(int globalWorkSize, int localWorkSize) throws OpenCLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer global_work_size = stack.pointers(globalWorkSize);
+            PointerBuffer local_work_size = stack.pointers(localWorkSize);
+            VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.environment.getCommandQueue(), this.handle, 1, null, global_work_size, local_work_size, null, null));
+        }
+    }
+
+    /**
+     * Executes this kernel in 2 dimensions. <code>globalWorkSize</code> must be evenly divisible by <code>localWorkSize</code>
+     *
+     * @param globalWorkSizeX The size of the global work group in the X
+     * @param localWorkSizeX  The size of each local work group in the X
+     * @param globalWorkSizeY The size of the global work group in the Y
+     * @param localWorkSizeY  The size of each local work group in the Y
+     * @throws OpenCLException If any error occurs while executing the kernel
+     */
+    public void execute(int globalWorkSizeX, int localWorkSizeX, int globalWorkSizeY, int localWorkSizeY) throws OpenCLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer global_work_size = stack.pointers(globalWorkSizeX, globalWorkSizeY);
+            PointerBuffer local_work_size = stack.pointers(localWorkSizeX, localWorkSizeY);
+            VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.environment.getCommandQueue(), this.handle, 2, null, global_work_size, local_work_size, null, null));
+        }
+    }
+
+    /**
+     * Executes this kernel in 3 dimensions. <code>globalWorkSize</code> must be evenly divisible by <code>localWorkSize</code>
+     *
+     * @param globalWorkSizeX The size of the global work group in the X
+     * @param localWorkSizeX  The size of each local work group in the X
+     * @param globalWorkSizeY The size of the global work group in the Y
+     * @param localWorkSizeY  The size of each local work group in the Y
+     * @param globalWorkSizeZ The size of the global work group in the Z
+     * @param localWorkSizeZ  The size of each local work group in the Z
+     * @throws OpenCLException If any error occurs while executing the kernel
+     */
+    public void execute(int globalWorkSizeX, int localWorkSizeX, int globalWorkSizeY, int localWorkSizeY, int globalWorkSizeZ, int localWorkSizeZ) throws OpenCLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer global_work_size = stack.pointers(globalWorkSizeX, globalWorkSizeY, globalWorkSizeZ);
+            PointerBuffer local_work_size = stack.pointers(localWorkSizeX, localWorkSizeY, localWorkSizeZ);
+            VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.environment.getCommandQueue(), this.handle, 3, null, global_work_size, local_work_size, null, null));
+        }
+    }
+
+    /**
+     * Executes this kernel in n dimensions. <code>globalWorkSize</code> must be evenly divisible by <code>localWorkSize</code>
+     *
+     * @param globalWorkSizes The size of each global work group
+     * @param localWorkSizes  The size of each local work group
+     * @throws OpenCLException          If any error occurs while executing the kernel
+     * @throws IllegalArgumentException If the length of <code>globalWorkSizes</code> and <code>localWorkSizes</code> are not equal
+     */
+    public void execute(int[] globalWorkSizes, int[] localWorkSizes) throws OpenCLException, IllegalArgumentException {
+        if (globalWorkSizes.length != localWorkSizes.length) {
+            throw new IllegalArgumentException("Global work size and local work size must have the same length");
+        }
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer global_work_size = stack.mallocPointer(globalWorkSizes.length);
+            for (int i = 0; i < globalWorkSizes.length; i++) {
+                global_work_size.put(i, globalWorkSizes[i]);
+            }
+            PointerBuffer local_work_size = stack.mallocPointer(localWorkSizes.length);
+            for (int i = 0; i < localWorkSizes.length; i++) {
+                local_work_size.put(i, localWorkSizes[i]);
+            }
+            VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.environment.getCommandQueue(), this.handle, globalWorkSizes.length, null, global_work_size, local_work_size, null, null));
+        }
     }
 
     /**
      * Creates a new CL memory buffer. Any errors are consumed and printed to console.
      *
-     * @param flags The creation flags
+     * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
+     *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
+     *              <table>
+     *                  <tr>
+     *                      <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
+     *                      <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
+     *                      <td>{@link CL10#CL_MEM_READ_ONLY MEM_READ_ONLY}</td>
+     *                      <td>{@link CL10#CL_MEM_USE_HOST_PTR MEM_USE_HOST_PTR}</td>
+     *                      <td>{@link CL10#CL_MEM_ALLOC_HOST_PTR MEM_ALLOC_HOST_PTR}</td>
+     *                  </tr>
+     *                  <tr>
+     *                      <td>{@link CL10#CL_MEM_COPY_HOST_PTR MEM_COPY_HOST_PTR}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_WRITE_ONLY MEM_HOST_WRITE_ONLY}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_READ_ONLY MEM_HOST_READ_ONLY}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_NO_ACCESS MEM_HOST_NO_ACCESS}</td>
+     *                  </tr>
+     *              </table>
      * @param size  The size of the buffer in bytes
      * @return A data buffer that can be used with {@link #setPointers(int, long...)} or {@link #setPointers(int, CLMemObject...)} or <code>null</code> if an error occurred
      * @see CL10#clCreateBuffer(long, long, long, IntBuffer)
@@ -48,9 +148,25 @@ public class CLKernel implements NativeResource {
     }
 
     /**
-     * Creates a new CL memory buffer.
+     * Creates a new CL memory buffer. The creation
      *
-     * @param flags The creation flags
+     * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
+     *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
+     *              <table>
+     *                  <tr>
+     *                      <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
+     *                      <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
+     *                      <td>{@link CL10#CL_MEM_READ_ONLY MEM_READ_ONLY}</td>
+     *                      <td>{@link CL10#CL_MEM_USE_HOST_PTR MEM_USE_HOST_PTR}</td>
+     *                      <td>{@link CL10#CL_MEM_ALLOC_HOST_PTR MEM_ALLOC_HOST_PTR}</td>
+     *                  </tr>
+     *                  <tr>
+     *                      <td>{@link CL10#CL_MEM_COPY_HOST_PTR MEM_COPY_HOST_PTR}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_WRITE_ONLY MEM_HOST_WRITE_ONLY}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_READ_ONLY MEM_HOST_READ_ONLY}</td>
+     *                      <td>{@link CL12#CL_MEM_HOST_NO_ACCESS MEM_HOST_NO_ACCESS}</td>
+     *                  </tr>
+     *              </table>
      * @param size  The size of the buffer in bytes
      * @return A data buffer that can be used with {@link #setPointers(int, long...)} or {@link #setPointers(int, CLMemObject...)}
      * @throws OpenCLException If there is any problem creating the buffer
@@ -66,80 +182,94 @@ public class CLKernel implements NativeResource {
         }
     }
 
-    public void setBytes(int index, byte... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer arg_value = stack.bytes(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single byte parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setByte(int index, byte value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1b(this.handle, index, value));
     }
 
-    public void setShorts(int index, short... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ShortBuffer arg_value = stack.shorts(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single short parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setShort(int index, short value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1s(this.handle, index, value));
     }
 
-    public void setInts(int index, int... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer arg_value = stack.ints(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single int parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setInt(int index, int value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1i(this.handle, index, value));
     }
 
-    public void setLongs(int index, long... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            LongBuffer arg_value = stack.longs(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single long parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setLong(int index, long value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1l(this.handle, index, value));
     }
 
-    public void setFloats(int index, float... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer arg_value = stack.floats(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single float parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setFloat(int index, float value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1f(this.handle, index, value));
     }
 
-    public void setDoubles(int index, double... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            DoubleBuffer arg_value = stack.doubles(value);
-            VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
-        }
+    /**
+     * Sets a single double parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
+    public void setDouble(int index, double value) throws OpenCLException {
+        VeilOpenCL.checkCLError(clSetKernelArg1d(this.handle, index, value));
     }
 
+    /**
+     * Sets an array of pointers to the specified parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The values of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
     public void setPointers(int index, long... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer arg_value = stack.pointers(value);
             VeilOpenCL.checkCLError(clSetKernelArg(this.handle, index, arg_value));
         }
     }
 
+    /**
+     * Sets an array of memory object pointers to the specified parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The values of the parameter
+     * @throws OpenCLException If there is any problem setting the kernel argument
+     */
     public void setPointers(int index, CLMemObject... value) throws OpenCLException {
-        if (value.length == 0) {
-            return;
-        }
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer arg_value = stack.mallocPointer(value.length);
             for (CLMemObject object : value) {
@@ -151,10 +281,24 @@ public class CLKernel implements NativeResource {
     }
 
     /**
+     * @return The environment this kernel is in
+     */
+    public OpenCLEnvironment getEnvironment() {
+        return this.environment;
+    }
+
+    /**
      * @return The pointer to the kernel object
      */
     public long getHandle() {
         return this.handle;
+    }
+
+    /**
+     * @return The maximum size a work group can be
+     */
+    public int getMaxWorkGroupSize() {
+        return this.maxWorkGroupSize;
     }
 
     @Override
