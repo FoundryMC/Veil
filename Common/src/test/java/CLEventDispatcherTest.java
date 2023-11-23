@@ -1,6 +1,6 @@
 import foundry.veil.opencl.CLBuffer;
 import foundry.veil.opencl.CLKernel;
-import foundry.veil.opencl.OpenCLEnvironment;
+import foundry.veil.opencl.CLEnvironment;
 import foundry.veil.opencl.VeilOpenCL;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,7 @@ public class CLEventDispatcherTest {
     public void testEnvironment() throws Exception {
         try (VeilOpenCL cl = VeilOpenCL.get(); MemoryStack stack = MemoryStack.stackPush()) {
             Assertions.assertNotNull(cl);
-            OpenCLEnvironment environment = cl.getEnvironment();
+            CLEnvironment environment = cl.getEnvironment();
             Assertions.assertNotNull(environment);
 
             environment.loadProgram(new ResourceLocation("test"), """
@@ -46,7 +46,7 @@ public class CLEventDispatcherTest {
     public void testExecute() throws Exception {
         try (VeilOpenCL cl = VeilOpenCL.get()) {
             Assertions.assertNotNull(cl);
-            OpenCLEnvironment environment = cl.getEnvironment();
+            CLEnvironment environment = cl.getEnvironment();
             Assertions.assertNotNull(environment);
 
             environment.loadProgram(new ResourceLocation("test"), """

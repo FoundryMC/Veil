@@ -36,7 +36,7 @@ public final class VeilOpenCL implements NativeResource {
 
     private static VeilOpenCL instance;
 
-    private final Map<DeviceInfo, OpenCLEnvironment> environments;
+    private final Map<DeviceInfo, CLEnvironment> environments;
     private final Set<DeviceInfo> invalidPlatforms;
     private final PlatformInfo[] platforms;
     private final List<DeviceInfo> priorityDevices;
@@ -58,8 +58,8 @@ public final class VeilOpenCL implements NativeResource {
     /**
      * @return The default OpenCL environment
      */
-    public @Nullable OpenCLEnvironment getEnvironment() {
-        return this.getEnvironment(OpenCLEnvironmentOptions.DEFAULT);
+    public @Nullable CLEnvironment getEnvironment() {
+        return this.getEnvironment(CLEnvironmentOptions.DEFAULT);
     }
 
     /**
@@ -68,7 +68,7 @@ public final class VeilOpenCL implements NativeResource {
      * @param options The requirements for the requested environment
      * @return The environment for a device with those properties or <code>null</code> if no device was found
      */
-    public @Nullable OpenCLEnvironment getEnvironment(OpenCLEnvironmentOptions options) {
+    public @Nullable CLEnvironment getEnvironment(CLEnvironmentOptions options) {
         for (DeviceInfo deviceInfo : this.getPriorityDevices()) {
             if (options.testDevice(deviceInfo)) {
                 return this.getEnvironment(deviceInfo);
@@ -83,17 +83,17 @@ public final class VeilOpenCL implements NativeResource {
      * @param deviceInfo The device to retrieve the environment for
      * @return The environment for that device
      */
-    public @Nullable OpenCLEnvironment getEnvironment(DeviceInfo deviceInfo) {
+    public @Nullable CLEnvironment getEnvironment(DeviceInfo deviceInfo) {
         if (this.invalidPlatforms.contains(deviceInfo)) {
             return null;
         }
 
-        OpenCLEnvironment environment = this.environments.get(deviceInfo);
+        CLEnvironment environment = this.environments.get(deviceInfo);
         if (environment == null) {
             try {
-                environment = new OpenCLEnvironment(deviceInfo);
+                environment = new CLEnvironment(deviceInfo);
                 this.environments.put(deviceInfo, environment);
-            } catch (OpenCLException e) {
+            } catch (CLException e) {
                 Veil.LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
                 return null;
             }
@@ -117,7 +117,7 @@ public final class VeilOpenCL implements NativeResource {
 
     @Override
     public void free() {
-        this.environments.values().forEach(OpenCLEnvironment::free);
+        this.environments.values().forEach(CLEnvironment::free);
         this.environments.clear();
     }
 
@@ -131,13 +131,13 @@ public final class VeilOpenCL implements NativeResource {
         return instance;
     }
 
-    public static void checkCLError(IntBuffer errcode) throws OpenCLException {
+    public static void checkCLError(IntBuffer errcode) throws CLException {
         checkCLError(errcode.get(0));
     }
 
-    public static void checkCLError(int errcode) throws OpenCLException {
+    public static void checkCLError(int errcode) throws CLException {
         if (errcode != CL_SUCCESS) {
-            throw new OpenCLException(errcode);
+            throw new CLException(errcode);
         }
     }
 
@@ -159,12 +159,12 @@ public final class VeilOpenCL implements NativeResource {
             }
 
             return platformInfos;
-        } catch (OpenCLException e) {
+        } catch (CLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String getProgramBuildInfo(long program, long device, int param) throws OpenCLException {
+    public static String getProgramBuildInfo(long program, long device, int param) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer log_size = stack.mallocPointer(1);
             VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, (PointerBuffer) null, log_size));
@@ -176,7 +176,7 @@ public final class VeilOpenCL implements NativeResource {
         }
     }
 
-    public static String getPlatformInfoStringUTF8(long platform, int param) throws OpenCLException {
+    public static String getPlatformInfoStringUTF8(long platform, int param) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer pp = stack.mallocPointer(1);
             checkCLError(clGetPlatformInfo(platform, param, (ByteBuffer) null, pp));
@@ -189,7 +189,7 @@ public final class VeilOpenCL implements NativeResource {
         }
     }
 
-    public static String getDeviceInfoStringUTF8(long platform, int param) throws OpenCLException {
+    public static String getDeviceInfoStringUTF8(long platform, int param) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer pp = stack.mallocPointer(1);
             checkCLError(clGetDeviceInfo(platform, param, (ByteBuffer) null, pp));
@@ -202,7 +202,7 @@ public final class VeilOpenCL implements NativeResource {
         }
     }
 
-    public static int getDeviceInfoInt(long device, int param) throws OpenCLException {
+    public static int getDeviceInfoInt(long device, int param) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer pl = stack.mallocInt(1);
             checkCLError(clGetDeviceInfo(device, param, pl, null));
@@ -210,7 +210,7 @@ public final class VeilOpenCL implements NativeResource {
         }
     }
 
-    public static long getDeviceInfoLong(long device, int param) throws OpenCLException {
+    public static long getDeviceInfoLong(long device, int param) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             LongBuffer pl = stack.mallocLong(1);
             checkCLError(clGetDeviceInfo(device, param, pl, null));
@@ -238,7 +238,7 @@ public final class VeilOpenCL implements NativeResource {
                                String vendor,
                                DeviceInfo[] devices) {
 
-        public static PlatformInfo create(long platform, MemoryStack stack) throws OpenCLException {
+        public static PlatformInfo create(long platform, MemoryStack stack) throws CLException {
             CLCapabilities caps = CL.createPlatformCapabilities(platform);
             String profile = getPlatformInfoStringUTF8(platform, CL_PLATFORM_PROFILE);
             String version = getPlatformInfoStringUTF8(platform, CL_PLATFORM_VERSION);
@@ -307,7 +307,7 @@ public final class VeilOpenCL implements NativeResource {
                              @Nullable String openclCVersion
     ) {
 
-        public static DeviceInfo create(long device, CLCapabilities platformCapabilities) throws OpenCLException {
+        public static DeviceInfo create(long device, CLCapabilities platformCapabilities) throws CLException {
             CLCapabilities caps = CL.createDeviceCapabilities(device, platformCapabilities);
             long platform = getDeviceInfoLong(device, CL_DEVICE_PLATFORM);
             long deviceType = getDeviceInfoLong(device, CL_DEVICE_TYPE);

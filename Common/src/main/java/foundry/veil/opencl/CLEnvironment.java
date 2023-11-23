@@ -35,7 +35,7 @@ import static org.lwjgl.opencl.CL20.clCreateCommandQueueWithProperties;
  *
  * @author Ocelot
  */
-public class OpenCLEnvironment implements NativeResource {
+public class CLEnvironment implements NativeResource {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final FileToIdConverter SHADERS = new FileToIdConverter("pinwheel/compute", ".cl");
@@ -47,7 +47,7 @@ public class OpenCLEnvironment implements NativeResource {
     private final Map<ResourceLocation, ProgramData> programs;
     private final CLEventDispatcher eventDispatcher;
 
-    public OpenCLEnvironment(VeilOpenCL.DeviceInfo deviceInfo) throws OpenCLException {
+    public CLEnvironment(VeilOpenCL.DeviceInfo deviceInfo) throws CLException {
         this.device = deviceInfo;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -103,7 +103,7 @@ public class OpenCLEnvironment implements NativeResource {
                 int programStatus = clBuildProgram(program, device, "", null, 0);
                 if (programStatus != CL_SUCCESS) {
                     System.err.println(VeilOpenCL.getProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG));
-                    throw new OpenCLException("Failed to compile program", programStatus);
+                    throw new CLException("Failed to compile program", programStatus);
                 }
 
                 ProgramData oldProgram = this.programs.put(name, new ProgramData(program));
@@ -153,13 +153,13 @@ public class OpenCLEnvironment implements NativeResource {
                 IntBuffer errcode_ret = stack.callocInt(1);
                 long kernelId = clCreateKernel(programData.id, kernelName, errcode_ret);
                 if (errcode_ret.get(0) == CL_INVALID_KERNEL_NAME) {
-                    throw new OpenCLException("Failed to find kernel: " + kernelName, errcode_ret.get(0));
+                    throw new CLException("Failed to find kernel: " + kernelName, errcode_ret.get(0));
                 }
                 VeilOpenCL.checkCLError(errcode_ret);
 
                 kernel = new CLKernel(this, kernelId);
                 programData.kernels.put(kernelName, kernel);
-            } catch (OpenCLException e) {
+            } catch (CLException e) {
                 LOGGER.error("Failed to create kernel: {}", kernelName, e);
                 programData.invalidKernels.add(kernelName);
             }
@@ -170,10 +170,18 @@ public class OpenCLEnvironment implements NativeResource {
     /**
      * Blocks until all CL commands have completed.
      *
-     * @throws OpenCLException If any error occurs while trying to block
+     * @throws CLException If any error occurs while trying to block
      */
-    public void finish() throws OpenCLException {
+    public void finish() throws CLException {
         VeilOpenCL.checkCLError(clFinish(this.commandQueue));
+    }
+
+    /**
+     * Destroys all programs.
+     */
+    public void freePrograms() {
+        this.programs.values().forEach(NativeResource::free);
+        this.programs.clear();
     }
 
     @Override
@@ -185,8 +193,7 @@ public class OpenCLEnvironment implements NativeResource {
         if (this.context != 0) {
             clReleaseContext(this.context);
         }
-        this.programs.values().forEach(NativeResource::free);
-        this.programs.clear();
+        this.freePrograms();
 
         try {
             this.eventDispatcher.close();

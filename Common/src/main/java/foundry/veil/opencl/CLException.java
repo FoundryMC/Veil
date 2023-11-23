@@ -9,7 +9,7 @@ import static org.lwjgl.opencl.CL10.*;
  *
  * @author Ocelot
  */
-public class OpenCLException extends Exception {
+public class CLException extends Exception {
 
     private static final Map<Integer, String> ERROR_CODES = Map.ofEntries(
             Map.entry(CL_DEVICE_NOT_FOUND, "CL_DEVICE_NOT_FOUND"),
@@ -59,12 +59,12 @@ public class OpenCLException extends Exception {
 
     private final int error;
 
-    public OpenCLException(String message, int errCode) {
+    public CLException(String message, int errCode) {
         super(message + ". " + String.format("OpenCL error: %s", ERROR_CODES.getOrDefault(errCode, Integer.toString(errCode))));
         this.error = errCode;
     }
 
-    public OpenCLException(int errCode) {
+    public CLException(int errCode) {
         super(String.format("OpenCL error: %s", ERROR_CODES.getOrDefault(errCode, Integer.toString(errCode))));
         this.error = errCode;
     }

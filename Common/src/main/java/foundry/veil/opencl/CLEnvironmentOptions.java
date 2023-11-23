@@ -15,15 +15,15 @@ import static org.lwjgl.opencl.CL10.*;
  * @param requireOpenGL   Whether the device needs to be able to support a mixed OpenGL/OpenCL environment
  * @author Ocelot
  */
-public record OpenCLEnvironmentOptions(CLVersion version,
-                                       int deviceMask,
-                                       boolean requireCompiler,
-                                       boolean requireOpenGL) {
+public record CLEnvironmentOptions(CLVersion version,
+                                   int deviceMask,
+                                   boolean requireCompiler,
+                                   boolean requireOpenGL) {
 
     /**
      * The default environment options.
      */
-    public static final OpenCLEnvironmentOptions DEFAULT = builder().build();
+    public static final CLEnvironmentOptions DEFAULT = builder().build();
 
     /**
      * Tests if the specified device follows the required options specified.
@@ -142,8 +142,8 @@ public record OpenCLEnvironmentOptions(CLVersion version,
         /**
          * @return A new environment option spec
          */
-        public OpenCLEnvironmentOptions build() {
-            return new OpenCLEnvironmentOptions(this.clVersion, this.deviceMask, this.requireCompiler, this.requireOpenGL);
+        public CLEnvironmentOptions build() {
+            return new CLEnvironmentOptions(this.clVersion, this.deviceMask, this.requireCompiler, this.requireOpenGL);
         }
     }
 

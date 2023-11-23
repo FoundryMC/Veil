@@ -35,11 +35,13 @@ import static org.lwjgl.opencl.CL10.*;
  */
 public class CLBuffer implements CLMemObject {
 
-    private final OpenCLEnvironment environment;
+    private final CLKernel kernel;
+    private final CLEnvironment environment;
     private final long pointer;
 
-    CLBuffer(OpenCLEnvironment environment, long pointer) {
-        this.environment = environment;
+    CLBuffer(CLKernel kernel, long pointer) {
+        this.kernel = kernel;
+        this.environment = kernel.getEnvironment();
         this.pointer = pointer;
     }
 
@@ -47,10 +49,10 @@ public class CLBuffer implements CLMemObject {
      * Writes the specified data into this buffer.
      *
      * @param data The buffer with data to write
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, ByteBuffer, PointerBuffer, PointerBuffer)
      */
-    public void write(ByteBuffer data) throws OpenCLException {
+    public void write(ByteBuffer data) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, data, null, null));
     }
 
@@ -58,10 +60,10 @@ public class CLBuffer implements CLMemObject {
      * Writes the specified data into this buffer.
      *
      * @param data The data to write
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, ShortBuffer, PointerBuffer, PointerBuffer)
      */
-    public void write(ShortBuffer data) throws OpenCLException {
+    public void write(ShortBuffer data) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, data, null, null));
     }
 
@@ -69,10 +71,10 @@ public class CLBuffer implements CLMemObject {
      * Writes the specified data into this buffer.
      *
      * @param data The data to write
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, IntBuffer, PointerBuffer, PointerBuffer)
      */
-    public void write(IntBuffer data) throws OpenCLException {
+    public void write(IntBuffer data) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, data, null, null));
     }
 
@@ -80,10 +82,10 @@ public class CLBuffer implements CLMemObject {
      * Writes the specified data into this buffer.
      *
      * @param data The data to write
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, FloatBuffer, PointerBuffer, PointerBuffer)
      */
-    public void write(FloatBuffer data) throws OpenCLException {
+    public void write(FloatBuffer data) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, data, null, null));
     }
 
@@ -91,10 +93,10 @@ public class CLBuffer implements CLMemObject {
      * Writes the specified data into this buffer.
      *
      * @param data The data to write
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, DoubleBuffer, PointerBuffer, PointerBuffer)
      */
-    public void write(DoubleBuffer data) throws OpenCLException {
+    public void write(DoubleBuffer data) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, data, null, null));
     }
 
@@ -102,10 +104,10 @@ public class CLBuffer implements CLMemObject {
      * Reads the data from this buffer into the specified store.
      *
      * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, ByteBuffer, PointerBuffer, PointerBuffer)
      */
-    public void read(ByteBuffer store) throws OpenCLException {
+    public void read(ByteBuffer store) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, store, null, null));
     }
 
@@ -113,10 +115,10 @@ public class CLBuffer implements CLMemObject {
      * Reads the data from this buffer into the specified store.
      *
      * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, ShortBuffer, PointerBuffer, PointerBuffer)
      */
-    public void read(ShortBuffer store) throws OpenCLException {
+    public void read(ShortBuffer store) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, store, null, null));
     }
 
@@ -124,10 +126,10 @@ public class CLBuffer implements CLMemObject {
      * Reads the data from this buffer into the specified store.
      *
      * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, IntBuffer, PointerBuffer, PointerBuffer)
      */
-    public void read(IntBuffer store) throws OpenCLException {
+    public void read(IntBuffer store) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, store, null, null));
     }
 
@@ -135,10 +137,10 @@ public class CLBuffer implements CLMemObject {
      * Reads the data from this buffer into the specified store.
      *
      * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, FloatBuffer, PointerBuffer, PointerBuffer)
      */
-    public void read(FloatBuffer store) throws OpenCLException {
+    public void read(FloatBuffer store) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, store, null, null));
     }
 
@@ -146,10 +148,10 @@ public class CLBuffer implements CLMemObject {
      * Reads the data from this buffer into the specified store.
      *
      * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, DoubleBuffer, PointerBuffer, PointerBuffer)
      */
-    public void read(DoubleBuffer store) throws OpenCLException {
+    public void read(DoubleBuffer store) throws CLException {
         VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, true, 0, store, null, null));
     }
 
@@ -158,10 +160,10 @@ public class CLBuffer implements CLMemObject {
      *
      * @param data       The buffer with data to write
      * @param onComplete The callback for when the operation completes or <code>null</code>
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, ByteBuffer, PointerBuffer, PointerBuffer)
      */
-    public void writeAsync(ByteBuffer data, @Nullable Runnable onComplete) throws OpenCLException {
+    public void writeAsync(ByteBuffer data, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, data, null, event));
@@ -176,10 +178,10 @@ public class CLBuffer implements CLMemObject {
      *
      * @param data       The data to write
      * @param onComplete The callback for when the operation completes or <code>null</code>
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, short[], PointerBuffer, PointerBuffer)
      */
-    public void writeAsync(ShortBuffer data, @Nullable Runnable onComplete) throws OpenCLException {
+    public void writeAsync(ShortBuffer data, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, data, null, event));
@@ -194,10 +196,10 @@ public class CLBuffer implements CLMemObject {
      *
      * @param data       The data to write
      * @param onComplete The callback for when the operation completes or <code>null</code>
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, int[], PointerBuffer, PointerBuffer)
      */
-    public void writeAsync(IntBuffer data, @Nullable Runnable onComplete) throws OpenCLException {
+    public void writeAsync(IntBuffer data, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, data, null, event));
@@ -212,10 +214,10 @@ public class CLBuffer implements CLMemObject {
      *
      * @param data       The data to write
      * @param onComplete The callback for when the operation completes or <code>null</code>
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, float[], PointerBuffer, PointerBuffer)
      */
-    public void writeAsync(FloatBuffer data, @Nullable Runnable onComplete) throws OpenCLException {
+    public void writeAsync(FloatBuffer data, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, data, null, event));
@@ -230,10 +232,10 @@ public class CLBuffer implements CLMemObject {
      *
      * @param data       The data to write
      * @param onComplete The callback for when the operation completes or <code>null</code>
-     * @throws OpenCLException If any error occurs while trying to upload data
+     * @throws CLException If any error occurs while trying to upload data
      * @see CL10#clEnqueueWriteBuffer(long, long, boolean, long, double[], PointerBuffer, PointerBuffer)
      */
-    public void writeAsync(DoubleBuffer data, @Nullable Runnable onComplete) throws OpenCLException {
+    public void writeAsync(DoubleBuffer data, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, data, null, event));
@@ -246,11 +248,12 @@ public class CLBuffer implements CLMemObject {
     /**
      * Asynchronous implementation of {@link #read(ByteBuffer)}. The specified callback will be fired when the operation completes.
      *
-     * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @param store      The buffer to store into
+     * @param onComplete The callback for when the operation completes or <code>null</code>
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, ByteBuffer, PointerBuffer, PointerBuffer)
      */
-    public void readAsync(ByteBuffer store, @Nullable Runnable onComplete) throws OpenCLException {
+    public void readAsync(ByteBuffer store, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, store, null, event));
@@ -263,11 +266,12 @@ public class CLBuffer implements CLMemObject {
     /**
      * Asynchronous implementation of {@link #read(ShortBuffer)}. The specified callback will be fired when the operation completes.
      *
-     * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @param store      The buffer to store into
+     * @param onComplete The callback for when the operation completes or <code>null</code>
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, ShortBuffer, PointerBuffer, PointerBuffer)
      */
-    public void readAsync(ShortBuffer store, @Nullable Runnable onComplete) throws OpenCLException {
+    public void readAsync(ShortBuffer store, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, store, null, event));
@@ -280,11 +284,12 @@ public class CLBuffer implements CLMemObject {
     /**
      * Asynchronous implementation of {@link #read(IntBuffer)}. The specified callback will be fired when the operation completes.
      *
-     * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @param store      The buffer to store into
+     * @param onComplete The callback for when the operation completes or <code>null</code>
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, IntBuffer, PointerBuffer, PointerBuffer)
      */
-    public void readAsync(IntBuffer store, @Nullable Runnable onComplete) throws OpenCLException {
+    public void readAsync(IntBuffer store, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, store, null, event));
@@ -297,11 +302,12 @@ public class CLBuffer implements CLMemObject {
     /**
      * Asynchronous implementation of {@link #read(FloatBuffer)}. The specified callback will be fired when the operation completes.
      *
-     * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @param store      The buffer to store into
+     * @param onComplete The callback for when the operation completes or <code>null</code>
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, FloatBuffer, PointerBuffer, PointerBuffer)
      */
-    public void readAsync(FloatBuffer store, @Nullable Runnable onComplete) throws OpenCLException {
+    public void readAsync(FloatBuffer store, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, store, null, event));
@@ -314,11 +320,12 @@ public class CLBuffer implements CLMemObject {
     /**
      * Asynchronous implementation of {@link #read(DoubleBuffer)}. The specified callback will be fired when the operation completes.
      *
-     * @param store The buffer to store into
-     * @throws OpenCLException If any error occurs while trying to download data
+     * @param store      The buffer to store into
+     * @param onComplete The callback for when the operation completes or <code>null</code>
+     * @throws CLException If any error occurs while trying to download data
      * @see CL10#clEnqueueReadBuffer(long, long, boolean, long, DoubleBuffer, PointerBuffer, PointerBuffer)
      */
-    public void readAsync(DoubleBuffer store, @Nullable Runnable onComplete) throws OpenCLException {
+    public void readAsync(DoubleBuffer store, @Nullable Runnable onComplete) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, 0, store, null, event));
@@ -331,5 +338,10 @@ public class CLBuffer implements CLMemObject {
     @Override
     public long pointer() {
         return this.pointer;
+    }
+
+    @Override
+    public void free() {
+        this.kernel.free(this);
     }
 }

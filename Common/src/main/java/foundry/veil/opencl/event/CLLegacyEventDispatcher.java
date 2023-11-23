@@ -1,7 +1,7 @@
 package foundry.veil.opencl.event;
 
 import com.mojang.logging.LogUtils;
-import foundry.veil.opencl.OpenCLException;
+import foundry.veil.opencl.CLException;
 import foundry.veil.opencl.VeilOpenCL;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +68,7 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
                     }
 
                     this.eventListeners.add(event);
-                } catch (OpenCLException e) {
+                } catch (CLException e) {
                     LOGGER.error("Error while querying event", e);
                 }
             }
