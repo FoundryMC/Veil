@@ -107,7 +107,9 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
-    shade "org.lwjgl:lwjgl-opencl:$lwjgl_version"
+    shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+        transitive false
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -133,6 +135,11 @@ jar {
 shadowJar {
     archiveClassifier = ''
     configurations = [project.configurations.shade]
+    relocate "org.objectweb.asm", "${project.group}.lib.asm"
+    relocate "org.lwjgl.opencl", "${project.group}.lib.opencl"
+    relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
+    relocate "imgui", "${project.group}.lib.imgui"
+    relocate "io.imgui", "${project.group}.lib.imgui"
     finalizedBy 'reobfShadowJar'
 }
 
