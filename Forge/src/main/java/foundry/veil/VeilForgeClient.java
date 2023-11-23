@@ -1,5 +1,6 @@
 package foundry.veil;
 
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -14,11 +15,15 @@ public class VeilForgeClient {
 
     public static void init() {
         VeilClient.init();
-        VeilClient.initRenderer();
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(VeilForgeClient::registerKeys);
         modEventBus.addListener(VeilForgeClient::registerGuiOverlays);
+        modEventBus.addListener(VeilForgeClient::registerListeners);
+    }
+
+    private static void registerListeners(RegisterClientReloadListenersEvent event) {
+        VeilClient.initRenderer();
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
