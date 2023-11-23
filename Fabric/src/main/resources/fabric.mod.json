@@ -20,10 +20,10 @@
     "environment": "*",
     "entrypoints": {
       "main": [
-        "foundry.veil.VeilFabric"
+        "foundry.veil.fabric.VeilFabric"
       ],
       "client": [
-        "foundry.veil.VeilFabricClient"
+        "foundry.veil.fabric.VeilFabricClient"
       ]
     },
     "mixins": [

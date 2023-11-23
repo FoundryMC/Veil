@@ -1,4 +1,4 @@
-package foundry.veil.platform;
+package foundry.veil.fabric.platform;
 
 import foundry.veil.platform.services.VeilPlatform;
 import net.fabricmc.loader.api.FabricLoader;

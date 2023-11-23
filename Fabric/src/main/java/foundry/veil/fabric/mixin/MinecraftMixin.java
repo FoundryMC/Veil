@@ -1,4 +1,4 @@
-package foundry.veil.mixin;
+package foundry.veil.fabric.mixin;
 
 import foundry.veil.VeilClient;
 import foundry.veil.render.pipeline.VeilRenderSystem;

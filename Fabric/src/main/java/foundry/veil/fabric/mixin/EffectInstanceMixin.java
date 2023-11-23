@@ -1,4 +1,4 @@
-package foundry.veil.mixin;
+package foundry.veil.fabric.mixin;
 
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.resources.ResourceLocation;

@@ -1,5 +1,6 @@
-package foundry.veil;
+package foundry.veil.forge;
 
+import foundry.veil.Veil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;

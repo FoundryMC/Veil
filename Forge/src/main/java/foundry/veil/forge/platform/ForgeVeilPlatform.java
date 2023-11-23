@@ -1,4 +1,4 @@
-package foundry.veil.platform;
+package foundry.veil.forge.platform;
 
 import foundry.veil.platform.services.VeilPlatform;
 import net.minecraftforge.fml.ModList;

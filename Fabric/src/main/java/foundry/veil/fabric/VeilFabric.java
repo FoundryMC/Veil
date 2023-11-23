@@ -1,5 +1,6 @@
-package foundry.veil;
+package foundry.veil.fabric;
 
+import foundry.veil.Veil;
 import net.fabricmc.api.ModInitializer;
 import org.jetbrains.annotations.ApiStatus;
 

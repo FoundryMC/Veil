@@ -1,9 +1,9 @@
-package foundry.veil.platform;
+package foundry.veil.forge.platform;
 
 import foundry.veil.platform.services.VeilClientPlatform;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public class FabricVeilClientPlatform implements VeilClientPlatform {
+public class ForgeVeilClientPlatform implements VeilClientPlatform {
 
 }

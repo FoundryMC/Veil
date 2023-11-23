@@ -1,5 +1,6 @@
-package foundry.veil;
+package foundry.veil.forge;
 
+import foundry.veil.VeilClient;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -8,7 +9,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 
-import static foundry.veil.VeilForgeClientEvents.OVERLAY;
+import static foundry.veil.forge.VeilForgeClientEvents.OVERLAY;
 
 @ApiStatus.Internal
 public class VeilForgeClient {
