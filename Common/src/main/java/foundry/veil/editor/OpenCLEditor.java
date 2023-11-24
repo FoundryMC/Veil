@@ -113,9 +113,12 @@ public class OpenCLEditor extends SingleWindowEditor {
 
         ResourceLocation name = new ResourceLocation("test");
         this.environment.loadProgram(name, source);
-        this.kernel = this.environment.createKernel(name, "example");
-        if (this.kernel == null) {
+
+        try {
+            this.kernel = this.environment.createKernel(name, "example");
+        } catch (CLException e) {
             LOGGER.error("Failed to compile program");
+            this.kernel = null;
             return;
         }
 

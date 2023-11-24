@@ -10,7 +10,6 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CLContextCallback;
 import org.lwjgl.system.MemoryStack;
@@ -135,17 +134,18 @@ public class CLEnvironment implements NativeResource {
     }
 
     /**
-     * <p>Retrieves a kernel from the specified shader program.</p>
+     * <p>Creates a kernel for the specified shader program.</p>
      * <p>The returned kernel should be freed when it is no longer needed. To be <a href="https://tenor.com/view/let-me-be-clear-uhhh-meme-gif-25693361">clear</a>, after the last kernel for a program has been freed the program WILL be freed and must be loaded again.</p>
      *
      * @param program    The name of the program to get the kernel from
      * @param kernelName The name of the kernel
-     * @return The kernel found or <code>null</code> if there was an error creating the kernel
+     * @return The kernel created
+     * @throws CLException If there was an error creating the kernel for any reason
      */
-    public @Nullable CLKernel createKernel(ResourceLocation program, String kernelName) {
+    public CLKernel createKernel(ResourceLocation program, String kernelName) throws CLException {
         ProgramData programData = this.programs.get(program);
         if (programData == null) {
-            return null;
+            throw new CLException("Unknown program: " + kernelName, CL_INVALID_PROGRAM);
         }
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -159,10 +159,7 @@ public class CLEnvironment implements NativeResource {
             CLKernel kernel = new CLKernel(this, program, kernelId);
             programData.kernels.add(kernel);
             return kernel;
-        } catch (CLException e) {
-            LOGGER.error("Failed to create kernel: {}", kernelName, e);
         }
-        return null;
     }
 
     /**
