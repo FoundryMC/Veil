@@ -31,16 +31,16 @@ public class CLEventDispatcherTest {
                     }
                     """);
 
-            CLKernel kernel = environment.getKernel(new ResourceLocation("test"), "test");
+            CLKernel kernel = environment.createKernel(new ResourceLocation("test"), "test");
             Assertions.assertNotNull(kernel);
 
             CLBuffer buffer = kernel.createBuffer(CL_MEM_READ_ONLY, 64);
             ByteBuffer data = stack.calloc(64);
             data.putInt(0, 1);
-            buffer.write(data);
+            buffer.write(0, data);
 
             ByteBuffer read = stack.malloc(data.capacity());
-            buffer.read(read);
+            buffer.read(0, read);
             Assertions.assertEquals(1, read.getInt(0));
         }
     }
@@ -62,7 +62,7 @@ public class CLEventDispatcherTest {
                     }
                     """);
 
-            CLKernel kernel = environment.getKernel(new ResourceLocation("test"), "test");
+            CLKernel kernel = environment.createKernel(new ResourceLocation("test"), "test");
             Assertions.assertNotNull(kernel);
 
             IntBuffer data = MemoryUtil.memAllocInt(1_000_000);
@@ -70,7 +70,7 @@ public class CLEventDispatcherTest {
             for (int i = 0; i < data.capacity(); i++) {
                 data.put(i, i);
             }
-            input.writeAsync(data, () -> System.out.println("Uploaded"));
+            input.writeAsync(0, data, () -> System.out.println("Uploaded"));
             System.out.println("Skipped");
 
             IntBuffer outputData = MemoryUtil.memAllocInt(data.capacity());
@@ -79,7 +79,7 @@ public class CLEventDispatcherTest {
             kernel.setPointers(0, input);
             kernel.setPointers(1, output);
             kernel.execute(data.capacity(), 1);
-            output.readAsync(outputData, () -> System.out.println("Read"));
+            output.readAsync(0, outputData, () -> System.out.println("Read"));
             System.out.println("Skipped");
 
             environment.finish();

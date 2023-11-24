@@ -1,7 +1,6 @@
 package foundry.veil.opencl;
 
 import com.mojang.logging.LogUtils;
-import foundry.veil.Veil;
 import foundry.veil.opencl.event.CLEventDispatcher;
 import foundry.veil.opencl.event.CLLegacyEventDispatcher;
 import foundry.veil.opencl.event.CLNativeEventDispatcher;
@@ -10,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CLContextCallback;
@@ -135,36 +135,34 @@ public class CLEnvironment implements NativeResource {
     }
 
     /**
-     * Retrieves a kernel from the specified shader program.
+     * <p>Retrieves a kernel from the specified shader program.</p>
+     * <p>The returned kernel should be freed when it is no longer needed. To be <a href="https://tenor.com/view/let-me-be-clear-uhhh-meme-gif-25693361">clear</a>, after the last kernel for a program has been freed the program WILL be freed and must be loaded again.</p>
      *
      * @param program    The name of the program to get the kernel from
      * @param kernelName The name of the kernel
      * @return The kernel found or <code>null</code> if there was an error creating the kernel
      */
-    public @Nullable CLKernel getKernel(ResourceLocation program, String kernelName) {
+    public @Nullable CLKernel createKernel(ResourceLocation program, String kernelName) {
         ProgramData programData = this.programs.get(program);
-        if (programData == null || programData.invalidKernels.contains(kernelName)) {
+        if (programData == null) {
             return null;
         }
 
-        CLKernel kernel = programData.kernels.get(kernelName);
-        if (kernel == null) {
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                IntBuffer errcode_ret = stack.callocInt(1);
-                long kernelId = clCreateKernel(programData.id, kernelName, errcode_ret);
-                if (errcode_ret.get(0) == CL_INVALID_KERNEL_NAME) {
-                    throw new CLException("Failed to find kernel: " + kernelName, errcode_ret.get(0));
-                }
-                VeilOpenCL.checkCLError(errcode_ret);
-
-                kernel = new CLKernel(this, kernelId);
-                programData.kernels.put(kernelName, kernel);
-            } catch (CLException e) {
-                LOGGER.error("Failed to create kernel: {}", kernelName, e);
-                programData.invalidKernels.add(kernelName);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer errcode_ret = stack.callocInt(1);
+            long kernelId = clCreateKernel(programData.id, kernelName, errcode_ret);
+            if (errcode_ret.get(0) == CL_INVALID_KERNEL_NAME) {
+                throw new CLException("Failed to find kernel: " + kernelName, errcode_ret.get(0));
             }
+            VeilOpenCL.checkCLError(errcode_ret);
+
+            CLKernel kernel = new CLKernel(this, program, kernelId);
+            programData.kernels.add(kernel);
+            return kernel;
+        } catch (CLException e) {
+            LOGGER.error("Failed to create kernel: {}", kernelName, e);
         }
-        return kernel;
+        return null;
     }
 
     /**
@@ -186,6 +184,10 @@ public class CLEnvironment implements NativeResource {
 
     @Override
     public void free() {
+        try {
+            this.finish();
+        } catch (CLException ignored) {
+        }
         this.errorCallback.free();
         if (this.commandQueue != 0) {
             clReleaseCommandQueue(this.commandQueue);
@@ -199,6 +201,22 @@ public class CLEnvironment implements NativeResource {
             this.eventDispatcher.close();
         } catch (InterruptedException e) {
             LOGGER.error("Failed to stop event dispatcher", e);
+        }
+    }
+
+    @ApiStatus.Internal
+    void free(CLKernel clKernel) {
+        ResourceLocation name = clKernel.getProgram();
+        ProgramData programData = this.programs.get(name);
+        if (programData == null) {
+            return;
+        }
+
+        programData.kernels.remove(clKernel);
+        if (programData.kernels.isEmpty()) {
+            LOGGER.info("Deleting kernel program: {}", name);
+            programData.free();
+            this.programs.remove(name);
         }
     }
 
@@ -230,20 +248,16 @@ public class CLEnvironment implements NativeResource {
         return this.commandQueue;
     }
 
-    private record ProgramData(long id,
-                               Map<String, CLKernel> kernels,
-                               Set<String> invalidKernels) implements NativeResource {
+    private record ProgramData(long id, Set<CLKernel> kernels) implements NativeResource {
 
         private ProgramData(long id) {
-            this(id, new HashMap<>(), new HashSet<>());
+            this(id, new HashSet<>());
         }
 
         @Override
         public void free() {
             clReleaseProgram(this.id);
-            this.kernels.values().forEach(NativeResource::free);
             this.kernels.clear();
-            this.invalidKernels.clear();
         }
     }
 }

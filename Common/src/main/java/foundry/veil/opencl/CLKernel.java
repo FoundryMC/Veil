@@ -1,8 +1,8 @@
 package foundry.veil.opencl;
 
-import foundry.veil.Veil;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
@@ -15,20 +15,21 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opencl.CL10.*;
 
 /**
- * <p>Manages the OpenCL kernel object. Buffers can be created with {@link #createBuffer(int, long)} and {@link #createBufferUnsafe(int, long)}</p>
- * <p><b>This does not need to be freed.</b></p>
+ * Manages the OpenCL kernel object. Buffers can be created with {@link #createBuffer(int, long)} and {@link #createBufferUnsafe(int, long)}
  *
  * @author Ocelot
  */
 public class CLKernel implements NativeResource {
 
     private final CLEnvironment environment;
+    private final ResourceLocation program;
     private final long handle;
     private final int maxWorkGroupSize;
     private final LongSet pointers;
 
-    CLKernel(CLEnvironment environment, long handle) throws CLException {
+    CLKernel(CLEnvironment environment, ResourceLocation program, long handle) throws CLException {
         this.environment = environment;
+        this.program = program;
         this.handle = handle;
         this.pointers = new LongArraySet();
 
@@ -291,6 +292,13 @@ public class CLKernel implements NativeResource {
     }
 
     /**
+     * @return The name of the program this kernel is created from
+     */
+    public ResourceLocation getProgram() {
+        return this.program;
+    }
+
+    /**
      * @return The pointer to the kernel object
      */
     public long getHandle() {
@@ -309,6 +317,7 @@ public class CLKernel implements NativeResource {
         clReleaseKernel(this.handle);
         this.pointers.forEach(CL10::clReleaseMemObject);
         this.pointers.clear();
+        this.environment.free(this);
     }
 
     @ApiStatus.Internal

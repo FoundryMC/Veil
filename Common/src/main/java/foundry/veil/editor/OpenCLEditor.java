@@ -113,7 +113,7 @@ public class OpenCLEditor extends SingleWindowEditor {
 
         ResourceLocation name = new ResourceLocation("test");
         this.environment.loadProgram(name, source);
-        this.kernel = this.environment.getKernel(name, "example");
+        this.kernel = this.environment.createKernel(name, "example");
         if (this.kernel == null) {
             LOGGER.error("Failed to compile program");
             return;
@@ -169,9 +169,9 @@ public class OpenCLEditor extends SingleWindowEditor {
                 try {
                     this.initBuffers(itemCount);
 
-                    this.bufferA.writeAsync(A, null);
-                    this.bufferB.writeAsync(B, null);
-                    this.bufferC.writeAsync(C, null);
+                    this.bufferA.writeAsync(0, A, null);
+                    this.bufferB.writeAsync(0, B, null);
+                    this.bufferC.writeAsync(0, C, null);
 
                     this.kernel.setPointers(0, this.bufferA);
                     this.kernel.setPointers(1, this.bufferB);
@@ -180,7 +180,7 @@ public class OpenCLEditor extends SingleWindowEditor {
 
                     this.kernel.execute(itemCount, this.workGroups.get());
 
-                    this.bufferD.readAsync(D, null);
+                    this.bufferD.readAsync(0, D, null);
 
                     this.environment.finish();
 
