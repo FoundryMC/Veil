@@ -34,14 +34,6 @@ public class VanillaShaderImportProcessor {
         return processor.modify(new Context(source));
     }
 
-    public static boolean setupFallback(ResourceProvider resourceProvider) {
-        if (processor != null) {
-            return false;
-        }
-        setup(resourceProvider);
-        return true;
-    }
-
     private record Context(String source) implements ShaderPreProcessor.Context {
 
         @Override
