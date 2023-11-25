@@ -19,6 +19,7 @@
     "client.ItemInHandRendererMixin",
     "client.ModelPartMixin",
     "client.PostChainMixin",
+    "client.ClientLevelMixin",
     "client.imgui.KeyboardHandlerMixin",
     "client.imgui.MouseHandlerMixin",
     "client.pipeline.GameRendererMixin",
