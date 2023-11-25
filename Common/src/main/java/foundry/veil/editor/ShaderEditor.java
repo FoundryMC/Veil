@@ -184,6 +184,9 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         }
         ImGui.sameLine();
         ImGui.checkbox("Scan IDs", this.scanIds);
+        if (ImGui.isItemHovered()) {
+            ImGui.setTooltip("Whether to scan raw OpenGL ids for shaders starting from 0 until 'Scan Count'");
+        }
         ImGui.sameLine();
         ImGui.beginDisabled(!this.scanIds.get());
         ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() / 3);
