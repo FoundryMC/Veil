@@ -40,7 +40,7 @@ public class ProgramMixin {
         String source = VeilRenderSystem.renderer().getShaderModificationManager().applyModifiers(veil$captureId, value, ShaderModification.APPLY_VERSION | ShaderModification.ALLOW_OUT);
         try {
             return VanillaShaderImportProcessor.modify(source);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Veil.LOGGER.error("Failed to modify vanilla source for shader: {}", veil$captureId, e);
         }
         return source;
