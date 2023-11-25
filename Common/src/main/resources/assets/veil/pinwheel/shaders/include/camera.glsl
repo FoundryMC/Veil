@@ -7,4 +7,4 @@ layout(std140) uniform CameraMatrices {
     vec3 CameraPosition;
     float NearPlane;
     float FarPlane;
-};
+} VeilCamera;

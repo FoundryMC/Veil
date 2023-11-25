@@ -1,6 +1,6 @@
 #version 330 // required
 #priority 1000 // default 1000
-// #include veil:test // Add include. Only supported for Veil Shaders
+#include veil:camera // Add include
 
 // Replaces this with the defined shader
 // #replace veil:shader/test
