@@ -26,6 +26,7 @@
     "client.pipeline.MinecraftMixin",
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
+    "client.shader.EffectInstanceMixin",
     "client.shader.GameRendererMixin",
     "client.shader.ProgramManagerMixin",
     "client.shader.ProgramMixin",

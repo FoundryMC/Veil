@@ -38,6 +38,6 @@ public class ShaderModifyProcessor implements ShaderPreProcessor {
         }
         int flags = context.isSourceFile() ? ShaderModification.APPLY_VERSION | ShaderModification.ALLOW_OUT : 0;
         FileToIdConverter converter = context.isSourceFile() ? context.getConverter() : ShaderManager.INCLUDE_LISTER;
-        return context.modify(context.getName(), this.shaderModificationManager.applyModifiers(converter.idToFile(name), context.getInput(), ShaderModification.ALLOW_INCLUDES | flags));
+        return context.modify(context.getName(), this.shaderModificationManager.applyModifiers(converter.idToFile(name), context.getInput(), flags));
     }
 }

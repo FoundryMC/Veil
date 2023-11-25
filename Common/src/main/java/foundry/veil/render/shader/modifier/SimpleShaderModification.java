@@ -59,10 +59,6 @@ public class SimpleShaderModification implements ShaderModification {
             pointer = 0;
         }
 
-        if ((flags & ALLOW_INCLUDES) == 0 && this.includes.length > 0) {
-            throw new IOException("Vanilla shaders do not support import injection");
-        }
-
         StringBuilder result = new StringBuilder(source);
         for (ResourceLocation include : this.includes) {
             String code = "#include " + include + "\n";

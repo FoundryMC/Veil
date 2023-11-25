@@ -114,6 +114,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
                     List<ShaderModification> modifications = modifiers.computeIfAbsent(shaderId, name -> new LinkedList<>());
 
                     if (modification instanceof ReplaceShaderModification) {
+                        // TODO This doesn't respect priority
                         modifications.clear();
                     }
                     if (modifications.size() != 1 || !(modifications.get(0) instanceof ReplaceShaderModification)) {

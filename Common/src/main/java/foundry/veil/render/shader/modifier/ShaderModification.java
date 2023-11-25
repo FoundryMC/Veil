@@ -21,17 +21,13 @@ public interface ShaderModification {
     Pattern PLACEHOLDER_PATTERN = Pattern.compile("#(\\w+)");
 
     /**
-     * Whether #include is allowed
-     */
-    int ALLOW_INCLUDES = 0b001;
-    /**
      * Whether the version is required and will be applied
      */
-    int APPLY_VERSION = 0b010;
+    int APPLY_VERSION = 0b01;
     /**
      * Whether [OUT] is a valid command
      */
-    int ALLOW_OUT = 0b100;
+    int ALLOW_OUT = 0b10;
 
     /**
      * Injects this modification into the specified shader source.
