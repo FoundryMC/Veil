@@ -1,8 +1,8 @@
 package foundry.veil.opencl;
 
 import com.mojang.logging.LogUtils;
-import foundry.veil.Veil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL;
@@ -10,9 +10,7 @@ import org.lwjgl.opencl.CL10;
 import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -28,7 +26,7 @@ import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
  *
  * @author Ocelot
  */
-public final class VeilOpenCL implements NativeResource {
+public final class VeilOpenCL {
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -130,10 +128,16 @@ public final class VeilOpenCL implements NativeResource {
         return this.priorityDevices;
     }
 
-    @Override
-    public void free() {
-        this.environments.values().forEach(CLEnvironment::free);
-        this.environments.clear();
+    /**
+     * Attempts to release all OpenCL resources without initializing OpenCL.
+     */
+    @ApiStatus.Internal
+    public static void free() {
+        if (instance != null) {
+            instance.environments.values().forEach(CLEnvironment::free);
+            instance.environments.clear();
+            instance = null;
+        }
     }
 
     /**
@@ -146,13 +150,117 @@ public final class VeilOpenCL implements NativeResource {
         return instance;
     }
 
+    /**
+     * IntBuffer implementation of {@link #checkCLError(int)}
+     */
     public static void checkCLError(IntBuffer errcode) throws CLException {
         checkCLError(errcode.get(0));
     }
 
+    /**
+     * Checks if the specified error code was not {@link CL10#CL_SUCCESS}
+     *
+     * @param errcode The error code to validate
+     * @throws CLException If the error code was not success
+     */
     public static void checkCLError(int errcode) throws CLException {
         if (errcode != CL_SUCCESS) {
             throw new CLException(errcode);
+        }
+    }
+
+    /**
+     * Retrieves the specified program build info string from the specified program and device.
+     *
+     * @param program The program to get the build info for
+     * @param device  The device the program was built on
+     * @param param   The parameter to get
+     * @return The program build info string
+     * @throws CLException If any error occurred while trying to get the string
+     */
+    public static String getProgramBuildInfo(long program, long device, int param) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer log_size = stack.mallocPointer(1);
+            VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, (PointerBuffer) null, log_size));
+
+            ByteBuffer log_data = stack.malloc((int) log_size.get(0));
+            VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, log_data, null));
+
+            return MemoryUtil.memASCII(log_data);
+        }
+    }
+
+    /**
+     * Retrieves the specified string parameter from the specified platform.
+     *
+     * @param platform The platform to get the string from
+     * @param param    The parameter to get
+     * @return The platform info string
+     * @throws CLException If any error occurred while trying to get the string
+     */
+    public static String getPlatformInfoString(long platform, int param) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer pp = stack.mallocPointer(1);
+            checkCLError(clGetPlatformInfo(platform, param, (ByteBuffer) null, pp));
+            int bytes = (int) pp.get(0);
+
+            ByteBuffer buffer = stack.malloc(bytes);
+            checkCLError(clGetPlatformInfo(platform, param, buffer, null));
+
+            return MemoryUtil.memUTF8(buffer, bytes - 1);
+        }
+    }
+
+    /**
+     * Retrieves the specified string parameter from the specified device.
+     *
+     * @param device The device to get the string from
+     * @param param  The parameter to get
+     * @return The device info string
+     * @throws CLException If any error occurred while trying to get the string
+     */
+    public static String getDeviceInfoString(long device, int param) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer pp = stack.mallocPointer(1);
+            checkCLError(clGetDeviceInfo(device, param, (ByteBuffer) null, pp));
+            int bytes = (int) pp.get(0);
+
+            ByteBuffer buffer = stack.malloc(bytes);
+            checkCLError(clGetDeviceInfo(device, param, buffer, null));
+
+            return MemoryUtil.memUTF8(buffer, bytes - 1);
+        }
+    }
+
+    /**
+     * Retrieves the specified integer parameter from the specified device.
+     *
+     * @param device The device to get the int from
+     * @param param  The parameter to get
+     * @return The device info int
+     * @throws CLException If any error occurred while trying to get the int
+     */
+    public static int getDeviceInfoInt(long device, int param) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer pl = stack.mallocInt(1);
+            checkCLError(clGetDeviceInfo(device, param, pl, null));
+            return pl.get(0);
+        }
+    }
+
+    /**
+     * Retrieves the specified long parameter from the specified device.
+     *
+     * @param device The device to get the long from
+     * @param param  The parameter to get
+     * @return The device info long
+     * @throws CLException If any error occurred while trying to get the long
+     */
+    public static long getDeviceInfoLong(long device, int param) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            LongBuffer pl = stack.mallocLong(1);
+            checkCLError(clGetDeviceInfo(device, param, pl, null));
+            return pl.get(0);
         }
     }
 
@@ -174,60 +282,6 @@ public final class VeilOpenCL implements NativeResource {
             }
 
             return platformInfos;
-        }
-    }
-
-    public static String getProgramBuildInfo(long program, long device, int param) throws CLException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            PointerBuffer log_size = stack.mallocPointer(1);
-            VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, (PointerBuffer) null, log_size));
-
-            ByteBuffer log_data = stack.malloc((int) log_size.get(0));
-            VeilOpenCL.checkCLError(clGetProgramBuildInfo(program, device, param, log_data, null));
-
-            return MemoryUtil.memASCII(log_data);
-        }
-    }
-
-    public static String getPlatformInfoStringUTF8(long platform, int param) throws CLException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            PointerBuffer pp = stack.mallocPointer(1);
-            checkCLError(clGetPlatformInfo(platform, param, (ByteBuffer) null, pp));
-            int bytes = (int) pp.get(0);
-
-            ByteBuffer buffer = stack.malloc(bytes);
-            checkCLError(clGetPlatformInfo(platform, param, buffer, null));
-
-            return MemoryUtil.memUTF8(buffer, bytes - 1);
-        }
-    }
-
-    public static String getDeviceInfoStringUTF8(long platform, int param) throws CLException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            PointerBuffer pp = stack.mallocPointer(1);
-            checkCLError(clGetDeviceInfo(platform, param, (ByteBuffer) null, pp));
-            int bytes = (int) pp.get(0);
-
-            ByteBuffer buffer = stack.malloc(bytes);
-            checkCLError(clGetDeviceInfo(platform, param, buffer, null));
-
-            return MemoryUtil.memUTF8(buffer, bytes - 1);
-        }
-    }
-
-    public static int getDeviceInfoInt(long device, int param) throws CLException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer pl = stack.mallocInt(1);
-            checkCLError(clGetDeviceInfo(device, param, pl, null));
-            return pl.get(0);
-        }
-    }
-
-    public static long getDeviceInfoLong(long device, int param) throws CLException {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            LongBuffer pl = stack.mallocLong(1);
-            checkCLError(clGetDeviceInfo(device, param, pl, null));
-            return pl.get(0);
         }
     }
 
@@ -253,10 +307,10 @@ public final class VeilOpenCL implements NativeResource {
 
         public static PlatformInfo create(long platform, MemoryStack stack) throws CLException {
             CLCapabilities caps = CL.createPlatformCapabilities(platform);
-            String profile = getPlatformInfoStringUTF8(platform, CL_PLATFORM_PROFILE);
-            String version = getPlatformInfoStringUTF8(platform, CL_PLATFORM_VERSION);
-            String name = getPlatformInfoStringUTF8(platform, CL_PLATFORM_NAME);
-            String vendor = getPlatformInfoStringUTF8(platform, caps.cl_khr_icd ? CL_PLATFORM_ICD_SUFFIX_KHR : CL_PLATFORM_VENDOR);
+            String profile = getPlatformInfoString(platform, CL_PLATFORM_PROFILE);
+            String version = getPlatformInfoString(platform, CL_PLATFORM_VERSION);
+            String name = getPlatformInfoString(platform, CL_PLATFORM_NAME);
+            String vendor = getPlatformInfoString(platform, caps.cl_khr_icd ? CL_PLATFORM_ICD_SUFFIX_KHR : CL_PLATFORM_VENDOR);
 
             IntBuffer num_devices = stack.mallocInt(1);
             checkCLError(clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, null, num_devices));
@@ -333,12 +387,12 @@ public final class VeilOpenCL implements NativeResource {
             int addressBits = getDeviceInfoInt(device, CL_DEVICE_ADDRESS_BITS);
             boolean available = getDeviceInfoInt(device, CL_DEVICE_AVAILABLE) == CL_TRUE;
             boolean compilerAvailable = getDeviceInfoInt(device, CL_DEVICE_COMPILER_AVAILABLE) == CL_TRUE;
-            String name = getDeviceInfoStringUTF8(device, CL_DEVICE_NAME);
-            String vendor = getDeviceInfoStringUTF8(device, CL_DEVICE_VENDOR);
-            String driverVersion = getDeviceInfoStringUTF8(device, CL_DRIVER_VERSION);
-            String profile = getDeviceInfoStringUTF8(device, CL_DEVICE_PROFILE);
-            String version = getDeviceInfoStringUTF8(device, CL_DEVICE_VERSION);
-            String openclCVersion = caps.OpenCL11 ? getDeviceInfoStringUTF8(device, CL_DEVICE_OPENCL_C_VERSION) : null;
+            String name = getDeviceInfoString(device, CL_DEVICE_NAME);
+            String vendor = getDeviceInfoString(device, CL_DEVICE_VENDOR);
+            String driverVersion = getDeviceInfoString(device, CL_DRIVER_VERSION);
+            String profile = getDeviceInfoString(device, CL_DEVICE_PROFILE);
+            String version = getDeviceInfoString(device, CL_DEVICE_VERSION);
+            String openclCVersion = caps.OpenCL11 ? getDeviceInfoString(device, CL_DEVICE_OPENCL_C_VERSION) : null;
             return new DeviceInfo(platform, device, caps, deviceType, vendorId, maxComputeUnits, maxWorkItemDimensions, maxWorkGroupSize, maxMemAllocSize, maxClockFrequency, addressBits, available, compilerAvailable, name, vendor, driverVersion, profile, version, openclCVersion);
         }
 

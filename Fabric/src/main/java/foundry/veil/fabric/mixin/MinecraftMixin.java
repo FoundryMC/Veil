@@ -1,6 +1,7 @@
 package foundry.veil.fabric.mixin;
 
 import foundry.veil.VeilClient;
+import foundry.veil.fabric.event.FreeNativeResourcesEvent;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -19,6 +20,6 @@ public class MinecraftMixin {
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V", shift = At.Shift.BEFORE))
     public void close(CallbackInfo ci) {
-        VeilRenderSystem.close();
+        FreeNativeResourcesEvent.EVENT.invoker().onFree();
     }
 }

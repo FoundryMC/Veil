@@ -92,6 +92,15 @@ minecraft.runs.configureEach {
     }
 }
 
+repositories {
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:$minecraft_version-$forge_version"
     compileOnly project(":Common")
@@ -131,6 +140,8 @@ dependencies {
     shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
+
+    runtimeOnly fg.deobf("curse.maven:oculus-581495:4767500")
 }
 
 tasks.withType(JavaCompile).configureEach {

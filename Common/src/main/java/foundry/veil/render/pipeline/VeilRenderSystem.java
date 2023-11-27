@@ -277,7 +277,7 @@ public final class VeilRenderSystem {
     public static void close() {
         renderer.free();
         VeilImGuiImpl.get().free();
-        VeilOpenCL.get().free();
+        VeilOpenCL.free();
     }
 
     @ApiStatus.Internal
