@@ -32,6 +32,7 @@ public class EditorManager implements PreparableReloadListener {
         this.add(new ExampleEditor());
         this.add(new PostEditor());
         this.add(new ShaderEditor());
+        this.add(new TextureEditor());
         this.add(new OpenCLEditor());
         this.add(new DeviceInfoViewer());
 

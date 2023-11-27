@@ -10,6 +10,7 @@ import org.lwjgl.opencl.CL10;
 import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
@@ -26,7 +27,7 @@ import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
  *
  * @author Ocelot
  */
-public final class VeilOpenCL {
+public final class VeilOpenCL implements NativeResource {
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -128,14 +129,20 @@ public final class VeilOpenCL {
         return this.priorityDevices;
     }
 
+    @ApiStatus.Internal
+    @Override
+    public void free() {
+        instance.environments.values().forEach(CLEnvironment::free);
+        instance.environments.clear();
+    }
+
     /**
      * Attempts to release all OpenCL resources without initializing OpenCL.
      */
     @ApiStatus.Internal
-    public static void free() {
+    public static void tryFree() {
         if (instance != null) {
-            instance.environments.values().forEach(CLEnvironment::free);
-            instance.environments.clear();
+            instance.free();
             instance = null;
         }
     }

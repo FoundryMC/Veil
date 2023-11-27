@@ -142,6 +142,7 @@ dependencies {
     }
 
     runtimeOnly fg.deobf("curse.maven:oculus-581495:4767500")
+    runtimeOnly fg.deobf("curse.maven:rubidium-574856:4767529")
 }
 
 tasks.withType(JavaCompile).configureEach {
