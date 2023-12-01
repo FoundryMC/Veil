@@ -16,13 +16,13 @@ tasks.withType(Javadoc) {
 }
 
 subprojects {
-    
+
     apply plugin: 'java'
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
-        
+
     jar {
         from(rootProject.file("LICENSE")) {
             rename { "${it}_${mod_name}" }
@@ -42,7 +42,7 @@ subprojects {
             ])
         }
     }
-    
+
     repositories {
         mavenLocal()
         mavenCentral()
