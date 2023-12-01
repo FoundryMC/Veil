@@ -1,10 +1,13 @@
 package foundry.veil.forge;
 
 import foundry.veil.VeilClient;
+import foundry.veil.forge.event.VeilRendererEvent;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,6 +28,7 @@ public class VeilForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
+        MinecraftForge.EVENT_BUS.post(new VeilRendererEvent(VeilRenderSystem.renderer()));
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
