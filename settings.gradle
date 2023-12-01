@@ -7,10 +7,6 @@ pluginManagement {
             url = 'https://maven.minecraftforge.net/'
         }
         maven {
-            name = 'NeoForge'
-            url = 'https://maven.neoforged.net/releases/'
-        }
-        maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
@@ -41,4 +37,4 @@ plugins {
 rootProject.name = 'Veil'
 // Quilt isn't 1.20, so it has to be excluded for now
 // include("Common", "Fabric", "Forge", "Quilt")
-include("Common", "Fabric", "Forge", "Neoforge")
+include("Common", "Fabric", "Forge")
