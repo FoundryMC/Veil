@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '1.2-SNAPSHOT' apply(false)
     id 'net.minecraftforge.gradle' version '[6.0,6.2)' apply(false)
+    id 'net.neoforged.gradle.userdev' version '7.0.41' apply(false)
     id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply(false)
     id "org.spongepowered.mixin" version '0.7-SNAPSHOT' apply(false)
     id 'org.jetbrains.kotlin.jvm' version '1.9.10' apply(false)
@@ -18,10 +19,15 @@ tasks.withType(Javadoc) {
 subprojects {
     
     apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
+    apply plugin: 'maven-publish'
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-    java.withSourcesJar()
-    java.withJavadocJar()
+    java {
+        withSourcesJar()
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
         
     jar {
         from(rootProject.file("LICENSE")) {

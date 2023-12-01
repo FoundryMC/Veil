@@ -1,16 +1,14 @@
 plugins {
-    id 'idea'
-    id 'maven-publish'
     id 'net.minecraftforge.gradle'
     id 'org.spongepowered.mixin'
     id 'com.github.johnrengelman.shadow'
 }
-
-archivesBaseName = "${mod_name}-forge-${minecraft_version}"
+base {
+    archivesName = "${mod_name}-forge-${minecraft_version}"
+}
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
-
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
 
@@ -22,6 +20,8 @@ jarJar.enable()
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
+
+    copyIdeResources = true //Calls processResources when in dev
 
     if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
         // This location is hardcoded in Forge and can not be changed.

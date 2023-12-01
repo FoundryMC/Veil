@@ -1,16 +1,13 @@
 plugins {
-    id 'java'
-    id 'idea'
-    id 'maven-publish'
     id 'fabric-loom'
     id 'io.github.juuxel.loom-quiltflower'
 }
-
-archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
+base {
+    archivesName = "${mod_name}-fabric-${minecraft_version}"
+}
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
-
 loom {
     if (project(":Common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
         accessWidenerPath.set(project(":Common").file("src/main/resources/${mod_id}.accesswidener"))
