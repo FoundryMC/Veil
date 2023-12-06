@@ -13,11 +13,6 @@ import java.util.function.Supplier;
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
 
-    @Inject(method = "flipFrame", at = @At("HEAD"), remap = false)
-    private static void veil$flipFrame(long window, CallbackInfo ci) {
-        VeilRenderSystem.flipFrame(window);
-    }
-
     @Inject(method = "setShader", at = @At("TAIL"), remap = false)
     private static void setShader(Supplier<ShaderInstance> shader, CallbackInfo ci) {
         VeilRenderSystem.shaderUpdate();

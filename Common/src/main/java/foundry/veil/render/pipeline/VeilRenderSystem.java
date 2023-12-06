@@ -253,12 +253,7 @@ public final class VeilRenderSystem {
     }
 
     @ApiStatus.Internal
-    public static void flipFrame(long windowId) {
-        Window window = Minecraft.getInstance().getWindow();
-        if (window.getWindow() != windowId) {
-            return;
-        }
-
+    public static void endFrame() {
         renderer.getFramebufferManager().clear();
         VeilImGuiImpl.get().end();
     }

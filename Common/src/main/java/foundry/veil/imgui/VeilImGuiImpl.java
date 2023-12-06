@@ -22,6 +22,7 @@ public class VeilImGuiImpl implements VeilImGui {
 
     private final ImGuiImplGlfw implGlfw;
     private final ImGuiImplGl3 implGl3;
+    private boolean active;
 
     private VeilImGuiImpl(long window) {
         this.implGlfw = new ImGuiImplGlfw();
@@ -35,6 +36,11 @@ public class VeilImGuiImpl implements VeilImGui {
 
     @Override
     public void begin() {
+        if (this.active) {
+            Veil.LOGGER.error("ImGui failed to render previous frame, disposing");
+            ImGui.endFrame();
+        }
+        this.active = true;
         this.implGlfw.newFrame();
         ImGui.newFrame();
 
@@ -43,6 +49,11 @@ public class VeilImGuiImpl implements VeilImGui {
 
     @Override
     public void end() {
+        if (!this.active) {
+            Veil.LOGGER.error("ImGui state de-synced");
+            return;
+        }
+        this.active = false;
         ImGui.render();
         this.implGl3.renderDrawData(ImGui.getDrawData());
 
