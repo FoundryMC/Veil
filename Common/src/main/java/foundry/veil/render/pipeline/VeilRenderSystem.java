@@ -254,8 +254,8 @@ public final class VeilRenderSystem {
 
     @ApiStatus.Internal
     public static void endFrame() {
-        renderer.getFramebufferManager().clear();
         VeilImGuiImpl.get().end();
+        renderer.getFramebufferManager().clear();
     }
 
     @ApiStatus.Internal
@@ -270,9 +270,9 @@ public final class VeilRenderSystem {
 
     @ApiStatus.Internal
     public static void close() {
-        renderer.free();
         VeilImGuiImpl.get().free();
         VeilOpenCL.tryFree();
+        renderer.free();
     }
 
     @ApiStatus.Internal
