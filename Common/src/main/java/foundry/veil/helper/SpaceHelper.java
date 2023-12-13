@@ -11,7 +11,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class SpaceHelper {
-//    public static Vector3f getNormalizedDeviceCoordsFromViewport(float x, float y, float z, float width, float height) {
+    //    public static Vector3f getNormalizedDeviceCoordsFromViewport(float x, float y, float z, float width, float height) {
 //        float rx = (2.0f * x) / width - 1.0f;
 //        float ry = 1.0f - (2.0f * y) / height;
 //        return new Vector3f(rx, ry, z);

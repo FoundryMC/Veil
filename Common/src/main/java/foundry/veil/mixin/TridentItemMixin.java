@@ -6,9 +6,10 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(TridentItem.class)
 public class TridentItemMixin implements IChargableItem {
+
     @Override
     public int getMaxCharge() {
-        return 10;
+        return TridentItem.THROW_THRESHOLD_TIME;
     }
 
     @Override

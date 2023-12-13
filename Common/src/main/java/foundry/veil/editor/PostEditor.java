@@ -4,7 +4,6 @@ import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.post.PostProcessingManager;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiSelectableFlags;
 import imgui.type.ImInt;
 import net.minecraft.resources.ResourceLocation;
 

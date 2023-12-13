@@ -7,5 +7,6 @@ import foundry.veil.model.graveyard.update.InterpolatedSkeleton;
  */
 public interface InterpolatedSkeletonParent {
     void setSkeleton(InterpolatedSkeleton skeleton);
+
     InterpolatedSkeleton getSkeleton();
 }

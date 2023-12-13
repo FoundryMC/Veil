@@ -15,7 +15,7 @@ import static net.minecraft.client.renderer.RenderType.create;
 public class RenderTypeRegistry {
     //private static final RenderType CUTOUT = RenderType.create("cutout", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false, RenderType.CompositeState.builder().setOutputState(RenderStateShardRegistry.VEIL_CUSTOM).setLightmapState(LIGHTMAP).setShaderState(RENDERTYPE_CUTOUT_SHADER).setTextureState(BLOCK_SHEET).createCompositeState(true));
 
-    public static void init(){
+    public static void init() {
 //        RenderTargetRegistry.register("veil:custom", Pair.of(Minecraft.getInstance().getMainRenderTarget().width, Minecraft.getInstance().getMainRenderTarget().height), true);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.TORCH);
 //        ItemBlockRenderTypes.TYPE_BY_BLOCK.remove(Blocks.WALL_TORCH);
@@ -28,7 +28,7 @@ public class RenderTypeRegistry {
 
     public static Function<ResourceLocation, RenderType> TRANSPARENT_TEXTURE = Util.memoize(RenderTypeRegistry::createTransparentTexture);
 
-    private static RenderType createTransparentTexture(ResourceLocation texture){
+    private static RenderType createTransparentTexture(ResourceLocation texture) {
         RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder()
                 .setShaderState(RENDERTYPE_TRANSPARENT_TEXTURE)
                 .setTextureState(new TextureStateShard(texture, false, false))

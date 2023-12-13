@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 
 /**
  * An abstract class for a pose that can be applied to a model. Some data is passed to the pose, and the pose can modify the player model at runtime.
+ *
  * @see VeilPoseable
  */
 public abstract class ExtendedPose implements VeilPoseable {
@@ -16,6 +17,7 @@ public abstract class ExtendedPose implements VeilPoseable {
     public void poseRightArm(HumanoidModel<?> model, VeilPoseable pose) {
         pose.pose(model);
     }
+
     @Override
     public void pose(HumanoidModel<?> model) {
         poseLeftArm(model.leftArm);

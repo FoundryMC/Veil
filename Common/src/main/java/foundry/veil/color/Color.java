@@ -6,6 +6,7 @@ import net.minecraft.util.Mth;
  * A simple color class that can be used to represent a color in RGBA format with utility functions.
  */
 public class Color {
+
     public static final Color WHITE = new Color(255, 255, 255, 255);
     public static final Color BLACK = new Color(0, 0, 0, 255);
     public static final Color RED = new Color(255, 0, 0, 255);
@@ -27,12 +28,12 @@ public class Color {
         this.a = a;
     }
 
-    public static void tickRainbow(int ticks, float partialTick){
+    public static void tickRainbow(int ticks, float partialTick) {
         // slowly change the hue of the rainbow color, it should take 5 seconds to complete a full cycle using sin
         //RAINBOW.setHue((float) (Math.sin((ticks+partialTick) * 0.05f) * 0.5f + 0.5f));
     }
 
-    public void lerp(Color other, float t){
+    public void lerp(Color other, float t) {
         r = Mth.lerp(t, r, other.r);
         g = Mth.lerp(t, g, other.g);
         b = Mth.lerp(t, b, other.b);
@@ -96,9 +97,9 @@ public class Color {
         this((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF, (hex >> 24) & 0xFF);
     }
 
-    public Color(int hex, boolean hasAlpha){
+    public Color(int hex, boolean hasAlpha) {
         this(hex);
-        if(!hasAlpha)
+        if (!hasAlpha)
             a = 1.0f;
     }
 
@@ -114,11 +115,11 @@ public class Color {
         return r;
     }
 
-    public static Color of(int col){
+    public static Color of(int col) {
         return BLACK.add(col);
     }
 
-    public Color add(int col){
+    public Color add(int col) {
         r += (col >> 16) & 0xFF;
         g += (col >> 8) & 0xFF;
         b += col & 0xFF;
@@ -208,7 +209,7 @@ public class Color {
         return new Color(this.r * r, this.g * g, this.b * b, this.a * a);
     }
 
-    public Color multiply(int col){
+    public Color multiply(int col) {
         return multiply((col >> 16) & 0xFF, (col >> 8) & 0xFF, col & 0xFF, (col >> 24) & 0xFF);
     }
 
@@ -235,6 +236,7 @@ public class Color {
     public int getRGB() {
         return (getRedInt() << 16) | (getGreenInt() << 8) | getBlueInt();
     }
+
     public int getRGBA() {
         return (getRedInt() << 24) | (getGreenInt() << 16) | (getBlueInt() << 8) | getAlphaInt();
     }

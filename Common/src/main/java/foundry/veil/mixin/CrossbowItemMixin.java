@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CrossbowItem.class)
 public class CrossbowItemMixin implements IChargableItem {
+
     @Override
     public int getMaxCharge() {
         return 25;

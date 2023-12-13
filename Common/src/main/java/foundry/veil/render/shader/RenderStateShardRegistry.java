@@ -13,7 +13,7 @@ public class RenderStateShardRegistry {
      * You can now use this auxtarget as a sampler in your shader.
      * Remember to combine the output of your post-processing shader with the main {@link RenderTarget} in another post-processing shader.
      * <p>
-     *     Example:
+     * Example:
      * </p>
      */
     public static final RenderStateShard.OutputStateShard VEIL_CUSTOM = new RenderStateShard.OutputStateShard("veil:custom", () -> {

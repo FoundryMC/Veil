@@ -13,7 +13,8 @@ public class TooltipKeyframe {
     private Color bottomBorderColor;
     private ItemStack itemStack;
 
-    public TooltipKeyframe(){}
+    public TooltipKeyframe() {
+    }
 
     public void setTooltipTextHeightBonus(float tooltipTextHeightBonus) {
         this.tooltipTextHeightBonus = tooltipTextHeightBonus;

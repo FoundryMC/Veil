@@ -16,6 +16,7 @@ public class Filter {
         float average = (color.getRed() + color.getGreen() + color.getBlue()) / 3.0f;
         return new Color(average, average, average, color.getAlpha());
     };
+
     public interface IFilterType {
         Color apply(Color color, float value);
     }

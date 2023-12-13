@@ -1,7 +1,6 @@
 package foundry.veil;
 
 import foundry.veil.molang.VeilMolang;
-import foundry.veil.opencl.VeilOpenCL;
 import foundry.veil.platform.services.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +23,7 @@ public class Veil {
 
     static {
         boolean arm = System.getProperty("os.arch").equals("arm") ||
-            System.getProperty("os.arch").startsWith("aarch64");
+                System.getProperty("os.arch").startsWith("aarch64");
         DEBUG = System.getProperty("veil.debug") != null;
         RENDER_DOC = System.getProperty("veil.renderDoc") != null;
         IMGUI = !arm && System.getProperty("veil.disableImgui") == null;

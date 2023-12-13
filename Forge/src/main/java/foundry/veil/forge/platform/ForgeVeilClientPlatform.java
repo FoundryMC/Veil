@@ -2,7 +2,6 @@ package foundry.veil.forge.platform;
 
 import foundry.veil.forge.event.ForgeVeilPostProcessingEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
-import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.post.PostPipeline;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;

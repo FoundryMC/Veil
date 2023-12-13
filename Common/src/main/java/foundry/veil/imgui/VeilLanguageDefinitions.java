@@ -876,7 +876,7 @@ original contents of mem""",
 
                 // 8.12. Image Functions
 
-                "imageSize" , """
+                "imageSize", """
 Returns the dimensions of the image or images
 bound to image. For arrayed images, the last
 component of the return value will hold the size

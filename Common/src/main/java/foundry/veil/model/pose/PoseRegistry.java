@@ -34,10 +34,10 @@ public class PoseRegistry {
      * Add a {@link ExtendedPose} to the registry.
      *
      * @param itemPredicate A predicate that determines if the pose should be applied to the item.
-     * @param pose The pose.
-     *             <p>
-     *             Create an {@link ExtendedPose}, either using an anonymous class or a separate class.
-     *             You are given a {@link PoseData} object which contains various state data of the model.
+     * @param pose          The pose.
+     *                      <p>
+     *                      Create an {@link ExtendedPose}, either using an anonymous class or a separate class.
+     *                      You are given a {@link PoseData} object which contains various state data of the model.
      */
     public static ExtendedPose registerPose(Predicate<Item> itemPredicate, ExtendedPose pose) {
         poses.put(itemPredicate, pose);

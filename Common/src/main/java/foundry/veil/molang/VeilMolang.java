@@ -2,7 +2,6 @@ package foundry.veil.molang;
 
 import gg.moonflower.molangcompiler.api.GlobalMolangCompiler;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Manages the Veil MoLang compiler.

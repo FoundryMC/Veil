@@ -2,7 +2,6 @@ package foundry.veil.render.pipeline;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.logging.LogUtils;

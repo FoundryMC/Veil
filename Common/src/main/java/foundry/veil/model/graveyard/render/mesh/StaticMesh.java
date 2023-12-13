@@ -91,7 +91,7 @@ public class StaticMesh extends ModelMesh {
         for (int i = 0; i < vertices.length; i++) {
             FaceVertex vertex = vertices[i];
             vertArray[i] = new Vertex(vertex.x(), vertex.y(), vertex.z());
-            uvArray[i] = new UV(vertex.u() / (float)this.textureWidth, vertex.v() / (float)this.textureHeight);
+            uvArray[i] = new UV(vertex.u() / (float) this.textureWidth, vertex.v() / (float) this.textureHeight);
         }
         Face face = new Face(vertArray, uvArray, new Vector3f(normalX, normalY, normalZ));
         faces.add(face);
@@ -99,7 +99,8 @@ public class StaticMesh extends ModelMesh {
     }
 
 
-    public record FaceVertex(float x, float y, float z, float u, float v) {}
+    public record FaceVertex(float x, float y, float z, float u, float v) {
+    }
 
     @Override
     public void render(InterpolatedBone part, PoseStack pPoseStack, VertexConsumer pVertexConsumer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {

@@ -18,38 +18,42 @@ public class RenderTargetRegistry {
 
     /**
      * Add a {@link RenderTarget} to the registry.
-     * @param id The name of the render target.
+     *
+     * @param id           The name of the render target.
      * @param renderTarget The render target.
      *                     <p>
-     * This will initialize the render target and optionally copy the depth buffer.
-     * Tip: If you want a quick RenderTarget to use, use {@link TextureTarget}
+     *                     This will initialize the render target and optionally copy the depth buffer.
+     *                     Tip: If you want a quick RenderTarget to use, use {@link TextureTarget}
      *                     <p>
-     * How to use: See {@link RenderStateShardRegistry}
+     *                     How to use: See {@link RenderStateShardRegistry}
      */
     public static void register(String id, Pair<Integer, Integer> renderTarget) {
         renderTargets.put(id, renderTarget);
     }
+
     /**
      * Add a {@link RenderTarget} to the registry.
-     * @param id The name of the render target.
-     * @param renderTarget The render target.
+     *
+     * @param id              The name of the render target.
+     * @param renderTarget    The render target.
      * @param shouldCopyDepth Whether the depth buffer should be copied to this render target.
      *                        <p>
-     * This will initialize the render target and optionally copy the depth buffer.
-     * Tip: If you want a quick RenderTarget to use, use {@link TextureTarget}
+     *                        This will initialize the render target and optionally copy the depth buffer.
+     *                        Tip: If you want a quick RenderTarget to use, use {@link TextureTarget}
      *                        <p>
-     * How to use: See {@link RenderStateShardRegistry}
+     *                        How to use: See {@link RenderStateShardRegistry}
      */
-    public static void register(String id,  Pair<Integer, Integer> renderTarget, boolean shouldCopyDepth) {
+    public static void register(String id, Pair<Integer, Integer> renderTarget, boolean shouldCopyDepth) {
         renderTargets.put(id, renderTarget);
-        if(shouldCopyDepth) RenderTargetRegistry.shouldCopyDepth.add(id);
+        if (shouldCopyDepth) RenderTargetRegistry.shouldCopyDepth.add(id);
     }
 
-    public static Map<String,  Pair<Integer, Integer>> getRenderTargets() {
+    public static Map<String, Pair<Integer, Integer>> getRenderTargets() {
         return renderTargets;
     }
+
     public static void modifyPostChain(PostChain postChain, ResourceLocation $$3) {
-        if($$3.getNamespace().equals("veil")){
+        if ($$3.getNamespace().equals("veil")) {
             RenderTargetRegistry.getRenderTargets().forEach((name, target) -> {
                         if (target == null) return;
                         postChain.addTempTarget(name, target.getFirst(), target.getSecond());

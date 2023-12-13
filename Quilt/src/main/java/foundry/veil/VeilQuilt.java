@@ -8,7 +8,7 @@ public class VeilQuilt implements ModInitializer {
     @Override
     public void onInitialize(ModContainer mod) {
         Veil.init();
-        if(QuiltLoader.isDevelopmentEnvironment()){
+        if (QuiltLoader.isDevelopmentEnvironment()) {
         }
     }
 }

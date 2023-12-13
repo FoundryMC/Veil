@@ -8,11 +8,13 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
+// TODO This class doesn't work
 public class BasicGeomHelper {
     public static RenderType TRANS_WHITE = RenderTypeRegistry.TRANSPARENT_TEXTURE.apply(new ResourceLocation("foundry", "textures/gui/white.png"));
-    public static void renderCenteredQuad(PoseStack ps, VertexConsumer consumer, float size, Color color){
+
+    public static void renderCenteredQuad(PoseStack ps, VertexConsumer consumer, float size, Color color) {
         ps.pushPose();
-        ps.translate(-size/2, -size/2, 0);
+        ps.translate(-size / 2, -size / 2, 0);
         consumer.vertex(ps.last().pose(), 0, 0, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         consumer.vertex(ps.last().pose(), size, 0, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         consumer.vertex(ps.last().pose(), size, size, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
@@ -20,16 +22,17 @@ public class BasicGeomHelper {
         ps.popPose();
     }
 
-    public static void renderCenteredQuad(PoseStack ps, VertexConsumer consumer, float width, float height, Color color){
+    public static void renderCenteredQuad(PoseStack ps, VertexConsumer consumer, float width, float height, Color color) {
         ps.pushPose();
-        ps.translate(-width/2, -height/2, 0);
+        ps.translate(-width / 2, -height / 2, 0);
         consumer.vertex(ps.last().pose(), 0, 0, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         consumer.vertex(ps.last().pose(), width, 0, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         consumer.vertex(ps.last().pose(), width, height, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         consumer.vertex(ps.last().pose(), 0, height, 0).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         ps.popPose();
     }
-    public static void renderQuad(PoseStack ps, MultiBufferSource multiBufferSource, float width, float height, Color[] colors){
+
+    public static void renderQuad(PoseStack ps, MultiBufferSource multiBufferSource, float width, float height, Color[] colors) {
         ps.pushPose();
         VertexConsumer consumer = multiBufferSource.getBuffer(TRANS_WHITE);
         consumer.vertex(ps.last().pose(), 0, 0, 0).color(colors[0].getRed(), colors[0].getGreen(), colors[0].getBlue(), colors[0].getAlpha()).uv(0, 0).uv2(0xF000F0).endVertex();
@@ -38,7 +41,8 @@ public class BasicGeomHelper {
         consumer.vertex(ps.last().pose(), 0, height, 0).color(colors[3].getRed(), colors[3].getGreen(), colors[3].getBlue(), colors[3].getAlpha()).uv(0, 1).uv2(0xF000F0).endVertex();
         ps.popPose();
     }
-    public static void renderQuad(PoseStack ps, MultiBufferSource mbuff, float width, float height, Color[] colors, RenderType shader){
+
+    public static void renderQuad(PoseStack ps, MultiBufferSource mbuff, float width, float height, Color[] colors, RenderType shader) {
         ps.pushPose();
         VertexConsumer consumer = mbuff.getBuffer(shader);
         consumer.vertex(ps.last().pose(), 0, 0, 0).color(colors[0].getRed(), colors[0].getGreen(), colors[0].getBlue(), colors[0].getAlpha()).uv(0, 0).uv2(0xF000F0).endVertex();

@@ -39,7 +39,7 @@ public class TooltipTimeline {
         return isPlaying;
     }
 
-    public void addFrameForTime(TooltipKeyframe keyframe, float duration){
+    public void addFrameForTime(TooltipKeyframe keyframe, float duration) {
         // add a keyframe that lasts for a certain amount of time
         for (int i = 0; i < duration; i++) {
             addFrame(keyframe);
@@ -47,7 +47,7 @@ public class TooltipTimeline {
     }
 
     private void addFrame(TooltipKeyframe keyframe) {
-        keyframes[keyframes.length-1] = keyframe;
+        keyframes[keyframes.length - 1] = keyframe;
     }
 
     public float getAnimationProgress() {

@@ -1,30 +1,34 @@
 package foundry.veil.color.theme;
 
-public class NumberThemeProperty implements IThemeProperty<Number>{
+import java.util.Objects;
+
+/**
+ * @author amo
+ */
+public class NumberThemeProperty implements IThemeProperty<Number> {
+
     private String name;
     private Number value;
     private Class<?> type = NumberThemeProperty.class;
+
     @Override
     public String getName() {
-        return null;
+        return this.name;
     }
 
     @Override
     public void setName(String name) {
-        if(name == null){
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public Number getValue() {
-        return value;
+        return this.value;
     }
 
     @Override
     public Class<?> getType() {
-        return type;
+        return this.type;
     }
 
     public void setValue(Number value) {
@@ -32,16 +36,15 @@ public class NumberThemeProperty implements IThemeProperty<Number>{
     }
 
     public void setType(Class<?> type) {
-        // check if type is a subclass of Number
-        if(Number.class.isAssignableFrom(type)){
-            this.type = type;
-        }else{
+        if (!Number.class.isAssignableFrom(type)) {
             throw new IllegalArgumentException("Type must be a subclass of Number");
         }
+
+        this.type = type;
     }
 
     // return the value and cast it to the specified type
     public <T extends Number> T getValue(Class<T> type) {
-        return type.cast(value);
+        return type.cast(this.value);
     }
 }

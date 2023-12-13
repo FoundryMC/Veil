@@ -20,7 +20,7 @@ public class Path {
         this.frames = frames;
         this.loop = loop;
         currentFrame = frames.get(0);
-        if(bezier) {
+        if (bezier) {
             populateFramesBezier();
         } else {
             populateFrames();
@@ -30,16 +30,16 @@ public class Path {
     public Keyframe getCurrentKeyframeAtProgress(float progress) {
         // find the keyframe before the current frame if the current frame is not a keyframe
         int index = frames.indexOf(frameAtProgress(progress));
-        if(index == -1) {
-            for(int i = 0; i < frames.size(); i++) {
-                if(frames.get(i) instanceof Keyframe) {
+        if (index == -1) {
+            for (int i = 0; i < frames.size(); i++) {
+                if (frames.get(i) instanceof Keyframe) {
                     index = i;
                     break;
                 }
             }
         }
         Frame frame = frames.get(index);
-        if(frame instanceof Keyframe) {
+        if (frame instanceof Keyframe) {
             return (Keyframe) frame;
         } else {
             return null;
@@ -48,11 +48,11 @@ public class Path {
 
     public Keyframe getKeyframeBefore(Frame frame) {
         int index = frames.indexOf(frame);
-        if(index == -1) {
+        if (index == -1) {
             return null;
         }
-        for(int i = index; i >= 0; i--) {
-            if(frames.get(i) instanceof Keyframe) {
+        for (int i = index; i >= 0; i--) {
+            if (frames.get(i) instanceof Keyframe) {
                 return (Keyframe) frames.get(i);
             }
         }
@@ -61,13 +61,13 @@ public class Path {
 
     private void populateFrames() {
         List<Frame> newFrames = new ArrayList<>();
-        for(int i = 0; i < frames.size(); i++){
+        for (int i = 0; i < frames.size(); i++) {
             Frame frame = frames.get(i);
             newFrames.add(frame);
-            if(frame instanceof Keyframe) {
-                for(int j = 0; j < ((Keyframe) frame).getDuration(); j++){
-                    int frameIndex = i+1 >= frames.size() ? loop ? 0 : i : i +1;
-                    newFrames.add(frame.interpolate(frames.get(frameIndex), j/((float)((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
+            if (frame instanceof Keyframe) {
+                for (int j = 0; j < ((Keyframe) frame).getDuration(); j++) {
+                    int frameIndex = i + 1 >= frames.size() ? loop ? 0 : i : i + 1;
+                    newFrames.add(frame.interpolate(frames.get(frameIndex), j / ((float) ((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
                 }
             } else {
                 newFrames.add(frame);
@@ -78,13 +78,13 @@ public class Path {
 
     private void populateFramesBezier() {
         List<Frame> newFrames = new ArrayList<>();
-        for(int i = 0; i < frames.size(); i++){
+        for (int i = 0; i < frames.size(); i++) {
             Frame frame = frames.get(i);
             newFrames.add(frame);
-            if(frame instanceof Keyframe) {
-                for(int j = 0; j < ((Keyframe) frame).getDuration(); j++){
-                    int frameIndex = i+1 >= frames.size() ? loop ? 0 : i : i +1;
-                    newFrames.add(frame.bezierInterpolate(frames.get(frameIndex), j/((float)((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
+            if (frame instanceof Keyframe) {
+                for (int j = 0; j < ((Keyframe) frame).getDuration(); j++) {
+                    int frameIndex = i + 1 >= frames.size() ? loop ? 0 : i : i + 1;
+                    newFrames.add(frame.bezierInterpolate(frames.get(frameIndex), j / ((float) ((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
                 }
             } else {
                 newFrames.add(frame);
@@ -95,8 +95,8 @@ public class Path {
 
     public int duration() {
         int duration = 0;
-        for(Frame frame : frames){
-            if(frame instanceof Keyframe) {
+        for (Frame frame : frames) {
+            if (frame instanceof Keyframe) {
                 duration += ((Keyframe) frame).getDuration();
             } else {
                 duration++;
@@ -107,13 +107,13 @@ public class Path {
 
     void reverse() {
         List<Frame> newFrames = new ArrayList<>();
-        for(int i = frames.size() - 1; i >= 0; i--){
+        for (int i = frames.size() - 1; i >= 0; i--) {
             Frame frame = frames.get(i);
-            if(frame instanceof Keyframe) {
+            if (frame instanceof Keyframe) {
                 newFrames.add(frame);
-                for(int j = ((Keyframe) frame).getDuration() - 1; j >= 0; j--){
-                    int frameIndex = i-1 < 0 ? loop ? frames.size() - 1 : i : i -1;
-                    newFrames.add(frame.interpolate(frames.get(frameIndex), j/((float)((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
+                for (int j = ((Keyframe) frame).getDuration() - 1; j >= 0; j--) {
+                    int frameIndex = i - 1 < 0 ? loop ? frames.size() - 1 : i : i - 1;
+                    newFrames.add(frame.interpolate(frames.get(frameIndex), j / ((float) ((Keyframe) frame).duration), ((Keyframe) frame).getEasing()));
                 }
             } else {
                 newFrames.add(frame);
@@ -123,10 +123,10 @@ public class Path {
     }
 
     public void next() {
-        if(pingPong) {
-            if(frames.indexOf(currentFrame) == frames.size() - 1) {
+        if (pingPong) {
+            if (frames.indexOf(currentFrame) == frames.size() - 1) {
                 reverse();
-            } else if(frames.indexOf(currentFrame) == 0) {
+            } else if (frames.indexOf(currentFrame) == 0) {
                 reverse();
             }
         }
@@ -134,10 +134,10 @@ public class Path {
     }
 
     public void previous() {
-        if(pingPong) {
-            if(frames.indexOf(currentFrame) == frames.size() - 1) {
+        if (pingPong) {
+            if (frames.indexOf(currentFrame) == frames.size() - 1) {
                 reverse();
-            } else if(frames.indexOf(currentFrame) == 0) {
+            } else if (frames.indexOf(currentFrame) == 0) {
                 reverse();
             }
         }

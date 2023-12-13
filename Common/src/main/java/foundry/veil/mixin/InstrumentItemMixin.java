@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(InstrumentItem.class)
 public class InstrumentItemMixin implements IChargableItem {
+
     @Override
     public int getMaxCharge() {
         return ((InstrumentItem) (Object) this).getUseDuration(((InstrumentItem) (Object) this).getDefaultInstance());

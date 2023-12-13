@@ -11,6 +11,7 @@ import foundry.veil.render.post.stage.MaskPostStage;
 import net.minecraft.resources.ResourceLocation;
 
 // TODO use registry
+
 /**
  * Registry for all post pipeline stages.
  */

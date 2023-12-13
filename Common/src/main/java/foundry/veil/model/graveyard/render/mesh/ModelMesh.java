@@ -22,14 +22,21 @@ public abstract class ModelMesh {
         this.isStatic = isStatic;
     }
 
-    public void update(@Nullable InterpolatedBone part, InterpolatedSkeleton model, int ticks, float partialTick) {}
+    public void update(@Nullable InterpolatedBone part, InterpolatedSkeleton model, int ticks, float partialTick) {
+    }
+
     public abstract void render(@Nullable InterpolatedBone part, PoseStack pPoseStack, VertexConsumer pVertexConsumer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha);
+
     public void render(PoseStack pPoseStack, VertexConsumer pVertexConsumer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
         this.render(null, pPoseStack, pVertexConsumer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
     }
 
-    protected record Vertex(float x, float y, float z) {}
-    protected record UV(float u, float v) {}
+    protected record Vertex(float x, float y, float z) {
+    }
+
+    protected record UV(float u, float v) {
+    }
+
     protected static class Face {
         protected final Vertex[] vertices;
         protected final UV[] uvs;
@@ -37,10 +44,10 @@ public abstract class ModelMesh {
 
         protected Face(Vertex a, Vertex b, Vertex c, Vertex d, float u0, float v0, float u1, float v1, float textureWidth, float textureHeight, boolean mirrored, Direction pDirection) {
             this.vertices = new Vertex[]{a, b, c, d};
-            this.uvs = new UV[] {new UV(u1 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v1 / textureHeight), new UV(u1 / textureWidth, v1 / textureHeight)};
+            this.uvs = new UV[]{new UV(u1 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v1 / textureHeight), new UV(u1 / textureWidth, v1 / textureHeight)};
             if (mirrored) {
                 int i = this.vertices.length;
-                for(int j = 0; j < i / 2; ++j) {
+                for (int j = 0; j < i / 2; ++j) {
                     Vertex vertex = this.vertices[j];
                     UV uv = this.uvs[j];
                     this.vertices[j] = this.vertices[i - 1 - j];
@@ -71,10 +78,10 @@ public abstract class ModelMesh {
 
         protected DynamicFace(Vector3f a, Vector3f b, Vector3f c, Vector3f d, float u0, float v0, float u1, float v1, float textureWidth, float textureHeight, boolean mirrored, Direction pDirection) {
             this.vertices = new Vector3f[]{a, b, c, d};
-            this.uvs = new UV[] {new UV(u1 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v1 / textureHeight), new UV(u1 / textureWidth, v1 / textureHeight)};
+            this.uvs = new UV[]{new UV(u1 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v0 / textureHeight), new UV(u0 / textureWidth, v1 / textureHeight), new UV(u1 / textureWidth, v1 / textureHeight)};
             if (mirrored) {
                 int i = this.vertices.length;
-                for(int j = 0; j < i / 2; ++j) {
+                for (int j = 0; j < i / 2; ++j) {
                     Vector3f vertex = this.vertices[j];
                     UV uv = this.uvs[j];
                     this.vertices[j] = this.vertices[i - 1 - j];

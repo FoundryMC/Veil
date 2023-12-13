@@ -109,9 +109,9 @@ public class ShaderProgramImpl implements ShaderProgram {
             // however mac shaders just don't work without a fragment, shader. This adds a "dummy" fragment shader
             // on mac specifically for all rendering shaders.
             if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) &&
-                !shaders.containsKey(GL_FRAGMENT_SHADER)) {
+                    !shaders.containsKey(GL_FRAGMENT_SHADER)) {
                 CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER,
-                    "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
+                        "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
                 glAttachShader(this.program, shader.id());
                 this.shaders.add(GL_FRAGMENT_SHADER);
                 compiledShaders.add(shader);
@@ -233,11 +233,11 @@ public class ShaderProgramImpl implements ShaderProgram {
     public static class Wrapper extends ShaderInstance {
 
         private static final byte[] DUMMY_SHADER = """
-            {
-                "vertex": "dummy",
-                "fragment": "dummy"
-            }
-            """.getBytes(StandardCharsets.UTF_8);
+                {
+                    "vertex": "dummy",
+                    "fragment": "dummy"
+                }
+                """.getBytes(StandardCharsets.UTF_8);
         private static final Resource RESOURCE = new Resource(null, () -> new ByteArrayInputStream(DUMMY_SHADER)) {
             @Override
             public PackResources source() {
@@ -301,7 +301,7 @@ public class ShaderProgramImpl implements ShaderProgram {
                 return null;
             }
             return (UniformWrapper) this.uniformMap.computeIfAbsent(name,
-                unused -> new UniformWrapper(() -> this.program, name));
+                    unused -> new UniformWrapper(() -> this.program, name));
         }
 
         @Override

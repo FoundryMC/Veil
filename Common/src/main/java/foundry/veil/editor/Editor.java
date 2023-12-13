@@ -1,7 +1,6 @@
 package foundry.veil.editor;
 
 import foundry.veil.render.pipeline.VeilRenderSystem;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.lwjgl.system.NativeResource;
 
 /**

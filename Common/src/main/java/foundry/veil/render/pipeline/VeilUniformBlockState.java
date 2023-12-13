@@ -104,20 +104,13 @@ public class VeilUniformBlockState {
      * @param block The block to unbind
      */
     public void unbind(ShaderBlock<?> block) {
-        if (!(block instanceof ShaderBlockImpl<?>)) {
+        if (!(block instanceof ShaderBlockImpl<?> impl)) {
             throw new UnsupportedOperationException("Cannot unbind " + block.getClass());
         }
 
-        Iterator<Map.Entry<ShaderBlockImpl<?>, Integer>> iterator = this.boundBlocks.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<ShaderBlockImpl<?>, Integer> entry = iterator.next();
-            ShaderBlockImpl<?> impl = entry.getKey();
-            if (!impl.equals(block)) {
-                continue;
-            }
-
-            this.unbind(entry.getValue(), impl);
-            iterator.remove();
+        Integer binding = this.boundBlocks.remove(block);
+        if (binding != null) {
+            this.unbind(binding, impl);
         }
     }
 

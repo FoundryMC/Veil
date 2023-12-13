@@ -58,13 +58,12 @@ public class TooltipTimelineManager {
     }
 
 
-
     public void update() {
         for (TooltipTimeline timeline : timelines.values()) {
-            if(timeline.isFinished()) {
+            if (timeline.isFinished()) {
                 timeline.reset();
             }
-            if(timeline.isPlaying()) {
+            if (timeline.isPlaying()) {
                 timeline.update();
             }
         }

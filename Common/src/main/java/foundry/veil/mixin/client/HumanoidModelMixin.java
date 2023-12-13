@@ -51,7 +51,7 @@ public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
         }
         PoseData poseData = new PoseData($$3, 0, $$1, $$2, $$4, $$5, chargeTime, maxChargeTime, mainhand, offhand, swapped);
         PoseRegistry.poses.forEach((item, pose) -> {
-            if(item == null || pose == null) return;
+            if (item == null || pose == null) return;
             pose.data = poseData;
             if ($$0 instanceof Player && item.test(((Player) $$0).getUseItem().getItem())) {
                 pose.pose((HumanoidModel<?>) (Object) this);
@@ -79,9 +79,13 @@ public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
     @Final
     public ModelPart leftLeg;
 
-    @Shadow @Final public ModelPart rightArm;
+    @Shadow
+    @Final
+    public ModelPart rightArm;
 
-    @Shadow @Final public ModelPart leftArm;
+    @Shadow
+    @Final
+    public ModelPart leftArm;
 
     @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;crouching:Z"))
     private boolean veil$cancelSneak(boolean original) {
@@ -113,7 +117,7 @@ public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
 
     @Inject(method = "translateToHand", at = @At("TAIL"))
     private void veilm$setArmAngle(HumanoidArm arm, PoseStack matrices, CallbackInfo ci) {
-        if(this.hasActivePose)
+        if (this.hasActivePose)
             this.body.translateAndRotate(matrices);
     }
 

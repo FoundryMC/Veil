@@ -4,7 +4,6 @@ import foundry.veil.opencl.CLException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
  * @author Ocelot
  */
 public interface CLEventDispatcher {

@@ -2,94 +2,97 @@ package foundry.veil.color;
 
 import foundry.veil.color.theme.IThemeProperty;
 import foundry.veil.render.ui.Tooltippable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * A color theme is a collection of colors. The colors can be accessed by name. Themes are intended to be used for color schemes.
  * <p>
- *     A color theme can be used to apply a color scheme to a {@link Tooltippable} tooltip.
- *     Themes can also be used to hold arbitrary color data mapped to strings.
+ * A color theme can be used to apply a color scheme to a {@link Tooltippable} tooltip.
+ * Themes can also be used to hold arbitrary color data mapped to strings.
+ *
+ * @author amo
  */
 public class ColorTheme {
-    private Map<Optional<String>, Color> colors = new HashMap<>();
-    private Map<Optional<String>, IThemeProperty<?>> properties = new HashMap<>();
 
-    public ColorTheme(){
+    private final Map<String, Color> colors = new HashMap<>();
+    private final Map<String, IThemeProperty<?>> properties = new HashMap<>();
 
+    public ColorTheme() {
     }
 
-    public ColorTheme(Color... colors){
-        for(Color color : colors){
-            addColor(color);
+    public ColorTheme(Color... colors) {
+        for (Color color : colors) {
+            this.addColor(color);
         }
     }
 
-    public void addProperty(String name, IThemeProperty<?> property){
-        properties.put(Optional.ofNullable(name), property);
+    public void addProperty(@Nullable String name, IThemeProperty<?> property) {
+        this.properties.put(name, property);
     }
 
-    public void addProperty(IThemeProperty<?> property){
-        properties.put(Optional.empty(), property);
+    public void addProperty(IThemeProperty<?> property) {
+        this.properties.put(null, property);
     }
 
-    public Object getAndCastProperty(String name){
-        IThemeProperty<?> property = properties.get(Optional.ofNullable(name));
-        return property.getType().cast(property);
+    public @Nullable Object getAndCastProperty(@Nullable String name) {
+        IThemeProperty<?> property = this.properties.get(name);
+        return property != null ? property.getType().cast(property) : null;
     }
 
-    public IThemeProperty<?> getProperty(String name){
-        return properties.get(Optional.ofNullable(name));
+    public @Nullable IThemeProperty<?> getProperty(@Nullable String name) {
+        return this.properties.get(name);
     }
 
-    public void removeProperty(String name){
-        properties.remove(Optional.ofNullable(name));
+    public void removeProperty(@Nullable String name) {
+        this.properties.remove(name);
     }
 
-    public void clearProperties(){
-        properties.clear();
+    public void clearProperties() {
+        this.properties.clear();
     }
 
-    public void addColor(String name, Color color){
-        colors.put(Optional.ofNullable(name), color);
+    public void addColor(@Nullable String name, Color color) {
+        this.colors.put(name, color);
     }
 
-    public void addColor(Color color){
-        colors.put(Optional.empty(), color);
+    public void addColor(Color color) {
+        this.colors.put(null, color);
     }
 
-    public Color getColor(String name){
-        return colors.get(Optional.ofNullable(name));
+    public Color getColor(@Nullable String name) {
+        return this.colors.get(name);
     }
 
-    public Color getColor(){
-        return colors.get(Optional.empty());
+    public Color getColor() {
+        return this.colors.get(null);
     }
 
-    public void removeColor(String name){
-        colors.remove(Optional.ofNullable(name));
+    public void removeColor(@Nullable String name) {
+        this.colors.remove(name);
     }
 
-    public void removeColor(){
-        colors.remove(Optional.empty());
+    public void removeColor() {
+        this.colors.remove(null);
     }
 
-    public void clear(){
-        colors.clear();
+    public void clear() {
+        this.colors.clear();
     }
 
-    public List<String> getNames(){
-        return (List<String>) colors.keySet().stream().map(Optional::get).toList();
+    public List<String> getNames() {
+        return this.colors.keySet().stream().filter(Objects::nonNull).toList();
     }
 
-    public List<Color> getColors(){
-        return (List<Color>) colors.values();
+    public List<Color> getColors() {
+        return (List<Color>) this.colors.values();
     }
 
-    public Map<Optional<String>, Color> getColorsMap(){
-        return colors;
+    public Map<String, Color> getColorsMap() {
+        return this.colors;
     }
 }

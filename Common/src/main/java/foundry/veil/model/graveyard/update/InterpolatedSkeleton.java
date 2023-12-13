@@ -55,6 +55,7 @@ public abstract class InterpolatedSkeleton<P extends InterpolatedSkeletonParent>
             properties.addProperty("headPitch", -entity.getViewXRot(1.0F));
         }
     }
+
     public abstract void animate(AnimationProperties properties);
 
     protected void applyConstraints(int iterations) {
@@ -85,7 +86,8 @@ public abstract class InterpolatedSkeleton<P extends InterpolatedSkeletonParent>
     public void render(float partialTick, PoseStack pPoseStack, VertexConsumer pVertexConsumer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
         for (Map.Entry<String, ModelMesh> stringMeshEntry : this.meshes.entrySet()) {
             ModelMesh mesh = stringMeshEntry.getValue();
-            if (!mesh.isStatic) mesh.update(this.parts.getOrDefault(stringMeshEntry.getKey(), null), this, ticksExisted, partialTick);
+            if (!mesh.isStatic)
+                mesh.update(this.parts.getOrDefault(stringMeshEntry.getKey(), null), this, ticksExisted, partialTick);
         }
 
         for (InterpolatedBone part : this.roots) {

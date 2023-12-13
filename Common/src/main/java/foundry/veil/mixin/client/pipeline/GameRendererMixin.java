@@ -18,19 +18,19 @@ public class GameRendererMixin {
         VeilRenderSystem.resize(pWidth, pHeight);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;tryTakeScreenshotIfNeeded()V", shift = At.Shift.BEFORE))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.BEFORE))
     public void veil$renderPost(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderPost(partialTicks);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V", shift = At.Shift.BEFORE))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Lighting;setupFor3DItems()V", shift = At.Shift.AFTER))
     public void veil$updateGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderer renderer = VeilRenderSystem.renderer();
         renderer.getCameraMatrices().updateGui();
         renderer.getGuiInfo().update();
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V", shift = At.Shift.AFTER))
+    @Inject(method = "render", at = @At("TAIL"))
     public void veil$unbindGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderer().getGuiInfo().unbind();
     }

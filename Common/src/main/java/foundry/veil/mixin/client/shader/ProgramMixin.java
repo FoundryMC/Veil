@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @Mixin(Program.class)

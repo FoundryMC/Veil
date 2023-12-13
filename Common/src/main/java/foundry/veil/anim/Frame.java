@@ -8,7 +8,7 @@ public class Frame {
     Vec3 rotation;
     Vec3 scale;
 
-    public Frame(Vec3 position, Vec3 rotation, Vec3 scale){
+    public Frame(Vec3 position, Vec3 rotation, Vec3 scale) {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
@@ -26,7 +26,7 @@ public class Frame {
         return scale;
     }
 
-    public Frame copy(){
+    public Frame copy() {
         return new Frame(position, rotation, scale);
     }
 

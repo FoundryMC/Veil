@@ -1,24 +1,28 @@
 package foundry.veil.color.theme;
 
+import java.util.Objects;
+
+/**
+ * @author amo
+ */
 public class StringThemeProperty implements IThemeProperty<String> {
+
     private String name;
     private String value;
+
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public void setName(String name) {
-        if(name == null){
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     @Override

@@ -104,7 +104,8 @@ public class InterpolatedBone {
         parentRotation.difference(globalSpaceRotation, this.rotation);
     }
 
-    protected void tick(float deltaTime) {}
+    protected void tick(float deltaTime) {
+    }
 
     public void transform(PoseStack pPoseStack, float partialTick) {
         pPoseStack.translate(Mth.lerp(partialTick, pX, x), Mth.lerp(partialTick, pY, y), Mth.lerp(partialTick, pZ, z));
@@ -121,7 +122,7 @@ public class InterpolatedBone {
         pPoseStack.pushPose();
 
         this.transform(pPoseStack, partialTick);
-        mesh.render(this, pPoseStack, pVertexConsumer,pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+        mesh.render(this, pPoseStack, pVertexConsumer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
 
         if (drawChildren) {
             for (InterpolatedBone child : this.children) {

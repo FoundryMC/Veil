@@ -29,7 +29,8 @@ public abstract class InterpolatedEntityRenderer<T extends LivingEntity & Interp
         this.shadowRadius = shadowRadius;
     }
 
-    public void setupModelFactory(T parent) {}
+    public void setupModelFactory(T parent) {
+    }
 
     public final void createSkeleton(T parent) {
         this.setupModelFactory(parent);
@@ -56,8 +57,9 @@ public abstract class InterpolatedEntityRenderer<T extends LivingEntity & Interp
         }
 
         if (!pEntity.isSpectator()) {
-            for(InterpolatedEntityRenderLayer<T, M> layer : this.layers) {
-                if (pEntity.getSkeleton() != null) layer.render(poseStack, pBuffer, pPackedLight, pEntity, (M) pEntity.getSkeleton(), pPartialTicks);
+            for (InterpolatedEntityRenderLayer<T, M> layer : this.layers) {
+                if (pEntity.getSkeleton() != null)
+                    layer.render(poseStack, pBuffer, pPackedLight, pEntity, (M) pEntity.getSkeleton(), pPartialTicks);
             }
         }
 
@@ -77,7 +79,8 @@ public abstract class InterpolatedEntityRenderer<T extends LivingEntity & Interp
         VertexConsumer vertexconsumer = pBuffer.getBuffer(this.getRenderType(pEntity));
         int packedOverlay = LivingEntityRenderer.getOverlayCoords(pEntity, 0);
 
-        if (pEntity.getSkeleton() != null) pEntity.getSkeleton().render(pPartialTicks, poseStack, vertexconsumer, pPackedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        if (pEntity.getSkeleton() != null)
+            pEntity.getSkeleton().render(pPartialTicks, poseStack, vertexconsumer, pPackedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     public abstract RenderType getRenderType(T entity);
@@ -95,7 +98,7 @@ public abstract class InterpolatedEntityRenderer<T extends LivingEntity & Interp
 
     protected void setupRotations(T pEntityLiving, PoseStack pMatrixStack, float pAgeInTicks, float pPartialTicks) {
         if (pEntityLiving.deathTime > 0) {
-            float deathTime = ((float)pEntityLiving.deathTime + pPartialTicks - 1.0F) / 20.0F * 1.6F;
+            float deathTime = ((float) pEntityLiving.deathTime + pPartialTicks - 1.0F) / 20.0F * 1.6F;
             deathTime = Mth.sqrt(deathTime);
             if (deathTime > 1.0F) {
                 deathTime = 1.0F;
@@ -103,7 +106,7 @@ public abstract class InterpolatedEntityRenderer<T extends LivingEntity & Interp
             pMatrixStack.mulPose(Axis.ZP.rotationDegrees(deathTime * this.getFlipDegrees(pEntityLiving)));
         } else if (pEntityLiving.isAutoSpinAttack()) {
             pMatrixStack.mulPose(Axis.XP.rotationDegrees(-90.0F - pEntityLiving.getXRot()));
-            pMatrixStack.mulPose(Axis.YP.rotationDegrees(((float)pEntityLiving.tickCount + pPartialTicks) * -75.0F));
+            pMatrixStack.mulPose(Axis.YP.rotationDegrees(((float) pEntityLiving.tickCount + pPartialTicks) * -75.0F));
         } else if (LivingEntityRenderer.isEntityUpsideDown(pEntityLiving)) {
             pMatrixStack.translate(0.0D, pEntityLiving.getBbHeight() + 0.1F, 0.0D);
             pMatrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));

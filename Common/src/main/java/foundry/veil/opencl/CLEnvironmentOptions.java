@@ -149,6 +149,7 @@ public record CLEnvironmentOptions(CLVersion version,
 
     /**
      * Supported versions of OpenCL.
+     *
      * @author Ocelot
      */
     public enum CLVersion {

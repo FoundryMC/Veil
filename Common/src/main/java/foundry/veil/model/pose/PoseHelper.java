@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 //Unused rn
 public class PoseHelper {
-    public static boolean poseItemUsing(PoseData data, ItemInHandRenderer pRenderer){
+    public static boolean poseItemUsing(PoseData data, ItemInHandRenderer pRenderer) {
         AtomicBoolean flag = new AtomicBoolean(false);
         PoseRegistry.poses.forEach((item, pose) -> {
             if (item == null || pose == null) return;
@@ -28,7 +28,7 @@ public class PoseHelper {
         return flag.get();
     }
 
-    public static boolean poseItem(PoseData data, ItemInHandRenderer pRenderer){
+    public static boolean poseItem(PoseData data, ItemInHandRenderer pRenderer) {
         AtomicBoolean flag = new AtomicBoolean(false);
         PoseRegistry.poses.forEach((item, pose) -> {
             if (item == null || pose == null) return;
@@ -41,17 +41,17 @@ public class PoseHelper {
         return flag.get();
     }
 
-    public static void offhandCapture(PoseData data, ItemStack pStack, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pEquippedProgress, float pSwingProgress, HumanoidArm pSide, ItemInHandRenderer pRenderer){
-        for(Map.Entry<Predicate<Item>, ExtendedPose> pose : PoseRegistry.poses.entrySet()){
-            if(pose.getKey().test(pStack.getItem())){
+    public static void offhandCapture(PoseData data, ItemStack pStack, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pEquippedProgress, float pSwingProgress, HumanoidArm pSide, ItemInHandRenderer pRenderer) {
+        for (Map.Entry<Predicate<Item>, ExtendedPose> pose : PoseRegistry.poses.entrySet()) {
+            if (pose.getKey().test(pStack.getItem())) {
                 pose.getValue().data = data;
-                if(pose.getValue().forceRenderMainHand()){
+                if (pose.getValue().forceRenderMainHand()) {
                     pMatrixStack.pushPose();
                     pose.getValue().poseMainHandFirstPerson(pMatrixStack);
                     pRenderer.renderPlayerArm(pMatrixStack, pBuffer, pCombinedLight, pEquippedProgress, pSwingProgress, Minecraft.getInstance().player.getMainArm());
                     pMatrixStack.popPose();
                 }
-                if(pose.getValue().forceRenderOffhand()){
+                if (pose.getValue().forceRenderOffhand()) {
                     pMatrixStack.pushPose();
                     pose.getValue().poseOffHandFirstPerson(pMatrixStack);
                     pRenderer.renderPlayerArm(pMatrixStack, pBuffer, pCombinedLight, pEquippedProgress, pSwingProgress, Minecraft.getInstance().player.getMainArm().getOpposite());

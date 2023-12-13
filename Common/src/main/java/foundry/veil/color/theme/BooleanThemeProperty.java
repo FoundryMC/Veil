@@ -1,27 +1,32 @@
 package foundry.veil.color.theme;
 
+import java.util.Objects;
+
+/**
+ * @author amo
+ */
 public class BooleanThemeProperty implements IThemeProperty<Boolean> {
+
     private String name;
     private boolean value;
+
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public void setName(String name) {
-        if(name == null){
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public Boolean getValue() {
-        return value;
+        return this.value;
     }
+
     public void setValue(boolean value) {
-        this.value = (boolean) value;
+        this.value = value;
     }
 
     @Override

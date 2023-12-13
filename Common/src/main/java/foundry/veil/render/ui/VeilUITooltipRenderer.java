@@ -46,25 +46,24 @@ public class VeilUITooltipRenderer {
         HitResult result = mc.hitResult;
         Vec3 pos = null;
         Tooltippable tooltippable = null;
-        if(result instanceof EntityHitResult) {
+        if (result instanceof EntityHitResult) {
             EntityHitResult entityHitResult = (EntityHitResult) result;
-            if(entityHitResult.getEntity() instanceof Tooltippable tooltippable1)
+            if (entityHitResult.getEntity() instanceof Tooltippable tooltippable1)
                 tooltippable = tooltippable1;
             else {
                 hoverTicks = 0;
                 lastHoveredPos = null;
                 return;
             }
-            pos = entityHitResult.getEntity().getPosition(0f).add(0.0, entityHitResult.getEntity().getEyeHeight()/2f, 0.0);
+            pos = entityHitResult.getEntity().getPosition(0f).add(0.0, entityHitResult.getEntity().getEyeHeight() / 2f, 0.0);
         }
         if (result instanceof BlockHitResult blockHitResult) {
             ClientLevel world = mc.level;
             pos = Vec3.atCenterOf(blockHitResult.getBlockPos());
             BlockEntity blockEntity = world.getBlockEntity(BlockPos.containing(pos));
-            if(blockEntity instanceof Tooltippable tooltippable1) {
+            if (blockEntity instanceof Tooltippable tooltippable1) {
                 tooltippable = tooltippable1;
-            }
-            else {
+            } else {
                 hoverTicks = 0;
                 lastHoveredPos = null;
                 return;
@@ -123,22 +122,22 @@ public class VeilUITooltipRenderer {
             Vec3i playerPosInt = new Vec3i((int) playerPos.x, (int) playerPos.y, (int) playerPos.z);
             Vec3i cornerInt = new Vec3i((int) pos.x, (int) pos.y, (int) pos.z);
             Vec3i diff = playerPosInt.subtract(cornerInt);
-            desiredPos = pos.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f)-0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f)-0.5f);
-            if(fade == 0){
+            desiredPos = pos.add(Math.round(Mth.clamp(Math.round(diff.getX()), -1, 1) * 0.5f) - 0.5f, 0.5, Math.round(Mth.clamp(Math.round(diff.getZ()), -1, 1) * 0.5f) - 0.5f);
+            if (fade == 0) {
                 currentPos = currentPos.add(0, -0.25f, 0);
-                background = background.multiply(1,1,1,fade);
-                borderTop = borderTop.multiply(1,1,1,fade);
-                borderBottom = borderBottom.multiply(1,1,1,fade);
+                background = background.multiply(1, 1, 1, fade);
+                borderTop = borderTop.multiply(1, 1, 1, fade);
+                borderBottom = borderBottom.multiply(1, 1, 1, fade);
             }
             currentPos = currentPos.lerp(desiredPos, 0.05f);
             Vector3f screenSpacePos = SpaceHelper.worldToScreenSpace(currentPos, partialTicks);
             Vector3f desiredScreenSpacePos = SpaceHelper.worldToScreenSpace(desiredPos, partialTicks);
             screenSpacePos = new Vector3f(Mth.clamp(screenSpacePos.x(), 0, width), Mth.clamp(screenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), screenSpacePos.z());
             desiredScreenSpacePos = new Vector3f(Mth.clamp(desiredScreenSpacePos.x(), 0, width), Mth.clamp(desiredScreenSpacePos.y(), 0, height - (mc.font.lineHeight * tooltip.size())), desiredScreenSpacePos.z());
-            tooltipX = (int)screenSpacePos.x();
-            tooltipY = (int)screenSpacePos.y();
-            desiredX = (int)desiredScreenSpacePos.x();
-            desiredY = (int)desiredScreenSpacePos.y();
+            tooltipX = (int) screenSpacePos.x();
+            tooltipY = (int) screenSpacePos.y();
+            desiredX = (int) desiredScreenSpacePos.x();
+            desiredY = (int) desiredScreenSpacePos.y();
         }
         UIUtils.drawHoverText(tooltippable, partialTicks, istack, stack, tooltip, tooltipX + (int) textXOffset, tooltipY + (int) textYOffset, width, height, -1, background.getHex(), borderTop.getHex(), borderBottom.getHex(), mc.font, (int) widthBonus, (int) heightBonus, items, desiredX, desiredY);
         stack.popPose();

@@ -3,7 +3,6 @@ package foundry.veil.fabric.event;
 import foundry.veil.event.FreeNativeResourcesEvent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Fired when Minecraft frees all native resources on the client.

@@ -20,7 +20,7 @@ public class VeilQuiltClient implements ClientModInitializer {
             VeilUITooltipRenderer.OVERLAY.render(Minecraft.getInstance().gui, matrices, tickDelta, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
         });
         ClientTickEvents.END.register(client -> {
-            if(client.player == null)
+            if (client.player == null)
                 return;
             VeilClient.tickClient(client.player.tickCount, client.getFrameTime());
         });

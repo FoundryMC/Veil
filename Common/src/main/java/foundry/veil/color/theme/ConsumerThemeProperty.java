@@ -1,26 +1,29 @@
 package foundry.veil.color.theme;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
-public class ConsumerThemeProperty implements IThemeProperty<Consumer<?>>{
+/**
+ * @author amo
+ */
+public class ConsumerThemeProperty implements IThemeProperty<Consumer<?>> {
+
     private String name;
     private Consumer<?> value;
+
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public void setName(String name) {
-        if(name == null){
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public Consumer<?> getValue() {
-        return value;
+        return this.value;
     }
 
     @Override

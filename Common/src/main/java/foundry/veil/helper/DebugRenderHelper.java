@@ -28,30 +28,30 @@ public class DebugRenderHelper {
         float aX = (float) pMaxX;
         float aY = (float) pMaxY;
         float aZ = (float) pMaxZ;
-        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, iX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
-        pConsumer.vertex(matrix4f, iX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
+        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, iX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, iX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        pConsumer.vertex(matrix4f, iX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
         pConsumer.vertex(matrix4f, aX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
         pConsumer.vertex(matrix4f, iX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
-        pConsumer.vertex(matrix4f, iX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
-        pConsumer.vertex(matrix4f, iX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
+        pConsumer.vertex(matrix4f, iX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        pConsumer.vertex(matrix4f, iX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
         pConsumer.vertex(matrix4f, iX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
         pConsumer.vertex(matrix4f, iX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
-        pConsumer.vertex(matrix4f, iX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
+        pConsumer.vertex(matrix4f, iX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
         pConsumer.vertex(matrix4f, aX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
         pConsumer.vertex(matrix4f, aX, iY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
-        pConsumer.vertex(matrix4f, iX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
-        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F) .endVertex();
+        pConsumer.vertex(matrix4f, iX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, iY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, aY, iZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+        pConsumer.vertex(matrix4f, aX, aY, aZ).color(pRed, pGreen, pBlue, pAlpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
     }
 
     public static void renderBox(PoseStack pPoseStack, VertexConsumer pConsumer, AABB box, float pRed, float pGreen, float pBlue, float pAlpha) {
@@ -65,15 +65,19 @@ public class DebugRenderHelper {
         for (int i = 0; i < 3; i++) {
             pPoseStack.pushPose();
             switch (i) {
-                case 1: pPoseStack.mulPose(Axis.YP.rotationDegrees(90)); break;
-                case 2: pPoseStack.mulPose(Axis.XP.rotationDegrees(90)); break;
+                case 1:
+                    pPoseStack.mulPose(Axis.YP.rotationDegrees(90));
+                    break;
+                case 2:
+                    pPoseStack.mulPose(Axis.XP.rotationDegrees(90));
+                    break;
             }
             Matrix4f matrix4f = pPoseStack.last().pose();
             Matrix3f matrix3f = pPoseStack.last().normal();
             pPoseStack.popPose();
             for (int segment = 0; segment < resolution; segment++) {
-                float angle1 = (segment / (float)resolution) * Mth.TWO_PI;
-                float angle2 = ((segment + 1) / (float)resolution) * Mth.TWO_PI;
+                float angle1 = (segment / (float) resolution) * Mth.TWO_PI;
+                float angle2 = ((segment + 1) / (float) resolution) * Mth.TWO_PI;
                 float s1 = Mth.sin(angle1) * radius;
                 float c1 = Mth.cos(angle1) * radius;
                 float s2 = Mth.sin(angle2) * radius;
@@ -102,8 +106,8 @@ public class DebugRenderHelper {
         Matrix4f matrix4f = pPoseStack.last().pose();
         Matrix3f matrix3f = pPoseStack.last().normal();
         for (int segment = 0; segment < resolution; segment++) {
-            float angle1 = (segment / (float)resolution) * Mth.TWO_PI;
-            float angle2 = ((segment + 1) / (float)resolution) * Mth.TWO_PI;
+            float angle1 = (segment / (float) resolution) * Mth.TWO_PI;
+            float angle2 = ((segment + 1) / (float) resolution) * Mth.TWO_PI;
             float s1 = Mth.sin(angle1) * radius;
             float c1 = Mth.cos(angle1) * radius;
             float s2 = Mth.sin(angle2) * radius;
@@ -122,12 +126,12 @@ public class DebugRenderHelper {
     public static void renderLine(PoseStack pPoseStack, VertexConsumer pConsumer, double pMinX, double pMinY, double pMinZ, double pMaxX, double pMaxY, double pMaxZ, float pRed, float pGreen, float pBlue, float pAlpha) {
         Matrix4f matrix4f = pPoseStack.last().pose();
         Matrix3f matrix3f = pPoseStack.last().normal();
-        float minX = (float)pMinX;
-        float minY = (float)pMinY;
-        float minZ = (float)pMinZ;
-        float maxX = (float)pMaxX;
-        float maxY = (float)pMaxY;
-        float maxZ = (float)pMaxZ;
+        float minX = (float) pMinX;
+        float minY = (float) pMinY;
+        float minZ = (float) pMinZ;
+        float maxX = (float) pMaxX;
+        float maxY = (float) pMaxY;
+        float maxZ = (float) pMaxZ;
         Vector3f normal = new Vector3f(minX, minY, minZ);
         normal.sub(new Vector3f(maxX, maxY, maxZ));
         normal.normalize();
@@ -139,12 +143,12 @@ public class DebugRenderHelper {
     public static void renderLine(PoseStack pPoseStack, VertexConsumer pConsumer, double pMinX, double pMinY, double pMinZ, double pMaxX, double pMaxY, double pMaxZ, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
         Matrix4f matrix4f = pPoseStack.last().pose();
         Matrix3f matrix3f = pPoseStack.last().normal();
-        float minX = (float)pMinX;
-        float minY = (float)pMinY;
-        float minZ = (float)pMinZ;
-        float maxX = (float)pMaxX;
-        float maxY = (float)pMaxY;
-        float maxZ = (float)pMaxZ;
+        float minX = (float) pMinX;
+        float minY = (float) pMinY;
+        float minZ = (float) pMinZ;
+        float maxX = (float) pMaxX;
+        float maxY = (float) pMaxY;
+        float maxZ = (float) pMaxZ;
         Vector3f normal = new Vector3f(minX, minY, minZ);
         normal.sub(new Vector3f(maxX, maxY, maxZ));
         normal.normalize();

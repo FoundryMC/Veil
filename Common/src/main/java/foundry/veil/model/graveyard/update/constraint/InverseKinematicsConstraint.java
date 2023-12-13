@@ -59,7 +59,8 @@ public class InverseKinematicsConstraint implements Constraint {
     }
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+    }
 
     @Override
     public void apply() {
@@ -76,7 +77,7 @@ public class InverseKinematicsConstraint implements Constraint {
         planeNormal.cross(pn2);
         planeNormal.normalize();
 
-        for (int iteration = 0; iteration < 32; iteration ++) {
+        for (int iteration = 0; iteration < 32; iteration++) {
             boolean startingFromTarget = iteration % 2 == 0;
             // reverse arrays to alternate between forward and backward passes
             Collections.reverse(points);
@@ -141,11 +142,11 @@ public class InverseKinematicsConstraint implements Constraint {
         polePoint.lerp(this.points.get(this.points.size() - 1), 0.5F);
         Vector3f poleDirection = new Vector3f(0, 0, 0);
         switch (this.forwardDirection) {
-            case NEGATIVE_X -> poleDirection.add( 0, 8, 0);
-            case POSITIVE_X -> poleDirection.add( 0,-8, 0);
-            case NEGATIVE_Y -> poleDirection.add( 0, 0, 8);
-            case POSITIVE_Y -> poleDirection.add( 0, 0,-8);
-            case NEGATIVE_Z -> poleDirection.add( 8, 0, 0);
+            case NEGATIVE_X -> poleDirection.add(0, 8, 0);
+            case POSITIVE_X -> poleDirection.add(0, -8, 0);
+            case NEGATIVE_Y -> poleDirection.add(0, 0, 8);
+            case POSITIVE_Y -> poleDirection.add(0, 0, -8);
+            case NEGATIVE_Z -> poleDirection.add(8, 0, 0);
             case POSITIVE_Z -> poleDirection.add(-8, 0, 0);
         }
         // hopefully correcting the weird rotation garbage
@@ -269,13 +270,13 @@ public class InverseKinematicsConstraint implements Constraint {
         Vector3f pPoint;
 
         for (int i = 0; i < this.points.size(); i++) {
-            float color1 = (float)i / (float)this.points.size();
+            float color1 = (float) i / (float) this.points.size();
 
             point = this.points.get(i);
             DebugRenderHelper.renderSphere(poseStack, vertexconsumer, 16, 0.2F, point.x(), point.y(), point.z(), color1, i == 0 ? 0.0F : color1, color1, 1.0F);
 
             if (i >= 1) {
-                float color0 = (float)(i - 1) / (float)this.points.size();
+                float color0 = (float) (i - 1) / (float) this.points.size();
                 pPoint = this.points.get(i - 1);
                 DebugRenderHelper.renderLine(poseStack, vertexconsumer, point.x(), point.y(), point.z(), pPoint.x(), pPoint.y(), pPoint.z(), color1, color1, color1, 1.0F, color0, color0, color0, 1.0F);
             }
@@ -291,6 +292,7 @@ public class InverseKinematicsConstraint implements Constraint {
         POSITIVE_X(new Vector3f(1, 0, 0)), POSITIVE_Y(new Vector3f(0, 1, 0)), POSITIVE_Z(new Vector3f(0, 0, 1)), NEGATIVE_X(new Vector3f(-1, 0, 0)), NEGATIVE_Y(new Vector3f(0, -1, 0)), NEGATIVE_Z(new Vector3f(0, 0, -1));
 
         Vector3f direction;
+
         InverseKinematicDirection(Vector3f direction) {
             this.direction = direction;
         }

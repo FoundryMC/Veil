@@ -3,13 +3,15 @@ package foundry.veil.math;
 import net.minecraft.util.Mth;
 
 public class Easings {
-    public static float ease(float x, Easing eType){
+    public static float ease(float x, Easing eType) {
         return eType.ease(x);
     }
 
     public enum Easing implements IEasing {
         linear {
-            public float ease(float x) { return x;}
+            public float ease(float x) {
+                return x;
+            }
         },
         easeInQuad {
             public float ease(float x) {

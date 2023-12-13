@@ -1,7 +1,6 @@
 package foundry.veil.mixin.client.pipeline;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import foundry.veil.render.CameraMatrices;

@@ -11,9 +11,10 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Create a new VeilUIItemTooltipDataHolder. This is used to store data for items that are rendered on tooltips.
+     *
      * @param itemStack the item to render
-     * @param x the x position of the item. Use the callback to modify this, you are given the current Partial Tick value.
-     * @param y the y position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     * @param x         the x position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     * @param y         the y position of the item. Use the callback to modify this, you are given the current Partial Tick value.
      */
 
     public VeilUIItemTooltipDataHolder(ItemStack itemStack, Function<Float, Float> x, Function<Float, Float> y) {
@@ -24,6 +25,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Get the itemstack to render
+     *
      * @return the itemstack
      */
 
@@ -33,6 +35,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Get the x position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     *
      * @return the x position
      */
 
@@ -42,6 +45,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Get the y position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     *
      * @return the y position
      */
 
@@ -51,6 +55,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Set the itemstack to render
+     *
      * @param itemStack the itemstack to set
      */
 
@@ -60,6 +65,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Set the x position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     *
      * @param x the x position to set
      */
 
@@ -69,6 +75,7 @@ public class VeilUIItemTooltipDataHolder {
 
     /**
      * Set the y position of the item. Use the callback to modify this, you are given the current Partial Tick value.
+     *
      * @param y the y position to set
      */
     public void setY(Function<Float, Float> y) {
