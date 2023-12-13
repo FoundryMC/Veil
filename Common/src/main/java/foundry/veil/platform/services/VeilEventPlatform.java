@@ -1,6 +1,7 @@
 package foundry.veil.platform.services;
 
 import foundry.veil.event.FreeNativeResourcesEvent;
+import foundry.veil.event.VeilPostProcessingEvent;
 import foundry.veil.event.VeilRendererEvent;
 
 import java.util.ServiceLoader;
@@ -17,4 +18,8 @@ public interface VeilEventPlatform {
     void onFreeNativeResources(FreeNativeResourcesEvent event);
 
     void onVeilRenderers(VeilRendererEvent event);
+
+    void preVeilPostProcessing(VeilPostProcessingEvent.Pre event);
+
+    void postVeilPostProcessing(VeilPostProcessingEvent.Post event);
 }

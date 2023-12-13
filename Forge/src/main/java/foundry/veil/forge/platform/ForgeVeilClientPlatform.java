@@ -1,9 +1,23 @@
 package foundry.veil.forge.platform;
 
+import foundry.veil.forge.event.ForgeVeilPostProcessingEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.render.post.PostPipeline;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class ForgeVeilClientPlatform implements VeilClientPlatform {
 
+    @Override
+    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Pre(name, pipeline));
+    }
+
+    @Override
+    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Post(name, pipeline));
+    }
 }

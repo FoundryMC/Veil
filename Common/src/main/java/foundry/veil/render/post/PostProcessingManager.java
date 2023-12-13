@@ -3,6 +3,8 @@ package foundry.veil.render.post;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
+import foundry.veil.VeilClient;
+import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.stage.CompositePostPipeline;
@@ -19,13 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11C.GL_ALWAYS;
 import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
@@ -143,20 +139,24 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
             return;
         }
 
+        VeilClientPlatform platform = VeilClient.clientPlatform();
         this.context.begin();
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
         this.activePipelines.sort(PIPELINE_SORTER);
         for (ProfileEntry entry : this.activePipelines) {
-            PostPipeline pipeline = this.pipelines.get(entry.getPipeline());
+            ResourceLocation id = entry.getPipeline();
+            PostPipeline pipeline = this.pipelines.get(id);
             if (pipeline != null) {
+                platform.preVeilPostProcessing(id, pipeline);
                 try {
                     pipeline.apply(this.context);
                     this.clearPipeline();
                 } catch (Exception e) {
-                    LOGGER.error("Error running pipeline {}", entry.getPipeline(), e);
+                    LOGGER.error("Error running pipeline {}", id, e);
                 }
+                platform.postVeilPostProcessing(id, pipeline);
             }
         }
 

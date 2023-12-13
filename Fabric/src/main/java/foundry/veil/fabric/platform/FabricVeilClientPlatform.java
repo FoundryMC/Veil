@@ -1,9 +1,22 @@
 package foundry.veil.fabric.platform;
 
+import foundry.veil.fabric.event.FabricVeilPostProcessingEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.render.post.PostPipeline;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class FabricVeilClientPlatform implements VeilClientPlatform {
 
+    @Override
+    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
+        FabricVeilPostProcessingEvent.PRE.invoker().preVeilPostProcessing(name, pipeline);
+    }
+
+    @Override
+    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
+        FabricVeilPostProcessingEvent.POST.invoker().postVeilPostProcessing(name, pipeline);
+    }
 }
