@@ -23,6 +23,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
     private final ResourceProvider resourceProvider;
     private final Set<ResourceLocation> addedImports;
     private final Map<ResourceLocation, String> imports;
+    private final List<ResourceLocation> importOrder;
 
     /**
      * Creates a new import processor that loads import files from the specified resource provider.
@@ -33,6 +34,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
         this.resourceProvider = resourceProvider;
         this.addedImports = new HashSet<>();
         this.imports = new HashMap<>();
+        this.importOrder = new ArrayList<>();
     }
 
     @Override
@@ -42,7 +44,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
 
     @Override
     public String modify(Context context) throws IOException {
-        List<String> inputLines = new LinkedList<>(Arrays.asList(context.getInput().split("\n")));
+        List<String> inputLines = context.getInput().lines().toList();
         List<String> output = new LinkedList<>();
 
         for (String line : inputLines) {
@@ -63,6 +65,7 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
                 try {
                     if (!this.imports.containsKey(source)) {
                         this.imports.put(source, this.loadImport(source));
+                        this.importOrder.add(source);
                     }
 
                     String importString = this.imports.get(source);
@@ -70,8 +73,8 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
                         throw new IOException("Import previously failed to load");
                     }
 
-                    int lineNumber = output.size();
-                    output.add("#line 1");
+                    long lineNumber = String.join("\n", output).lines().filter(s -> !s.startsWith("#line")).count() + 2;
+                    output.add("#line 0 " + (this.importOrder.indexOf(source) + 1));
                     output.add(context.modify(source, importString));
                     output.add("#line " + lineNumber);
                 } catch (Exception e) {
