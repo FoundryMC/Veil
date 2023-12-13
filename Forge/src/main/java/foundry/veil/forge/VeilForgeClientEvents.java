@@ -2,8 +2,6 @@ package foundry.veil.forge;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.forge.event.FreeNativeResourcesEvent;
-import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,10 +22,5 @@ public class VeilForgeClientEvents {
         if (event.phase == TickEvent.Phase.END) {
             VeilClient.tickClient(Minecraft.getInstance().getFrameTime());
         }
-    }
-
-    @SubscribeEvent
-    public static void onFree(FreeNativeResourcesEvent event) {
-        VeilRenderSystem.close();
     }
 }

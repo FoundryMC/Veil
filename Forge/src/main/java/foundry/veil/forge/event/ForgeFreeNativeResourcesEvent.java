@@ -7,5 +7,5 @@ import net.minecraftforge.eventbus.api.Event;
  *
  * @author Ocelot
  */
-public class FreeNativeResourcesEvent extends Event {
+public class ForgeFreeNativeResourcesEvent extends Event {
 }

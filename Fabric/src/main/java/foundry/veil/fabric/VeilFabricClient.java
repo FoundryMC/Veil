@@ -2,7 +2,7 @@ package foundry.veil.fabric;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.fabric.event.FreeNativeResourcesEvent;
+import foundry.veil.fabric.event.FabricFreeNativeResourcesEvent;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -25,7 +25,6 @@ public class VeilFabricClient implements ClientModInitializer {
             VeilUITooltipRenderer.OVERLAY.render(Minecraft.getInstance().gui, matrices, tickDelta, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
-        FreeNativeResourcesEvent.EVENT.register(VeilRenderSystem::close);
 
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 

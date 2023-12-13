@@ -3,6 +3,7 @@ package foundry.veil;
 import com.mojang.blaze3d.platform.InputConstants;
 import foundry.veil.editor.EditorManager;
 import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.platform.services.VeilEventPlatform;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.RenderTypeRegistry;
 import net.minecraft.client.KeyMapping;
@@ -18,6 +19,7 @@ public class VeilClient {
     @ApiStatus.Internal
     public static void init() {
         RenderTypeRegistry.init();
+        VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
     }
 
     @ApiStatus.Internal

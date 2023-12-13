@@ -8,11 +8,11 @@ import net.minecraftforge.eventbus.api.Event;
  *
  * @author Ocelot
  */
-public class VeilRendererEvent extends Event {
+public class ForgeVeilRendererEvent extends Event {
 
     private final VeilRenderer renderer;
 
-    public VeilRendererEvent(VeilRenderer renderer) {
+    public ForgeVeilRendererEvent(VeilRenderer renderer) {
         this.renderer = renderer;
     }
 

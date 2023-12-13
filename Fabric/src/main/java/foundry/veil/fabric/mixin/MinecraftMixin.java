@@ -1,8 +1,8 @@
 package foundry.veil.fabric.mixin;
 
 import foundry.veil.VeilClient;
-import foundry.veil.fabric.event.FreeNativeResourcesEvent;
-import foundry.veil.fabric.event.VeilRendererEvent;
+import foundry.veil.fabric.event.FabricFreeNativeResourcesEvent;
+import foundry.veil.fabric.event.FabricVeilRendererEvent;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -17,11 +17,11 @@ public class MinecraftMixin {
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;resizeDisplay()V", shift = At.Shift.BEFORE))
     public void init(GameConfig gameConfig, CallbackInfo ci) {
         VeilClient.initRenderer();
-        VeilRendererEvent.EVENT.invoker().onVeilRendererAvailable(VeilRenderSystem.renderer());
+        FabricVeilRendererEvent.EVENT.invoker().onVeilRendererAvailable(VeilRenderSystem.renderer());
     }
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V", shift = At.Shift.BEFORE))
     public void close(CallbackInfo ci) {
-        FreeNativeResourcesEvent.EVENT.invoker().onFree();
+        FabricFreeNativeResourcesEvent.EVENT.invoker().onFree();
     }
 }

@@ -1,7 +1,8 @@
 package foundry.veil.forge;
 
 import foundry.veil.VeilClient;
-import foundry.veil.forge.event.VeilRendererEvent;
+import foundry.veil.forge.event.ForgeVeilRendererEvent;
+import foundry.veil.platform.services.VeilEventPlatform;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -28,7 +29,7 @@ public class VeilForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
-        MinecraftForge.EVENT_BUS.post(new VeilRendererEvent(VeilRenderSystem.renderer()));
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilRendererEvent(VeilRenderSystem.renderer()));
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
