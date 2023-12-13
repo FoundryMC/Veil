@@ -92,8 +92,8 @@ public class BlockEntityMixin implements Tooltippable {
         this.veil$tooltipHeight = tag.getInt("tooltipHeight");
         this.veil$worldspace = tag.getBoolean("worldspace");
 
-        this.veil$theme.clear();
         if (tag.contains("theme", CompoundTag.TAG_COMPOUND)) {
+            this.veil$theme.clear();
             CompoundTag themeTag = tag.getCompound("theme");
             for (String key : themeTag.getAllKeys()) {
                 this.veil$theme.addColor(key, Color.of(themeTag.getInt(key)));
