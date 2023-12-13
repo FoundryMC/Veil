@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL41C.*;
  *
  * @author Ocelot
  */
-public interface MutableUniformAccess extends UniformAccess {
+public interface MutableShaderUniformAccess extends UniformAccess, ShaderUniformAccess {
 
     /**
      * Sets default uniforms based on what {@link RenderSystem} provides.
@@ -73,6 +73,21 @@ public interface MutableUniformAccess extends UniformAccess {
     }
 
     /**
+     * Adds a texture that is dynamically bound and sets texture units.
+     *
+     * @param name      The name of the texture to set
+     * @param textureId The id of the texture to bind and assign a texture unit
+     */
+    void addSampler(CharSequence name, int textureId);
+
+    /**
+     * Removes the specified sampler binding.
+     *
+     * @param name The name of the sampler to remove
+     */
+    void removeSampler(CharSequence name);
+
+    /**
      * Loads the samplers set by {@link #addSampler(CharSequence, int)} into the shader.
      *
      * @param sampler The sampler to start binding to
@@ -92,31 +107,11 @@ public interface MutableUniformAccess extends UniformAccess {
     int applyShaderSamplers(@Nullable ShaderTextureSource.Context context, int sampler);
 
     /**
-     * Adds a texture that is dynamically bound and sets texture units.
-     *
-     * @param name      The name of the texture to set
-     * @param textureId The id of the texture to bind and assign a texture unit
-     */
-    void addSampler(CharSequence name, int textureId);
-
-    /**
-     * Removes the specified sampler binding.
-     *
-     * @param name The name of the sampler to remove
-     */
-    void removeSampler(CharSequence name);
-
-    /**
      * Clears all samplers.
      */
     void clearSamplers();
 
-    /**
-     * Sets the binding to use for the specified uniform block.
-     *
-     * @param name    The name of the block to set
-     * @param binding The binding to use for that block
-     */
+    @Override
     default void setUniformBlock(CharSequence name, int binding) {
         int index = this.getUniformBlock(name);
         if (index != GL_INVALID_INDEX) {
@@ -124,12 +119,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a float in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setFloat(CharSequence name, float value) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -137,13 +127,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     */
+    @Override
     default void setVector(CharSequence name, float x, float y) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -151,14 +135,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     */
+    @Override
     default void setVector(CharSequence name, float x, float y, float z) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -166,15 +143,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     * @param w    The w component of the vector
-     */
+    @Override
     default void setVector(CharSequence name, float x, float y, float z, float w) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -182,42 +151,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVector(CharSequence name, Vector2fc value) {
-        this.setVector(name, value.x(), value.y());
-    }
-
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVector(CharSequence name, Vector3fc value) {
-        this.setVector(name, value.x(), value.y(), value.z());
-    }
-
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVector(CharSequence name, Vector4fc value) {
-        this.setVector(name, value.x(), value.y(), value.z(), value.w());
-    }
-
-    /**
-     * Sets an integer in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setInt(CharSequence name, int value) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -225,13 +159,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     */
+    @Override
     default void setVectorI(CharSequence name, int x, int y) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -239,14 +167,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     */
+    @Override
     default void setVectorI(CharSequence name, int x, int y, int z) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -254,15 +175,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     * @param w    The w component of the vector
-     */
+    @Override
     default void setVectorI(CharSequence name, int x, int y, int z, int w) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -270,42 +183,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector2ic value) {
-        this.setVectorI(name, value.x(), value.y());
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector3ic value) {
-        this.setVectorI(name, value.x(), value.y(), value.z());
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector4ic value) {
-        this.setVectorI(name, value.x(), value.y(), value.z(), value.w());
-    }
-
-    /**
-     * Sets an array of floats in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setFloats(CharSequence name, float... values) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -313,12 +191,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector2fc... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -334,12 +207,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector3fc... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -355,12 +223,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector4fc... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -376,12 +239,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of integers in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setInts(CharSequence name, int... values) {
         int location = this.getUniform(name);
         if (location != -1) {
@@ -389,12 +247,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector2ic... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -410,12 +263,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector3ic... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -431,12 +279,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
+    @Override
     default void setVectors(CharSequence name, Vector4ic... values) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -452,12 +295,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setMatrix(CharSequence name, Matrix2fc value) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -471,12 +309,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setMatrix(CharSequence name, Matrix3fc value) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -490,12 +323,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setMatrix(CharSequence name, Matrix3x2fc value) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -509,12 +337,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setMatrix(CharSequence name, Matrix4fc value) {
         int location = this.getUniform(name);
         if (location == -1) {
@@ -528,12 +351,7 @@ public interface MutableUniformAccess extends UniformAccess {
         }
     }
 
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
+    @Override
     default void setMatrix(CharSequence name, Matrix4x3fc value) {
         int location = this.getUniform(name);
         if (location == -1) {

@@ -8,6 +8,7 @@ import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostPipelineStageRegistry;
 import foundry.veil.render.shader.texture.ShaderTextureSource;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,6 +85,161 @@ public class CompositePostPipeline implements PostPipeline {
     @Override
     public PostPipelineStageRegistry.PipelineType<? extends PostPipeline> getType() {
         throw new UnsupportedOperationException("Composite pipelines cannot be encoded");
+    }
+
+
+    @Override
+    public void setUniformBlock(CharSequence name, int binding) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setUniformBlock(name, binding);
+        }
+    }
+
+    @Override
+    public void setFloat(CharSequence name, float value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setFloat(name, value);
+        }
+    }
+
+    @Override
+    public void setVector(CharSequence name, float x, float y) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVector(name, x, y);
+        }
+    }
+
+    @Override
+    public void setVector(CharSequence name, float x, float y, float z) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVector(name, x, y, z);
+        }
+    }
+
+    @Override
+    public void setVector(CharSequence name, float x, float y, float z, float w) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVector(name, x, y, z, w);
+        }
+    }
+
+    @Override
+    public void setInt(CharSequence name, int value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setInt(name, value);
+        }
+    }
+
+    @Override
+    public void setVectorI(CharSequence name, int x, int y) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectorI(name, x, y);
+        }
+    }
+
+    @Override
+    public void setVectorI(CharSequence name, int x, int y, int z) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectorI(name, x, y, z);
+        }
+    }
+
+    @Override
+    public void setVectorI(CharSequence name, int x, int y, int z, int w) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectorI(name, x, y, z, w);
+        }
+    }
+
+    @Override
+    public void setFloats(CharSequence name, float... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setFloats(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector2fc... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector3fc... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector4fc... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setInts(CharSequence name, int... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setInts(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector2ic... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector3ic... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setVectors(CharSequence name, Vector4ic... values) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setVectors(name, values);
+        }
+    }
+
+    @Override
+    public void setMatrix(CharSequence name, Matrix2fc value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setMatrix(name, value);
+        }
+    }
+
+    @Override
+    public void setMatrix(CharSequence name, Matrix3fc value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setMatrix(name, value);
+        }
+    }
+
+    @Override
+    public void setMatrix(CharSequence name, Matrix3x2fc value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setMatrix(name, value);
+        }
+    }
+
+    @Override
+    public void setMatrix(CharSequence name, Matrix4fc value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setMatrix(name, value);
+        }
+    }
+
+    @Override
+    public void setMatrix(CharSequence name, Matrix4x3fc value) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setMatrix(name, value);
+        }
     }
 
     /**

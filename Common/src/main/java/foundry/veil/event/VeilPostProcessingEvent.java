@@ -27,8 +27,9 @@ public final class VeilPostProcessingEvent {
          *
          * @param name     The name of the pipeline being run
          * @param pipeline The pipeline running
+         * @param context  The context for running pipelines
          */
-        void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline);
+        void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context);
     }
 
     /**
@@ -44,7 +45,8 @@ public final class VeilPostProcessingEvent {
          *
          * @param name     The name of the pipeline being run
          * @param pipeline The pipeline running
+         * @param context  The context for running pipelines
          */
-        void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline);
+        void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context);
     }
 }

@@ -17,10 +17,12 @@ public class ForgeVeilPostProcessingEvent extends Event {
 
     private final ResourceLocation name;
     private final PostPipeline pipeline;
+    private final PostPipeline.Context context;
 
-    public ForgeVeilPostProcessingEvent(ResourceLocation name, PostPipeline pipeline) {
+    public ForgeVeilPostProcessingEvent(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
         this.name = name;
         this.pipeline = pipeline;
+        this.context = context;
     }
 
     /**
@@ -38,14 +40,21 @@ public class ForgeVeilPostProcessingEvent extends Event {
     }
 
     /**
+     * @return The context for running pipelines
+     */
+    public PostPipeline.Context getContext() {
+        return this.context;
+    }
+
+    /**
      * Fired before Veil runs the default post-processing steps.
      *
      * @author Ocelot
      */
     public static class Pre extends ForgeVeilPostProcessingEvent {
 
-        public Pre(ResourceLocation name, PostPipeline pipeline) {
-            super(name, pipeline);
+        public Pre(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+            super(name, pipeline, context);
         }
     }
 
@@ -56,8 +65,8 @@ public class ForgeVeilPostProcessingEvent extends Event {
      */
     public static class Post extends ForgeVeilPostProcessingEvent {
 
-        public Post(ResourceLocation name, PostPipeline pipeline) {
-            super(name, pipeline);
+        public Post(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+            super(name, pipeline, context);
         }
     }
 }

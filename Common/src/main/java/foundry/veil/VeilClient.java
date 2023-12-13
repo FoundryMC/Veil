@@ -20,6 +20,10 @@ public class VeilClient {
     public static void init() {
         RenderTypeRegistry.init();
         VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
+        // TODO document
+//        VeilEventPlatform.INSTANCE.preVeilPostProcessing((name, pipeline, context) -> {
+//
+//        });
     }
 
     @ApiStatus.Internal

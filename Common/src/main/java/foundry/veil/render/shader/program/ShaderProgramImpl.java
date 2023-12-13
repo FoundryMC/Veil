@@ -333,9 +333,9 @@ public class ShaderProgramImpl implements ShaderProgram {
      */
     public static class UniformWrapper extends Uniform {
 
-        private final Supplier<MutableUniformAccess> access;
+        private final Supplier<MutableShaderUniformAccess> access;
 
-        public UniformWrapper(Supplier<MutableUniformAccess> access, String name) {
+        public UniformWrapper(Supplier<MutableShaderUniformAccess> access, String name) {
             super(name, UT_INT1, 0, null);
             this.close(); // Free constructor allocated resources
             this.access = access;

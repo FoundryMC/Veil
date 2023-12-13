@@ -25,11 +25,11 @@ public class ForgeVeilEventPlatform implements VeilEventPlatform {
 
     @Override
     public void preVeilPostProcessing(VeilPostProcessingEvent.Pre event) {
-        MinecraftForge.EVENT_BUS.<ForgeVeilPostProcessingEvent.Pre>addListener(forgeEvent -> event.preVeilPostProcessing(forgeEvent.getName(), forgeEvent.getPipeline()));
+        MinecraftForge.EVENT_BUS.<ForgeVeilPostProcessingEvent.Pre>addListener(forgeEvent -> event.preVeilPostProcessing(forgeEvent.getName(), forgeEvent.getPipeline(), forgeEvent.getContext()));
     }
 
     @Override
     public void postVeilPostProcessing(VeilPostProcessingEvent.Post event) {
-        MinecraftForge.EVENT_BUS.<ForgeVeilPostProcessingEvent.Post>addListener(forgeEvent -> event.postVeilPostProcessing(forgeEvent.getName(), forgeEvent.getPipeline()));
+        MinecraftForge.EVENT_BUS.<ForgeVeilPostProcessingEvent.Post>addListener(forgeEvent -> event.postVeilPostProcessing(forgeEvent.getName(), forgeEvent.getPipeline(), forgeEvent.getContext()));
     }
 }

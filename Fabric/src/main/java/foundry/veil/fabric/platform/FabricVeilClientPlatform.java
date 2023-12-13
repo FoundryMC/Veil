@@ -11,12 +11,12 @@ import org.jetbrains.annotations.ApiStatus;
 public class FabricVeilClientPlatform implements VeilClientPlatform {
 
     @Override
-    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
-        FabricVeilPostProcessingEvent.PRE.invoker().preVeilPostProcessing(name, pipeline);
+    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+        FabricVeilPostProcessingEvent.PRE.invoker().preVeilPostProcessing(name, pipeline, context);
     }
 
     @Override
-    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
-        FabricVeilPostProcessingEvent.POST.invoker().postVeilPostProcessing(name, pipeline);
+    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+        FabricVeilPostProcessingEvent.POST.invoker().postVeilPostProcessing(name, pipeline, context);
     }
 }

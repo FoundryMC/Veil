@@ -6,12 +6,9 @@ import com.mojang.logging.LogUtils;
 import foundry.veil.VeilClient;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.stage.CompositePostPipeline;
-import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.resource.CodecReloadListener;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -44,14 +41,10 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
 
     /**
      * Creates a new instance of the post-processing manager.
-     *
-     * @param framebufferManager The manager for all custom framebuffers
-     * @param textureManager     The texture manager instance
-     * @param shaderManager      The shader manager instance
      */
-    public PostProcessingManager(FramebufferManager framebufferManager, TextureManager textureManager, ShaderManager shaderManager) {
+    public PostProcessingManager() {
         super(CompositePostPipeline.CODEC, FileToIdConverter.json("pinwheel/post"));
-        this.context = new PostPipelineContext(framebufferManager, textureManager, shaderManager);
+        this.context = new PostPipelineContext();
         this.activePipelines = new LinkedList<>();
         this.pipelines = new HashMap<>();
     }
@@ -149,14 +142,14 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
             ResourceLocation id = entry.getPipeline();
             PostPipeline pipeline = this.pipelines.get(id);
             if (pipeline != null) {
-                platform.preVeilPostProcessing(id, pipeline);
+                platform.preVeilPostProcessing(id, pipeline, this.context);
                 try {
                     pipeline.apply(this.context);
                     this.clearPipeline();
                 } catch (Exception e) {
                     LOGGER.error("Error running pipeline {}", id, e);
                 }
-                platform.postVeilPostProcessing(id, pipeline);
+                platform.postVeilPostProcessing(id, pipeline, this.context);
             }
         }
 

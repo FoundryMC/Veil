@@ -3,11 +3,9 @@ package foundry.veil.render.post;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
-import foundry.veil.render.shader.ShaderManager;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -22,24 +20,14 @@ import java.util.Map;
 @ApiStatus.Internal
 public class PostPipelineContext implements PostPipeline.Context, NativeResource {
 
-    private final FramebufferManager framebufferManager;
-    private final TextureManager textureManager;
-    private final ShaderManager shaderManager;
     private final VertexBuffer vbo;
     private final Map<CharSequence, Integer> samplers;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
 
     /**
      * Creates a new context to fit the specified window.
-     *
-     * @param framebufferManager The manager for all custom framebuffers
-     * @param textureManager     The texture manager instance
-     * @param shaderManager      The shader manager instance
      */
-    public PostPipelineContext(FramebufferManager framebufferManager, TextureManager textureManager, ShaderManager shaderManager) {
-        this.framebufferManager = framebufferManager;
-        this.textureManager = textureManager;
-        this.shaderManager = shaderManager;
+    public PostPipelineContext() {
         this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.samplers = new HashMap<>();
         this.framebuffers = new HashMap<>();
@@ -65,7 +53,7 @@ public class PostPipelineContext implements PostPipeline.Context, NativeResource
      * Marks the start of a new post run.
      */
     public void begin() {
-        this.framebufferManager.getFramebuffers().forEach(this::setFramebuffer);
+        VeilRenderSystem.renderer().getFramebufferManager().getFramebuffers().forEach(this::setFramebuffer);
         this.setFramebuffer(VeilFramebuffers.MAIN, AdvancedFbo.getMainFramebuffer());
         this.setFramebuffer(VeilFramebuffers.POST, this.getDrawFramebuffer());
     }
@@ -108,21 +96,6 @@ public class PostPipelineContext implements PostPipeline.Context, NativeResource
     @Override
     public AdvancedFbo getDrawFramebuffer() {
         return this.framebuffers.getOrDefault(VeilFramebuffers.POST, AdvancedFbo.getMainFramebuffer());
-    }
-
-    @Override
-    public TextureManager getTextureManager() {
-        return this.textureManager;
-    }
-
-    @Override
-    public ShaderManager getShaderManager() {
-        return this.shaderManager;
-    }
-
-    @Override
-    public FramebufferManager getFramebufferManager() {
-        return this.framebufferManager;
     }
 
     @Override

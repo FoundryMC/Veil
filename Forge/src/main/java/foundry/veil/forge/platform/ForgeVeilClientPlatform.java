@@ -12,12 +12,12 @@ import org.jetbrains.annotations.ApiStatus;
 public class ForgeVeilClientPlatform implements VeilClientPlatform {
 
     @Override
-    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
-        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Pre(name, pipeline));
+    public void preVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Pre(name, pipeline, context));
     }
 
     @Override
-    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline) {
-        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Post(name, pipeline));
+    public void postVeilPostProcessing(ResourceLocation name, PostPipeline pipeline, PostPipeline.Context context) {
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilPostProcessingEvent.Post(name, pipeline, context));
     }
 }

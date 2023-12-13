@@ -18,7 +18,7 @@ import static org.lwjgl.opengl.GL20C.glUseProgram;
  *
  * @author Ocelot
  */
-public interface ShaderProgram extends NativeResource, MutableUniformAccess {
+public interface ShaderProgram extends NativeResource, MutableShaderUniformAccess {
 
     /**
      * Binds this program for use.

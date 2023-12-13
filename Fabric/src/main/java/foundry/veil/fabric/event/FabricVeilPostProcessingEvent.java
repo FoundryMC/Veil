@@ -15,15 +15,17 @@ import net.fabricmc.fabric.api.event.EventFactory;
  */
 public final class FabricVeilPostProcessingEvent {
 
-    public static final Event<VeilPostProcessingEvent.Pre> PRE = EventFactory.createArrayBacked(VeilPostProcessingEvent.Pre.class, events -> (name, pipeline) -> {
+    public static final Event<VeilPostProcessingEvent.Pre> PRE = EventFactory.createArrayBacked(VeilPostProcessingEvent.Pre.class, (name, pipeline, context) -> {
+    }, events -> (name, pipeline, context) -> {
         for (VeilPostProcessingEvent.Pre event : events) {
-            event.preVeilPostProcessing(name, pipeline);
+            event.preVeilPostProcessing(name, pipeline, context);
         }
     });
 
-    public static final Event<VeilPostProcessingEvent.Post> POST = EventFactory.createArrayBacked(VeilPostProcessingEvent.Post.class, events -> (name, pipeline) -> {
+    public static final Event<VeilPostProcessingEvent.Post> POST = EventFactory.createArrayBacked(VeilPostProcessingEvent.Post.class, (name, pipeline, context) -> {
+    }, events -> (name, pipeline, context) -> {
         for (VeilPostProcessingEvent.Post event : events) {
-            event.postVeilPostProcessing(name, pipeline);
+            event.postVeilPostProcessing(name, pipeline, context);
         }
     });
 

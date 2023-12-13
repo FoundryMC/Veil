@@ -1,9 +1,13 @@
 package foundry.veil.render.post;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.serialization.Codec;
 import foundry.veil.render.framebuffer.AdvancedFbo;
+import foundry.veil.render.shader.program.MutableShaderUniformAccess;
 import foundry.veil.render.shader.program.ShaderProgram;
+import foundry.veil.render.shader.program.UniformAccess;
 import foundry.veil.render.shader.texture.ShaderTextureSource;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -11,11 +15,12 @@ import org.lwjgl.system.NativeResource;
 
 /**
  * <p>A series of post-processing effects that can be run to change the current framebuffer state.</p>
- * <p>It can be fully run using {@link PostProcessingManager#runPipeline(PostPipeline)}</p>
+ * <p>It can be fully run using {@link PostProcessingManager#runPipeline(PostPipeline)}.</p>
+ * <p>This class implements {@link MutableShaderUniformAccess} to allow changing uniforms in all shaders.</p>
  *
  * @author Ocelot
  */
-public interface PostPipeline extends NativeResource {
+public interface PostPipeline extends UniformAccess, NativeResource {
 
     Codec<PostPipeline> CODEC = PostPipelineStageRegistry.CODEC.dispatch(PostPipeline::getType, PostPipelineStageRegistry.PipelineType::codec);
 
@@ -45,7 +50,12 @@ public interface PostPipeline extends NativeResource {
      *
      * @author Ocelot
      */
-    interface Context extends RenderContext, ShaderTextureSource.Context {
+    interface Context extends ShaderTextureSource.Context {
+
+        /**
+         * Draws a quad onto the full screen using {@link DefaultVertexFormat#POSITION}.
+         */
+        void drawScreenQuad();
 
         /**
          * Binds a named sampler id. All samplers can be applied with {@link #applySamplers(ShaderProgram)} for adding them to shaders.
@@ -88,7 +98,7 @@ public interface PostPipeline extends NativeResource {
 
         @Override
         default AbstractTexture getTexture(ResourceLocation name) {
-            return this.getTextureManager().getTexture(name);
+            return Minecraft.getInstance().getTextureManager().getTexture(name);
         }
     }
 }
