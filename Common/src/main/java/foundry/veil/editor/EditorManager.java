@@ -122,10 +122,25 @@ public class EditorManager implements PreparableReloadListener {
         this.editors.remove(editor);
     }
 
+    /**
+     * Toggles visibility of the ImGui overlay.
+     */
+    public void toggle() {
+        this.enabled = !this.enabled;
+    }
+
+    /**
+     * @return Whether the overlay is active
+     */
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * Sets whether the overlay should be active.
+     *
+     * @param enabled Whether to enable the ImGui overlay
+     */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }

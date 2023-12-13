@@ -25,6 +25,11 @@ public class MouseHandlerMixin {
         }
     }
 
+    @Inject(method = "grabMouse", at = @At("HEAD"))
+    public void grabMouse(CallbackInfo ci) {
+        VeilImGuiImpl.get().onGrabMouse();
+    }
+
     @Inject(method = "xpos", at = @At("HEAD"), cancellable = true)
     public void cancelMouseX(CallbackInfoReturnable<Double> cir) {
         if (VeilImGuiImpl.get().shouldHideMouse()) {

@@ -1,4 +1,4 @@
-package foundry.veil.fabric.mixin;
+package foundry.veil.fabric.mixin.client;
 
 import foundry.veil.VeilClient;
 import foundry.veil.fabric.event.FabricFreeNativeResourcesEvent;

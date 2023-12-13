@@ -66,6 +66,11 @@ public class VeilImGuiImpl implements VeilImGui {
     }
 
     @Override
+    public void onGrabMouse() {
+        ImGui.setWindowFocus(null);
+    }
+
+    @Override
     public boolean mouseButtonCallback(long window, int button, int action, int mods) {
         return ImGui.getIO().getWantCaptureMouse();
     }

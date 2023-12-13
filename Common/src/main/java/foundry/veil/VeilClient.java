@@ -1,7 +1,6 @@
 package foundry.veil;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import foundry.veil.editor.EditorManager;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
 import foundry.veil.render.pipeline.VeilRenderSystem;
@@ -37,11 +36,6 @@ public class VeilClient {
 //        if (ticks % 200 == 0) {
 //            OptimizationUtil.calculateStableFps();
 //        }
-
-        EditorManager editorManager = VeilRenderSystem.renderer().getEditorManager();
-        while (EDITOR_KEY.consumeClick()) {
-            editorManager.setEnabled(!editorManager.isEnabled());
-        }
     }
 
     public static VeilClientPlatform clientPlatform() {

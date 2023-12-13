@@ -7,8 +7,10 @@
   "mixins": [
   ],
   "client": [
-    "EffectInstanceMixin",
-    "MinecraftMixin"
+    "client.EffectInstanceMixin",
+    "client.KeyboardHandlerMixin",
+    "client.MinecraftMixin",
+    "client.MouseHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
