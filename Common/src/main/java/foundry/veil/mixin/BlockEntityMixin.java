@@ -54,12 +54,12 @@ public class BlockEntityMixin implements Tooltippable {
 
     @Override
     public List<Component> getTooltip() {
-        return veil$tooltip;
+        return this.veil$tooltip;
     }
 
     @Override
     public boolean isTooltipEnabled() {
-        return veil$tooltipEnabled;
+        return this.veil$tooltipEnabled;
     }
 
     @Override
@@ -92,8 +92,13 @@ public class BlockEntityMixin implements Tooltippable {
         this.veil$tooltipHeight = tag.getInt("tooltipHeight");
         this.veil$worldspace = tag.getBoolean("worldspace");
 
-        if (tag.contains("theme", CompoundTag.TAG_COMPOUND)) {
+        if (this.veil$theme != null) {
             this.veil$theme.clear();
+        }
+        if (tag.contains("theme", CompoundTag.TAG_COMPOUND)) {
+            if (this.veil$theme == null) {
+                this.veil$theme = new ColorTheme();
+            }
             CompoundTag themeTag = tag.getCompound("theme");
             for (String key : themeTag.getAllKeys()) {
                 this.veil$theme.addColor(key, Color.of(themeTag.getInt(key)));
@@ -123,7 +128,7 @@ public class BlockEntityMixin implements Tooltippable {
 
     @Override
     public ColorTheme getTheme() {
-        return veil$theme;
+        return this.veil$theme;
     }
 
     @Override
@@ -148,12 +153,12 @@ public class BlockEntityMixin implements Tooltippable {
 
     @Override
     public boolean getWorldspace() {
-        return veil$worldspace;
+        return this.veil$worldspace;
     }
 
     @Override
     public TooltipTimeline getTimeline() {
-        return veil$timeline;
+        return this.veil$timeline;
     }
 
     @Override
@@ -163,37 +168,37 @@ public class BlockEntityMixin implements Tooltippable {
 
     @Override
     public int getTooltipWidth() {
-        return veil$tooltipWidth;
+        return this.veil$tooltipWidth;
     }
 
     @Override
     public int getTooltipHeight() {
-        return veil$tooltipHeight;
+        return this.veil$tooltipHeight;
     }
 
     @Override
     public int getTooltipXOffset() {
-        return veil$tooltipX;
+        return this.veil$tooltipX;
     }
 
     @Override
     public int getTooltipYOffset() {
-        return veil$tooltipHeight;
+        return this.veil$tooltipHeight;
     }
 
     @Override
     public List<VeilUIItemTooltipDataHolder> getItems() {
-        return veil$tooltipDataHolder;
+        return this.veil$tooltipDataHolder;
     }
 
     @Inject(method = "saveAdditional", at = @At("RETURN"))
     public void saveAdditional(CompoundTag $$0, CallbackInfo ci) {
-        $$0.put("tooltipData", saveTooltipData());
+        $$0.put("tooltipData", this.saveTooltipData());
     }
 
     @Inject(method = "load", at = @At("RETURN"))
     public void loadAdditional(CompoundTag $$0, CallbackInfo ci) {
-        loadTooltipData($$0.getCompound("tooltipData"));
+        this.loadTooltipData($$0.getCompound("tooltipData"));
     }
 
 }
