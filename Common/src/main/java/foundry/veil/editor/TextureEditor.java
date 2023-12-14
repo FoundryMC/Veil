@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL20C.glIsTexture;
 public class TextureEditor extends SingleWindowEditor {
 
     private final IntSet texturesSet;
-    private final Map<Integer, ImBoolean> openTextures;
+    private final Map<Integer, OpenTexture> openTextures;
     private int[] textures;
     private int selectedTexture;
 
@@ -80,35 +80,40 @@ public class TextureEditor extends SingleWindowEditor {
         ImGui.endDisabled();
         ImGui.popButtonRepeat();
 
-        ImGui.beginDisabled(this.openTextures.containsKey(this.selectedTexture));
+        ImGui.beginDisabled(this.openTextures.containsKey(selectedId) && this.openTextures.get(selectedId).visible.get());
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.button("Pop Out")) {
-            this.openTextures.put(this.selectedTexture, new ImBoolean());
+            this.openTextures.put(selectedId, new OpenTexture());
         }
         ImGui.endDisabled();
 
         if (selectedId != 0) {
             addImage(selectedId);
         }
+    }
 
-        Iterator<Map.Entry<Integer, ImBoolean>> iterator = this.openTextures.entrySet().iterator();
+    @Override
+    public void render() {
+        super.render();
+
+        Iterator<Map.Entry<Integer, OpenTexture>> iterator = this.openTextures.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Integer, ImBoolean> entry = iterator.next();
+            Map.Entry<Integer, OpenTexture> entry = iterator.next();
             int id = entry.getKey();
-            int textureId = id < 0 || id >= this.textures.length ? 0 : this.textures[id];
-            if (textureId == 0) {
-                iterator.remove();
+
+            OpenTexture texture = entry.getValue();
+            if (!texture.visible.get()) {
                 continue;
             }
 
-            ImBoolean open = entry.getValue();
+            ImBoolean open = texture.open;
             if (!open.get()) {
                 open.set(true);
                 ImGui.setNextWindowSize(800, 600);
             }
 
             if (ImGui.begin("Texture " + id, open)) {
-                addImage(textureId);
+                addImage(id);
             }
             ImGui.end();
 
@@ -116,6 +121,18 @@ public class TextureEditor extends SingleWindowEditor {
                 iterator.remove();
             }
         }
+    }
+
+    @Override
+    public void renderMenuBar() {
+        for (Map.Entry<Integer, OpenTexture> entry : this.openTextures.entrySet()) {
+            ImGui.menuItem("Texture " + entry.getKey(), null, entry.getValue().visible);
+        }
+    }
+
+    @Override
+    public boolean isMenuBarEnabled() {
+        return !this.openTextures.isEmpty();
     }
 
     private static void addImage(int selectedId) {
@@ -130,8 +147,14 @@ public class TextureEditor extends SingleWindowEditor {
     public void onHide() {
         super.onHide();
         this.texturesSet.clear();
-        this.openTextures.clear();
         this.textures = new int[0];
         this.selectedTexture = 0;
+    }
+
+    private record OpenTexture(ImBoolean open, ImBoolean visible) {
+
+        private OpenTexture() {
+            this(new ImBoolean(), new ImBoolean(true));
+        }
     }
 }

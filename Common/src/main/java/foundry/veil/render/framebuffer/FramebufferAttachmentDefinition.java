@@ -66,7 +66,7 @@ public record FramebufferAttachmentDefinition(@NotNull FramebufferAttachmentDefi
                     Codec.STRING.optionalFieldOf("name")
                             .forGetter(attachment -> Optional.ofNullable(attachment.name()))
             ).apply(instance, (type, format, linear, levels, name) ->
-                    new FramebufferAttachmentDefinition(type, format, false, linear, levels, name.orElse(null))));
+                    new FramebufferAttachmentDefinition(type, format, true, linear, levels, name.orElse(null))));
 
     /**
      * @return Whether this attachment can be represented as <code>"depth": true</code> in the JSON
@@ -193,7 +193,7 @@ public record FramebufferAttachmentDefinition(@NotNull FramebufferAttachmentDefi
          * @return The OpenGL id of this format
          */
         public int getId() {
-            return id;
+            return this.id;
         }
     }
 }
