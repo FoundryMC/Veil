@@ -87,10 +87,19 @@ public class HumanoidModelMixin<T extends LivingEntity> implements IPoseable {
     @Final
     public ModelPart leftArm;
 
-    @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;crouching:Z"))
-    private boolean veil$cancelSneak(boolean original) {
-        if (hasActivePose) return false;
-        return original;
+    @Unique
+    private boolean veil$prevCrouch;
+
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;crouching:Z", shift = At.Shift.BEFORE))
+    private void veil$cancelSneak(T $$0, float $$1, float $$2, float $$3, float $$4, float $$5, CallbackInfo ci) {
+        veil$prevCrouch = crouching;
+
+        if (hasActivePose) crouching = false;
+    }
+
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;rightArmPose:Lnet/minecraft/client/model/HumanoidModel$ArmPose;", ordinal = 1, shift = At.Shift.BEFORE))
+    private void veil$cancelSneak2(T $$0, float $$1, float $$2, float $$3, float $$4, float $$5, CallbackInfo ci) {
+        crouching = veil$prevCrouch;
     }
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/HumanoidModel;body:Lnet/minecraft/client/model/geom/ModelPart;", ordinal = 4, shift = At.Shift.AFTER))
