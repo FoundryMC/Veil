@@ -18,16 +18,12 @@ import static org.lwjgl.opencl.CL11.clSetEventCallback;
 public class CLNativeEventDispatcher implements CLEventDispatcher {
 
     @Override
-    public void listen(long event, long eventType, @NotNull Runnable callback) throws CLException {
+    public void listen(long event, long eventStatus, @NotNull Runnable callback) throws CLException {
         Objects.requireNonNull(callback, "callback");
         VeilOpenCL.checkCLError(clSetEventCallback(event, CL_COMPLETE, (e, event_command_exec_status, user_data) -> {
-            if (event_command_exec_status == CL_COMPLETE) {
+            if (event_command_exec_status == eventStatus) {
                 callback.run();
             }
         }, MemoryUtil.NULL));
-    }
-
-    @Override
-    public void close() {
     }
 }

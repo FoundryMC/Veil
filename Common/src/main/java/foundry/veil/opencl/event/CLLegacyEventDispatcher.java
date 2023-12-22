@@ -14,8 +14,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.opencl.CL10.CL_EVENT_COMMAND_EXECUTION_STATUS;
-import static org.lwjgl.opencl.CL10.clGetEventInfo;
+import static org.lwjgl.opencl.CL10.*;
 
 /**
  * Uses a custom thread to request event status for all events.
@@ -62,7 +61,7 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
                 try {
                     VeilOpenCL.checkCLError(clGetEventInfo(event.event, CL_EVENT_COMMAND_EXECUTION_STATUS, status, null));
 
-                    if (status.get(0) <= event.eventType) {
+                    if (status.get(0) <= event.eventStatus) {
                         event.callback.run();
                         continue;
                     }
@@ -76,15 +75,18 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
     }
 
     @Override
-    public void listen(long event, long eventType, @NotNull Runnable callback) {
+    public void listen(long event, long eventStatus, @NotNull Runnable callback) throws CLException {
         Objects.requireNonNull(callback, "callback");
-        this.eventListeners.add(new EventListener(event, eventType, callback));
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            VeilOpenCL.checkCLError(clGetEventInfo(event, CL_EVENT_REFERENCE_COUNT, stack.mallocInt(1), null));
+        }
+
+        this.eventListeners.add(new EventListener(event, eventStatus, callback));
         synchronized (this.eventNotifier) {
             this.eventNotifier.notifyAll();
         }
     }
 
-    @Override
     public void close() throws InterruptedException {
         this.stopped = true;
         synchronized (this.eventNotifier) {
@@ -95,6 +97,6 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
         this.listenerThread.join(4000);
     }
 
-    private record EventListener(long event, long eventType, Runnable callback) {
+    private record EventListener(long event, long eventStatus, Runnable callback) {
     }
 }

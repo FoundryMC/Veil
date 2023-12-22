@@ -75,4 +75,11 @@ public class CLException extends Exception {
     public int getError() {
         return this.error;
     }
+
+    /**
+     * @return A string representation of the error
+     */
+    public String getErrorString() {
+        return ERROR_CODES.getOrDefault(this.error, Integer.toString(this.error));
+    }
 }

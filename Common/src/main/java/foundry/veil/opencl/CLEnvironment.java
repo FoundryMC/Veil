@@ -120,10 +120,10 @@ public class CLEnvironment implements NativeResource {
     }
 
     /**
-     * Loads the specified program binary from file.
+     * Loads the specified program binary from file. They are expected to be located at <code>namespace:pinwheel/compute/path.cl</code>.
      *
-     * @param provider The provider for files
      * @param name     The name of the shader file
+     * @param provider The provider for files
      * @throws IOException If any errors occurs
      */
     public void loadProgram(ResourceLocation name, ResourceProvider provider) throws IOException {
@@ -172,32 +172,43 @@ public class CLEnvironment implements NativeResource {
     }
 
     /**
-     * Destroys all programs.
+     * Destroys the program with the specified name. This will do nothing if the program doesn't exist.
+     *
+     * @param program The name of the program to free
      */
-    public void freePrograms() {
-        this.programs.values().forEach(NativeResource::free);
-        this.programs.clear();
+    public void freeProgram(ResourceLocation program) {
+        ProgramData programData = this.programs.remove(program);
+        if (programData != null) {
+            LOGGER.info("Deleting kernel program: {}", program);
+            programData.free();
+        }
     }
 
+    @ApiStatus.Internal
     @Override
     public void free() {
         try {
             this.finish();
         } catch (CLException ignored) {
         }
-        this.errorCallback.free();
+        if (this.errorCallback != null) {
+            this.errorCallback.free();
+        }
         if (this.commandQueue != 0) {
             clReleaseCommandQueue(this.commandQueue);
         }
         if (this.context != 0) {
             clReleaseContext(this.context);
         }
-        this.freePrograms();
+        this.programs.values().forEach(NativeResource::free);
+        this.programs.clear();
 
-        try {
-            this.eventDispatcher.close();
-        } catch (InterruptedException e) {
-            LOGGER.error("Failed to stop event dispatcher", e);
+        if (this.eventDispatcher instanceof CLLegacyEventDispatcher legacyEventDispatcher) {
+            try {
+                legacyEventDispatcher.close();
+            } catch (InterruptedException e) {
+                LOGGER.error("Failed to stop event dispatcher", e);
+            }
         }
     }
 
@@ -211,9 +222,7 @@ public class CLEnvironment implements NativeResource {
 
         programData.kernels.remove(clKernel);
         if (programData.kernels.isEmpty()) {
-            LOGGER.info("Deleting kernel program: {}", name);
-            programData.free();
-            this.programs.remove(name);
+            this.freeProgram(name);
         }
     }
 
