@@ -264,14 +264,18 @@ public final class VeilRenderSystem {
 
     @ApiStatus.Internal
     public static void resize(int width, int height) {
-        renderer.getFramebufferManager().resizeFramebuffers(width, height);
+        if (renderer != null) {
+            renderer.getFramebufferManager().resizeFramebuffers(width, height);
+        }
     }
 
     @ApiStatus.Internal
     public static void close() {
         VeilImGuiImpl.get().free();
         VeilOpenCL.tryFree();
-        renderer.free();
+        if (renderer != null) {
+            renderer.free();
+        }
     }
 
     @ApiStatus.Internal
