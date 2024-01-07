@@ -20,7 +20,7 @@ public class KeyboardHandlerMixin {
     @Final
     private Minecraft minecraft;
 
-    @Inject(method = "keyPress", at = @At("HEAD"))
+    @Inject(method = "keyPress", at = @At("TAIL"))
     public void keyPress(long window, int key, int scancode, int action, int mods, CallbackInfo ci) {
         if (window == this.minecraft.getWindow().getWindow() && action == GLFW_PRESS && VeilClient.EDITOR_KEY.matches(key, scancode)) {
             VeilRenderSystem.renderer().getEditorManager().toggle();

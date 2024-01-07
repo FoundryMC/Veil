@@ -56,7 +56,7 @@ public class VeilForgeClientEvents {
     @SubscribeEvent
     public void addPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.CLIENT_RESOURCES) {
-            
+
             // Register test resource pack
             if (Veil.DEBUG && !FMLLoader.isProduction()) {
                 registerBuiltinPack(event, Veil.veilPath("test_shaders"));
@@ -65,7 +65,7 @@ public class VeilForgeClientEvents {
     }
 
     private static void registerBuiltinPack(AddPackFindersEvent event, ResourceLocation id) {
-        Path resourcePath = ModList.get().getModFileById(Veil.MODID).getFile().findResource(id.getPath());
+        Path resourcePath = ModList.get().getModFileById(Veil.MODID).getFile().findResource("resourcepacks/" + id.getPath());
         Pack pack = Pack.readMetaAndCreate(id.toString(), Component.literal(id.getNamespace() + "/" + id.getPath()), false,
                 (path) -> new PathPackResources(path, resourcePath, false), PackType.CLIENT_RESOURCES, Pack.Position.BOTTOM, PackSource.BUILT_IN);
         event.addRepositorySource(packConsumer -> packConsumer.accept(pack));
