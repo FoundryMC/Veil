@@ -29,7 +29,7 @@ public class VeilFabricClient implements ClientModInitializer {
         // Register test resource pack
         FabricLoader loader = FabricLoader.getInstance();
         if (Veil.DEBUG && loader.isDevelopmentEnvironment()) {
-            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.DEFAULT_ENABLED);
+            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.NORMAL);
         }
     }
 }
