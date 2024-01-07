@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.opencl.CL12;
@@ -46,6 +47,7 @@ public class CLKernel implements NativeResource {
      * @param globalWorkSize The size of the global work group
      * @param localWorkSize  The size of each local work group
      * @throws CLException If any error occurs while executing the kernel
+     * @see <a href="https://www.khronos.org/registry/OpenCL/sdk/2.1/docs/man/xhtml/clEnqueueNDRangeKernel.html">Reference Page</a>
      */
     public void execute(int globalWorkSize, int localWorkSize) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -63,6 +65,7 @@ public class CLKernel implements NativeResource {
      * @param globalWorkSizeY The size of the global work group in the Y
      * @param localWorkSizeY  The size of each local work group in the Y
      * @throws CLException If any error occurs while executing the kernel
+     * @see <a href="https://www.khronos.org/registry/OpenCL/sdk/2.1/docs/man/xhtml/clEnqueueNDRangeKernel.html">Reference Page</a>
      */
     public void execute(int globalWorkSizeX, int localWorkSizeX, int globalWorkSizeY, int localWorkSizeY) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -82,6 +85,7 @@ public class CLKernel implements NativeResource {
      * @param globalWorkSizeZ The size of the global work group in the Z
      * @param localWorkSizeZ  The size of each local work group in the Z
      * @throws CLException If any error occurs while executing the kernel
+     * @see <a href="https://www.khronos.org/registry/OpenCL/sdk/2.1/docs/man/xhtml/clEnqueueNDRangeKernel.html">Reference Page</a>
      */
     public void execute(int globalWorkSizeX, int localWorkSizeX, int globalWorkSizeY, int localWorkSizeY, int globalWorkSizeZ, int localWorkSizeZ) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -98,6 +102,7 @@ public class CLKernel implements NativeResource {
      * @param localWorkSizes  The size of each local work group
      * @throws CLException              If any error occurs while executing the kernel
      * @throws IllegalArgumentException If the length of <code>globalWorkSizes</code> and <code>localWorkSizes</code> are not equal
+     * @see <a href="https://www.khronos.org/registry/OpenCL/sdk/2.1/docs/man/xhtml/clEnqueueNDRangeKernel.html">Reference Page</a>
      */
     public void execute(int[] globalWorkSizes, int[] localWorkSizes) throws CLException, IllegalArgumentException {
         if (globalWorkSizes.length != localWorkSizes.length) {
@@ -141,9 +146,9 @@ public class CLKernel implements NativeResource {
      * @return A data buffer that can be used with {@link #setPointers(int, long...)} or {@link #setPointers(int, CLMemObject...)} or <code>null</code> if an error occurred
      * @see CL10#clCreateBuffer(long, long, long, IntBuffer)
      */
-    public CLBuffer createBufferUnsafe(int flags, long size) {
+    public @Nullable CLBuffer createBufferUnsafe(int flags, long size) {
         try {
-            return createBuffer(flags, size);
+            return this.createBuffer(flags, size);
         } catch (CLException e) {
             VeilOpenCL.LOGGER.error("Failed to create CL buffer", e);
             return null;
@@ -156,7 +161,7 @@ public class CLKernel implements NativeResource {
      * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
      *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
      *              <table>
-     *                  <caption>All possible OpenCL memory buffer flags</caption>
+     *                  <caption>OpenCL memory buffer flags</caption>
      *                  <tr>
      *                      <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
      *                      <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>

@@ -69,7 +69,7 @@ public final class VeilOpenCL implements NativeResource {
     }
 
     /**
-     * @return The default OpenCL environment
+     * @return The default OpenCL environment or <code>null</code> if no device was found
      */
     public @Nullable CLEnvironment getEnvironment() {
         return this.getEnvironment(CLEnvironmentOptions.DEFAULT);
@@ -94,7 +94,7 @@ public final class VeilOpenCL implements NativeResource {
      * Retrieves the environment for the specified device.
      *
      * @param deviceInfo The device to retrieve the environment for
-     * @return The environment for that device
+     * @return The environment for that device or <code>null</code> if no device was found or <code>null</code> if no device was found
      */
     public @Nullable CLEnvironment getEnvironment(DeviceInfo deviceInfo) {
         if (this.invalidDevices.contains(deviceInfo)) {

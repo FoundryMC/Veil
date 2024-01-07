@@ -7,7 +7,8 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.*;
 
-import static org.lwjgl.opencl.CL10.*;
+import static org.lwjgl.opencl.CL10.clEnqueueReadBuffer;
+import static org.lwjgl.opencl.CL10.clEnqueueWriteBuffer;
 
 /**
  * <p>A generic data buffer that can be referenced uploaded to/from OpenCL.</p>
@@ -179,7 +180,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, data, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -198,7 +199,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, data, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -217,7 +218,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, data, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -236,7 +237,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, data, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -255,7 +256,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueWriteBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, data, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -274,7 +275,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, store, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -293,7 +294,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, store, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -312,7 +313,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, store, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -331,7 +332,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, store, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }
@@ -350,7 +351,7 @@ public class CLBuffer implements CLMemObject {
             PointerBuffer event = onComplete != null ? stack.mallocPointer(1) : null;
             VeilOpenCL.checkCLError(clEnqueueReadBuffer(this.environment.getCommandQueue(), this.pointer, false, offset, store, null, event));
             if (event != null) {
-                this.environment.getEventDispatcher().listen(event.get(0), CL_COMPLETE, onComplete);
+                this.environment.getEventDispatcher().listen(event.get(0), onComplete);
             }
         }
     }

@@ -11,7 +11,7 @@ import static org.lwjgl.opencl.CL10.*;
  *
  * @param version         The minimum required version
  * @param deviceMask      The mask for what types of devices should be used
- * @param requireCompiler Whether the device needs to be able to compile program source.
+ * @param requireCompiler Whether the device needs to be able to compile program sources
  * @param requireOpenGL   Whether the device needs to be able to support a mixed OpenGL/OpenCL environment
  * @author Ocelot
  */
