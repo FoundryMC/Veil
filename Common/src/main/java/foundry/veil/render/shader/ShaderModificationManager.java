@@ -142,7 +142,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
                 }
 
                 if (nextStage == null) {
-                    nextStage = getNextStage(entry.getKey(), resourceManager);
+                    nextStage = this.getNextStage(entry.getKey(), resourceManager);
                 }
                 if (nextStage == null) {
                     // No need to inject in into next shader
@@ -151,6 +151,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
 
                 InputShaderModification input = new InputShaderModification(simpleMod.getPriority(), () -> OUT_PATTERN.matcher(simpleMod.fillPlaceholders(simpleMod.getOutput())).replaceAll("in "));
                 modifiers.computeIfAbsent(nextStage, unused -> new LinkedList<>()).add(input);
+                names.put(input, names.get(simpleMod));
             }
         }
         modifiers.values().forEach(modifications -> modifications.sort(Comparator.comparingInt(ShaderModification::getPriority).thenComparing(names::get)));

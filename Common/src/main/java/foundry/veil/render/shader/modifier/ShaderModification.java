@@ -60,7 +60,7 @@ public interface ShaderModification {
             if (parameters == 1) {
                 return new Function(name, Pattern.compile("\\w+\\s+" + name + "\\s*\\(\\s*\\w+\\s\\w+)\\)[^{]*\\{"), parameters, head, code);
             }
-            return new Function(name, Pattern.compile("\\w+\\s+" + name + "\\s*\\(((\\s*\\w+\\s\\w+,){" + (parameters - 1) + "}\\s*\\w+\\s\\w+)\\)[^{]*\\{"), parameters, head, code);
+            return new Function(name, Pattern.compile("\\w+\\s+" + name + "\\s*\\(((\\s*\\w+\\s\\w+,)\\{" + (parameters - 1) + "}\\s*\\w+\\s\\w+)\\)[^{]*\\{"), parameters, head, code);
         }
     }
 }
