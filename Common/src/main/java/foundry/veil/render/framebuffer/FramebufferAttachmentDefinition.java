@@ -57,7 +57,7 @@ public record FramebufferAttachmentDefinition(@NotNull FramebufferAttachmentDefi
             RecordCodecBuilder.create(instance -> instance.group(
                     Type.CODEC.optionalFieldOf("type", Type.TEXTURE)
                             .forGetter(FramebufferAttachmentDefinition::type),
-                    Format.CODEC.optionalFieldOf("format", Format.RGBA8)
+                    Format.CODEC.optionalFieldOf("format", Format.DEPTH_COMPONENT)
                             .forGetter(FramebufferAttachmentDefinition::format),
                     Codec.BOOL.optionalFieldOf("linear", false)
                             .forGetter(FramebufferAttachmentDefinition::linear),
@@ -72,7 +72,7 @@ public record FramebufferAttachmentDefinition(@NotNull FramebufferAttachmentDefi
      * @return Whether this attachment can be represented as <code>"depth": true</code> in the JSON
      */
     public boolean isCompactDepthAttachment() {
-        return this.type == Type.TEXTURE && this.format == Format.DEPTH_COMPONENT24 && this.levels == 0;
+        return this.type == Type.TEXTURE && this.format == Format.DEPTH_COMPONENT && !this.linear && this.levels == 0 && this.name == null;
     }
 
     /**

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.pipeline.VeilRenderer;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,13 +36,13 @@ public class GameRendererMixin {
         VeilRenderSystem.renderer().getGuiInfo().unbind();
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", shift = At.Shift.BEFORE))
-    public void veil$preDrawFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+    @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LightTexture;turnOnLightLayer()V", ordinal = 0, shift = At.Shift.BEFORE))
+    public void veil$preDrawFirstPerson(PoseStack $$0, Camera $$1, float $$2, CallbackInfo ci) {
         VeilFirstPersonRenderer.setup();
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/Camera;F)V", shift = At.Shift.AFTER))
-    public void veil$postDrawFirstPerson(float $$0, long $$1, PoseStack $$2, CallbackInfo ci) {
+    @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LightTexture;turnOffLightLayer()V", ordinal = 0, shift = At.Shift.AFTER))
+    public void veil$postDrawFirstPerson(PoseStack $$0, Camera $$1, float $$2, CallbackInfo ci) {
         VeilFirstPersonRenderer.blit();
     }
 }

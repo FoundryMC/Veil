@@ -46,10 +46,10 @@ public record FramebufferDefinition(MolangExpression width,
     private static final Codec<Optional<FramebufferAttachmentDefinition>> DEPTH_CODEC =
             Codec.either(FramebufferAttachmentDefinition.DEPTH_CODEC, Codec.BOOL)
                     .xmap(either -> either.map(Optional::of,
-                                    right -> right ?
+                                    compact -> compact ?
                                             Optional.of(new FramebufferAttachmentDefinition(
                                                     FramebufferAttachmentDefinition.Type.TEXTURE,
-                                                    FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT24,
+                                                    FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT,
                                                     true,
                                                     false,
                                                     0,
@@ -129,11 +129,6 @@ public record FramebufferDefinition(MolangExpression width,
 
     /**
      * Creates a new framebuffer.
-     *
-     * @param width        The width of the framebuffer
-     * @param height       The height of the framebuffer
-     * @param colorBuffers The color attachments to add
-     * @param depthBuffer  The depth attachment to use or <code>null</code> to not add a depth buffer
      */
     public FramebufferDefinition {
         if (colorBuffers.length < 1) {
