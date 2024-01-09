@@ -13,10 +13,8 @@ import java.util.ServiceLoader;
 public class Veil {
 
     public static final String MODID = "veil";
-    public static final String NAME = "Veil";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
     public static final boolean DEBUG;
-    public static final boolean RENDER_DOC;
     public static final boolean IMGUI;
 
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
@@ -25,7 +23,6 @@ public class Veil {
         boolean arm = System.getProperty("os.arch").equals("arm") ||
                 System.getProperty("os.arch").startsWith("aarch64");
         DEBUG = System.getProperty("veil.debug") != null;
-        RENDER_DOC = System.getProperty("veil.renderDoc") != null;
         IMGUI = !arm && System.getProperty("veil.disableImgui") == null;
     }
 
