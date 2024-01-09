@@ -33,6 +33,7 @@
     "client.shader.ProgramManagerMixin",
     "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",
+    "debug.DebugScreenOverlayMixin",
     "debug.RenderDocker"
   ],
   "injectors": {

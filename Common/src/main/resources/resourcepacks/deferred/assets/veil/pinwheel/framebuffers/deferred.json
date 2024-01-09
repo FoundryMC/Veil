@@ -2,6 +2,10 @@
   "depth": true,
   "color_buffers": [
     {
+      "name": "CompatibilitySampler",
+      "format": "RGBA8"
+    },
+    {
       "name": "AlbedoSampler",
       "format": "RGBA8"
     },

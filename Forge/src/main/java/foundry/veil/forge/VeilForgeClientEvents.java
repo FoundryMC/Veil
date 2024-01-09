@@ -2,6 +2,7 @@ package foundry.veil.forge;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.render.VeilDeferredRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.minecraft.client.Minecraft;
@@ -61,6 +62,9 @@ public class VeilForgeClientEvents {
             if (Veil.DEBUG && !FMLLoader.isProduction()) {
                 registerBuiltinPack(event, Veil.veilPath("test_shaders"));
             }
+
+            // TODO make this pack enabled by default
+            registerBuiltinPack(event, VeilDeferredRenderer.PACK_ID);
         }
     }
 

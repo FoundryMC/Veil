@@ -94,7 +94,7 @@ public final class VeilRenderSystem {
         }
 
         TextureManager textureManager = client.getTextureManager();
-        renderer = new VeilRendererImpl(resourceManager, textureManager);
+        renderer = new VeilRendererImpl(resourceManager);
 
         VeilImGuiImpl.init(client.getWindow().getWindow());
     }

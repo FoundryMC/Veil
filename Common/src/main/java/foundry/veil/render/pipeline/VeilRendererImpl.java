@@ -4,6 +4,7 @@ import foundry.veil.editor.EditorManager;
 import foundry.veil.mixin.client.pipeline.ReloadableResourceManagerAccessor;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
+import foundry.veil.render.VeilDeferredRenderer;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
@@ -26,15 +27,17 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     private final ShaderManager shaderManager;
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
+    private final VeilDeferredRenderer deferredRenderer;
     private final EditorManager editorManager;
     private final CameraMatrices cameraMatrices;
     private final GuiInfo guiInfo;
 
-    public VeilRendererImpl(ReloadableResourceManager resourceManager, TextureManager textureManager) {
+    public VeilRendererImpl(ReloadableResourceManager resourceManager) {
         this.shaderModificationManager = new ShaderModificationManager();
         this.shaderManager = new ShaderManager(this.shaderModificationManager);
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager();
+        this.deferredRenderer = new VeilDeferredRenderer();
         this.editorManager = new EditorManager(resourceManager);
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
@@ -47,6 +50,7 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
         listeners.add(1, this.shaderManager);
         resourceManager.registerReloadListener(this.framebufferManager);
         resourceManager.registerReloadListener(this.postProcessingManager);
+        resourceManager.registerReloadListener(this.deferredRenderer);
     }
 
     @Override
@@ -70,6 +74,11 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     }
 
     @Override
+    public VeilDeferredRenderer getDeferredRenderer() {
+        return this.deferredRenderer;
+    }
+
+    @Override
     public EditorManager getEditorManager() {
         return this.editorManager;
     }
@@ -89,6 +98,7 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
         this.shaderManager.close();
         this.framebufferManager.free();
         this.postProcessingManager.free();
+        this.deferredRenderer.free();
         this.cameraMatrices.free();
         this.guiInfo.free();
     }

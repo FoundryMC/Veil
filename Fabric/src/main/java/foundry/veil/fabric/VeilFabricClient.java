@@ -2,6 +2,7 @@ package foundry.veil.fabric;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.render.VeilDeferredRenderer;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -31,5 +32,6 @@ public class VeilFabricClient implements ClientModInitializer {
         if (Veil.DEBUG && loader.isDevelopmentEnvironment()) {
             ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.NORMAL);
         }
+        ResourceManagerHelper.registerBuiltinResourcePack(VeilDeferredRenderer.PACK_ID, loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.DEFAULT_ENABLED);
     }
 }
