@@ -273,9 +273,7 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public void apply() {
-            this.program.bind();
-            this.program.addRenderSystemTextures();
-            this.program.applyShaderSamplers(0);
+            this.program.setup();
         }
 
         @Override

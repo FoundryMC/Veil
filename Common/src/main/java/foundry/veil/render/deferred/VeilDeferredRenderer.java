@@ -7,6 +7,7 @@ import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -47,12 +48,13 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     private final ShaderManager deferredShaderManager;
 
     private boolean enabled;
-    private boolean active;
+    private RendererState state;
 
     public VeilDeferredRenderer(ShaderManager deferredShaderManager, FramebufferManager framebufferManager, PostProcessingManager postProcessingManager) {
         this.framebufferManager = framebufferManager;
         this.postProcessingManager = postProcessingManager;
         this.deferredShaderManager = deferredShaderManager;
+        this.state = RendererState.DISABLED;
     }
 
     @Override
@@ -79,24 +81,38 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     @Override
     public void free() {
         this.enabled = false;
+        this.state = RendererState.DISABLED;
         this.deferredShaderManager.close();
     }
 
-    /**
-     * Sets up the render state for opaque rendering.
-     */
+    @ApiStatus.Internal
     public void setup() {
-        if (!this.enabled || !this.active) {
+        if (!this.enabled) {
             return;
         }
 
-        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-        if (deferredFramebuffer == null) {
-            this.free();
-            return;
-        }
+        switch (this.state) {
+            case DISABLED -> {
+            }
+            case OPAQUE -> {
+                AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+                if (deferredFramebuffer == null) {
+                    this.free();
+                    return;
+                }
 
-        deferredFramebuffer.bind(true);
+                deferredFramebuffer.bind(true);
+            }
+            case TRANSLUCENT -> {
+                AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
+                if (transparent == null) {
+                    this.free();
+                    return;
+                }
+
+                transparent.bind(true);
+            }
+        }
 
         // Temporary hack until we blit
 //        deferredFramebuffer.bindDraw(false);
@@ -106,33 +122,35 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 //        glDrawBuffers(deferredFramebuffer.getDrawBuffers());
     }
 
-    /**
-     * Clears the render state from opaque rendering.
-     */
+    @ApiStatus.Internal
     public void clear() {
-        if (!this.enabled || !this.active) {
+        if (!this.enabled) {
             return;
         }
 
-//        this.postProcessingManager.getPipeline()
-
-        // This copies the "compatibility" buffer into the main buffer, but leaves the deferred data for later
-//        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-//        deferredFramebuffer.resolveToAdvancedFbo(AdvancedFbo.getMainFramebuffer());
-
-        AdvancedFbo.unbind();
-
-        // TODO blit instead of resolve
+        switch (this.state) {
+            case DISABLED -> {
+            }
+            case OPAQUE, TRANSLUCENT -> AdvancedFbo.unbind();
+        }
     }
 
-    /**
-     * Sets up the renderer state for transparency.
-     */
-    public void setupTransparency() {
-        if (!this.enabled || !this.active) {
+    @ApiStatus.Internal
+    public void beginOpaque() {
+        if (!this.enabled) {
             return;
         }
 
+        this.state = RendererState.OPAQUE;
+    }
+
+    @ApiStatus.Internal
+    public void beginTranslucent() {
+        if (!this.enabled) {
+            return;
+        }
+
+        this.state = RendererState.TRANSLUCENT;
         AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
         if (transparent == null) {
             this.free();
@@ -144,26 +162,54 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         if (deferredFramebuffer != null) {
             deferredFramebuffer.resolveToAdvancedFbo(transparent, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         }
-        transparent.bind(true);
     }
 
-    public void begin() {
-        this.active = true;
+    @ApiStatus.Internal
+    public void blit() {
+        if (!this.enabled) {
+            return;
+        }
+
+        this.end();
+
+//        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+//        if (deferredFramebuffer != null) {
+//            deferredFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+//        }
     }
 
+    @ApiStatus.Internal
     public void end() {
-        this.active = false;
+        this.state = RendererState.DISABLED;
     }
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
     }
 
+    /**
+     * @return Whether the deferred renderer is initialized and ready to use
+     */
     public boolean isEnabled() {
-        return this.enabled;
+        return this.enabled && !Minecraft.useShaderTransparency(); // TODO allow fabulous
+    }
+
+    /**
+     * @return Whether the deferred renderer is currently actively being used
+     */
+    public boolean isActive() {
+        return this.isEnabled() && this.state != RendererState.DISABLED;
+    }
+
+    public RendererState getRendererState() {
+        return this.state;
     }
 
     public ShaderManager getDeferredShaderManager() {
         return this.deferredShaderManager;
+    }
+
+    public enum RendererState {
+        DISABLED, OPAQUE, TRANSLUCENT
     }
 }

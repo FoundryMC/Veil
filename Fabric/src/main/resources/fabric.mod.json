@@ -23,6 +23,9 @@
       "foundry.veil.fabric.VeilFabricClient"
     ]
   },
+  "custom": {
+    "fabric-renderer-indigo:force_compatibility": true
+  },
   "mixins": [
     "veil-common.mixins.json",
     "veil-fabric.mixins.json"

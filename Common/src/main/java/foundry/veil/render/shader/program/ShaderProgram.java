@@ -21,6 +21,15 @@ import static org.lwjgl.opengl.GL20C.glUseProgram;
 public interface ShaderProgram extends NativeResource, MutableShaderUniformAccess {
 
     /**
+     * Binds this program for use and prepares for rendering.
+     */
+    default void setup() {
+        this.bind();
+        this.addRenderSystemTextures();
+        this.applyShaderSamplers(0);
+    }
+
+    /**
      * Binds this program for use.
      */
     default void bind() {
