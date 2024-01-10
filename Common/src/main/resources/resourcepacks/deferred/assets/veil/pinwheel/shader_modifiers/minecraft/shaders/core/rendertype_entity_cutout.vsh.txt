@@ -1,0 +1,18 @@
+#version 330 // required
+#priority 1000 // default 1000
+
+// Vertex Only
+[GET_ATTRIBUTE 1] vec4 Color;
+[GET_ATTRIBUTE 4] ivec2 UV2;
+[GET_ATTRIBUTE 5] vec3 Normal;
+
+[OUTPUT]
+out vec4 DeferredVertexColor;
+out vec2 DeferredLightMapUV;
+out vec3 DeferredNormal;
+
+[FUNCTION main(0) TAIL]
+DeferredVertexColor = Color;
+DeferredLightMapUV = vec2(UV2 / 16.0);
+// TODO don't do this. Pass it in as a custom uniform
+DeferredNormal = (transpose(inverse(ModelViewMat)) * vec4(Normal, 0.0)).xyz;

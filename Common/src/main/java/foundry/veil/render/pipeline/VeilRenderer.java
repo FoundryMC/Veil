@@ -3,7 +3,7 @@ package foundry.veil.render.pipeline;
 import foundry.veil.editor.EditorManager;
 import foundry.veil.render.CameraMatrices;
 import foundry.veil.render.GuiInfo;
-import foundry.veil.render.VeilDeferredRenderer;
+import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostProcessingManager;

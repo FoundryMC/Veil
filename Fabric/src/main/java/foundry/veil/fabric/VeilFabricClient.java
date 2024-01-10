@@ -2,7 +2,7 @@ package foundry.veil.fabric;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.render.VeilDeferredRenderer;
+import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

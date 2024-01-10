@@ -1,6 +1,5 @@
 package foundry.veil.mixin.client;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.model.anim.IChargableItem;
 import foundry.veil.model.anim.IPoseable;

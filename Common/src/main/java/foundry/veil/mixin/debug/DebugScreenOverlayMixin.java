@@ -1,6 +1,6 @@
 package foundry.veil.mixin.debug;
 
-import foundry.veil.render.VeilDeferredRenderer;
+import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.DebugScreenOverlay;

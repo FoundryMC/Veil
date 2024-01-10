@@ -1,7 +1,6 @@
 package foundry.veil.forge.platform;
 
 import foundry.veil.platform.services.VeilPlatform;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 

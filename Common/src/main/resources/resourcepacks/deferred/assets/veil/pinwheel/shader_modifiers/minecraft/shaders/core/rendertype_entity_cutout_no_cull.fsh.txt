@@ -15,6 +15,7 @@ layout(location = 5) out vec4 fragVanillaLight;
 [FUNCTION main(0) TAIL]
 fragColor = vec4(0.0);
 fragAlbedo = texture(Sampler0, texCoord0) * DeferredVertexColor * ColorModulator;
+fragAlbedo.rgb = mix(overlayColor.rgb, fragAlbedo.rgb, overlayColor.a);
 fragNormal = vec4(DeferredNormal, 0.0);
 fragMaterial = vec4(0.0);
 fragEmissive = vec4(0.0);

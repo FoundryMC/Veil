@@ -2,7 +2,7 @@ package foundry.veil.forge;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.render.VeilDeferredRenderer;
+import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.minecraft.client.Minecraft;

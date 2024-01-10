@@ -91,7 +91,6 @@ public class SimpleShaderModification implements ShaderModification {
 
             String code = this.fillPlaceholders(this.output) + '\n';
             builder.insert(pointer, code);
-            pointer += code.length();
         }
 
         for (Function function : this.functions) {
@@ -101,9 +100,13 @@ public class SimpleShaderModification implements ShaderModification {
             }
 
             int head = matcher.end();
+            pointer = head;
             if (!function.head()) {
                 int parenthesis = 1;
                 while (pointer < builder.length()) {
+                    if (builder.charAt(pointer) == '{') {
+                        parenthesis++;
+                    }
                     if (builder.charAt(pointer) == '}') {
                         parenthesis--;
                     }
@@ -118,8 +121,6 @@ public class SimpleShaderModification implements ShaderModification {
                 while (returnMatcher.find()) {
                     pointer = returnMatcher.start() - 1;
                 }
-            } else {
-                pointer = head;
             }
 
             String code = this.fillPlaceholders("\n{\n" + function.code() + "}");
