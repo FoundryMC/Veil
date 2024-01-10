@@ -106,12 +106,10 @@ public class ShaderProgramImpl implements ShaderProgram {
             }
 
             // Fragment shaders aren't strictly necessary if the fragment output isn't used,
-            // however mac shaders just don't work without a fragment, shader. This adds a "dummy" fragment shader
+            // however mac shaders don't work without a fragment shader. This adds a "dummy" fragment shader
             // on mac specifically for all rendering shaders.
-            if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) &&
-                    !shaders.containsKey(GL_FRAGMENT_SHADER)) {
-                CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER,
-                        "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
+            if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) && !shaders.containsKey(GL_FRAGMENT_SHADER)) {
+                CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER, "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
                 glAttachShader(this.program, shader.id());
                 this.shaders.add(GL_FRAGMENT_SHADER);
                 compiledShaders.add(shader);

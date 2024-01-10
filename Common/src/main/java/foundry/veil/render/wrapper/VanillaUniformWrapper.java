@@ -183,7 +183,7 @@ public class VanillaUniformWrapper extends Uniform {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.mallocFloat(3 * 3);
             value.get(buffer);
-            glProgramUniformMatrix2fv(this.programId, this.location, false, buffer);
+            glProgramUniformMatrix3fv(this.programId, this.location, false, buffer);
         }
     }
 
@@ -196,7 +196,7 @@ public class VanillaUniformWrapper extends Uniform {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.mallocFloat(4 * 4);
             value.get(buffer);
-            glProgramUniformMatrix2fv(this.programId, this.location, false, buffer);
+            glProgramUniformMatrix4fv(this.programId, this.location, false, buffer);
         }
     }
 

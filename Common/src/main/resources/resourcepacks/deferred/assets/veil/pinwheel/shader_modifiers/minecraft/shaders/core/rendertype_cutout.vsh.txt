@@ -11,8 +11,10 @@ out vec4 DeferredVertexColor;
 out vec2 DeferredLightMapUV;
 out vec3 DeferredNormal;
 
+[UNIFORM]
+uniform mat3 NormalMat;
+
 [FUNCTION main(0) TAIL]
 DeferredVertexColor = Color;
 DeferredLightMapUV = vec2(UV2 / 256.0);
-// TODO don't do this. Pass it in as a custom uniform
-DeferredNormal = (transpose(inverse(ModelViewMat)) * vec4(Normal, 0.0)).xyz;
+DeferredNormal = NormalMat * Normal;
