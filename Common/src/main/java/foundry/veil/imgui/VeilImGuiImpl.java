@@ -3,10 +3,13 @@ package foundry.veil.imgui;
 import foundry.veil.Veil;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import imgui.ImGui;
+import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotContext;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.internal.ImGuiContext;
 import org.jetbrains.annotations.ApiStatus;
 
 import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
@@ -22,14 +25,16 @@ public class VeilImGuiImpl implements VeilImGui {
 
     private final ImGuiImplGlfw implGlfw;
     private final ImGuiImplGl3 implGl3;
+    private final ImGuiContext imGuiContext;
+    private final ImPlotContext imPlotContext;
     private boolean active;
 
     private VeilImGuiImpl(long window) {
         this.implGlfw = new ImGuiImplGlfw();
         this.implGl3 = new ImGuiImplGl3();
 
-        ImGui.createContext();
-        ImPlot.createContext();
+        this.imGuiContext = ImGui.createContext();
+        this.imPlotContext = ImPlot.createContext();
         this.implGlfw.init(window, true);
         this.implGl3.init("#version 410 core");
     }
@@ -99,7 +104,8 @@ public class VeilImGuiImpl implements VeilImGui {
     public void free() {
         this.implGlfw.dispose();
         this.implGl3.dispose();
-        ImGui.destroyContext();
+        ImGui.destroyContext(this.imGuiContext);
+        ImPlot.destroyContext(this.imPlotContext);
     }
 
     public static void init(long window) {
