@@ -2,10 +2,7 @@ package foundry.veil.render.shader.definition;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -16,17 +13,15 @@ import java.util.function.Consumer;
  */
 public class ShaderPreDefinitions {
 
-    private final Consumer<String> definitionCallback;
+    private final Set<Consumer<String>> definitionCallbacks;
     private final Map<String, String> definitions;
     private final Map<String, String> staticDefinitions;
 
     /**
      * Creates a new set of predefinitions.
-     *
-     * @param definitionCallback The callback for when definitions change or <code>null</code> to ignore changes
      */
-    public ShaderPreDefinitions(@Nullable Consumer<String> definitionCallback) {
-        this.definitionCallback = definitionCallback;
+    public ShaderPreDefinitions() {
+        this.definitionCallbacks = new HashSet<>();
         this.definitions = new HashMap<>();
         this.staticDefinitions = new HashMap<>();
     }
@@ -37,6 +32,15 @@ public class ShaderPreDefinitions {
             return "#define " + name;
         }
         return "#define " + name + " " + definition;
+    }
+
+    /**
+     * Adds a listener for when a change happens.
+     *
+     * @param definitionCallback The callback for when definitions change or <code>null</code> to ignore changes
+     */
+    public void addListener(Consumer<String> definitionCallback) {
+        this.definitionCallbacks.add(definitionCallback);
     }
 
     /**
@@ -66,8 +70,8 @@ public class ShaderPreDefinitions {
      */
     public void set(String name, String definition) {
         String previous = this.definitions.put(name, definition);
-        if (this.definitionCallback != null && !Objects.equals(previous, definition)) {
-            this.definitionCallback.accept(name);
+        if (!Objects.equals(previous, definition)) {
+            this.definitionCallbacks.forEach(callback -> callback.accept(name));
         }
     }
 
@@ -106,8 +110,8 @@ public class ShaderPreDefinitions {
      * @param name The name of the definition to remove
      */
     public void remove(String name) {
-        if (this.definitionCallback != null && this.definitions.remove(name) != null) {
-            this.definitionCallback.accept(name);
+        if (this.definitions.remove(name) != null) {
+            this.definitionCallbacks.forEach(callback -> callback.accept(name));
         }
     }
 

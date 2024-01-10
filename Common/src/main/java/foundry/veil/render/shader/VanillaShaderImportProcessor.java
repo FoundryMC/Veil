@@ -1,9 +1,12 @@
 package foundry.veil.render.shader;
 
+import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.processor.ShaderImportProcessor;
 import foundry.veil.render.shader.processor.ShaderPreProcessor;
 import foundry.veil.render.shader.program.ProgramDefinition;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.jetbrains.annotations.ApiStatus;
@@ -64,6 +67,11 @@ public class VanillaShaderImportProcessor {
         @Override
         public int getType() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public FileToIdConverter getConverter() {
+            return VeilRenderSystem.renderer().getShaderManager().getSourceSet().getTypeConverter(this.getType());
         }
 
         @Override

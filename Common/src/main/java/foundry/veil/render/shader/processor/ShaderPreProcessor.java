@@ -83,9 +83,7 @@ public interface ShaderPreProcessor {
         /**
          * @return The file to id converter for the loading shader file type
          */
-        default FileToIdConverter getConverter() {
-            return ShaderManager.getTypeConverter(this.getType());
-        }
+        FileToIdConverter getConverter();
 
         /**
          * @return The readable name of the loading shader file type

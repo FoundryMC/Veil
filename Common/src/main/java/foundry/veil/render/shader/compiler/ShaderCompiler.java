@@ -1,6 +1,7 @@
 package foundry.veil.render.shader.compiler;
 
 import foundry.veil.render.shader.ShaderException;
+import foundry.veil.render.shader.ShaderSourceSet;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.processor.ShaderPreProcessor;
 import foundry.veil.render.shader.program.ProgramDefinition;
@@ -93,8 +94,11 @@ public interface ShaderCompiler extends NativeResource {
      * Context for compiling shaders and programs.
      *
      * @param preDefinitions The set of all shader pre-definitions
+     * @param sourceSet      The location to load relative shader files from
      * @param definition     The definition the shader is being compiled for or <code>null</code> if there is no program
      */
-    record Context(ShaderPreDefinitions preDefinitions, @Nullable ProgramDefinition definition) {
+    record Context(ShaderPreDefinitions preDefinitions,
+                   ShaderSourceSet sourceSet,
+                   @Nullable ProgramDefinition definition) {
     }
 }

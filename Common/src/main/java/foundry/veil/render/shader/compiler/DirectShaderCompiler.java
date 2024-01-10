@@ -5,6 +5,7 @@ import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.processor.*;
 import foundry.veil.render.shader.program.ProgramDefinition;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
@@ -60,7 +61,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
             throw new IOException("Failed to read " + ShaderManager.getTypeName(type) + " from " + id + " because no provider was specified");
         }
 
-        ResourceLocation location = ShaderManager.getTypeConverter(type).idToFile(id);
+        ResourceLocation location = context.sourceSet().getTypeConverter(type).idToFile(id);
         try (Reader reader = this.provider.openAsReader(location)) {
             this.compilingName = id;
             return this.compile(context, type, IOUtils.toString(reader));
@@ -156,6 +157,11 @@ public class DirectShaderCompiler implements ShaderCompiler {
         @Override
         public int getType() {
             return this.type;
+        }
+
+        @Override
+        public FileToIdConverter getConverter() {
+            return this.context.sourceSet().getTypeConverter(this.getType());
         }
 
         @Override

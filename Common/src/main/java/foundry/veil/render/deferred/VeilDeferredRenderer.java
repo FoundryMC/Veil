@@ -6,13 +6,17 @@ import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.post.PostProcessingManager;
+import foundry.veil.render.shader.ShaderManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
@@ -33,48 +37,56 @@ import static org.lwjgl.opengl.GL11C.GL_NEAREST;
  *
  * @author Ocelot
  */
-public class VeilDeferredRenderer implements ResourceManagerReloadListener, NativeResource {
+public class VeilDeferredRenderer implements PreparableReloadListener, NativeResource {
 
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
+    private final ShaderManager deferredShaderManager;
 
     private boolean enabled;
+    private boolean active;
 
-    public VeilDeferredRenderer(FramebufferManager framebufferManager, PostProcessingManager postProcessingManager) {
+    public VeilDeferredRenderer(ShaderManager deferredShaderManager, FramebufferManager framebufferManager, PostProcessingManager postProcessingManager) {
         this.framebufferManager = framebufferManager;
         this.postProcessingManager = postProcessingManager;
+        this.deferredShaderManager = deferredShaderManager;
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
+    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
         boolean active = resourceManager.listPacks().anyMatch(r -> r.packId().equals(PACK_ID.toString()));
-        if (this.enabled == active) {
-            return;
+        if (this.enabled != active) {
+            this.enabled = active;
+            if (active) {
+                LOGGER.info("Deferred Renderer Enabled");
+                // TODO setup
+            } else {
+                LOGGER.info("Deferred Renderer Disabled");
+                return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
+            }
         }
 
-        this.enabled = active;
-        if (active) {
-            LOGGER.info("Deferred Renderer Enabled");
-            // TODO setup
-        } else {
-            LOGGER.info("Deferred Renderer Disabled");
-            this.free();
+        if (this.enabled) {
+            return this.deferredShaderManager.reload(preparationBarrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
         }
+
+        return preparationBarrier.wait(null);
     }
 
     @Override
     public void free() {
         this.enabled = false;
+        this.deferredShaderManager.close();
     }
 
     /**
      * Sets up the render state for opaque rendering.
      */
     public void setup() {
-        if (!this.enabled) {
+        if (!this.enabled || !this.active) {
             return;
         }
 
@@ -98,15 +110,17 @@ public class VeilDeferredRenderer implements ResourceManagerReloadListener, Nati
      * Clears the render state from opaque rendering.
      */
     public void clear() {
-        if (!this.enabled) {
+        if (!this.enabled || !this.active) {
             return;
         }
 
 //        this.postProcessingManager.getPipeline()
 
         // This copies the "compatibility" buffer into the main buffer, but leaves the deferred data for later
-        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-        deferredFramebuffer.resolveToAdvancedFbo(AdvancedFbo.getMainFramebuffer());
+//        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+//        deferredFramebuffer.resolveToAdvancedFbo(AdvancedFbo.getMainFramebuffer());
+
+        AdvancedFbo.unbind();
 
         // TODO blit instead of resolve
     }
@@ -115,7 +129,7 @@ public class VeilDeferredRenderer implements ResourceManagerReloadListener, Nati
      * Sets up the renderer state for transparency.
      */
     public void setupTransparency() {
-        if (!this.enabled) {
+        if (!this.enabled || !this.active) {
             return;
         }
 
@@ -133,11 +147,23 @@ public class VeilDeferredRenderer implements ResourceManagerReloadListener, Nati
         transparent.bind(true);
     }
 
+    public void begin() {
+        this.active = true;
+    }
+
+    public void end() {
+        this.active = false;
+    }
+
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
     }
 
     public boolean isEnabled() {
         return this.enabled;
+    }
+
+    public ShaderManager getDeferredShaderManager() {
+        return this.deferredShaderManager;
     }
 }

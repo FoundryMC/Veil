@@ -25,7 +25,6 @@ import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -34,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL20C.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20C.GL_VERTEX_SHADER;
@@ -58,10 +58,9 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
             .registerTypeAdapter(ProgramDefinition.class, new ProgramDefinition.Deserializer())
             .create();
 
-    public static final String FOLDER = "pinwheel/shaders/program";
     public static final FileToIdConverter INCLUDE_LISTER = new FileToIdConverter("pinwheel/shaders/include", ".glsl");
-    public static final FileToIdConverter SHADER_LISTER = FileToIdConverter.json(FOLDER);
-    public static final FileToIdConverter GLSL_CONVERTER = new FileToIdConverter(FOLDER, ".glsl");
+    public static final ShaderSourceSet PROGRAM_SET = new ShaderSourceSet("pinwheel/shaders/program");
+    public static final ShaderSourceSet DEFERRED_SET = new ShaderSourceSet("pinwheel/shaders/deferred");
 
     private static final Map<Integer, String> TYPES = Map.of(
             GL_VERTEX_SHADER, "vertex",
@@ -71,15 +70,8 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
             GL_FRAGMENT_SHADER, "fragment",
             GL_COMPUTE_SHADER, "compute"
     );
-    private static final Map<Integer, FileToIdConverter> EXTENSIONS = Map.of(
-            GL_VERTEX_SHADER, new FileToIdConverter(FOLDER, ".vsh"),
-            GL_TESS_CONTROL_SHADER, new FileToIdConverter(FOLDER, ".tcsh"),
-            GL_TESS_EVALUATION_SHADER, new FileToIdConverter(FOLDER, ".tesh"),
-            GL_GEOMETRY_SHADER, new FileToIdConverter(FOLDER, ".gsh"),
-            GL_FRAGMENT_SHADER, new FileToIdConverter(FOLDER, ".fsh"),
-            GL_COMPUTE_SHADER, new FileToIdConverter(FOLDER, ".csh")
-    );
 
+    private final ShaderSourceSet sourceSet;
     private final ShaderModificationManager shaderModificationManager;
     private final ShaderPreDefinitions definitions;
     private final Map<ResourceLocation, ShaderProgram> shaders;
@@ -91,11 +83,15 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     /**
      * Creates a new shader manager.
      *
+     * @param sourceSet                 The source set to load all shaders from
      * @param shaderModificationManager The manager for shader file modifications
+     * @param shaderPreDefinitions      The set of shader pre-definitions
      */
-    public ShaderManager(@NotNull ShaderModificationManager shaderModificationManager) {
+    public ShaderManager(ShaderSourceSet sourceSet, ShaderModificationManager shaderModificationManager, ShaderPreDefinitions shaderPreDefinitions) {
+        this.sourceSet = sourceSet;
         this.shaderModificationManager = shaderModificationManager;
-        this.definitions = new ShaderPreDefinitions(this::onDefinitionChanged);
+        this.definitions = shaderPreDefinitions;
+        this.definitions.addListener(this::onDefinitionChanged);
         this.shaders = new HashMap<>();
         this.shadersView = Collections.unmodifiableMap(this.shaders);
         this.dirtyShaders = new HashSet<>();
@@ -112,8 +108,8 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         });
     }
 
-    private ProgramDefinition parseDefinition(ResourceLocation id, ResourceProvider provider) throws IOException {
-        try (Reader reader = provider.openAsReader(SHADER_LISTER.idToFile(id))) {
+    private ProgramDefinition parseDefinition(ShaderSourceSet set, ResourceLocation id, ResourceProvider provider) throws IOException {
+        try (Reader reader = provider.openAsReader(set.getShaderDefinitionLister().idToFile(id))) {
             ProgramDefinition definition = GsonHelper.fromJson(GSON, reader, ProgramDefinition.class);
             if (definition.vertex() == null &&
                     definition.tesselationControl() == null &&
@@ -130,19 +126,18 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         }
     }
 
-    private void readShader(ResourceManager resourceManager, Map<ResourceLocation, ProgramDefinition> definitions, Map<ResourceLocation, Resource> shaderSources, ResourceLocation key) {
+    private void readShader(ShaderSourceSet set, ResourceManager resourceManager, Map<ResourceLocation, ProgramDefinition> definitions, Map<ResourceLocation, Resource> shaderSources, ResourceLocation id) {
         Set<ResourceLocation> checkedSources = new HashSet<>();
-        ResourceLocation id = SHADER_LISTER.fileToId(key);
 
         try {
-            ProgramDefinition definition = this.parseDefinition(id, resourceManager);
+            ProgramDefinition definition = this.parseDefinition(set, id, resourceManager);
             if (definitions.put(id, definition) != null) {
                 throw new IllegalStateException("Duplicate shader ignored with ID " + id);
             }
 
             for (Map.Entry<Integer, ResourceLocation> shader : definition.shaders().entrySet()) {
-                FileToIdConverter converter = ShaderManager.getTypeConverter(shader.getKey());
-                ResourceLocation location = converter.idToFile(shader.getValue());
+                FileToIdConverter typeConverter = set.getTypeConverter(shader.getKey());
+                ResourceLocation location = typeConverter.idToFile(shader.getValue());
 
                 if (!checkedSources.add(location)) {
                     continue;
@@ -151,13 +146,12 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 Resource resource = resourceManager.getResourceOrThrow(location);
                 try (InputStream stream = resource.open()) {
                     byte[] source = stream.readAllBytes();
-                    Resource fileResource =
-                            new Resource(resource.source(), () -> new ByteArrayInputStream(source));
+                    Resource fileResource = new Resource(resource.source(), () -> new ByteArrayInputStream(source));
                     shaderSources.put(location, fileResource);
                 }
             }
         } catch (IOException | IllegalArgumentException | JsonParseException e) {
-            LOGGER.error("Couldn't parse shader {} from {}", id, key, e);
+            LOGGER.error("Couldn't parse shader {} from {}", id, set.getShaderDefinitionLister().idToFile(id), e);
         }
     }
 
@@ -188,10 +182,10 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         return shaderSources;
     }
 
-    private void compile(ShaderProgram program, ProgramDefinition definition, ShaderCompiler compiler) {
+    private void compile(ShaderSourceSet set, ShaderProgram program, ProgramDefinition definition, ShaderCompiler compiler) {
         ResourceLocation id = program.getId();
         try {
-            program.compile(new ShaderCompiler.Context(this.definitions, definition), compiler);
+            program.compile(new ShaderCompiler.Context(this.definitions, set, definition), compiler);
         } catch (ShaderException e) {
             LOGGER.error("Failed to create shader {}: {}", id, e.getMessage());
             LOGGER.warn(e.getGlError());
@@ -233,7 +227,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         }
 
         try {
-            this.compile(program, this.parseDefinition(id, provider), compiler);
+            this.compile(this.sourceSet, program, this.parseDefinition(this.sourceSet, id, provider), compiler);
         } catch (Exception e) {
             LOGGER.error("Failed to read shader definition: {}", id, e);
         }
@@ -249,13 +243,6 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     }
 
     /**
-     * @return The manager for all pre-definitions
-     */
-    public ShaderPreDefinitions getDefinitions() {
-        return this.definitions;
-    }
-
-    /**
      * Retrieves a shader by the specified id.
      *
      * @param id The id of the shader to retrieve
@@ -268,17 +255,23 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     /**
      * @return All shader programs registered
      */
-    public @NotNull Map<ResourceLocation, ShaderProgram> getShaders() {
+    public Map<ResourceLocation, ShaderProgram> getShaders() {
         return this.shadersView;
     }
 
-    private ReloadState prepare(ResourceManager resourceManager) {
+    /**
+     * @return The source set all shaders are loaded from
+     */
+    public ShaderSourceSet getSourceSet() {
+        return this.sourceSet;
+    }
+
+    private ReloadState prepare(ResourceManager resourceManager, Collection<ResourceLocation> shaders) {
         Map<ResourceLocation, ProgramDefinition> definitions = new HashMap<>();
         Map<ResourceLocation, Resource> shaderSources = new HashMap<>();
 
-        for (Map.Entry<ResourceLocation, Resource> entry : SHADER_LISTER.listMatchingResources(resourceManager).entrySet()) {
-            ResourceLocation key = entry.getKey();
-            this.readShader(resourceManager, definitions, shaderSources, key);
+        for (ResourceLocation key : shaders) {
+            this.readShader(this.sourceSet, resourceManager, definitions, shaderSources, key);
         }
         shaderSources.putAll(this.readIncludes(resourceManager));
 
@@ -289,37 +282,23 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         this.shaders.values().forEach(ShaderProgram::free);
         this.shaders.clear();
 
-        Map<ResourceLocation, Resource> shaderSources = reloadState.shaderSources();
-        ResourceProvider sourceProvider = loc -> Optional.ofNullable(shaderSources.get(loc));
+        ResourceProvider sourceProvider = loc -> Optional.ofNullable(reloadState.shaderSources().get(loc));
         try (ShaderCompiler compiler = this.addProcessors(ShaderCompiler.cached(sourceProvider))) {
             for (Map.Entry<ResourceLocation, ProgramDefinition> entry : reloadState.definitions().entrySet()) {
                 ResourceLocation id = entry.getKey();
                 ShaderProgram program = ShaderProgram.create(id);
-                this.compile(program, entry.getValue(), compiler);
+                this.compile(this.sourceSet, program, entry.getValue(), compiler);
                 this.shaders.put(id, program);
             }
         }
 
         VeilRenderSystem.finalizeShaderCompilation();
 
-        LOGGER.info("Loaded {} shaders", this.shaders.size());
+        LOGGER.info("Loaded {} shaders from: {}", this.shaders.size(), this.sourceSet.getFolder());
     }
 
-    private ReloadState prepareRecompile(ResourceManager resourceManager, Set<ResourceLocation> shaders) {
-        Map<ResourceLocation, ProgramDefinition> definitions = new HashMap<>();
-        Map<ResourceLocation, Resource> shaderSources = new HashMap<>();
-
-        for (ResourceLocation key : shaders) {
-            this.readShader(resourceManager, definitions, shaderSources, SHADER_LISTER.idToFile(key));
-        }
-        shaderSources.putAll(this.readIncludes(resourceManager));
-
-        return new ReloadState(definitions, shaderSources);
-    }
-
-    private void applyRecompile(ShaderManager.ReloadState reloadState, Set<ResourceLocation> shaders) {
-        Map<ResourceLocation, Resource> shaderSources = reloadState.shaderSources();
-        ResourceProvider sourceProvider = loc -> Optional.ofNullable(shaderSources.get(loc));
+    private void applyRecompile(ShaderManager.ReloadState reloadState, Collection<ResourceLocation> shaders) {
+        ResourceProvider sourceProvider = loc -> Optional.ofNullable(reloadState.shaderSources().get(loc));
         try (ShaderCompiler compiler = this.addProcessors(ShaderCompiler.cached(sourceProvider))) {
             for (Map.Entry<ResourceLocation, ProgramDefinition> entry : reloadState.definitions().entrySet()) {
                 ResourceLocation id = entry.getKey();
@@ -328,7 +307,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                     LOGGER.warn("Failed to recompile shader: {}", id);
                     continue;
                 }
-                this.compile(program, entry.getValue(), compiler);
+                this.compile(this.sourceSet, program, entry.getValue(), compiler);
             }
         }
 
@@ -337,7 +316,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         LOGGER.info("Recompiled {} shaders", shaders.size());
     }
 
-    private void scheduleRecompile() {
+    private void scheduleRecompile(int attempt) {
         Minecraft client = Minecraft.getInstance();
         client.tell(() -> {
             if (!this.recompileFuture.isDone()) {
@@ -349,7 +328,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 shaders = new HashSet<>(this.dirtyShaders);
                 this.dirtyShaders.clear();
             }
-            this.recompileFuture = CompletableFuture.supplyAsync(() -> this.prepareRecompile(client.getResourceManager(), shaders), Util.backgroundExecutor())
+            this.recompileFuture = CompletableFuture.supplyAsync(() -> this.prepare(client.getResourceManager(), shaders), Util.backgroundExecutor())
                     .thenAcceptAsync(state -> this.applyRecompile(state, shaders), client)
                     .handle((value, e) -> {
                         if (e != null) {
@@ -362,7 +341,12 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                             }
                         }
 
-                        this.scheduleRecompile();
+                        if (attempt >= 3) {
+                            LOGGER.error("Failed to recompile shaders after " + attempt + " attempts");
+                            return value;
+                        }
+
+                        this.scheduleRecompile(attempt + 1);
                         return value;
                     });
         });
@@ -382,16 +366,23 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
             return;
         }
 
-        this.scheduleRecompile();
+        this.scheduleRecompile(0);
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> reload(@NotNull PreparationBarrier preparationBarrier, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller prepareProfiler, @NotNull ProfilerFiller applyProfiler, @NotNull Executor backgroundExecutor, @NotNull Executor gameExecutor) {
+    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
         if (this.reloadFuture != null && !this.reloadFuture.isDone()) {
             return this.reloadFuture.thenCompose(preparationBarrier::wait);
         }
         return this.reloadFuture = this.recompileFuture.thenCompose(
-                unused -> CompletableFuture.supplyAsync(() -> this.prepare(resourceManager), backgroundExecutor)
+                unused -> CompletableFuture.supplyAsync(() -> {
+                            FileToIdConverter lister = this.sourceSet.getShaderDefinitionLister();
+                            Set<ResourceLocation> shaderIds = lister.listMatchingResources(resourceManager).keySet()
+                                    .stream()
+                                    .map(lister::fileToId)
+                                    .collect(Collectors.toSet());
+                            return this.prepare(resourceManager, shaderIds);
+                        }, backgroundExecutor)
                         .thenCompose(preparationBarrier::wait)
                         .thenAcceptAsync(this::apply, gameExecutor));
     }
@@ -447,17 +438,6 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     public static String getTypeName(int type) {
         String value = TYPES.get(type);
         return value != null ? value : "0x" + Integer.toHexString(type);
-    }
-
-    /**
-     * Retrieves the id converter of a shader type.
-     *
-     * @param type The GL enum for the type
-     * @return The file type converter or <code>glsl</code> if the type is unknown
-     */
-    public static FileToIdConverter getTypeConverter(int type) {
-        FileToIdConverter value = EXTENSIONS.get(type);
-        return value != null ? value : GLSL_CONVERTER;
     }
 
     @Override

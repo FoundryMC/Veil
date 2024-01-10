@@ -9,6 +9,7 @@ import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.ShaderModificationManager;
+import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -23,6 +24,7 @@ import java.util.List;
 public class VeilRendererImpl implements VeilRenderer, NativeResource {
 
     private final ShaderModificationManager shaderModificationManager;
+    private final ShaderPreDefinitions shaderPreDefinitions;
     private final ShaderManager shaderManager;
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
@@ -33,10 +35,12 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
 
     public VeilRendererImpl(ReloadableResourceManager resourceManager) {
         this.shaderModificationManager = new ShaderModificationManager();
-        this.shaderManager = new ShaderManager(this.shaderModificationManager);
+        this.shaderPreDefinitions = new ShaderPreDefinitions();
+        this.shaderManager = new ShaderManager(ShaderManager.PROGRAM_SET, this.shaderModificationManager, this.shaderPreDefinitions);
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager();
-        this.deferredRenderer = new VeilDeferredRenderer(this.framebufferManager, this.postProcessingManager);
+        ShaderManager deferredShaderManager = new ShaderManager(ShaderManager.DEFERRED_SET, this.shaderModificationManager, this.shaderPreDefinitions);
+        this.deferredRenderer = new VeilDeferredRenderer(deferredShaderManager, this.framebufferManager, this.postProcessingManager);
         this.editorManager = new EditorManager(resourceManager);
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
@@ -55,6 +59,11 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
     @Override
     public ShaderModificationManager getShaderModificationManager() {
         return this.shaderModificationManager;
+    }
+
+    @Override
+    public ShaderPreDefinitions getShaderDefinitions() {
+        return this.shaderPreDefinitions;
     }
 
     @Override

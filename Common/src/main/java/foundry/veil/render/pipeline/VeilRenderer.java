@@ -19,16 +19,14 @@ import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 public interface VeilRenderer {
 
     /**
-     * @return The set of shader pre-definitions. Changes are automatically synced the next frame
-     */
-    default ShaderPreDefinitions shaderDefinitions() {
-        return this.getShaderManager().getDefinitions();
-    }
-
-    /**
      * @return The manager for all custom shader modifications
      */
     ShaderModificationManager getShaderModificationManager();
+
+    /**
+     * @return The set of shader pre-definitions. Changes are automatically synced the next frame
+     */
+    ShaderPreDefinitions getShaderDefinitions();
 
     /**
      * @return The manager for all veil shaders
