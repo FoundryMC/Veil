@@ -18,12 +18,14 @@ public class TextureEditor extends SingleWindowEditor {
 
     private final IntSet texturesSet;
     private final Map<Integer, OpenTexture> openTextures;
+    private final ImBoolean flip;
     private int[] textures;
     private int selectedTexture;
 
     public TextureEditor() {
         this.texturesSet = new IntArraySet();
         this.openTextures = new HashMap<>();
+        this.flip = new ImBoolean();
         this.textures = new int[0];
         this.selectedTexture = 0;
     }
@@ -83,12 +85,15 @@ public class TextureEditor extends SingleWindowEditor {
         ImGui.beginDisabled(this.openTextures.containsKey(selectedId) && this.openTextures.get(selectedId).visible.get());
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.button("Pop Out")) {
-            this.openTextures.put(selectedId, new OpenTexture());
+            this.openTextures.put(selectedId, new OpenTexture(this.flip.get()));
         }
         ImGui.endDisabled();
 
+        ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.checkbox("Flip Y", this.flip);
+
         if (selectedId != 0) {
-            addImage(selectedId);
+            addImage(selectedId, this.flip.get());
         }
     }
 
@@ -112,8 +117,11 @@ public class TextureEditor extends SingleWindowEditor {
                 ImGui.setNextWindowSize(800, 600);
             }
 
+
             if (ImGui.begin("Texture " + id, open)) {
-                addImage(id);
+                ImBoolean flip = texture.flip;
+                ImGui.checkbox("Flip Y", flip);
+                addImage(id, flip.get());
             }
             ImGui.end();
 
@@ -135,12 +143,12 @@ public class TextureEditor extends SingleWindowEditor {
         return !this.openTextures.isEmpty();
     }
 
-    private static void addImage(int selectedId) {
+    private static void addImage(int selectedId, boolean flip) {
         RenderSystem.bindTexture(selectedId);
         int width = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
         int height = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
         float size = ImGui.getContentRegionAvailX();
-        ImGui.image(selectedId, size, size * (float) height / (float) width, 0, 0, 1, 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+        ImGui.image(selectedId, size, size * (float) height / (float) width, 0, flip ? 1 : 0, 1, flip ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
@@ -151,10 +159,10 @@ public class TextureEditor extends SingleWindowEditor {
         this.selectedTexture = 0;
     }
 
-    private record OpenTexture(ImBoolean open, ImBoolean visible) {
+    private record OpenTexture(ImBoolean open, ImBoolean visible, ImBoolean flip) {
 
-        private OpenTexture() {
-            this(new ImBoolean(), new ImBoolean(true));
+        private OpenTexture(boolean flip) {
+            this(new ImBoolean(), new ImBoolean(true), new ImBoolean(flip));
         }
     }
 }
