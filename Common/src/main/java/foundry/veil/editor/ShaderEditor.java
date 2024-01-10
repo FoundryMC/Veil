@@ -4,11 +4,10 @@ import foundry.veil.imgui.CodeEditor;
 import foundry.veil.imgui.VeilLanguageDefinitions;
 import foundry.veil.mixin.client.GameRendererAccessor;
 import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.shader.program.ShaderProgram;
 import imgui.ImGui;
-import imgui.flag.ImGuiDataType;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.minecraft.client.Minecraft;
@@ -23,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -44,15 +44,15 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     private final ImString programFilterText;
     private Pattern programFilter;
     private SelectedProgram selectedProgram;
+    private int selectedTab;
 
     private final ImBoolean editSourceOpen;
-    private final ImBoolean scanIds;
-    private final ImInt scanIdCount;
     private int editProgramId;
     private int editShaderId;
 
     public ShaderEditor() {
         this.shaders = new TreeMap<>();
+
         this.codeEditor = new CodeEditor("Upload");
         this.codeEditor.setSaveCallback((source, errorConsumer) -> {
             if (this.selectedProgram == null || !glIsShader(this.editShaderId)) {
@@ -81,10 +81,9 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.programFilterText = new ImString(128);
         this.programFilter = null;
         this.selectedProgram = null;
+        this.selectedTab = 0;
 
         this.editSourceOpen = new ImBoolean();
-        this.scanIds = new ImBoolean();
-        this.scanIdCount = new ImInt();
         this.editProgramId = 0;
         this.editShaderId = 0;
     }
@@ -179,28 +178,41 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
     private void reloadShaders() {
         this.shaders.clear();
-
         GameRendererAccessor gameRendererAccessor = (GameRendererAccessor) Minecraft.getInstance().gameRenderer;
-        for (ShaderInstance shader : gameRendererAccessor.getShaders().values()) {
-            String name = shader.getName().isBlank() ? Integer.toString(shader.getId()) : shader.getName();
-            this.shaders.put(new ResourceLocation(name), shader.getId());
-        }
+        VeilRenderer veilRenderer = VeilRenderSystem.renderer();
 
-        for (ShaderProgram shader : VeilRenderSystem.renderer().getShaderManager().getShaders().values()) {
-            this.shaders.put(shader.getId(), shader.getProgram());
-        }
+        switch (TabSource.values()[this.selectedTab]) {
+            case VANILLA -> {
+                for (ShaderInstance shader : gameRendererAccessor.getShaders().values()) {
+                    String name = shader.getName().isBlank() ? Integer.toString(shader.getId()) : shader.getName();
+                    this.shaders.put(new ResourceLocation(name), shader.getId());
+                }
+            }
+            case VEIL -> {
+                for (ShaderProgram shader : veilRenderer.getShaderManager().getShaders().values()) {
+                    this.shaders.put(shader.getId(), shader.getProgram());
+                }
+            }
+            case VEIL_DEFERRED -> {
+                for (ShaderProgram shader : veilRenderer.getDeferredRenderer().getDeferredShaderManager().getShaders().values()) {
+                    this.shaders.put(shader.getId(), shader.getProgram());
+                }
+            }
+            case OTHER -> {
+                for (int i = 0; i < 10000; i++) {
+                    if (!glIsProgram(i)) {
+                        continue;
+                    }
 
-        if (this.scanIds.get()) {
-            for (int i = 0; i < this.scanIdCount.get(); i++) {
-                if (!glIsProgram(i)) {
-                    continue;
+                    this.shaders.put(new ResourceLocation("unknown", Integer.toString(i)), i);
                 }
 
-                if (this.shaders.containsValue(i)) {
-                    continue;
+                for (ShaderProgram shader : veilRenderer.getShaderManager().getShaders().values()) {
+                    this.shaders.values().remove(shader.getProgram());
                 }
-
-                this.shaders.put(new ResourceLocation("unknown", Integer.toString(i)), i);
+                for (ShaderInstance shader : gameRendererAccessor.getShaders().values()) {
+                    this.shaders.values().remove(shader.getId());
+                }
             }
         }
 
@@ -216,23 +228,37 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
     @Override
     protected void renderComponents() {
-        ImGui.beginGroup();
+        ImGui.beginChild("Shader Programs", ImGui.getContentRegionAvailX() * 2 / 3, 0);
         ImGui.text("Shader Programs");
 
-        if (ImGui.button("Refresh")) {
+        TabSource[] sources = TabSource.values();
+        if (ImGui.beginTabBar("##controls")) {
+            if (ImGui.tabItemButton("Refresh")) {
+                this.reloadShaders();
+            }
+            for (TabSource source : sources) {
+                ImGui.beginDisabled(!source.active.getAsBoolean());
+                if (ImGui.beginTabItem(source.displayName)) {
+                    if (this.selectedTab != source.ordinal()) {
+                        this.selectedTab = source.ordinal();
+                        this.setSelectedProgram(null);
+                        this.reloadShaders();
+                    }
+                    ImGui.endTabItem();
+                }
+                ImGui.endDisabled();
+            }
+            ImGui.endTabBar();
+        }
+
+        // Deselect the tab if it is no longer active
+        while (!sources[this.selectedTab].active.getAsBoolean() && this.selectedTab > 0) {
+            this.selectedTab--;
+            this.setSelectedProgram(null);
             this.reloadShaders();
         }
-        ImGui.sameLine();
-        ImGui.checkbox("Scan IDs", this.scanIds);
-        if (ImGui.isItemHovered()) {
-            ImGui.setTooltip("Whether to scan raw OpenGL ids for shaders starting from 0 until 'Scan Count'");
-        }
-        ImGui.sameLine();
-        ImGui.beginDisabled(!this.scanIds.get());
-        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() / 3);
-        ImGui.sliderScalar("Scan Count", ImGuiDataType.U16, this.scanIdCount, 1, 1000);
-        ImGui.endDisabled();
 
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
         if (ImGui.inputTextWithHint("##search", "Search...", this.programFilterText)) {
             String regex = this.programFilterText.get();
             this.programFilter = null;
@@ -244,7 +270,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
             }
         }
 
-        if (ImGui.beginListBox("##programs", 0, -Float.MIN_VALUE)) {
+        if (ImGui.beginListBox("##programs", ImGui.getContentRegionAvailX(), -Float.MIN_VALUE)) {
             for (ResourceLocation name : this.shaders.keySet()) {
                 boolean selected = this.selectedProgram != null && name.equals(this.selectedProgram.name);
 
@@ -262,7 +288,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
             ImGui.endListBox();
         }
-        ImGui.endGroup();
+        ImGui.endChild();
 
         ImGui.sameLine();
         ImGui.beginGroup();
@@ -321,5 +347,24 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     }
 
     private record SelectedProgram(ResourceLocation name, int programId, Map<Integer, Integer> shaders) {
+    }
+
+    private enum TabSource {
+        VANILLA("Vanilla"),
+        VEIL("Veil"),
+        VEIL_DEFERRED("Veil Deferred", () -> VeilRenderSystem.renderer().getDeferredRenderer().isEnabled()),
+        OTHER("Unknown");
+
+        private final String displayName;
+        private final BooleanSupplier active;
+
+        TabSource(String displayName) {
+            this(displayName, () -> true);
+        }
+
+        TabSource(String displayName, BooleanSupplier active) {
+            this.displayName = displayName;
+            this.active = active;
+        }
     }
 }
