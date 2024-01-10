@@ -15,7 +15,7 @@ public class ForgeVeilPlatform implements VeilPlatform {
 
     @Override
     public boolean isModLoaded(String modId) {
-        return ModList.get().isLoaded(modId);
+        return FMLLoader.getLoadingModList().getModFileById(modId) != null;
     }
 
     @Override
