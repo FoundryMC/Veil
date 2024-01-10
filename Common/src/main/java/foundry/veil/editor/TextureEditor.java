@@ -143,20 +143,20 @@ public class TextureEditor extends SingleWindowEditor {
         return !this.openTextures.isEmpty();
     }
 
-    private static void addImage(int selectedId, boolean flip) {
-        RenderSystem.bindTexture(selectedId);
-        int width = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
-        int height = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
-        float size = ImGui.getContentRegionAvailX();
-        ImGui.image(selectedId, size, size * (float) height / (float) width, 0, flip ? 1 : 0, 1, flip ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
     @Override
     public void onHide() {
         super.onHide();
         this.texturesSet.clear();
         this.textures = new int[0];
         this.selectedTexture = 0;
+    }
+
+    private static void addImage(int selectedId, boolean flip) {
+        RenderSystem.bindTexture(selectedId);
+        int width = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+        int height = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+        float size = ImGui.getContentRegionAvailX();
+        ImGui.image(selectedId, size, size * (float) height / (float) width, 0, flip ? 1 : 0, 1, flip ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private record OpenTexture(ImBoolean open, ImBoolean visible, ImBoolean flip) {
