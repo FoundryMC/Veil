@@ -5,8 +5,10 @@ import foundry.veil.imgui.VeilLanguageDefinitions;
 import foundry.veil.mixin.client.GameRendererAccessor;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.render.shader.program.ShaderProgram;
 import imgui.ImGui;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -18,10 +20,7 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +44,9 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     private Pattern programFilter;
     private SelectedProgram selectedProgram;
     private int selectedTab;
+
+    private final ImString addDefinitionText;
+    private final Set<String> removedDefinitions;
 
     private final ImBoolean editSourceOpen;
     private int editProgramId;
@@ -82,6 +84,9 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.programFilter = null;
         this.selectedProgram = null;
         this.selectedTab = 0;
+
+        this.addDefinitionText = new ImString(128);
+        this.removedDefinitions = new HashSet<>(1);
 
         this.editSourceOpen = new ImBoolean();
         this.editProgramId = 0;
@@ -228,6 +233,8 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
 
     @Override
     protected void renderComponents() {
+        this.removedDefinitions.clear();
+
         ImGui.beginChild("Shader Programs", ImGui.getContentRegionAvailX() * 2 / 3, 0);
         ImGui.text("Shader Programs");
 
@@ -290,18 +297,57 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         }
         ImGui.endChild();
 
+        ShaderPreDefinitions definitions = VeilRenderSystem.renderer().getShaderDefinitions();
         ImGui.sameLine();
-        ImGui.beginGroup();
-        ImGui.text("Open Source");
+        if (ImGui.beginChild("Panel", 0, ImGui.getContentRegionAvailY())) {
+            if (ImGui.beginChild("Open Source", 0, ImGui.getContentRegionAvailY() / 2)) {
+                ImGui.text("Open Source");
 
-        this.openShaderButton("Vertex Shader", GL_VERTEX_SHADER);
-        this.openShaderButton("Tesselation Control Shader", GL_TESS_CONTROL_SHADER);
-        this.openShaderButton("Tesselation Evaluation Shader", GL_TESS_EVALUATION_SHADER);
-        this.openShaderButton("Geometry Shader", GL_GEOMETRY_SHADER);
-        this.openShaderButton("Fragment Shader", GL_FRAGMENT_SHADER);
-        this.openShaderButton("Compute Shader", GL_COMPUTE_SHADER);
+                this.openShaderButton("Vertex Shader", GL_VERTEX_SHADER);
+                this.openShaderButton("Tesselation Control Shader", GL_TESS_CONTROL_SHADER);
+                this.openShaderButton("Tesselation Evaluation Shader", GL_TESS_EVALUATION_SHADER);
+                this.openShaderButton("Geometry Shader", GL_GEOMETRY_SHADER);
+                this.openShaderButton("Fragment Shader", GL_FRAGMENT_SHADER);
+                this.openShaderButton("Compute Shader", GL_COMPUTE_SHADER);
+            }
+            ImGui.endChild();
 
-        ImGui.endGroup();
+            if (ImGui.beginChild("Shader Definitions", 0, ImGui.getContentRegionAvailY())) {
+                ImGui.text("Shader Definitions:");
+                ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+                if (ImGui.inputTextWithHint("##add_definition", "name = value", this.addDefinitionText, ImGuiInputTextFlags.EnterReturnsTrue)) {
+                    definitions.define(this.addDefinitionText.get().trim());
+                    this.addDefinitionText.clear();
+                }
+                if (ImGui.beginListBox("##definitions", -Float.MIN_VALUE, ImGui.getContentRegionAvailY())) {
+                    for (Map.Entry<String, String> entry : definitions.getDefinitions().entrySet()) {
+                        String name = entry.getKey();
+                        String value = entry.getValue();
+
+                        ImGui.pushID(name);
+                        ImGui.text(value);
+
+                        float size = ImGui.getTextLineHeightWithSpacing();
+                        ImGui.sameLine();
+                        ImGui.dummy(ImGui.getContentRegionAvailX() - ImGui.getStyle().getCellPaddingX() * 2 - size, 0);
+                        ImGui.sameLine();
+                        if (ImGui.button("X", size, size)) {
+                            this.removedDefinitions.add(name);
+                        }
+
+                        ImGui.popID();
+                    }
+
+                    ImGui.endListBox();
+                }
+            }
+            ImGui.endChild();
+        }
+        ImGui.endChild();
+
+        for (String name : this.removedDefinitions) {
+            definitions.remove(name);
+        }
     }
 
     @Override

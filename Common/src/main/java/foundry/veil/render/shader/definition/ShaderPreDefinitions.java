@@ -15,6 +15,7 @@ public class ShaderPreDefinitions {
 
     private final Set<Consumer<String>> definitionCallbacks;
     private final Map<String, String> definitions;
+    private final Map<String, String> definitionsView;
     private final Map<String, String> staticDefinitions;
 
     /**
@@ -23,6 +24,7 @@ public class ShaderPreDefinitions {
     public ShaderPreDefinitions() {
         this.definitionCallbacks = new HashSet<>();
         this.definitions = new HashMap<>();
+        this.definitionsView = Collections.unmodifiableMap(this.definitions);
         this.staticDefinitions = new HashMap<>();
     }
 
@@ -132,5 +134,12 @@ public class ShaderPreDefinitions {
      */
     public @Nullable String getDefinition(String name) {
         return this.definitions.get(name);
+    }
+
+    /**
+     * @return A view of all definitions
+     */
+    public Map<String, String> getDefinitions() {
+        return this.definitions;
     }
 }
