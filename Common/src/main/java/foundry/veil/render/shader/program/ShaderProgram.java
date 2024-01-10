@@ -2,6 +2,7 @@ package foundry.veil.render.shader.program;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.render.shader.ShaderManager;
+import foundry.veil.render.shader.compiler.CompiledShader;
 import foundry.veil.render.shader.compiler.ShaderCompiler;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
@@ -53,9 +54,9 @@ public interface ShaderProgram extends NativeResource, MutableShaderUniformAcces
     void compile(ShaderCompiler.Context context, ShaderCompiler compiler) throws Exception;
 
     /**
-     * @return The shader types attached to this program
+     * @return The shaders attached to this program
      */
-    Set<Integer> getShaders();
+    Set<CompiledShader> getShaders();
 
     /**
      * @return All shader definitions this program depends on

@@ -45,7 +45,7 @@ import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
 public class ShaderProgramImpl implements ShaderProgram {
 
     private final ResourceLocation id;
-    private final Set<Integer> shaders;
+    private final Set<CompiledShader> shaders;
     private final Map<CharSequence, Integer> uniforms;
     private final Map<CharSequence, Integer> blocks;
     private final Map<CharSequence, Integer> textures;
@@ -75,6 +75,10 @@ public class ShaderProgramImpl implements ShaderProgram {
     }
 
     private void clearShader() {
+        if (this.program != 0) {
+            // The shaders are already marked for deletion, they just have to be unlinked since the program isn't deleted
+            this.shaders.forEach(shader -> glDetachShader(this.program, shader.id()));
+        }
         this.shaders.clear();
         this.uniforms.clear();
         this.blocks.clear();
@@ -95,14 +99,11 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         try {
-            Set<CompiledShader> compiledShaders = new HashSet<>();
-
             Map<Integer, ResourceLocation> shaders = definition.shaders();
             for (Map.Entry<Integer, ResourceLocation> entry : shaders.entrySet()) {
                 CompiledShader shader = compiler.compile(context, entry.getKey(), entry.getValue());
                 glAttachShader(this.program, shader.id());
-                this.shaders.add(entry.getKey());
-                compiledShaders.add(shader);
+                this.shaders.add(shader);
             }
 
             // Fragment shaders aren't strictly necessary if the fragment output isn't used,
@@ -111,8 +112,7 @@ public class ShaderProgramImpl implements ShaderProgram {
             if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) && !shaders.containsKey(GL_FRAGMENT_SHADER)) {
                 CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER, "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
                 glAttachShader(this.program, shader.id());
-                this.shaders.add(GL_FRAGMENT_SHADER);
-                compiledShaders.add(shader);
+                this.shaders.add(shader);
             }
 
             glLinkProgram(this.program);
@@ -122,7 +122,7 @@ public class ShaderProgramImpl implements ShaderProgram {
             }
 
             this.bind();
-            compiledShaders.forEach(shader -> {
+            this.shaders.forEach(shader -> {
                 shader.apply(this);
                 this.definitionDependencies.addAll(shader.definitionDependencies());
             });
@@ -135,15 +135,15 @@ public class ShaderProgramImpl implements ShaderProgram {
 
     @Override
     public void free() {
+        this.clearShader();
         if (this.program > 0) {
             glDeleteProgram(this.program);
             this.program = 0;
         }
-        this.clearShader();
     }
 
     @Override
-    public Set<Integer> getShaders() {
+    public Set<CompiledShader> getShaders() {
         return this.shaders;
     }
 
