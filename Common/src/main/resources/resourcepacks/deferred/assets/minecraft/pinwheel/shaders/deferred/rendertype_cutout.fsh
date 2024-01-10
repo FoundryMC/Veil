@@ -24,9 +24,8 @@ void main() {
     if (color.a < 0.1) {
         discard;
     }
-//    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
     fragColor = vec4(0.0);
-    fragAlbedo = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+    fragAlbedo = color;
     fragNormal = vec4(normal, 0.0);
     fragMaterial = vec4(0.0);
     fragEmissive = vec4(0.0);

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -91,6 +92,8 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        profiler.push("veil_deferred");
         switch (this.state) {
             case DISABLED -> {
             }
@@ -113,6 +116,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
                 transparent.bind(true);
             }
         }
+        profiler.pop();
 
         // Temporary hack until we blit
 //        deferredFramebuffer.bindDraw(false);
@@ -128,11 +132,14 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        profiler.push("veil_deferred");
         switch (this.state) {
             case DISABLED -> {
             }
             case OPAQUE, TRANSLUCENT -> AdvancedFbo.unbind();
         }
+        profiler.pop();
     }
 
     @ApiStatus.Internal
@@ -157,11 +164,16 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        profiler.push("veil_deferred");
+
         // Copy opaque depth to transparency, so it doesn't draw on top
         AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
         if (deferredFramebuffer != null) {
             deferredFramebuffer.resolveToAdvancedFbo(transparent, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         }
+
+        profiler.pop();
     }
 
     @ApiStatus.Internal
@@ -170,7 +182,10 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        profiler.push("veil_deferred");
         this.end();
+        profiler.pop();
 
 //        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
 //        if (deferredFramebuffer != null) {

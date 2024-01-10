@@ -1,16 +1,7 @@
 #version 330
 
-uniform sampler2D Sampler0;
-
-uniform vec4 ColorModulator;
-uniform float FogStart;
-uniform float FogEnd;
-uniform vec4 FogColor;
-
-in vec4 vertexColor;
-in vec2 texCoord0;
+flat in vec4 color;
 in vec2 texCoord2;
-in vec3 normal;
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragAlbedo;
@@ -20,13 +11,9 @@ layout(location = 4) out vec4 fragEmissive;
 layout(location = 5) out vec4 fragVanillaLight;
 
 void main() {
-    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-    if (color.a < 0.5) {
-        discard;
-    }
     fragColor = vec4(0.0);
     fragAlbedo = color;
-    fragNormal = vec4(normal, 0.0);
+    fragNormal = vec4(0.0, 1.0, 0.0, 0.0);
     fragMaterial = vec4(0.0);
     fragEmissive = vec4(0.0);
     fragVanillaLight = vec4(texCoord2, 0.0, 0.0);
