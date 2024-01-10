@@ -64,7 +64,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
             glCompileShader(this.editShaderId);
             if (glGetShaderi(this.editShaderId, GL_COMPILE_STATUS) != GL_TRUE) {
                 String log = glGetShaderInfoLog(this.editShaderId);
-                this.parseErrors(source, log).forEach(errorConsumer);
+                parseErrors(source, log).forEach(errorConsumer);
                 System.out.println(log);
                 return;
             }
@@ -72,7 +72,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
             glLinkProgram(this.editProgramId);
             if (glGetProgrami(this.editProgramId, GL_LINK_STATUS) != GL_TRUE) {
                 String log = glGetProgramInfoLog(this.editProgramId);
-                this.parseErrors(source, log).forEach(errorConsumer);
+                parseErrors(source, log).forEach(errorConsumer);
                 System.out.println(log);
             }
         });
@@ -116,28 +116,8 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         this.codeEditor.show(glGetShaderSource(shader));
     }
 
-    private Map<Integer, String> parseErrors(String source, String log) {
-        Map<Integer, Map<Integer, String>> logErrors = new HashMap<>();
-        for (String line : log.split("\n")) {
-            Matcher matcher = ERROR_PARSER.matcher(line);
-            if (!matcher.find()) {
-                continue;
-            }
-
-            try {
-                int sourceNumber = Integer.parseInt(matcher.group(1));
-                int lineNumber = Integer.parseInt(matcher.group(2));
-
-                Map<Integer, String> errors = logErrors.computeIfAbsent(sourceNumber, unused -> new HashMap<>());
-                if (errors.containsKey(lineNumber)) {
-                    continue;
-                }
-
-                String error = matcher.group(3);
-                errors.put(lineNumber, error);
-            } catch (Throwable ignored) {
-            }
-        }
+    private static Map<Integer, String> parseErrors(String source, String log) {
+        Map<Integer, Map<Integer, String>> logErrors = parseLogErrors(log);
 
         Map<Integer, String> foundErrors = new HashMap<>();
         int sourceId = 0;
@@ -170,6 +150,31 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
         }
 
         return foundErrors;
+    }
+
+    private static Map<Integer, Map<Integer, String>> parseLogErrors(String log) {
+        Map<Integer, Map<Integer, String>> logErrors = new HashMap<>();
+        for (String line : log.split("\n")) {
+            Matcher matcher = ERROR_PARSER.matcher(line);
+            if (!matcher.find()) {
+                continue;
+            }
+
+            try {
+                int sourceNumber = Integer.parseInt(matcher.group(1));
+                int lineNumber = Integer.parseInt(matcher.group(2));
+
+                Map<Integer, String> errors = logErrors.computeIfAbsent(sourceNumber, unused -> new HashMap<>());
+                if (errors.containsKey(lineNumber)) {
+                    continue;
+                }
+
+                String error = matcher.group(3);
+                errors.put(lineNumber, error);
+            } catch (Throwable ignored) {
+            }
+        }
+        return logErrors;
     }
 
     private void reloadShaders() {
