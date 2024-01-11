@@ -2,12 +2,16 @@ package foundry.veil.render.deferred;
 
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
+import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
+import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
+import foundry.veil.render.wrapper.CullFrustum;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -22,18 +26,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11C.GL_NEAREST;
+import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL20C.glDrawBuffers;
+import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT0;
 
 /**
  * <p>Handles mixing the regular deferred pipeline and the forward-rendered transparency pipeline.</p>
  * <p>The rendering pipeline goes in this order:</p>
  * <ul>
  *     <li>Opaque Shaders</li>
- *     <li>Opaque post-processing ({@link PostProcessingManager#OPAQUE_POST})</li>
+ *     <li>Opaque post-processing ({@link VeilDeferredRenderer#OPAQUE_POST})</li>
  *     <li>Light Shaders via {@link LightRenderer}</li>
- *     <li>Light post-processing ({@link PostProcessingManager#LIGHT_POST})</li>
- *     <li>Transparency Shaders ({@link PostProcessingManager#TRANSPARENT_BLIT})</li>
+ *     <li>Light post-processing ({@link VeilDeferredRenderer#LIGHT_POST})</li>
+ *     <li>Transparency Shaders ({@link VeilDeferredRenderer#TRANSPARENT_POST})</li>
  *     <li>Skybox Shader(s) via {@link SkyRenderer}</li>
  *     <li>Final post-processing via {@link PostProcessingManager}</li>
  * </ul>
@@ -44,12 +49,19 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
+
+    public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
+    public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
+    public static final ResourceLocation TRANSPARENT_POST = Veil.veilPath("core/transparent");
+    public static final ResourceLocation SCREEN_POST = Veil.veilPath("core/screen");
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final ShaderManager deferredShaderManager;
     private final ShaderPreDefinitions shaderPreDefinitions;
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
+    private final LightRenderer lightRenderer;
 
     private boolean enabled;
     private RendererState state;
@@ -59,6 +71,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         this.shaderPreDefinitions = shaderPreDefinitions;
         this.framebufferManager = framebufferManager;
         this.postProcessingManager = postProcessingManager;
+        this.lightRenderer = new LightRenderer(framebufferManager);
+
+        this.enabled = false;
         this.state = RendererState.INACTIVE;
     }
 
@@ -69,7 +84,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             this.enabled = active;
             if (active) {
                 LOGGER.info("Deferred Renderer Enabled");
-                // TODO setup
+                this.lightRenderer.addLight(new DirectionalLight());
             } else {
                 LOGGER.info("Deferred Renderer Disabled");
                 return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
@@ -88,6 +103,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         this.enabled = false;
         this.state = RendererState.DISABLED;
         this.deferredShaderManager.close();
+        this.lightRenderer.free();
     }
 
     @ApiStatus.Internal
@@ -177,20 +193,55 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     }
 
     @ApiStatus.Internal
-    public void blit() {
+    public void blit(CullFrustum frustum) {
         if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
         profiler.push("veil_deferred");
-        this.end();
-        profiler.pop();
 
-//        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-//        if (deferredFramebuffer != null) {
-//            deferredFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
-//        }
+        this.end();
+
+        AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+        AdvancedFbo post = this.framebufferManager.getFramebuffer(VeilFramebuffers.POST);
+        if (deferred == null || post == null) {
+            this.free();
+            return;
+        }
+
+        PostPipeline opaquePipeline = this.postProcessingManager.getPipeline(OPAQUE_POST);
+        if (opaquePipeline != null) {
+            this.postProcessingManager.runPipeline(opaquePipeline);
+        }
+
+//        deferred.bindDraw(false);
+//        glDrawBuffers(GL_COLOR_ATTACHMENT0);
+//        post.resolveToAdvancedFbo(deferred, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//        deferred.bindDraw(false);
+//        glDrawBuffers(deferred.getDrawBuffers());
+
+//        post.bind(false);
+
+        AdvancedFbo light = this.framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
+        if (light == null) {
+            this.free();
+            return;
+        }
+
+        light.bind(true);
+        this.lightRenderer.render(frustum);
+
+        PostPipeline lightPipeline = this.postProcessingManager.getPipeline(LIGHT_POST);
+        if (lightPipeline != null) {
+            this.postProcessingManager.runPipeline(lightPipeline);
+        }
+
+        light.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+
+//        post.bind(true);
+
+        profiler.pop();
     }
 
     @ApiStatus.Internal
@@ -205,10 +256,11 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
         if (this.state == RendererState.DISABLED) {
-            consumer.accept("Disabled");
+            consumer.accept(ChatFormatting.RED + "Disabled");
         }
         boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
         consumer.accept("Vanilla Entity Lights: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
+        this.lightRenderer.addDebugInfo(consumer);
     }
 
     /**

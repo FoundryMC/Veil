@@ -1,5 +1,6 @@
 package foundry.veil.render.shader;
 
+import foundry.veil.Veil;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,38 +40,39 @@ public final class VeilShaders {
 //    public static final ResourceLocation PARTICLE_SOLID = particle("solid");
 //    public static final ResourceLocation PARTICLE_CUTOUT = particle("cutout");
 //    public static final ResourceLocation PARTICLE_TRANSLUCENT = particle("translucent");
-//
-//    public static final ResourceLocation LIGHT_AMBIENT = light("ambient");
-//    public static final ResourceLocation LIGHT_DIRECTIONAL = light("directional");
-//    public static final ResourceLocation LIGHT_SKY = light("sky");
-//
+
+    public static final ResourceLocation LIGHT_AMBIENT = light("ambient");
+    public static final ResourceLocation LIGHT_DIRECTIONAL = light("directional");
+    public static final ResourceLocation LIGHT_POINT = light("point");
+    public static final ResourceLocation LIGHT_SKY = light("sky");
+
 //    public static final ResourceLocation UI_MAP_FOG = ui("map_fog");
 
     private static @NotNull ResourceLocation core(@NotNull String name) {
-        return new ResourceLocation("starfall", "core/" + name);
+        return Veil.veilPath("core/" + name);
     }
 
     private static @NotNull ResourceLocation renderType(@NotNull String name) {
-        return new ResourceLocation("starfall", "rendertype/" + name);
+        return Veil.veilPath("rendertype/" + name);
     }
 
     private static @NotNull ResourceLocation block(@NotNull String name) {
-        return new ResourceLocation("starfall", "block/" + name);
+        return Veil.veilPath("block/" + name);
     }
 
     private static @NotNull ResourceLocation model(@NotNull String name) {
-        return new ResourceLocation("starfall", "model/" + name);
+        return Veil.veilPath("model/" + name);
     }
 
     private static @NotNull ResourceLocation particle(@NotNull String name) {
-        return new ResourceLocation("starfall", "particle/" + name);
+        return Veil.veilPath("particle/" + name);
     }
 
     private static @NotNull ResourceLocation light(@NotNull String name) {
-        return new ResourceLocation("starfall", "light/" + name);
+        return Veil.veilPath("light/" + name);
     }
 
     private static @NotNull ResourceLocation ui(@NotNull String name) {
-        return new ResourceLocation("starfall", "ui/" + name);
+        return Veil.veilPath("ui/" + name);
     }
 }

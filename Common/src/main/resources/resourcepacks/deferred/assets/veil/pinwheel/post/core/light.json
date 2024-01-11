@@ -1,0 +1,25 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "veil:light/mix",
+	  "in": "veil:light",
+      "out": "swap"
+    },
+    {
+      "type": "veil:copy",
+      "in": "swap",
+      "out": "veil:light"
+    }
+  ],
+  "framebuffers": {
+    "swap": {
+      "depth": false,
+      "color_buffers": [
+        {
+          "format": "RGBA16F"
+        }
+      ]
+    }
+  }
+}

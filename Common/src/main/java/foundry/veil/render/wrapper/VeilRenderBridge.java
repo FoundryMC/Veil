@@ -5,6 +5,7 @@ import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;
@@ -15,6 +16,16 @@ import java.util.function.Supplier;
  * @author Ocelot
  */
 public interface VeilRenderBridge {
+
+    /**
+     * Creates a cull frustum helper from the specified vanilla frustum.
+     *
+     * @param frustum The frustum to use for the cull frustum
+     * @return The cull frustum
+     */
+    static CullFrustum create(Frustum frustum) {
+        return (CullFrustum) frustum;
+    }
 
     /**
      * Wraps the specified render target in a new advanced fbo.

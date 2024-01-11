@@ -78,7 +78,7 @@ public class DeferredEditor extends SingleWindowEditor {
 
     private static void drawBuffers(AdvancedFbo buffer) {
         if (buffer != null) {
-            int columns = (int) Math.ceil(Math.sqrt(buffer.getColorAttachments() + 1));
+            int columns = (int) Math.ceil(Math.sqrt(buffer.getColorAttachments() + (buffer.isDepthTextureAttachment() ? 1 : 0)));
             float width = ImGui.getContentRegionAvailX() / columns;
             float height = width * buffer.getHeight() / buffer.getWidth();
             int i;

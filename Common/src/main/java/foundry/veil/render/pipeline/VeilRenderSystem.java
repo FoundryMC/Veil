@@ -115,9 +115,9 @@ public final class VeilRenderSystem {
      *
      * @param shader The shader instance to use
      */
-    public static void setShader(ShaderProgram shader) {
+    public static void setShader(@Nullable ShaderProgram shader) {
         VeilRenderSystem.setShader(() -> shader);
-        VeilRenderSystem.shaderLocation = shader.getId();
+        VeilRenderSystem.shaderLocation = shader != null ? shader.getId() : null;
     }
 
     /**
@@ -126,7 +126,10 @@ public final class VeilRenderSystem {
      * @param shader The reference to the shader to use
      */
     public static void setShader(Supplier<ShaderProgram> shader) {
-        RenderSystem.setShader(() -> shader.get().toShaderInstance());
+        RenderSystem.setShader(() -> {
+            ShaderProgram program = shader.get();
+            return program != null ? program.toShaderInstance() : null;
+        });
     }
 
     /**

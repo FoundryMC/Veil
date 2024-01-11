@@ -1,0 +1,21 @@
+{
+  "vertex": "veil:light/blit",
+  "fragment": "veil:light/mix",
+  "textures": {
+    "CompatibilitySampler": {
+      "type": "framebuffer",
+      "name": "veil:deferred",
+      "sampler": 0
+    },
+    "AlbedoSampler": {
+      "type": "framebuffer",
+      "name": "veil:deferred",
+      "sampler": 1
+    },
+    "LightSampler": {
+      "type": "framebuffer",
+      "name": "veil:light",
+      "sampler": 0
+    }
+  }
+}

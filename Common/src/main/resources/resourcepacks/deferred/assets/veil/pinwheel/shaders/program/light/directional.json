@@ -1,0 +1,4 @@
+{
+  "vertex": "veil:light/blit",
+  "fragment": "veil:light/directional"
+}
