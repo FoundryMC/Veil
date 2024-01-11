@@ -1,5 +1,5 @@
 {
-  "vertex": "rendertype_armor_cutout_no_cull",
+  "vertex": "entity",
   "fragment": "rendertype_armor_cutout_no_cull",
   "definitions": [
     "DISABLE_VANILLA_ENTITY_LIGHT"

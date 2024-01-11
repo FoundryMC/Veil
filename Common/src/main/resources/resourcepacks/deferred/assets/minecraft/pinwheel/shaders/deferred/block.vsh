@@ -1,5 +1,7 @@
 #version 330
 
+#include veil:light
+
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec4 Color;
 layout(location = 2) in vec2 UV0;
@@ -16,6 +18,7 @@ uniform mat3 NormalMat;
 out vec4 vertexColor;
 out vec2 texCoord0;
 out vec2 texCoord2;
+out vec4 lightmapColor;
 out vec3 normal;
 
 void main() {
@@ -24,6 +27,7 @@ void main() {
 
     vertexColor = Color;
     texCoord0 = UV0;
-    texCoord2 = vec2(UV2 / 256.0);
+    texCoord2 = minecraft_sample_lightmap_coords(UV2);
+    lightmapColor = texture(Sampler2, texCoord2);
     normal = NormalMat * Normal;
 }

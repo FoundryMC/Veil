@@ -23,18 +23,20 @@ out vec4 vertexColor;
 out vec2 texCoord0;
 out vec2 texCoord2;
 out vec4 overlayColor;
+out vec4 lightmapColor;
 out vec3 normal;
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 
-    #ifdef DISABLE_VANILLA_ENTITY_LIGHT
     vertexColor = Color;
-    #else
-    vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
-    #endif
     texCoord0 = UV0;
-    texCoord2 = vec2(UV2 / 16.0);
+    texCoord2 = vec2(UV2 / 256.0);
     overlayColor = texelFetch(Sampler1, UV1, 0);
+    lightmapColor = texelFetch(Sampler2, UV2 / 16, 0);
     normal = NormalMat * Normal;
+
+    #ifndef DISABLE_VANILLA_ENTITY_LIGHT
+    lightmapColor *= minecraft_mix_light(Light0_Direction, Light1_Direction, normal);
+    #endif
 }

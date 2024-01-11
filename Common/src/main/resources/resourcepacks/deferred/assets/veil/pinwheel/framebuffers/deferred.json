@@ -24,6 +24,10 @@
     {
       "name": "VanillaLightSampler",
       "format": "RG8"
+    },
+    {
+      "name": "LightMapSampler",
+      "format": "RGB8"
     }
   ]
 }
