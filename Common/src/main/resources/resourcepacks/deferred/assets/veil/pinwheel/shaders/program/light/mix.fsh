@@ -14,4 +14,5 @@ void main() {
     vec3 light = texture(LightSampler, screenUv).rgb;
     fragColor = vec4(albedo.rgb * light, albedo.a);
     fragColor.rgb = mix(fragColor.rgb, compatibility.rgb, compatibility.a);
+    fragColor.a += compatibility.a * (1.0 - fragColor.a);
 }

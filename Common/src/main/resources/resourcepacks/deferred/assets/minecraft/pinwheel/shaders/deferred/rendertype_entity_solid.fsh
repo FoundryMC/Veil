@@ -23,7 +23,7 @@ void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     fragColor = vec4(0.0);
-    fragAlbedo = color;
+    fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 0.0);
     fragMaterial = vec4(0.0);
     fragEmissive = vec4(0.0);

@@ -19,10 +19,9 @@ layout(location = 5) out vec4 fragVanillaLight;
 layout(location = 6) out vec4 fragLightMap;
 
 void main() {
-//    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-//    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
     fragColor = vec4(0.0);
-    fragAlbedo = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+    fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 0.0);
     fragMaterial = vec4(0.0);
     fragEmissive = vec4(0.0);

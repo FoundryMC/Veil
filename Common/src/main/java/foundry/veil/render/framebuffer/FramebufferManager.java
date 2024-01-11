@@ -36,6 +36,7 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 public class FramebufferManager extends CodecReloadListener<FramebufferDefinition> implements NativeResource {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final ResourceLocation MAIN = new ResourceLocation("main");
 
     public static final Codec<ResourceLocation> FRAMEBUFFER_CODEC = Codec.STRING.comapFlatMap(name -> {
         try {
@@ -84,6 +85,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
             }
         });
         AdvancedFbo.unbind();
+        this.framebuffers.put(MAIN, AdvancedFbo.getMainFramebuffer());
     }
 
     /**
@@ -93,6 +95,10 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     public void clear() {
         RenderSystem.clearColor(0.0F, 0.0F, 0.0F, 0.0F);
         this.framebuffers.forEach((name, fbo) -> {
+            if (MAIN.equals(name)) {
+                return;
+            }
+
             fbo.bindDraw(false);
             fbo.clear();
         });
@@ -129,6 +135,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
 
     @Override
     public void free() {
+        this.framebuffers.remove(MAIN);
         this.framebuffers.values().forEach(AdvancedFbo::free);
         this.framebuffers.clear();
     }

@@ -27,7 +27,7 @@ void main() {
         discard;
     }
     fragColor = vec4(0.0);
-    fragAlbedo = color;
+    fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 0.0);
     fragMaterial = vec4(0.0);
     fragEmissive = vec4(0.0);

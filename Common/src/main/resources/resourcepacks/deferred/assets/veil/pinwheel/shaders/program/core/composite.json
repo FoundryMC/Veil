@@ -1,0 +1,26 @@
+{
+  "vertex": "veil:blit_screen",
+  "fragment": "veil:core/composite",
+  "textures": {
+    "LightSampler": {
+      "type": "framebuffer",
+      "name": "veil:light"
+    },
+    "MainSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main"
+    },
+    "MainDepthSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main:depth"
+    },
+    "TransparentSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent"
+    },
+    "TransparentDepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent:depth"
+    }
+  }
+}

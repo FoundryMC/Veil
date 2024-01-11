@@ -1,10 +1,10 @@
 package foundry.veil.render.deferred;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
 import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.post.PostPipeline;
@@ -26,9 +26,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import static org.lwjgl.opengl.GL11C.*;
-import static org.lwjgl.opengl.GL20C.glDrawBuffers;
-import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT0;
+import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11C.GL_NEAREST;
 
 /**
  * <p>Handles mixing the regular deferred pipeline and the forward-rendered transparency pipeline.</p>
@@ -52,6 +51,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
+    public static final ResourceLocation MIX_LIGHT = Veil.veilPath("core/mix_light");
     public static final ResourceLocation TRANSPARENT_POST = Veil.veilPath("core/transparent");
     public static final ResourceLocation SCREEN_POST = Veil.veilPath("core/screen");
 
@@ -101,7 +101,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     @Override
     public void free() {
         this.enabled = false;
-        this.state = RendererState.DISABLED;
+        this.state = RendererState.INACTIVE;
         this.deferredShaderManager.close();
         this.lightRenderer.free();
     }
@@ -232,14 +232,30 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         light.bind(true);
         this.lightRenderer.render(frustum);
 
+        // Applies effects to the final light image
         PostPipeline lightPipeline = this.postProcessingManager.getPipeline(LIGHT_POST);
         if (lightPipeline != null) {
             this.postProcessingManager.runPipeline(lightPipeline);
         }
 
-        light.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+        // Merges the diffuse and light textures
+        PostPipeline mixLightPipeline = this.postProcessingManager.getPipeline(MIX_LIGHT);
+        if (mixLightPipeline != null) {
+            this.postProcessingManager.runPipeline(mixLightPipeline);
+        }
 
-//        post.bind(true);
+        AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(post);
+
+        // Draws the final opaque image and transparent onto the background
+        PostPipeline screenPipeline = this.postProcessingManager.getPipeline(SCREEN_POST);
+        if (screenPipeline != null) {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            this.postProcessingManager.runPipeline(screenPipeline);
+            RenderSystem.disableBlend();
+        }
+
+        post.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
 
         profiler.pop();
     }
