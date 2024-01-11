@@ -35,6 +35,7 @@ public class EditorManager implements PreparableReloadListener {
         this.add(new TextureEditor());
         this.add(new OpenCLEditor());
         this.add(new DeviceInfoViewer());
+        this.add(new DeferredEditor());
 
         resourceManager.registerReloadListener(this);
     }

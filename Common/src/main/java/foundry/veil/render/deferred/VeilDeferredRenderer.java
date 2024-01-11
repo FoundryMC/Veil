@@ -7,6 +7,8 @@ import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
+import foundry.veil.render.shader.definition.ShaderPreDefinitions;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -16,7 +18,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -42,20 +43,23 @@ import static org.lwjgl.opengl.GL11C.GL_NEAREST;
 public class VeilDeferredRenderer implements PreparableReloadListener, NativeResource {
 
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
+    public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private final ShaderManager deferredShaderManager;
+    private final ShaderPreDefinitions shaderPreDefinitions;
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
-    private final ShaderManager deferredShaderManager;
 
     private boolean enabled;
     private RendererState state;
 
-    public VeilDeferredRenderer(ShaderManager deferredShaderManager, FramebufferManager framebufferManager, PostProcessingManager postProcessingManager) {
+    public VeilDeferredRenderer(ShaderManager deferredShaderManager, ShaderPreDefinitions shaderPreDefinitions, FramebufferManager framebufferManager, PostProcessingManager postProcessingManager) {
+        this.deferredShaderManager = deferredShaderManager;
+        this.shaderPreDefinitions = shaderPreDefinitions;
         this.framebufferManager = framebufferManager;
         this.postProcessingManager = postProcessingManager;
-        this.deferredShaderManager = deferredShaderManager;
-        this.state = RendererState.DISABLED;
+        this.state = RendererState.INACTIVE;
     }
 
     @Override
@@ -88,15 +92,13 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void setup() {
-        if (!this.enabled) {
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
         profiler.push("veil_deferred");
         switch (this.state) {
-            case DISABLED -> {
-            }
             case OPAQUE -> {
                 AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
                 if (deferredFramebuffer == null) {
@@ -128,15 +130,13 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void clear() {
-        if (!this.enabled) {
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
         profiler.push("veil_deferred");
         switch (this.state) {
-            case DISABLED -> {
-            }
             case OPAQUE, TRANSLUCENT -> AdvancedFbo.unbind();
         }
         profiler.pop();
@@ -144,7 +144,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void beginOpaque() {
-        if (!this.enabled) {
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
@@ -153,7 +153,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void beginTranslucent() {
-        if (!this.enabled) {
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
@@ -178,7 +178,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void blit() {
-        if (!this.enabled) {
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
 
@@ -195,11 +195,34 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void end() {
-        this.state = RendererState.DISABLED;
+        if (!this.isEnabled() || this.state == RendererState.DISABLED) {
+            return;
+        }
+
+        this.state = RendererState.INACTIVE;
     }
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
+        if (this.state == RendererState.DISABLED) {
+            consumer.accept("Disabled");
+        }
+        boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
+        consumer.accept("Vanilla Entity Lights: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
+    }
+
+    /**
+     * Allows the renderer to run normally.
+     */
+    public void enable() {
+        this.state = RendererState.INACTIVE;
+    }
+
+    /**
+     * Forces the renderer off.
+     */
+    public void disable() {
+        this.state = RendererState.DISABLED;
     }
 
     /**
@@ -213,7 +236,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * @return Whether the deferred renderer is currently actively being used
      */
     public boolean isActive() {
-        return this.isEnabled() && this.state != RendererState.DISABLED;
+        return this.isEnabled() && this.state.isActive();
     }
 
     public RendererState getRendererState() {
@@ -225,6 +248,10 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     }
 
     public enum RendererState {
-        DISABLED, OPAQUE, TRANSLUCENT
+        DISABLED, INACTIVE, OPAQUE, TRANSLUCENT;
+
+        public boolean isActive() {
+            return this == OPAQUE || this == TRANSLUCENT;
+        }
     }
 }

@@ -40,7 +40,7 @@ public class VeilRendererImpl implements VeilRenderer, NativeResource {
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager();
         ShaderManager deferredShaderManager = new ShaderManager(ShaderManager.DEFERRED_SET, this.shaderModificationManager, this.shaderPreDefinitions);
-        this.deferredRenderer = new VeilDeferredRenderer(deferredShaderManager, this.framebufferManager, this.postProcessingManager);
+        this.deferredRenderer = new VeilDeferredRenderer(deferredShaderManager,this.shaderPreDefinitions, this.framebufferManager, this.postProcessingManager);
         this.editorManager = new EditorManager(resourceManager);
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();

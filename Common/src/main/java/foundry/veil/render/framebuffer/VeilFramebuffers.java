@@ -15,9 +15,9 @@ public final class VeilFramebuffers {
 
     public static final ResourceLocation MAIN = new ResourceLocation("main");
     public static final ResourceLocation FIRST_PERSON = buffer("first_person");
+    public static final ResourceLocation DEFERRED = buffer("deferred");
     public static final ResourceLocation TRANSPARENT = buffer("transparent");
     public static final ResourceLocation LIGHT = buffer("light");
-    public static final ResourceLocation DEFERRED = buffer("deferred");
     public static final ResourceLocation POST = buffer("post");
 
     private static ResourceLocation buffer(String name) {
