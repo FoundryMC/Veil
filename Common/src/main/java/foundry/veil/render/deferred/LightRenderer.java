@@ -143,6 +143,13 @@ public class LightRenderer implements NativeResource {
     }
 
     /**
+     * @return The deferred framebuffer being read from
+     */
+    public @Nullable AdvancedFbo getFramebuffer() {
+        return this.framebuffer;
+    }
+
+    /**
      * @return The main light in the scene or <code>null</code> if there is no primary directional light
      */
     public @Nullable DirectionalLight getMainLight() {

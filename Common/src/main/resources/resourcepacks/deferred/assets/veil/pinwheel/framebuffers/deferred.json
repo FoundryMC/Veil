@@ -18,10 +18,6 @@
       "format": "R16F"
     },
     {
-      "name": "EmissiveSampler",
-      "format": "RGBA8"
-    },
-    {
       "name": "VanillaLightSampler",
       "format": "RG8"
     },

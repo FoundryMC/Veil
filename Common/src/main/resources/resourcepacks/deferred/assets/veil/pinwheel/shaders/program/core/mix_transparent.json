@@ -1,6 +1,9 @@
 {
   "vertex": "veil:blit_screen",
-  "fragment": "veil:core/mix",
+  "fragment": "veil:core/mix_transparent",
+  "definitions": [
+    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
+  ],
   "textures": {
     "CompatibilitySampler": {
       "type": "framebuffer",
@@ -11,6 +14,11 @@
       "type": "framebuffer",
       "name": "veil:transparent",
       "sampler": 1
+    },
+    "LightMapAlbedoSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent",
+      "sampler": 6
     },
     "LightSampler": {
       "type": "framebuffer",

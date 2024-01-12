@@ -25,7 +25,7 @@ public class DeferredShaderStateCache {
      */
     public boolean setupRenderState(@Nullable ShaderInstance shaderInstance) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
-        if (shaderInstance == null || !deferredRenderer.isActive() || deferredRenderer.getRendererState() == VeilDeferredRenderer.RendererState.TRANSLUCENT) {
+        if (shaderInstance == null || !deferredRenderer.isActive()) {
             this.veil$oldShader = null;
             this.veil$deferredShader = null;
             return false;

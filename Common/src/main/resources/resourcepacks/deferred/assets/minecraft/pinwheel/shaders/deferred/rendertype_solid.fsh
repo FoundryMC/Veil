@@ -1,5 +1,3 @@
-#version 330
-
 uniform sampler2D Sampler0;
 
 uniform vec4 ColorModulator;
@@ -14,17 +12,15 @@ layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragAlbedo;
 layout(location = 2) out vec4 fragNormal;
 layout(location = 3) out vec4 fragMaterial;
-layout(location = 4) out vec4 fragEmissive;
-layout(location = 5) out vec4 fragVanillaLight;
-layout(location = 6) out vec4 fragLightMap;
+layout(location = 4) out vec4 fragVanillaLight;
+layout(location = 5) out vec4 fragLightMap;
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
     fragColor = vec4(0.0);
     fragAlbedo = vec4(color.rgb, 1.0);
-    fragNormal = vec4(normal, 0.0);
+    fragNormal = vec4(normal, 1.0);
     fragMaterial = vec4(0.0);
-    fragEmissive = vec4(0.0);
-    fragVanillaLight = vec4(texCoord2, 0.0, 0.0);
+    fragVanillaLight = vec4(texCoord2, 0.0, 1.0);
     fragLightMap = lightmapColor;
 }

@@ -29,9 +29,8 @@ public class ModelBlockRendererMixin {
 
     @Inject(method = "tesselateBlock", at = @At("HEAD"))
     public void captureState(BlockAndTintGetter $$0, BakedModel $$1, BlockState blockState, BlockPos $$3, PoseStack $$4, VertexConsumer $$5, boolean $$6, RandomSource $$7, long $$8, int $$9, CallbackInfo ci) {
-        RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
-        veil$DEFERRED.set(deferredRenderer.isEnabled() && deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED && (!(renderType instanceof RenderType.CompositeRenderType compositeRenderType) || compositeRenderType.state().transparencyState == RenderStateShard.NO_TRANSPARENCY));
+        veil$DEFERRED.set(deferredRenderer.isEnabled() && deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED);
     }
 
     @Inject(method = "tesselateBlock", at = @At("RETURN"))

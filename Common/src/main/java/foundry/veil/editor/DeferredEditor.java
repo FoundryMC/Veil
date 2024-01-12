@@ -16,6 +16,7 @@ public class DeferredEditor extends SingleWindowEditor {
 
     private final ImBoolean enableDeferredPipeline = new ImBoolean(true);
     private final ImBoolean enableEntityLight = new ImBoolean(true);
+    private final ImBoolean bakeTransparentLight = new ImBoolean(true);
 
     @Override
     public String getDisplayName() {
@@ -28,6 +29,7 @@ public class DeferredEditor extends SingleWindowEditor {
         ShaderPreDefinitions definitions = renderer.getShaderDefinitions();
         VeilDeferredRenderer deferredRenderer = renderer.getDeferredRenderer();
 
+        this.enableDeferredPipeline.set(deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED);
         if (ImGui.checkbox("Enable Pipeline", this.enableDeferredPipeline)) {
             if (this.enableDeferredPipeline.get()) {
                 deferredRenderer.enable();
@@ -37,11 +39,22 @@ public class DeferredEditor extends SingleWindowEditor {
         }
 
         ImGui.sameLine();
+        this.enableEntityLight.set(definitions.getDefinition(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null);
         if (ImGui.checkbox("Enable Vanilla Entity Lights", this.enableEntityLight)) {
             if (this.enableEntityLight.get()) {
                 definitions.remove(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
             } else {
                 definitions.define(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
+            }
+        }
+
+        ImGui.sameLine();
+        this.bakeTransparentLight.set(definitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null);
+        if (ImGui.checkbox("Bake Transparency Lightmaps", this.bakeTransparentLight)) {
+            if (this.bakeTransparentLight.get()) {
+                definitions.define(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+            } else {
+                definitions.remove(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
             }
         }
 

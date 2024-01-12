@@ -313,7 +313,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
 
         VeilRenderSystem.finalizeShaderCompilation();
 
-        LOGGER.info("Recompiled {} shaders", shaders.size());
+        LOGGER.info("Recompiled {} shaders from: {}", shaders.size(), this.sourceSet.getFolder());
     }
 
     private void scheduleRecompile(int attempt) {

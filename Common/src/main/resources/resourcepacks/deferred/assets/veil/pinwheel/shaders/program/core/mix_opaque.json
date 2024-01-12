@@ -1,6 +1,6 @@
 {
   "vertex": "veil:blit_screen",
-  "fragment": "veil:core/mix",
+  "fragment": "veil:core/mix_opaque",
   "textures": {
     "CompatibilitySampler": {
       "type": "framebuffer",
