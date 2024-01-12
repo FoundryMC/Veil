@@ -57,16 +57,5 @@ extendable method com/mojang/blaze3d/shaders/Uniform setMat4x4 (FFFFFFFFFFFFFFFF
 extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Matrix4f;)V
 extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Matrix3f;)V
 
-# RenderType
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState depthTestState Lnet/minecraft/client/renderer/RenderStateShard$DepthTestStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState cullState Lnet/minecraft/client/renderer/RenderStateShard$CullStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState lightmapState Lnet/minecraft/client/renderer/RenderStateShard$LightmapStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState overlayState Lnet/minecraft/client/renderer/RenderStateShard$OverlayStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState layeringState Lnet/minecraft/client/renderer/RenderStateShard$LayeringStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState outputState Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState texturingState Lnet/minecraft/client/renderer/RenderStateShard$TexturingStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState lineState Lnet/minecraft/client/renderer/RenderStateShard$LineStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState colorLogicState Lnet/minecraft/client/renderer/RenderStateShard$ColorLogicStateShard;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState outlineProperty Lnet/minecraft/client/renderer/RenderType$OutlineProperty;
-# accessible field net/minecraft/client/renderer/RenderType$CompositeState states Lcom/google/common/collect/ImmutableList;
+# Deferred Renderer
 mutable field net/minecraft/client/renderer/RenderType$CompositeState states Lcom/google/common/collect/ImmutableList;
