@@ -67,25 +67,21 @@ public class DeferredEditor extends SingleWindowEditor {
         ImGui.sameLine();
         this.enableEntityLight.set(definitions.getDefinition(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null);
         if (ImGui.checkbox("Enable Vanilla Entity Lights", this.enableEntityLight)) {
-            client.tell(() -> {
-                if (this.enableEntityLight.get()) {
-                    definitions.remove(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
-                } else {
-                    definitions.define(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
-                }
-            });
+            if (this.enableEntityLight.get()) {
+                definitions.remove(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
+            } else {
+                definitions.define(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
+            }
         }
 
         ImGui.sameLine();
         this.bakeTransparentLight.set(definitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null);
         if (ImGui.checkbox("Bake Transparency Lightmaps", this.bakeTransparentLight)) {
-            client.tell(() -> {
-                if (this.bakeTransparentLight.get()) {
-                    definitions.define(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
-                } else {
-                    definitions.remove(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
-                }
-            });
+            if (this.bakeTransparentLight.get()) {
+                definitions.define(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+            } else {
+                definitions.remove(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+            }
         }
 
         ImGui.text("Framebuffers");

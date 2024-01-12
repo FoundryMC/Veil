@@ -7,6 +7,7 @@ import foundry.veil.render.shader.program.ShaderProgram;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -24,11 +25,27 @@ public class DeferredShaderStateCache {
      * @return Whether the state was handled and set
      */
     public boolean setupRenderState(@Nullable ShaderInstance shaderInstance) {
+        ShaderInstance shader = this.getShader(shaderInstance);
+        if (shader != shaderInstance) {
+            RenderSystem.setShader(() -> shader);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves the shader that should be used if using defered rendering
+     *
+     * @param shaderInstance The shader to get the render state for
+     * @return The shader to use
+     */
+    @Contract("null -> null")
+    public ShaderInstance getShader(ShaderInstance shaderInstance) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
         if (shaderInstance == null || !deferredRenderer.isActive()) {
             this.veil$oldShader = null;
             this.veil$deferredShader = null;
-            return false;
+            return shaderInstance;
         }
 
         if (!Objects.equals(this.veil$oldShader, shaderInstance)) {
@@ -36,11 +53,7 @@ public class DeferredShaderStateCache {
             ShaderProgram deferredShader = deferredRenderer.getDeferredShaderManager().getShader(new ResourceLocation(shaderInstance.getName()));
             this.veil$deferredShader = deferredShader != null ? deferredShader.toShaderInstance() : null;
         }
-        if (this.veil$deferredShader != null) {
-            RenderSystem.setShader(() -> this.veil$deferredShader);
-            return true;
-        }
+        return Objects.requireNonNullElse(this.veil$deferredShader, shaderInstance);
 
-        return false;
     }
 }

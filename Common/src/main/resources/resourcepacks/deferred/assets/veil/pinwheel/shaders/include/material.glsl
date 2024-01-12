@@ -11,6 +11,8 @@
 #define PARTICLE 0.8
 #define ARMOR_CUTOUT 0.9
 #define LEAD 1.0
+#define CLOUD 1.1
+#define WORLD_BORDER 1.2
 
 bool isBlock(float material) {
     return material >= BLOCK_SOLID && material <= BLOCK_TRANSLUCENT;

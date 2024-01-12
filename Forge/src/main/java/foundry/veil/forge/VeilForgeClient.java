@@ -2,10 +2,13 @@ package foundry.veil.forge;
 
 import foundry.veil.VeilClient;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
+import foundry.veil.render.VeilVanillaShaders;
 import foundry.veil.render.pipeline.VeilRenderSystem;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -24,6 +27,7 @@ public class VeilForgeClient {
         modEventBus.addListener(VeilForgeClient::registerKeys);
         modEventBus.addListener(VeilForgeClient::registerGuiOverlays);
         modEventBus.addListener(VeilForgeClient::registerListeners);
+        modEventBus.addListener(VeilForgeClient::registerShaders);
     }
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
@@ -37,5 +41,13 @@ public class VeilForgeClient {
 
     private static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", OVERLAY);
+    }
+
+    private static void registerShaders(RegisterShadersEvent event) {
+        try {
+            VeilVanillaShaders.registerShaders((id, vertexFormat, loadCallback) -> event.registerShader(new ShaderInstance(event.getResourceProvider(), id, vertexFormat), loadCallback));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

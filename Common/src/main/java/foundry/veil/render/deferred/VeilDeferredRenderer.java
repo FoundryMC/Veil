@@ -86,7 +86,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             if (active) {
                 LOGGER.info("Deferred Renderer Enabled");
 //                this.lightRenderer.addLight(new DirectionalLight());
-//                this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+                this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
             } else {
                 LOGGER.info("Deferred Renderer Disabled");
                 return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
