@@ -7,7 +7,6 @@ import foundry.veil.render.deferred.light.Light;
 import foundry.veil.render.deferred.light.LightTypeRenderer;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
-import foundry.veil.render.framebuffer.VeilFramebuffers;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.render.wrapper.CullFrustum;
@@ -35,6 +34,7 @@ public class LightRenderer implements NativeResource {
     private final Map<Light.Type, LightData<?>> lights;
 
     private DirectionalLight mainLight;
+    private AdvancedFbo framebuffer;
 
     /**
      * Creates a new light renderer.
@@ -56,12 +56,10 @@ public class LightRenderer implements NativeResource {
             return;
         }
 
-        AdvancedFbo deferredBuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-
         shader.bind();
-        if (deferredBuffer != null) {
-            shader.setFramebufferSamplers(deferredBuffer);
-            shader.setVector("ScreenSize", deferredBuffer.getWidth(), deferredBuffer.getHeight());
+        if (this.framebuffer != null) {
+            shader.setFramebufferSamplers(this.framebuffer);
+            shader.setVector("ScreenSize", this.framebuffer.getWidth(), this.framebuffer.getHeight());
         } else {
             shader.setVector("ScreenSize", 1.0F, 1.0F);
         }
@@ -71,9 +69,11 @@ public class LightRenderer implements NativeResource {
     /**
      * Renders all lights into the light framebuffer.
      *
-     * @param frustum The frustum to cull lights with
+     * @param frustum     The frustum to cull lights with
+     * @param framebuffer The framebuffer to sample from
      */
-    public void render(CullFrustum frustum) {
+    public void render(CullFrustum frustum, AdvancedFbo framebuffer) {
+        this.framebuffer = framebuffer;
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE,
@@ -83,6 +83,7 @@ public class LightRenderer implements NativeResource {
         this.lights.values().forEach(data -> data.render(this, frustum));
 
         RenderSystem.disableBlend();
+        this.framebuffer = null;
     }
 
     /**

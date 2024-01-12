@@ -33,6 +33,7 @@ public class BlitPostStage extends FramebufferPostStage {
     ).apply(instance, (shader, in, out, clear) -> new BlitPostStage(shader, in.orElse(null), out, clear)));
 
     private final ResourceLocation shader;
+    private boolean printedError;
 
     /**
      * Creates a new blit post stage that applies the specified shader.
@@ -52,7 +53,10 @@ public class BlitPostStage extends FramebufferPostStage {
     public void apply(Context context) {
         ShaderProgram shader = VeilRenderSystem.renderer().getShaderManager().getShader(this.shader);
         if (shader == null) {
-            LOGGER.warn("Failed to find post shader: " + this.shader);
+            if (!this.printedError) {
+                this.printedError = true;
+                LOGGER.warn("Failed to find post shader: " + this.shader);
+            }
             return;
         }
 

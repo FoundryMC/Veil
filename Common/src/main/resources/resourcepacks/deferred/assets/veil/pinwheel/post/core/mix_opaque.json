@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "veil:core/mix_opaque",
+	  "in": "veil:light",
+      "out": "veil:deferred_final"
+    }
+  ]
+}

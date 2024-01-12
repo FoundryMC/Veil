@@ -51,7 +51,8 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
-    public static final ResourceLocation MIX_LIGHT = Veil.veilPath("core/mix_light");
+    public static final ResourceLocation OPAQUE_MIX = Veil.veilPath("core/mix_opaque");
+    public static final ResourceLocation TRANSPARENT_MIX = Veil.veilPath("core/mix_transparent");
     public static final ResourceLocation TRANSPARENT_POST = Veil.veilPath("core/transparent");
     public static final ResourceLocation SCREEN_POST = Veil.veilPath("core/screen");
 
@@ -192,6 +193,29 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         profiler.pop();
     }
 
+    private void run(CullFrustum frustum, AdvancedFbo deferred, AdvancedFbo light, ResourceLocation post, ResourceLocation mix) {
+        PostPipeline postPipeline = this.postProcessingManager.getPipeline(post);
+        if (postPipeline != null) {
+            this.postProcessingManager.runPipeline(postPipeline);
+        }
+
+        light.bind(true);
+        light.clear();
+        this.lightRenderer.render(frustum, deferred);
+
+        // Applies effects to the final light image
+        PostPipeline lightPipeline = this.postProcessingManager.getPipeline(LIGHT_POST);
+        if (lightPipeline != null) {
+            this.postProcessingManager.runPipeline(lightPipeline);
+        }
+
+        // Applies light to the image
+        PostPipeline mixOpaquePipeline = this.postProcessingManager.getPipeline(mix);
+        if (mixOpaquePipeline != null) {
+            this.postProcessingManager.runPipeline(mixOpaquePipeline);
+        }
+    }
+
     @ApiStatus.Internal
     public void blit(CullFrustum frustum) {
         if (!this.isEnabled() || this.state == RendererState.DISABLED) {
@@ -204,47 +228,16 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         this.end();
 
         AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-        AdvancedFbo post = this.framebufferManager.getFramebuffer(VeilFramebuffers.POST);
-        if (deferred == null || post == null) {
-            this.free();
-            return;
-        }
-
-        PostPipeline opaquePipeline = this.postProcessingManager.getPipeline(OPAQUE_POST);
-        if (opaquePipeline != null) {
-            this.postProcessingManager.runPipeline(opaquePipeline);
-        }
-
-//        deferred.bindDraw(false);
-//        glDrawBuffers(GL_COLOR_ATTACHMENT0);
-//        post.resolveToAdvancedFbo(deferred, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-//        deferred.bindDraw(false);
-//        glDrawBuffers(deferred.getDrawBuffers());
-
-//        post.bind(false);
-
+        AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
         AdvancedFbo light = this.framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
-        if (light == null) {
+        AdvancedFbo post = this.framebufferManager.getFramebuffer(VeilFramebuffers.POST);
+        if (deferred == null || transparent == null || light == null || post == null) {
             this.free();
             return;
         }
 
-        light.bind(true);
-        this.lightRenderer.render(frustum);
-
-        // Applies effects to the final light image
-        PostPipeline lightPipeline = this.postProcessingManager.getPipeline(LIGHT_POST);
-        if (lightPipeline != null) {
-            this.postProcessingManager.runPipeline(lightPipeline);
-        }
-
-        // Merges the diffuse and light textures
-        PostPipeline mixLightPipeline = this.postProcessingManager.getPipeline(MIX_LIGHT);
-        if (mixLightPipeline != null) {
-            this.postProcessingManager.runPipeline(mixLightPipeline);
-        }
-
-        AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(post);
+        this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
+        this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
 
         // Draws the final opaque image and transparent onto the background
         PostPipeline screenPipeline = this.postProcessingManager.getPipeline(SCREEN_POST);

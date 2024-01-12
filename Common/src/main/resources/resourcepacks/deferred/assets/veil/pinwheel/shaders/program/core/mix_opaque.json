@@ -1,6 +1,6 @@
 {
-  "vertex": "veil:light/blit",
-  "fragment": "veil:light/mix",
+  "vertex": "veil:blit_screen",
+  "fragment": "veil:core/mix",
   "textures": {
     "CompatibilitySampler": {
       "type": "framebuffer",
@@ -16,6 +16,10 @@
       "type": "framebuffer",
       "name": "veil:light",
       "sampler": 0
+    },
+    "DepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:deferred:depth"
     }
   }
 }

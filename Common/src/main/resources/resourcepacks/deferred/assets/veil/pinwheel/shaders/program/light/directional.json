@@ -1,4 +1,4 @@
 {
-  "vertex": "veil:light/blit",
+  "vertex": "veil:blit_screen",
   "fragment": "veil:light/directional"
 }

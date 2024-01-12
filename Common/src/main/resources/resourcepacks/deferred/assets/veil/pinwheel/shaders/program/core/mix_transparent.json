@@ -1,0 +1,25 @@
+{
+  "vertex": "veil:blit_screen",
+  "fragment": "veil:core/mix",
+  "textures": {
+    "CompatibilitySampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent",
+      "sampler": 0
+    },
+    "AlbedoSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent",
+      "sampler": 1
+    },
+    "LightSampler": {
+      "type": "framebuffer",
+      "name": "veil:light",
+      "sampler": 0
+    },
+    "DepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent:depth"
+    }
+  }
+}

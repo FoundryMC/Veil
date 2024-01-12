@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "veil:core/mix_transparent",
+	  "in": "veil:light",
+      "out": "veil:transparent_final"
+    }
+  ]
+}

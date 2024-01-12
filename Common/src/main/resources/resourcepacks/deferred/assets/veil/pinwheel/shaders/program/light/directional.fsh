@@ -2,7 +2,7 @@
 #include veil:deferred_utils
 #include veil:color_utilities
 
-in vec2 screenUv;
+in vec2 texCoord;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
@@ -18,7 +18,7 @@ uniform vec3 LightDirection;
 out vec4 fragColor;
 
 float rimLight(vec3 lightDir, float worldDepth, float size) {
-    vec2 uv = screenUv + lightDir.xy * size * (VeilCamera.ProjMat[1][1] / -worldDepth);
+    vec2 uv = texCoord + lightDir.xy * size * (VeilCamera.ProjMat[1][1] / -worldDepth);
     float depthSample = texture(DiffuseDepthSampler, uv).r;
     float worldDepth2 = depthSampleToWorldDepth(depthSample);
     return clamp(pow(max(worldDepth2 - worldDepth, 0.0) * 0.15, 2.0), 0.0, 1.0);
@@ -26,9 +26,9 @@ float rimLight(vec3 lightDir, float worldDepth, float size) {
 
 void main() {
     // sample buffers
-    vec3 normalVS = texture(NormalSampler, screenUv).xyz;
+    vec3 normalVS = texture(NormalSampler, texCoord).xyz;
     //vec2 lightMapUv = texture(VanillaLightSampler, screenUv).xy;
-    float depthSample = texture(DiffuseDepthSampler, screenUv).r;
+    float depthSample = texture(DiffuseDepthSampler, texCoord).r;
     float worldDepth = depthSampleToWorldDepth(depthSample);
     vec3 lightDirectionVS = worldToViewSpaceDirection(LightDirection);
 

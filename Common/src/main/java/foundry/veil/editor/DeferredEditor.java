@@ -10,6 +10,7 @@ import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.jetbrains.annotations.Nullable;
 
 public class DeferredEditor extends SingleWindowEditor {
 
@@ -48,66 +49,58 @@ public class DeferredEditor extends SingleWindowEditor {
         if (ImGui.beginTabBar("Framebuffers")) {
             FramebufferManager framebufferManager = renderer.getFramebufferManager();
             AdvancedFbo deferredBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+            AdvancedFbo deferredFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED_FINAL);
             AdvancedFbo transparentBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
+            AdvancedFbo transparentFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_FINAL);
             AdvancedFbo lightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
 
-            ImGui.beginDisabled(deferredBuffer == null);
-            if (ImGui.beginTabItem("Deferred")) {
-                drawBuffers(deferredBuffer);
-                ImGui.endTabItem();
-            }
-            ImGui.endDisabled();
-
-            ImGui.beginDisabled(transparentBuffer == null);
-            if (ImGui.beginTabItem("Transparent")) {
-                drawBuffers(transparentBuffer);
-                ImGui.endTabItem();
-            }
-            ImGui.endDisabled();
-
-            ImGui.beginDisabled(lightBuffer == null);
-            if (ImGui.beginTabItem("Light")) {
-                drawBuffers(lightBuffer);
-                ImGui.endTabItem();
-            }
-            ImGui.endDisabled();
+            drawBuffers("Opaque", deferredBuffer);
+            drawBuffers("Opaque Final", deferredFinalBuffer);
+            drawBuffers("Transparent", transparentBuffer);
+            drawBuffers("Transparent Final", transparentFinalBuffer);
+            drawBuffers("Light", lightBuffer);
 
             ImGui.endTabBar();
         }
     }
 
-    private static void drawBuffers(AdvancedFbo buffer) {
-        if (buffer != null) {
-            int columns = (int) Math.ceil(Math.sqrt(buffer.getColorAttachments() + (buffer.isDepthTextureAttachment() ? 1 : 0)));
-            float width = ImGui.getContentRegionAvailX() / columns;
-            float height = width * buffer.getHeight() / buffer.getWidth();
-            int i;
-            for (i = 0; i < buffer.getColorAttachments(); i++) {
-                if (!buffer.isColorTextureAttachment(i)) {
-                    continue;
+    private static void drawBuffers(String name, @Nullable AdvancedFbo buffer) {
+        ImGui.beginDisabled(buffer == null);
+        if (ImGui.beginTabItem(name)) {
+            if (buffer != null) {
+                int columns = (int) Math.ceil(Math.sqrt(buffer.getColorAttachments() + (buffer.isDepthTextureAttachment() ? 1 : 0)));
+                float width = ImGui.getContentRegionAvailX() / columns;
+                float height = width * buffer.getHeight() / buffer.getWidth();
+                int i;
+                for (i = 0; i < buffer.getColorAttachments(); i++) {
+                    if (!buffer.isColorTextureAttachment(i)) {
+                        continue;
+                    }
+
+                    if (i % columns != 0) {
+                        ImGui.sameLine();
+                    }
+                    ImGui.beginGroup();
+                    AdvancedFboTextureAttachment attachment = buffer.getColorTextureAttachment(i);
+                    ImGui.text(attachment.getName() != null ? attachment.getName() : "Attachment " + i);
+                    ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+                    ImGui.endGroup();
                 }
 
-                if (i % columns != 0) {
-                    ImGui.sameLine();
+                if (buffer.isDepthTextureAttachment()) {
+                    if (i % columns != 0) {
+                        ImGui.sameLine();
+                    }
+                    ImGui.beginGroup();
+                    AdvancedFboTextureAttachment attachment = buffer.getDepthTextureAttachment();
+                    ImGui.text(attachment.getName() != null ? attachment.getName() : "Depth");
+                    ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+                    ImGui.endGroup();
                 }
-                ImGui.beginGroup();
-                AdvancedFboTextureAttachment attachment = buffer.getColorTextureAttachment(i);
-                ImGui.text(attachment.getName() != null ? attachment.getName() : "Attachment " + i);
-                ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
-                ImGui.endGroup();
             }
-
-            if (buffer.isDepthTextureAttachment()) {
-                if (i % columns != 0) {
-                    ImGui.sameLine();
-                }
-                ImGui.beginGroup();
-                AdvancedFboTextureAttachment attachment = buffer.getDepthTextureAttachment();
-                ImGui.text(attachment.getName() != null ? attachment.getName() : "Depth");
-                ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
-                ImGui.endGroup();
-            }
+            ImGui.endTabItem();
         }
+        ImGui.endDisabled();
     }
 
     @Override

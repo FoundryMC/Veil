@@ -2,9 +2,13 @@
   "vertex": "veil:blit_screen",
   "fragment": "veil:core/composite",
   "textures": {
-    "LightSampler": {
+    "DeferredSampler": {
       "type": "framebuffer",
-      "name": "veil:light"
+      "name": "veil:deferred_final"
+    },
+    "DeferredDepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:deferred_final:depth"
     },
     "MainSampler": {
       "type": "framebuffer",
@@ -16,11 +20,11 @@
     },
     "TransparentSampler": {
       "type": "framebuffer",
-      "name": "veil:transparent"
+      "name": "veil:transparent_final"
     },
     "TransparentDepthSampler": {
       "type": "framebuffer",
-      "name": "veil:transparent:depth"
+      "name": "veil:transparent_final:depth"
     }
   }
 }
