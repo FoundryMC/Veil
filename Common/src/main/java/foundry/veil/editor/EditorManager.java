@@ -93,6 +93,21 @@ public class EditorManager implements PreparableReloadListener {
         }
     }
 
+    @ApiStatus.Internal
+    public void renderLast() {
+        if (!this.enabled) {
+            return;
+        }
+
+        for (Map.Entry<Editor, ImBoolean> entry : this.editors.entrySet()) {
+            Editor editor = entry.getKey();
+            ImBoolean enabled = entry.getValue();
+            if (enabled.get()) {
+                editor.renderLast();
+            }
+        }
+    }
+
     public void show(Editor editor) {
         ImBoolean enabled = this.editors.get(editor);
         if (enabled != null && !enabled.get()) {

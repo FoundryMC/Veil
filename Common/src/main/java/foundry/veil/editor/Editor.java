@@ -22,6 +22,12 @@ public interface Editor extends NativeResource {
     void render();
 
     /**
+     * Called just before the imgui state is drawn to the screen
+     */
+    default void renderLast() {
+    }
+
+    /**
      * @return The visible display name of this editor
      */
     String getDisplayName();

@@ -1,15 +1,20 @@
 package foundry.veil.editor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.render.shader.TextureDownloader;
 import imgui.ImGui;
 import imgui.flag.ImGuiDir;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL20C.glIsTexture;
@@ -21,6 +26,8 @@ public class TextureEditor extends SingleWindowEditor {
     private final ImBoolean flip;
     private int[] textures;
     private int selectedTexture;
+    private boolean downloadTextures;
+    private CompletableFuture<?> downloadFuture;
 
     public TextureEditor() {
         this.texturesSet = new IntArraySet();
@@ -28,6 +35,7 @@ public class TextureEditor extends SingleWindowEditor {
         this.flip = new ImBoolean();
         this.textures = new int[0];
         this.selectedTexture = 0;
+        this.downloadFuture = null;
     }
 
     private void scanTextures() {
@@ -62,6 +70,7 @@ public class TextureEditor extends SingleWindowEditor {
         int[] value = {this.selectedTexture};
 
         ImGui.beginDisabled(this.textures.length == 0);
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() / 2);
         if (ImGui.sliderInt("##textures", value, 0, this.textures.length - 1, selectedId == 0 ? "No Texture" : Integer.toString(selectedId))) {
             this.selectedTexture = value[0];
         }
@@ -81,6 +90,14 @@ public class TextureEditor extends SingleWindowEditor {
         }
         ImGui.endDisabled();
         ImGui.popButtonRepeat();
+
+        ImGui.beginDisabled(this.downloadFuture != null && !this.downloadFuture.isDone());
+        ImGui.sameLine();
+        if (ImGui.button("Download Textures")) {
+            this.downloadTextures = true;
+            this.downloadFuture = new CompletableFuture<>();
+        }
+        ImGui.endDisabled();
 
         ImGui.beginDisabled(this.openTextures.containsKey(selectedId) && this.openTextures.get(selectedId).visible.get());
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
@@ -127,6 +144,40 @@ public class TextureEditor extends SingleWindowEditor {
 
             if (!open.get()) {
                 iterator.remove();
+            }
+        }
+    }
+
+    @Override
+    public void renderLast() {
+        super.renderLast();
+
+        if (this.downloadTextures) {
+            this.downloadTextures = false;
+
+            try {
+                Minecraft client = Minecraft.getInstance();
+                Path outputFolder = Paths.get(client.gameDirectory.toURI()).resolve("debug-out");
+                if (!Files.exists(outputFolder)) {
+                    Files.createDirectories(outputFolder);
+                } else {
+                    Files.walkFileTree(outputFolder, new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+                }
+
+                List<CompletableFuture<?>> result = new LinkedList<>();
+                for (int i : this.texturesSet) {
+                    result.add(TextureDownloader.save(Integer.toString(i), outputFolder, i, false));
+                }
+
+                this.downloadFuture = CompletableFuture.allOf(result.toArray(new CompletableFuture[0])).thenRunAsync(() -> Util.getPlatform().openFile(outputFolder.toFile()), client);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.GL_TEXTURE_BASE_LEVEL;
 import static org.lwjgl.opengl.GL12C.GL_TEXTURE_MAX_LEVEL;
+import static org.lwjgl.stb.STBImageWrite.stbi_flip_vertically_on_write;
 import static org.lwjgl.stb.STBImageWrite.stbi_write_png;
 
 /**
@@ -38,9 +39,10 @@ public final class TextureDownloader {
      * @param name         The name of the file to save to
      * @param outputFolder The folder to place the file in
      * @param texture      The id of the texture to download
+     * @param flip         Whether to flip the image on write
      * @return A future for when all texture levels have been downloaded and saved
      */
-    public static CompletableFuture<?> save(String name, Path outputFolder, int texture) {
+    public static CompletableFuture<?> save(String name, Path outputFolder, int texture, boolean flip) {
         glBindTexture(GL_TEXTURE_2D, texture);
         int base = glGetTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL);
         int max = glGetTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL);
@@ -74,6 +76,7 @@ public final class TextureDownloader {
 
             CompletableFuture<?> future = CompletableFuture.runAsync(() ->
             {
+                stbi_flip_vertically_on_write(flip);
                 boolean success = stbi_write_png(outputFile.toString(), width, height, 4, image, 0);
                 MemoryUtil.memFree(image);
                 if (!success) {
@@ -91,10 +94,11 @@ public final class TextureDownloader {
      * @param name         The name of the file to save to
      * @param outputFolder The folder to place the file in
      * @param texture      The texture object to download
+     * @param flip         Whether to flip the image on write
      * @return A future for when all texture levels have been downloaded and saved
      */
-    public static CompletableFuture<?> save(String name, Path outputFolder, AbstractTexture texture) {
-        return save(name, outputFolder, texture.getId());
+    public static CompletableFuture<?> save(String name, Path outputFolder, AbstractTexture texture, boolean flip) {
+        return save(name, outputFolder, texture.getId(), flip);
     }
 
     /**
@@ -103,10 +107,11 @@ public final class TextureDownloader {
      * @param name         The name of the file to save to
      * @param outputFolder The folder to place the file in
      * @param texture      The id of the registered texture object
+     * @param flip         Whether to flip the image on write
      * @return A future for when all texture levels have been downloaded and saved
      */
-    public static CompletableFuture<?> save(String name, Path outputFolder, ResourceLocation texture) {
+    public static CompletableFuture<?> save(String name, Path outputFolder, ResourceLocation texture, boolean flip) {
         AbstractTexture abstractTexture = Minecraft.getInstance().getTextureManager().getTexture(texture);
-        return save(name, outputFolder, abstractTexture != null ? abstractTexture : MissingTextureAtlasSprite.getTexture());
+        return save(name, outputFolder, abstractTexture != null ? abstractTexture : MissingTextureAtlasSprite.getTexture(), flip);
     }
 }

@@ -59,6 +59,7 @@ public class VeilImGuiImpl implements VeilImGui {
             return;
         }
         this.active = false;
+        VeilRenderSystem.renderer().getEditorManager().renderLast();
         ImGui.render();
         this.implGl3.renderDrawData(ImGui.getDrawData());
 
