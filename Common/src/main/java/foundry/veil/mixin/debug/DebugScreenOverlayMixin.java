@@ -16,7 +16,7 @@ public class DebugScreenOverlayMixin {
     @ModifyVariable(method = "getSystemInformation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;showOnlyReducedInfo()Z", shift = At.Shift.BEFORE), ordinal = 0)
     public List<String> modifyGameInformation(List<String> value) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
-        if (deferredRenderer.isEnabled()) {
+        if (deferredRenderer.isEnabled() && deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED) {
             value.add("");
             value.add(ChatFormatting.UNDERLINE + "Veil Deferred Renderer");
             deferredRenderer.addDebugInfo(value::add);

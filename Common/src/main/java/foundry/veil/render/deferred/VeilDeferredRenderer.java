@@ -3,7 +3,6 @@ package foundry.veil.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
-import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
@@ -270,11 +269,12 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
-        if (this.state == RendererState.DISABLED) {
-            consumer.accept(ChatFormatting.RED + "Disabled");
-        }
+        boolean vanillaLights = this.lightRenderer.isVanillaLightEnabled();
         boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
-        consumer.accept("Vanilla Entity Lights: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
+        boolean bakeTransparencyLightmaps =  this.shaderPreDefinitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null;
+        consumer.accept("Vanilla Light: " + (vanillaLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
+        consumer.accept("Vanilla Entity Light: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
+        consumer.accept("Bake Transparency Lightmap: " + (bakeTransparencyLightmaps ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         this.lightRenderer.addDebugInfo(consumer);
     }
 

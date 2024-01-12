@@ -1,0 +1,7 @@
+{
+  "vertex": "particle",
+  "fragment": "particle",
+  "definitions": [
+    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
+  ]
+}
