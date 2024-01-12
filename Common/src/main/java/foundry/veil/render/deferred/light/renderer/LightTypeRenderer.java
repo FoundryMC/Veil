@@ -1,4 +1,4 @@
-package foundry.veil.render.deferred.light;
+package foundry.veil.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.render.deferred.LightRenderer;
+import foundry.veil.render.deferred.light.Light;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.NativeResource;

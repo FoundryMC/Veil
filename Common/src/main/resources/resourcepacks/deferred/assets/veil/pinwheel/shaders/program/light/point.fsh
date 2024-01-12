@@ -10,7 +10,6 @@ in float falloff;
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
 uniform sampler2D MaterialSampler;
-uniform sampler2D EmissiveSampler;
 uniform sampler2D VanillaLightSampler;
 uniform sampler2D DiffuseDepthSampler;
 

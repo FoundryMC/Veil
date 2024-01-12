@@ -2,14 +2,15 @@ package foundry.veil.render.deferred;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.deferred.light.Light;
-import foundry.veil.render.deferred.light.LightTypeRenderer;
+import foundry.veil.render.deferred.light.renderer.LightTypeRenderer;
+import foundry.veil.render.deferred.light.renderer.VanillaLightRenderer;
 import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.render.wrapper.CullFrustum;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
@@ -30,20 +31,18 @@ import java.util.function.Consumer;
  */
 public class LightRenderer implements NativeResource {
 
-    private final FramebufferManager framebufferManager;
     private final Map<Light.Type, LightData<?>> lights;
 
-    private DirectionalLight mainLight;
+    private VanillaLightRenderer vanillaLightRenderer;
+    private boolean vanillaLightEnabled;
     private AdvancedFbo framebuffer;
 
     /**
      * Creates a new light renderer.
-     *
-     * @param framebufferManager The manager to retrieve the deferred and light framebuffers from
      */
-    public LightRenderer(FramebufferManager framebufferManager) {
-        this.framebufferManager = framebufferManager;
+    public LightRenderer() {
         this.lights = new EnumMap<>(Light.Type.class);
+        this.vanillaLightEnabled = true;
     }
 
     /**
@@ -81,6 +80,15 @@ public class LightRenderer implements NativeResource {
                 GlStateManager.DestFactor.ZERO);
 
         this.lights.values().forEach(data -> data.render(this, frustum));
+        if (this.vanillaLightEnabled) {
+            ClientLevel level = Minecraft.getInstance().level;
+            if (level != null) {
+                if (this.vanillaLightRenderer == null) {
+                    this.vanillaLightRenderer = new VanillaLightRenderer();
+                }
+                this.vanillaLightRenderer.render(this, level);
+            }
+        }
 
         RenderSystem.disableBlend();
         this.framebuffer = null;
@@ -95,9 +103,6 @@ public class LightRenderer implements NativeResource {
         Objects.requireNonNull(light, "light");
         RenderSystem.assertOnRenderThreadOrInit();
         this.lights.computeIfAbsent(light.getType(), LightData::new).addLight(light);
-        if (this.mainLight == null && light.getType() == Light.Type.DIRECTIONAL && light instanceof DirectionalLight directionalLight) {
-            this.mainLight = directionalLight;
-        }
     }
 
     /**
@@ -136,10 +141,21 @@ public class LightRenderer implements NativeResource {
     }
 
     /**
-     * @return The framebuffer manager instance
+     * Enables the vanilla lightmap and directional shading.
      */
-    public FramebufferManager getFramebufferManager() {
-        return this.framebufferManager;
+    public void enableVanillaLight() {
+        this.vanillaLightEnabled = true;
+    }
+
+    /**
+     * Disables the vanilla lightmap and directional shading.
+     */
+    public void disableVanillaLight() {
+        this.vanillaLightEnabled = false;
+        if (this.vanillaLightRenderer != null) {
+            this.vanillaLightRenderer.free();
+            this.vanillaLightRenderer = null;
+        }
     }
 
     /**
@@ -150,16 +166,20 @@ public class LightRenderer implements NativeResource {
     }
 
     /**
-     * @return The main light in the scene or <code>null</code> if there is no primary directional light
+     * @return Whether the vanilla lighting is enabled
      */
-    public @Nullable DirectionalLight getMainLight() {
-        return this.mainLight;
+    public boolean isVanillaLightEnabled() {
+        return this.vanillaLightEnabled;
     }
 
     @Override
     public void free() {
         this.lights.values().forEach(LightData::free);
         this.lights.clear();
+        if (this.vanillaLightRenderer != null) {
+            this.vanillaLightRenderer.free();
+            this.vanillaLightRenderer = null;
+        }
     }
 
     @ApiStatus.Internal

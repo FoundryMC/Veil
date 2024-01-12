@@ -1,6 +1,10 @@
 package foundry.veil.render.deferred.light;
 
 import foundry.veil.render.deferred.LightRenderer;
+import foundry.veil.render.deferred.light.renderer.DirectionalLightRenderer;
+import foundry.veil.render.deferred.light.renderer.LightTypeRenderer;
+import foundry.veil.render.deferred.light.renderer.PointLightRenderer;
+import foundry.veil.render.deferred.light.renderer.VanillaLightRenderer;
 import foundry.veil.render.wrapper.CullFrustum;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -21,15 +25,6 @@ public abstract class Light implements Cloneable {
     public Light() {
         this.color = new Vector3f(1.0F);
         this.markDirty();
-    }
-
-    /**
-     * Stores the data of this light into the specified buffer.
-     *
-     * @param buffer The buffer to fill
-     */
-    public void store(ByteBuffer buffer) {
-        this.color.get(buffer.position(), buffer);
     }
 
     /**
@@ -119,6 +114,7 @@ public abstract class Light implements Cloneable {
     @Override
     public abstract Light clone();
 
+    // FIXME Use a proper registry
     /**
      * Types of lights that can exist.
      *

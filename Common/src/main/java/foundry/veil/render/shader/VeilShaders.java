@@ -2,7 +2,6 @@ package foundry.veil.render.shader;
 
 import foundry.veil.Veil;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Default shader names.
@@ -12,12 +11,12 @@ public final class VeilShaders {
     private VeilShaders() {
     }
 
-    public static final ResourceLocation POSITION = core("position");
-    public static final ResourceLocation POSITION_COLOR = core("position_color");
-    public static final ResourceLocation POSITION_COLOR_TEX = core("position_color_tex");
-    public static final ResourceLocation POSITION_TEX = core("position_tex");
-    public static final ResourceLocation POSITION_TEX_COLOR = core("position_tex_color");
-
+//    public static final ResourceLocation POSITION = core("position");
+//    public static final ResourceLocation POSITION_COLOR = core("position_color");
+//    public static final ResourceLocation POSITION_COLOR_TEX = core("position_color_tex");
+//    public static final ResourceLocation POSITION_TEX = core("position_tex");
+//    public static final ResourceLocation POSITION_TEX_COLOR = core("position_tex_color");
+//
 //    public static final ResourceLocation RENDER_LINES = renderType("lines");
 //    public static final ResourceLocation RENDER_TEXT = renderType("text");
 //    public static final ResourceLocation RENDER_NAMEPLATE = renderType("nameplate");
@@ -44,35 +43,31 @@ public final class VeilShaders {
     public static final ResourceLocation LIGHT_AMBIENT = light("ambient");
     public static final ResourceLocation LIGHT_DIRECTIONAL = light("directional");
     public static final ResourceLocation LIGHT_POINT = light("point");
+    public static final ResourceLocation LIGHT_VANILLA = light("vanilla");
+    public static final ResourceLocation LIGHT_VANILLA_LIGHTMAP = light("vanilla_lightmap");
     public static final ResourceLocation LIGHT_SKY = light("sky");
 
-//    public static final ResourceLocation UI_MAP_FOG = ui("map_fog");
-
-    private static @NotNull ResourceLocation core(@NotNull String name) {
+    private static ResourceLocation core(String name) {
         return Veil.veilPath("core/" + name);
     }
 
-    private static @NotNull ResourceLocation renderType(@NotNull String name) {
+    private static ResourceLocation renderType(String name) {
         return Veil.veilPath("rendertype/" + name);
     }
 
-    private static @NotNull ResourceLocation block(@NotNull String name) {
+    private static ResourceLocation block(String name) {
         return Veil.veilPath("block/" + name);
     }
 
-    private static @NotNull ResourceLocation model(@NotNull String name) {
+    private static ResourceLocation model(String name) {
         return Veil.veilPath("model/" + name);
     }
 
-    private static @NotNull ResourceLocation particle(@NotNull String name) {
+    private static ResourceLocation particle(String name) {
         return Veil.veilPath("particle/" + name);
     }
 
-    private static @NotNull ResourceLocation light(@NotNull String name) {
+    private static ResourceLocation light(String name) {
         return Veil.veilPath("light/" + name);
-    }
-
-    private static @NotNull ResourceLocation ui(@NotNull String name) {
-        return Veil.veilPath("ui/" + name);
     }
 }

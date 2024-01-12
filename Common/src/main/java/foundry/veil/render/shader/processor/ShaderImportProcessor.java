@@ -74,9 +74,10 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
                     }
 
                     long lineNumber = String.join("\n", output).lines().filter(s -> !s.startsWith("#line")).count() + 2;
-                    output.add("#line 0 " + (this.importOrder.indexOf(source) + 1));
+                    int sourceNumber = this.importOrder.indexOf(source);
+                    output.add("#line 0 " + (sourceNumber + 1));
                     output.add(context.modify(source, importString));
-                    output.add("#line " + lineNumber);
+                    output.add("#line " + lineNumber + " " + sourceNumber);
                 } catch (Exception e) {
                     throw new IOException("Failed to add import: " + line, e);
                 }

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  *
  * @author Ocelot
  */
-public class PointLight extends Light implements PositionedLight<PointLight> {
+public class PointLight extends Light implements InstancedLight, PositionedLight<PointLight> {
 
     protected final Vector3f position;
     protected float radius;

@@ -1,7 +1,8 @@
-package foundry.veil.render.deferred.light;
+package foundry.veil.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import foundry.veil.render.deferred.LightRenderer;
+import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.VeilShaders;
 import foundry.veil.render.shader.program.ShaderProgram;

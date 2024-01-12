@@ -18,12 +18,6 @@ public class DirectionalLight extends Light {
     }
 
     @Override
-    public void store(ByteBuffer buffer) {
-        super.store(buffer);
-        this.direction.get(buffer.position() + 3 * Float.BYTES, buffer);
-    }
-
-    @Override
     public boolean isVisible(CullFrustum frustum) {
         return true;
     }

@@ -73,7 +73,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         this.shaderPreDefinitions = shaderPreDefinitions;
         this.framebufferManager = framebufferManager;
         this.postProcessingManager = postProcessingManager;
-        this.lightRenderer = new LightRenderer(framebufferManager);
+        this.lightRenderer = new LightRenderer();
 
         this.enabled = false;
         this.state = RendererState.INACTIVE;
@@ -86,8 +86,8 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             this.enabled = active;
             if (active) {
                 LOGGER.info("Deferred Renderer Enabled");
-                this.lightRenderer.addLight(new DirectionalLight());
-                this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+//                this.lightRenderer.addLight(new DirectionalLight());
+//                this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
             } else {
                 LOGGER.info("Deferred Renderer Disabled");
                 return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
@@ -304,6 +304,10 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      */
     public boolean isActive() {
         return this.isEnabled() && this.state.isActive();
+    }
+
+    public LightRenderer getLightRenderer() {
+        return this.lightRenderer;
     }
 
     public RendererState getRendererState() {

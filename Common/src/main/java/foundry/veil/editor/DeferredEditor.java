@@ -1,5 +1,6 @@
 package foundry.veil.editor;
 
+import foundry.veil.render.deferred.LightRenderer;
 import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
@@ -10,13 +11,15 @@ import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.shader.definition.ShaderPreDefinitions;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 public class DeferredEditor extends SingleWindowEditor {
 
-    private final ImBoolean enableDeferredPipeline = new ImBoolean(true);
-    private final ImBoolean enableEntityLight = new ImBoolean(true);
-    private final ImBoolean bakeTransparentLight = new ImBoolean(true);
+    private final ImBoolean enableDeferredPipeline = new ImBoolean();
+    private final ImBoolean enableVanillaLight = new ImBoolean();
+    private final ImBoolean enableEntityLight = new ImBoolean();
+    private final ImBoolean bakeTransparentLight = new ImBoolean();
 
     @Override
     public String getDisplayName() {
@@ -28,6 +31,7 @@ public class DeferredEditor extends SingleWindowEditor {
         VeilRenderer renderer = VeilRenderSystem.renderer();
         ShaderPreDefinitions definitions = renderer.getShaderDefinitions();
         VeilDeferredRenderer deferredRenderer = renderer.getDeferredRenderer();
+        LightRenderer lightRenderer = deferredRenderer.getLightRenderer();
 
         this.enableDeferredPipeline.set(deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED);
         if (ImGui.checkbox("Enable Pipeline", this.enableDeferredPipeline)) {
@@ -35,6 +39,17 @@ public class DeferredEditor extends SingleWindowEditor {
                 deferredRenderer.enable();
             } else {
                 deferredRenderer.disable();
+            }
+            Minecraft.getInstance().levelRenderer.allChanged();
+        }
+
+        ImGui.sameLine();
+        this.enableVanillaLight.set(lightRenderer.isVanillaLightEnabled());
+        if (ImGui.checkbox("Enable Vanilla Light", this.enableVanillaLight)) {
+            if (this.enableVanillaLight.get()) {
+                lightRenderer.enableVanillaLight();
+            } else {
+                lightRenderer.disableVanillaLight();
             }
         }
 
@@ -65,13 +80,11 @@ public class DeferredEditor extends SingleWindowEditor {
             AdvancedFbo deferredFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED_FINAL);
             AdvancedFbo transparentBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
             AdvancedFbo transparentFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_FINAL);
-            AdvancedFbo lightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
 
             drawBuffers("Opaque", deferredBuffer);
             drawBuffers("Opaque Final", deferredFinalBuffer);
             drawBuffers("Transparent", transparentBuffer);
             drawBuffers("Transparent Final", transparentFinalBuffer);
-            drawBuffers("Light", lightBuffer);
 
             ImGui.endTabBar();
         }

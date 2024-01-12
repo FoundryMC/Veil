@@ -1,3 +1,5 @@
+#include veil:material
+
 uniform sampler2D Sampler0;
 
 uniform vec4 ColorModulator;
@@ -20,7 +22,7 @@ void main() {
     fragColor = vec4(0.0);
     fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 1.0);
-    fragMaterial = vec4(0.0);
+    fragMaterial = vec4(BLOCK_SOLID, 0.0, 0.0, 1.0);
     fragVanillaLight = vec4(texCoord2, 0.0, 1.0);
     fragLightMap = lightmapColor;
 }

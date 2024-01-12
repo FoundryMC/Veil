@@ -1,9 +1,11 @@
-package foundry.veil.render.deferred.light;
+package foundry.veil.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import foundry.veil.ext.VertexBufferExtension;
 import foundry.veil.render.deferred.LightRenderer;
+import foundry.veil.render.deferred.light.InstancedLight;
+import foundry.veil.render.deferred.light.Light;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.MemoryStack;
 
@@ -18,7 +20,7 @@ import static org.lwjgl.opengl.GL15C.*;
  * @param <T> The type of lights to renders
  * @author Ocelot
  */
-public abstract class InstancedLightRenderer<T extends Light> implements LightTypeRenderer<T> {
+public abstract class InstancedLightRenderer<T extends Light & InstancedLight> implements LightTypeRenderer<T> {
 
     protected final int lightSize;
     protected int maxLights;
