@@ -1,0 +1,7 @@
+{
+  "vertex": "block",
+  "fragment": "rendertype_translucent_no_crumbling",
+  "definitions": [
+    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
+  ]
+}

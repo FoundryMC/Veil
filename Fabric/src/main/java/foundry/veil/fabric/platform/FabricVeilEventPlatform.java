@@ -18,7 +18,7 @@ public class FabricVeilEventPlatform implements VeilEventPlatform {
     }
 
     @Override
-    public void onVeilRenderers(VeilRendererEvent event) {
+    public void onVeilRendererAvailable(VeilRendererEvent event) {
         FabricVeilRendererEvent.EVENT.register(event);
     }
 

@@ -17,7 +17,7 @@ public interface VeilEventPlatform {
 
     void onFreeNativeResources(FreeNativeResourcesEvent event);
 
-    void onVeilRenderers(VeilRendererEvent event);
+    void onVeilRendererAvailable(VeilRendererEvent event);
 
     void preVeilPostProcessing(VeilPostProcessingEvent.Pre event);
 

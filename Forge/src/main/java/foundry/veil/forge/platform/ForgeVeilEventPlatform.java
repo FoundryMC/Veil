@@ -19,7 +19,7 @@ public class ForgeVeilEventPlatform implements VeilEventPlatform {
     }
 
     @Override
-    public void onVeilRenderers(VeilRendererEvent event) {
+    public void onVeilRendererAvailable(VeilRendererEvent event) {
         MinecraftForge.EVENT_BUS.<ForgeVeilRendererEvent>addListener(forgeEvent -> event.onVeilRendererAvailable(forgeEvent.getRenderer()));
     }
 
