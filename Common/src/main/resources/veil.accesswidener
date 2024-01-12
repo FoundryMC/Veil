@@ -20,6 +20,7 @@ accessible field net/minecraft/client/renderer/ItemBlockRenderTypes TYPE_BY_BLOC
 accessible class net/minecraft/client/renderer/RenderStateShard$TextureStateShard
 accessible field net/minecraft/client/renderer/RenderStateShard NO_OVERLAY Lnet/minecraft/client/renderer/RenderStateShard$OverlayStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard NO_LIGHTMAP Lnet/minecraft/client/renderer/RenderStateShard$LightmapStateShard;
+accessible field net/minecraft/client/renderer/RenderStateShard NO_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
 accessible method net/minecraft/client/renderer/ItemInHandRenderer renderPlayerArm (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFLnet/minecraft/world/entity/HumanoidArm;)V
 accessible field net/minecraft/client/Options bobView Lnet/minecraft/client/OptionInstance;

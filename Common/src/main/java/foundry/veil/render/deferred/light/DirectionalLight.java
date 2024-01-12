@@ -13,11 +13,6 @@ public class DirectionalLight extends Light {
 
     protected final Vector3f direction;
 
-    private DirectionalLight(int color, Vector3fc direction) {
-        this.setColor(color);
-        this.direction = new Vector3f(direction);
-    }
-
     public DirectionalLight() {
         this.direction = new Vector3f(0.0F, -1.0F, 0.0F);
     }
