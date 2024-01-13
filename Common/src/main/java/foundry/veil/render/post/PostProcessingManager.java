@@ -1,8 +1,14 @@
 package foundry.veil.render.post;
 
+import com.google.common.collect.Iterables;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import foundry.veil.VeilClient;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.render.framebuffer.AdvancedFbo;
@@ -11,6 +17,7 @@ import foundry.veil.render.shader.program.ShaderProgram;
 import foundry.veil.resource.CodecReloadListener;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 
 import static org.lwjgl.opengl.GL11C.GL_ALWAYS;
@@ -180,6 +189,70 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.context.end();
     }
 
+    private CompositePostPipeline loadPipeline(Resource resource) throws IOException {
+        try (Reader reader = resource.openAsReader()) {
+            JsonElement element = JsonParser.parseReader(reader);
+            DataResult<CompositePostPipeline> result = this.codec.parse(JsonOps.INSTANCE, element);
+
+            if (result.error().isPresent()) {
+                throw new JsonSyntaxException(result.error().get().message());
+            }
+            return result.result().orElseThrow();
+        }
+    }
+
+    @Override
+    protected @NotNull Map<ResourceLocation, CompositePostPipeline> prepare(@NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
+        Map<ResourceLocation, CompositePostPipeline> data = new HashMap<>();
+
+        Map<ResourceLocation, List<Resource>> resources = this.converter.listMatchingResourceStacks(resourceManager);
+        for (Map.Entry<ResourceLocation, List<Resource>> entry : resources.entrySet()) {
+            ResourceLocation location = entry.getKey();
+            ResourceLocation id = this.converter.fileToId(location);
+
+            if (entry.getValue().size() == 1) {
+                try {
+                    data.put(id, this.loadPipeline(Iterables.getOnlyElement(entry.getValue())));
+                } catch (Exception e) {
+                    this.logger.error("Couldn't parse data file {} from {}", id, location, e);
+                }
+                continue;
+            }
+
+            List<CompositePostPipeline> pipelines = new ArrayList<>(entry.getValue().size());
+            for (Resource resource : entry.getValue()) {
+                try {
+                    pipelines.add(this.loadPipeline(resource));
+                } catch (Exception e) {
+                    this.logger.error("Couldn't parse data file {} from {}", id, location, e);
+                }
+            }
+
+            // No pipelines loaded, so just continue
+            if (pipelines.isEmpty()) {
+                continue;
+            }
+
+            // Only 1 pipeline successfully loaded
+            if (pipelines.size() == 1) {
+                data.put(id, Iterables.getOnlyElement(pipelines));
+                continue;
+            }
+
+            pipelines.sort(Comparator.comparingInt(CompositePostPipeline::getPriority));
+            for (int i = 0; i < pipelines.size(); i++) {
+                CompositePostPipeline pipeline = pipelines.get(i);
+                if (pipeline.isReplace()) {
+                    pipelines = pipelines.subList(0, i + 1);
+                    break;
+                }
+            }
+            data.put(id, new CompositePostPipeline(pipelines.toArray(CompositePostPipeline[]::new), Collections.emptyMap(), Collections.emptyMap()));
+        }
+
+        return data;
+    }
+
     @Override
     protected void apply(@NotNull Map<ResourceLocation, CompositePostPipeline> data, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
         this.pipelines.values().forEach(PostPipeline::free);
@@ -191,6 +264,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
     @Override
     public void free() {
         this.pipelines.values().forEach(PostPipeline::free);
+        this.pipelines.clear();
         this.context.free();
     }
 
@@ -233,14 +307,14 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
          * @return The id of the pipeline shader
          */
         public ResourceLocation getPipeline() {
-            return pipeline;
+            return this.pipeline;
         }
 
         /**
          * @return The priority the profile is inserted at
          */
         public int getPriority() {
-            return priority;
+            return this.priority;
         }
 
         /**
@@ -257,11 +331,11 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             ProfileEntry that = (ProfileEntry) o;
-            return this.priority == that.priority && Objects.equals(pipeline, that.pipeline);
+            return this.priority == that.priority && Objects.equals(this.pipeline, that.pipeline);
         }
 
         @Override

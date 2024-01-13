@@ -30,16 +30,29 @@ public class CompositePostPipeline implements PostPipeline {
                     .forGetter(CompositePostPipeline::getTextures),
             CompositePostPipeline.FRAMEBUFFER_CODEC
                     .optionalFieldOf("framebuffers", Collections.emptyMap())
-                    .forGetter(CompositePostPipeline::getFramebuffers)
-    ).apply(instance, (pipelines, textures, framebuffers) -> new CompositePostPipeline(pipelines.toArray(PostPipeline[]::new), textures, framebuffers)));
+                    .forGetter(CompositePostPipeline::getFramebuffers),
+            Codec.INT.optionalFieldOf("priority", 1000).forGetter(CompositePostPipeline::getPriority),
+            Codec.BOOL.optionalFieldOf("replace", false).forGetter(CompositePostPipeline::isReplace)
+    ).apply(instance, (pipelines, textures, framebuffers, priority, replace) -> new CompositePostPipeline(pipelines.toArray(PostPipeline[]::new), textures, framebuffers, priority, replace)));
 
     private final PostPipeline[] stages;
     private final Map<String, ShaderTextureSource> textures;
     private final Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
+    private final int priority;
+    private final boolean replace;
 
     private int screenWidth = -1;
     private int screenHeight = -1;
+
+    private CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, int priority, boolean replace) {
+        this.stages = stages;
+        this.textures = textures;
+        this.framebufferDefinitions = framebufferDefinitions;
+        this.framebuffers = new HashMap<>();
+        this.priority = priority;
+        this.replace = replace;
+    }
 
     /**
      * Creates a new composite post pipeline that runs all child pipelines in order.
@@ -49,10 +62,7 @@ public class CompositePostPipeline implements PostPipeline {
      * @param framebufferDefinitions The definitions of framebuffers to create in order to use in the stages
      */
     public CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions) {
-        this.stages = stages;
-        this.textures = textures;
-        this.framebufferDefinitions = framebufferDefinitions;
-        this.framebuffers = new HashMap<>();
+        this(stages, textures, framebufferDefinitions, 1000, false);
     }
 
     @Override
@@ -261,5 +271,19 @@ public class CompositePostPipeline implements PostPipeline {
      */
     public Map<ResourceLocation, FramebufferDefinition> getFramebuffers() {
         return this.framebufferDefinitions;
+    }
+
+    /**
+     * @return The priority of this pipeline
+     */
+    public int getPriority() {
+        return this.priority;
+    }
+
+    /**
+     * @return Whether this stage will replace all stages with a higher priority
+     */
+    public boolean isReplace() {
+        return this.replace;
     }
 }
