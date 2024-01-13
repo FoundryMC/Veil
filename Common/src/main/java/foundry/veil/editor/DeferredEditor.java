@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 public class DeferredEditor extends SingleWindowEditor {
 
     private final ImBoolean enableDeferredPipeline = new ImBoolean();
+    private final ImBoolean enableAmbientOcclusion = new ImBoolean();
     private final ImBoolean enableVanillaLight = new ImBoolean();
     private final ImBoolean enableEntityLight = new ImBoolean();
     private final ImBoolean bakeTransparentLight = new ImBoolean();
@@ -42,7 +43,6 @@ public class DeferredEditor extends SingleWindowEditor {
         ShaderPreDefinitions definitions = renderer.getShaderDefinitions();
         VeilDeferredRenderer deferredRenderer = renderer.getDeferredRenderer();
         LightRenderer lightRenderer = deferredRenderer.getLightRenderer();
-        Minecraft client = Minecraft.getInstance();
 
         this.enableDeferredPipeline.set(deferredRenderer.getRendererState() != VeilDeferredRenderer.RendererState.DISABLED);
         if (ImGui.checkbox("Enable Pipeline", this.enableDeferredPipeline)) {
@@ -51,7 +51,16 @@ public class DeferredEditor extends SingleWindowEditor {
             } else {
                 deferredRenderer.disable();
             }
-            client.levelRenderer.allChanged();
+        }
+
+        ImGui.sameLine();
+        this.enableAmbientOcclusion.set(lightRenderer.isAmbientOcclusionEnabled());
+        if (ImGui.checkbox("Enable Ambient Occlusion", this.enableAmbientOcclusion)) {
+            if (this.enableAmbientOcclusion.get()) {
+                lightRenderer.enableAmbientOcclusion();
+            } else {
+                lightRenderer.disableAmbientOcclusion();
+            }
         }
 
         ImGui.sameLine();

@@ -20,6 +20,7 @@
     "client.ItemInHandRendererMixin",
     "client.ModelPartMixin",
     "client.PostChainMixin",
+    "client.deferred.AmbientOcclusionFaceMixin",
     "client.deferred.CompositeStateMixin",
     "client.deferred.LevelRendererMixin",
     "client.deferred.ModelBlockRendererMixin",

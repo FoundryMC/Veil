@@ -35,6 +35,7 @@ public class LightRenderer implements NativeResource {
 
     private VanillaLightRenderer vanillaLightRenderer;
     private boolean vanillaLightEnabled;
+    private boolean ambientOcclusionEnabled;
     private AdvancedFbo framebuffer;
 
     /**
@@ -43,6 +44,7 @@ public class LightRenderer implements NativeResource {
     public LightRenderer() {
         this.lights = new EnumMap<>(Light.Type.class);
         this.vanillaLightEnabled = true;
+        this.ambientOcclusionEnabled = true;
     }
 
     /**
@@ -159,6 +161,26 @@ public class LightRenderer implements NativeResource {
     }
 
     /**
+     * Enables ambient occlusion.
+     */
+    public void enableAmbientOcclusion() {
+        if (!this.ambientOcclusionEnabled) {
+            this.ambientOcclusionEnabled = true;
+            Minecraft.getInstance().levelRenderer.allChanged();
+        }
+    }
+
+    /**
+     * Disables ambient occlusion.
+     */
+    public void disableAmbientOcclusion() {
+        if (this.ambientOcclusionEnabled) {
+            this.ambientOcclusionEnabled = false;
+            Minecraft.getInstance().levelRenderer.allChanged();
+        }
+    }
+
+    /**
      * @return The deferred framebuffer being read from
      */
     public @Nullable AdvancedFbo getFramebuffer() {
@@ -170,6 +192,13 @@ public class LightRenderer implements NativeResource {
      */
     public boolean isVanillaLightEnabled() {
         return this.vanillaLightEnabled;
+    }
+
+    /**
+     * @return Whether chunks can have ambient occlusion
+     */
+    public boolean isAmbientOcclusionEnabled() {
+        return this.ambientOcclusionEnabled;
     }
 
     @Override

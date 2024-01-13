@@ -36,8 +36,12 @@ import static org.lwjgl.opengl.GL11C.GL_NEAREST;
  *     <li>Opaque post-processing ({@link VeilDeferredRenderer#OPAQUE_POST})</li>
  *     <li>Light Shaders via {@link LightRenderer}</li>
  *     <li>Light post-processing ({@link VeilDeferredRenderer#LIGHT_POST})</li>
- *     <li>Transparency Shaders ({@link VeilDeferredRenderer#TRANSPARENT_POST})</li>
- *     <li>Skybox Shader(s) via {@link SkyRenderer}</li>
+ *     <li>Transparency Shaders</li>
+ *     <li>Transparency post-processing ({@link VeilDeferredRenderer#TRANSPARENT_POST})</li>
+ *     <li>Light Shaders via {@link LightRenderer}</li>
+ *     <li>Light post-processing ({@link VeilDeferredRenderer#LIGHT_POST})</li>
+ *     <li>Skybox Shader(s) via {@link SkyRenderer}</li> TODO
+ *     <li>Final image compositing</li>
  *     <li>Final post-processing via {@link PostProcessingManager}</li>
  * </ul>
  *
@@ -269,9 +273,11 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
+        boolean ambientOcclusion = this.lightRenderer.isAmbientOcclusionEnabled();
         boolean vanillaLights = this.lightRenderer.isVanillaLightEnabled();
         boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
-        boolean bakeTransparencyLightmaps =  this.shaderPreDefinitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null;
+        boolean bakeTransparencyLightmaps = this.shaderPreDefinitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null;
+        consumer.accept("Ambient Occlusion: " + (ambientOcclusion ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Light: " + (vanillaLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Entity Light: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Bake Transparency Lightmap: " + (bakeTransparencyLightmaps ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
@@ -282,6 +288,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * Allows the renderer to run normally.
      */
     public void enable() {
+        if (this.state == RendererState.DISABLED) {
+            Minecraft.getInstance().levelRenderer.allChanged();
+        }
         this.state = RendererState.INACTIVE;
     }
 
@@ -289,6 +298,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * Forces the renderer off.
      */
     public void disable() {
+        if (this.state != RendererState.DISABLED) {
+            Minecraft.getInstance().levelRenderer.allChanged();
+        }
         this.state = RendererState.DISABLED;
     }
 

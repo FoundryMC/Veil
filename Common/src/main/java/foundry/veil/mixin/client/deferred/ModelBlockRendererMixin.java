@@ -5,9 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.render.deferred.DeferredVertexConsumer;
 import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -18,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -38,8 +36,28 @@ public class ModelBlockRendererMixin {
         veil$DEFERRED.set(false);
     }
 
+    @ModifyArg(method = "renderModelFaceFlat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;putQuadData(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFFIIIII)V"), index = 6)
+    public float modifyShade0(float value) {
+        return veil$DEFERRED.get() ? 1.0F : value;
+    }
+
+    @ModifyArg(method = "renderModelFaceFlat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;putQuadData(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFFIIIII)V"), index = 7)
+    public float modifyShade1(float value) {
+        return veil$DEFERRED.get() ? 1.0F : value;
+    }
+
+    @ModifyArg(method = "renderModelFaceFlat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;putQuadData(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFFIIIII)V"), index = 8)
+    public float modifyShade2(float value) {
+        return veil$DEFERRED.get() ? 1.0F : value;
+    }
+
+    @ModifyArg(method = "renderModelFaceFlat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;putQuadData(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/renderer/block/model/BakedQuad;FFFFIIIII)V"), index = 9)
+    public float modifyShade3(float value) {
+        return veil$DEFERRED.get() ? 1.0F : value;
+    }
+
     @ModifyVariable(method = "tesselateBlock", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public VertexConsumer modifyConsumer(VertexConsumer value) {
-        return veil$DEFERRED.get() ? new DeferredVertexConsumer(value) : value;
+        return veil$DEFERRED.get() ? new DeferredVertexConsumer(value, VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer().isAmbientOcclusionEnabled()) : value;
     }
 }
