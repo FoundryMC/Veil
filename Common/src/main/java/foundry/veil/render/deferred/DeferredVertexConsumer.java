@@ -73,7 +73,7 @@ public class DeferredVertexConsumer implements VertexConsumer {
     @Override
     public void putBulkData(PoseStack.Pose pPoseEntry, BakedQuad pQuad, float[] pColorMuls, float pRed, float pGreen, float pBlue, int[] pCombinedLights, int pCombinedOverlay, boolean pMulColor) {
         this.verticalNormal = !pQuad.isShade();
-        VertexConsumer.super.putBulkData(pPoseEntry, pQuad, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, pRed, pGreen, pBlue, pCombinedLights, pCombinedOverlay, pMulColor);
+        VertexConsumer.super.putBulkData(pPoseEntry, pQuad, pColorMuls, pRed, pGreen, pBlue, pCombinedLights, pCombinedOverlay, pMulColor);
         this.verticalNormal = false;
     }
 }

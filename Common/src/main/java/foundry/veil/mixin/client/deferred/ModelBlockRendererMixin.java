@@ -58,6 +58,6 @@ public class ModelBlockRendererMixin {
 
     @ModifyVariable(method = "tesselateBlock", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public VertexConsumer modifyConsumer(VertexConsumer value) {
-        return veil$DEFERRED.get() ? new DeferredVertexConsumer(value, VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer().isAmbientOcclusionEnabled()) : value;
+        return veil$DEFERRED.get() ? new DeferredVertexConsumer(value) : value;
     }
 }
