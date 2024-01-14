@@ -13,7 +13,6 @@ in vec3 normal;
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-    fragColor = vec4(0.0);
     fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 1.0);
     fragMaterial = vec4(BLOCK_SOLID, 0.0, 0.0, 1.0);

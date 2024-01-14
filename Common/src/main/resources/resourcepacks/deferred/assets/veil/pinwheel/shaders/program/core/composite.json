@@ -22,6 +22,11 @@
       "type": "framebuffer",
       "name": "veil:transparent_final"
     },
+    "TransparentMaterialSampler": {
+      "type": "framebuffer",
+      "name": "veil:transparent",
+      "sampler": 3
+    },
     "TransparentDepthSampler": {
       "type": "framebuffer",
       "name": "veil:transparent_final:depth"

@@ -1,5 +1,6 @@
 #include veil:material
 #include veil:translucent_buffers
+#include veil:blend
 
 uniform sampler2D Sampler0;
 
@@ -14,10 +15,9 @@ in vec3 normal;
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-    fragColor = vec4(0.0);
     fragAlbedo = color;
     fragNormal = vec4(normal, 1.0);
-    fragMaterial = vec4(BLOCK_TRANSLUCENT, 0.0, 0.0, 1.0);
+    fragMaterial = vec4(BLOCK_TRANSLUCENT, TRANSLUCENT_TRANSPARENCY, 0.0, 1.0);
     fragLightSampler = vec4(texCoord2, 0.0, 1.0);
     fragLightMap = lightmapColor;
     #ifdef USE_BAKED_TRANSPARENT_LIGHTMAPS
