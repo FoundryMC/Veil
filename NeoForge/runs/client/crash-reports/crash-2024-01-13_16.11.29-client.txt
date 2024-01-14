@@ -1,0 +1,292 @@
+---- Minecraft Crash Report ----
+// Why did you do that?
+
+Time: 2024-01-13 16:11:29
+Description: Initializing game
+
+org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:392) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:250) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.service.modlauncher.MixinTransformationHandler.processClass(MixinTransformationHandler.java:131) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.launch.MixinLaunchPluginLegacy.processClass(MixinLaunchPluginLegacy.java:131) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at cpw.mods.modlauncher.serviceapi.ILaunchPluginService.processClassWithFlags(ILaunchPluginService.java:156) ~[modlauncher-10.0.9.jar:10.0.9+10.0.9+main.dcd20f30] {}
+	at cpw.mods.modlauncher.LaunchPluginHandler.offerClassNodeToPlugins(LaunchPluginHandler.java:88) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.ClassTransformer.transform(ClassTransformer.java:120) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.TransformingClassLoader.maybeTransformClassBytes(TransformingClassLoader.java:50) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:169) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:275) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:288) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:275) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:191) ~[securejarhandler-2.1.24.jar:?] {}
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:520) ~[?:?] {}
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:561) ~[neoforge-20.4.83-beta.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.main.Main.main(Main.java:206) ~[neoforge-20.4.83-beta.jar:?] {re:mixin,pl:runtimedistcleaner:A,re:classloading,pl:mixin:APP:veil-common.mixins.json:debug.RenderDocker,pl:mixin:A,pl:runtimedistcleaner:A}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:114) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.ForgeClientUserdevLaunchHandler.runService(ForgeClientUserdevLaunchHandler.java:19) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-2.0.7.jar:2.0] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [veil-common.mixins.json:client.deferred.LevelRendererMixin] from phase [DEFAULT] in config [veil-common.mixins.json] FAILED during APPLY
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinError(MixinProcessor.java:636) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinApplyError(MixinProcessor.java:588) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:379) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	... 31 more
+Caused by: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: Critical injection failure: @Inject annotation on updateUniforms could not find any targets matching 'renderChunkLayer' in net.minecraft.client.renderer.LevelRenderer. No refMap loaded. [PREINJECT Applicator Phase -> veil-common.mixins.json:client.deferred.LevelRendererMixin -> Prepare Injections ->  -> handler$zzi000$updateUniforms(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V -> Parse]
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.validateTargets(InjectionInfo.java:656) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.findTargets(InjectionInfo.java:587) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.readAnnotation(InjectionInfo.java:330) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.<init>(InjectionInfo.java:316) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.<init>(InjectionInfo.java:308) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.CallbackInjectionInfo.<init>(CallbackInjectionInfo.java:46) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at jdk.internal.reflect.GeneratedConstructorAccessor69.newInstance(Unknown Source) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45) ~[?:?] {}
+	at java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499) ~[?:?] {}
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:480) ~[?:?] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo$InjectorEntry.create(InjectionInfo.java:149) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.parse(InjectionInfo.java:708) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinTargetContext.prepareInjections(MixinTargetContext.java:1311) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.prepareInjections(MixinApplicatorStandard.java:1042) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.applyMixin(MixinApplicatorStandard.java:393) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:325) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.apply(TargetClassContext.java:383) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:365) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:363) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	... 31 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:392) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:250) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.service.modlauncher.MixinTransformationHandler.processClass(MixinTransformationHandler.java:131) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at org.spongepowered.asm.launch.MixinLaunchPluginLegacy.processClass(MixinLaunchPluginLegacy.java:131) ~[mixin-0.8.5.jar:0.8.5+Jenkins-b310.git-155314e6e91465dad727e621a569906a410cd6f4] {}
+	at cpw.mods.modlauncher.serviceapi.ILaunchPluginService.processClassWithFlags(ILaunchPluginService.java:156) ~[modlauncher-10.0.9.jar:10.0.9+10.0.9+main.dcd20f30] {}
+	at cpw.mods.modlauncher.LaunchPluginHandler.offerClassNodeToPlugins(LaunchPluginHandler.java:88) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.ClassTransformer.transform(ClassTransformer.java:120) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.TransformingClassLoader.maybeTransformClassBytes(TransformingClassLoader.java:50) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:169) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:275) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:288) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:275) ~[securejarhandler-2.1.24.jar:?] {}
+	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:191) ~[securejarhandler-2.1.24.jar:?] {}
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:520) ~[?:?] {}
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:561) ~[neoforge-20.4.83-beta.jar%23194!/:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:A,pl:runtimedistcleaner:A}
+-- Initialization --
+Details:
+	Modules: 
+		ADVAPI32.dll:Advanced Windows 32 Base API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		COMCTL32.dll:User Experience Controls Library:6.10 (WinBuild.160101.0800):Microsoft Corporation
+		CRYPT32.dll:Crypto API32:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		CRYPTBASE.dll:Base cryptographic API DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		CRYPTSP.dll:Cryptographic Service Provider API:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		ColorAdapterClient.dll:Microsoft Color Adapter Client:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		CoreMessaging.dll:Microsoft CoreMessaging Dll:10.0.19041.3930:Microsoft Corporation
+		CoreUIComponents.dll:Microsoft Core UI Components Dll:10.0.19041.3636:Microsoft Corporation
+		DBGHELP.DLL:Windows Image Helper:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		DEVOBJ.dll:Device Information Set DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		DNSAPI.dll:DNS Client API DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		GDI32.dll:GDI Client DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		GLU32.dll:OpenGL Utility Library DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		IMM32.DLL:Multi-User Windows IMM32 API Client DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		IPHLPAPI.DLL:IP Helper API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		KERNEL32.DLL:Windows NT BASE API Client DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		KERNELBASE.dll:Windows NT BASE API Client DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		MMDevApi.dll:MMDevice API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		MSASN1.dll:ASN.1 Runtime APIs:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		MSCTF.dll:MSCTF Server DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		MpOav.dll:IOfficeAntiVirus Module:4.18.23110.3 (9ebb3643d539a6fc4659898b1df3124d5da4c0a9):Microsoft Corporation
+		NLAapi.dll:Network Location Awareness 2:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		NSI.dll:NSI User-mode interface DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		NTASN1.dll:Microsoft ASN.1 API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		OLEAUT32.dll:OLEAUT32.DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		Ole32.dll:Microsoft OLE for Windows:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		OpenAL.dll:Main implementation library:1.23.0:
+		PROPSYS.dll:Microsoft Property System:7.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		PSAPI.DLL:Process Status Helper:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		RPCRT4.dll:Remote Procedure Call Runtime:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		SETUPAPI.dll:Windows Setup API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		SHCORE.dll:SHCORE:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		SHELL32.dll:Windows Shell Common Dll:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		USER32.dll:Multi-User Windows USER API Client DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		USERENV.dll:Userenv:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		VCRUNTIME140.dll:Microsoft® C Runtime Library:14.28.29913.0 built by: vcwrkspc:Microsoft Corporation
+		VERSION.dll:Version Checking and File Installation Libraries:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		WINHTTP.dll:Windows HTTP Services:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		WINMM.dll:MCI API DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		WINTRUST.dll:Microsoft Trust Verification APIs:10.0.19041.3930 (WinBuild.160101.0800):Microsoft Corporation
+		WS2_32.dll:Windows Socket 2.0 32-Bit DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		WSOCK32.dll:Windows Socket 32-Bit DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		Wldp.dll:Windows Lockdown Policy:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		amdihk64.dll:Radeon Settings: Host Service:2,00,00,1788:Advanced Micro Devices, Inc.
+		amsi.dll:Anti-Malware Scan Interface:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		atig6pxx.dll:atiglpxx.dll:8.14.01.6564:Advanced Micro Devices, Inc. 
+		atio6axx.dll:AMD OpenGL Driver:23.08.230729_569461f:Advanced Micro Devices, Inc
+		bcrypt.dll:Windows Cryptographic Primitives Library:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		bcryptPrimitives.dll:Windows Cryptographic Primitives Library:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		cfgmgr32.dll:Configuration Manager DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		clbcatq.dll:COM+ Configuration Catalog:2001.12.10941.16384 (WinBuild.160101.0800):Microsoft Corporation
+		combase.dll:Microsoft COM for Windows:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		dbgcore.DLL:Windows Core Debugging Helpers:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		dhcpcsvc.DLL:DHCP Client Service:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		dhcpcsvc6.DLL:DHCPv6 Client:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		dinput8.dll:Microsoft DirectInput:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		dt_socket.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		dwmapi.dll:Microsoft Desktop Window Manager API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		fwpuclnt.dll:FWP/IPsec User-Mode API:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		gdi32full.dll:GDI Client DLL:10.0.19041.3758 (WinBuild.160101.0800):Microsoft Corporation
+		glfw.dll:GLFW 3.4.0 DLL:3.4.0:GLFW
+		icm32.dll:Microsoft Color Management Module (CMM):10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		inputhost.dll:InputHost:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		instrument.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		java.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		java.exe:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		jdwp.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		jemalloc.dll
+		jimage.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		jli.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		jna13014838907901075640.dll:JNA native library:6.1.6:Java(TM) Native Access (JNA)
+		jvm.dll:OpenJDK 64-Bit server VM:17.0.1.0:Oracle Corporation
+		kernel.appcore.dll:AppModel API Host:10.0.19041.3758 (WinBuild.160101.0800):Microsoft Corporation
+		lwjgl.dll
+		lwjgl_opengl.dll
+		lwjgl_stb.dll
+		management.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		management_ext.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		mdnsNSP.dll:Bonjour Namespace Provider:3,1,0,1:Apple Inc.
+		mscms.dll:Microsoft Color Matching System DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		msvcp140.dll:Microsoft® C Runtime Library:14.28.29913.0 built by: vcwrkspc:Microsoft Corporation
+		msvcp_win.dll:Microsoft® C Runtime Library:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		msvcrt.dll:Windows NT CRT DLL:7.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		mswsock.dll:Microsoft Windows Sockets 2.0 Service Provider:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		napinsp.dll:E-mail Naming Shim Provider:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		ncrypt.dll:Windows NCrypt Router:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		net.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		nio.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		ntdll.dll:NT Layer DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		ntmarta.dll:Windows NT MARTA provider:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		opengl32.dll:OpenGL Client DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		pdh.dll:Windows Performance Data Helper DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		perfos.dll:Windows System Performance Objects DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		perfproc.dll:Windows System Process Performance Objects DLL:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		pnrpnsp.dll:PNRP Name Space Provider:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		profapi.dll:User Profile Basic API:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		rasadhlp.dll:Remote Access AutoDial Helper:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		rsaenh.dll:Microsoft Enhanced Cryptographic Provider:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		sechost.dll:Host for SCM/SDDL/LSA Lookup APIs:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		shlwapi.dll:Shell Light-weight Utility Library:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		sunmscapi.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		svml.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		textinputframework.dll:"TextInputFramework.DYNLINK":10.0.19041.3758 (WinBuild.160101.0800):Microsoft Corporation
+		ucrtbase.dll:Microsoft® C Runtime Library:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		uxtheme.dll:Microsoft UxTheme Library:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		vcruntime140_1.dll:Microsoft® C Runtime Library:14.28.29913.0 built by: vcwrkspc:Microsoft Corporation
+		verify.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+		win32u.dll:Win32u:10.0.19041.3930 (WinBuild.160101.0800):Microsoft Corporation
+		windows.storage.dll:Microsoft WinRT Storage API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		winrnr.dll:LDAP RnR Provider DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		wintypes.dll:Windows Base Types DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		wshbth.dll:Windows Sockets Helper DLL:10.0.19041.3636 (WinBuild.160101.0800):Microsoft Corporation
+		xinput1_4.dll:Microsoft Common Controller API:10.0.19041.1 (WinBuild.160101.0800):Microsoft Corporation
+		zip.dll:OpenJDK Platform binary:17.0.1.0:Oracle Corporation
+Stacktrace:
+	at net.minecraft.client.main.Main.main(Main.java:206) ~[neoforge-20.4.83-beta.jar:?] {re:mixin,pl:runtimedistcleaner:A,re:classloading,pl:mixin:APP:veil-common.mixins.json:debug.RenderDocker,pl:mixin:A,pl:runtimedistcleaner:A}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:568) ~[?:?] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:114) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.ForgeClientUserdevLaunchHandler.runService(ForgeClientUserdevLaunchHandler.java:19) ~[loader-2.0.7.jar:2.0] {}
+	at net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-2.0.7.jar:2.0] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+
+
+-- System Details --
+Details:
+	Minecraft Version: 1.20.4
+	Minecraft Version ID: 1.20.4
+	Operating System: Windows 10 (amd64) version 10.0
+	Java Version: 17.0.1, Oracle Corporation
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 370335232 bytes (353 MiB) / 616562688 bytes (588 MiB) up to 8573157376 bytes (8176 MiB)
+	CPUs: 12
+	Processor Vendor: AuthenticAMD
+	Processor Name: AMD Ryzen 5 3600 6-Core Processor              
+	Identifier: AuthenticAMD Family 23 Model 113 Stepping 0
+	Microarchitecture: Zen 2
+	Frequency (GHz): 3.59
+	Number of physical packages: 1
+	Number of physical CPUs: 6
+	Number of logical CPUs: 12
+	Graphics card #0 name: Radeon RX 580 Series
+	Graphics card #0 vendor: Advanced Micro Devices, Inc. (0x1002)
+	Graphics card #0 VRAM (MB): 4095.00
+	Graphics card #0 deviceId: 0x67df
+	Graphics card #0 versionInfo: DriverVersion=31.0.21902.5
+	Memory slot #0 capacity (MB): 16384.00
+	Memory slot #0 clockSpeed (GHz): 3.60
+	Memory slot #0 type: DDR4
+	Memory slot #1 capacity (MB): 16384.00
+	Memory slot #1 clockSpeed (GHz): 3.60
+	Memory slot #1 type: DDR4
+	Virtual memory max (MB): 37566.11
+	Virtual memory used (MB): 29001.13
+	Swap memory total (MB): 4864.00
+	Swap memory used (MB): 549.57
+	JVM Flags: 1 total; -XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump
+	Launched Version: 20.4.83-beta
+	Backend library: LWJGL version 3.3.2+13
+	Backend API: Radeon RX 580 Series GL version 4.6.0 Core Profile Context 23.9.2.230827, ATI Technologies Inc.
+	Window size: <not initialized>
+	GL Caps: Using framebuffer using OpenGL 3.2
+	GL debug messages: 
+	Using VBOs: Yes
+	Is Modded: Definitely; Client brand changed to 'neoforge'
+	Universe: 404
+	Type: Client (map_client.txt)
+	Locale: en_US
+	CPU: 12x AMD Ryzen 5 3600 6-Core Processor 
+	ModLauncher: 10.0.9+10.0.9+main.dcd20f30
+	ModLauncher launch target: forgeclientuserdev
+	ModLauncher naming: mcp
+	ModLauncher services: 
+		mixin-0.8.5.jar mixin PLUGINSERVICE 
+		loader-2.0.7.jar slf4jfixer PLUGINSERVICE 
+		loader-2.0.7.jar runtime_enum_extender PLUGINSERVICE 
+		at-modlauncher-10.0.1.jar accesstransformer PLUGINSERVICE 
+		loader-2.0.7.jar runtimedistcleaner PLUGINSERVICE 
+		modlauncher-10.0.9.jar mixin TRANSFORMATIONSERVICE 
+		modlauncher-10.0.9.jar fml TRANSFORMATIONSERVICE 
+	FML Language Providers: 
+		lowcodefml@2.0
+		minecraft@2.0
+		javafml@2.0
+	Mod List: 
+		neoforge-20.4.83-beta.jar                         |Minecraft                     |minecraft                     |1.20.4              |COMMON_SET|Manifest: a1:d4:5e:04:4f:d3:d6:e0:7b:37:97:cf:77:b0:de:ad:4a:47:ce:8c:96:49:5f:0a:cf:8c:ae:b2:6d:4b:8a:3f
+		main                                              |Veil                          |veil                          |1.0.0               |ERROR     |Manifest: NOSIGNATURE
+		                                                  |NeoForge                      |neoforge                      |20.4.83-beta        |COMMON_SET|Manifest: NOSIGNATURE
+	Crash Report UUID: 161b2c89-fcd9-4658-8e66-3040f25348c4
+	FML: 20.4
+	NeoForge: net.neoforged:20.4.83-beta

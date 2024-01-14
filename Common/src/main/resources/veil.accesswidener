@@ -3,14 +3,9 @@ accessible field net/minecraft/client/renderer/EffectInstance samplerMap Ljava/u
 accessible class net/minecraft/client/renderer/RenderType$CompositeRenderType
 accessible method net/minecraft/client/renderer/RenderType$CompositeRenderType state ()Lnet/minecraft/client/renderer/RenderType$CompositeState;
 accessible field net/minecraft/client/renderer/RenderStateShard$ShaderStateShard shader Ljava/util/Optional;
-accessible field net/minecraft/client/renderer/RenderType$CompositeState shaderState Lnet/minecraft/client/renderer/RenderStateShard$ShaderStateShard;
-accessible field net/minecraft/client/renderer/RenderType$CompositeState transparencyState Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
-accessible field net/minecraft/client/renderer/RenderType$CompositeState textureState Lnet/minecraft/client/renderer/RenderStateShard$EmptyTextureStateShard;
-accessible field net/minecraft/client/renderer/RenderType$CompositeState writeMaskState Lnet/minecraft/client/renderer/RenderStateShard$WriteMaskStateShard;
 accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 accessible class com/mojang/blaze3d/preprocessor/GlslPreprocessor$Context
-accessible field net/minecraft/client/Minecraft timer Lnet/minecraft/client/Timer;
 accessible class net/minecraft/client/renderer/RenderStateShard$OutputStateShard
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 accessible field net/minecraft/client/renderer/RenderStateShard LIGHTMAP Lnet/minecraft/client/renderer/RenderStateShard$LightmapStateShard;
@@ -23,9 +18,9 @@ accessible field net/minecraft/client/renderer/RenderStateShard NO_LIGHTMAP Lnet
 accessible field net/minecraft/client/renderer/RenderStateShard NO_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
 accessible field net/minecraft/client/renderer/RenderStateShard TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
 accessible method net/minecraft/client/renderer/ItemInHandRenderer renderPlayerArm (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFLnet/minecraft/world/entity/HumanoidArm;)V
-accessible field net/minecraft/client/Options bobView Lnet/minecraft/client/OptionInstance;
 accessible field net/minecraft/client/renderer/entity/ItemRenderer textureManager Lnet/minecraft/client/renderer/texture/TextureManager;
 accessible method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
+accessible class net/minecraft/client/renderer/RenderType$CompositeState
 
 # Shader Instance Wrapper
 accessible field net/minecraft/client/renderer/ShaderInstance uniformMap Ljava/util/Map;

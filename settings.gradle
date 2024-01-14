@@ -3,12 +3,16 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = 'Forge'
-            url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'NeoForge'
+            url = 'https://maven.neoforged.net/releases/'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
         }
         maven {
             name = 'Sponge Snapshots'
@@ -31,10 +35,10 @@ pluginManagement {
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
 }
 
 rootProject.name = 'Veil'
 // Quilt isn't 1.20, so it has to be excluded for now
 // include("Common", "Fabric", "Forge", "Quilt")
-include("Common", "Fabric", "Forge")
+include("Common", "Fabric", "Forge", "NeoForge")

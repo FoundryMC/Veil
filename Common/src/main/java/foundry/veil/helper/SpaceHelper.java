@@ -166,7 +166,7 @@ public class SpaceHelper {
         cameraRotation.transform(position);
 
         // Account for view bobbing
-        if (mc.options.bobView.get() && mc.getCameraEntity() instanceof Player) {
+        if (mc.options.bobView().get() && mc.getCameraEntity() instanceof Player) {
             Player player = (Player) mc.getCameraEntity();
             float playerStep = player.walkDist - player.walkDistO;
             float stepSize = -(player.walkDist + playerStep * partialTicks);

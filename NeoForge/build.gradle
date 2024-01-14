@@ -1,0 +1,155 @@
+plugins {
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.81'
+    id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+base {
+    archivesName = "${mod_name}-neoforge-${minecraft_version}"
+}
+
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
+}
+
+// Automatically enable neoforge AccessTransformers if the file exists
+// This location is hardcoded in FML and can not be changed.
+// https://github.com/neoforged/FancyModLoader/blob/a952595eaaddd571fbc53f43847680b00894e0c1/loader/src/main/java/net/neoforged/fml/loading/moddiscovery/ModFile.java#L118
+if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
+    minecraft.accessTransformers.file file('src/main/resources/META-INF/accesstransformer.cfg')
+}
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+
+//        lazyToken('minecraft_classpath') {
+//            configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+//        }
+    }
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    shade
+    library
+    implementation.extendsFrom library
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+    compileOnly project(":Common")
+
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
+    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+
+    implementation "gg.moonflower:molang-compiler:$molang_compiler_version"
+    shade "gg.moonflower:molang-compiler:$molang_compiler_version"
+
+    implementation "io.github.spair:imgui-java-binding:$imgui_version"
+    implementation("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+
+    library "io.github.spair:imgui-java-natives-linux:$imgui_version"
+    library "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    library "io.github.spair:imgui-java-natives-windows:$imgui_version"
+
+    shade "io.github.spair:imgui-java-binding:$imgui_version"
+    shade("io.github.spair:imgui-java-lwjgl3:$imgui_version") {
+        exclude group: 'org.lwjgl'
+        exclude group: 'org.lwjgl.lwjgl'
+    }
+
+    shade "io.github.spair:imgui-java-natives-linux:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
+
+    implementation ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+        transitive false
+    }
+    shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+        transitive false
+    }
+}
+
+// NeoGradle compiles the game, but we don't want to add our common code to the game's code
+Spec<Task> notNeoTask = { Task it -> !it.name.startsWith("neo") } as Spec<Task>
+
+tasks.withType(JavaCompile).matching(notNeoTask).configureEach {
+    source(project(":Common").sourceSets.main.allSource)
+}
+
+tasks.withType(Javadoc).matching(notNeoTask).configureEach {
+    source(project(":Common").sourceSets.main.allJava)
+}
+
+tasks.named("sourcesJar", Jar) {
+    from(project(":Common").sourceSets.main.allSource)
+}
+
+tasks.withType(ProcessResources).matching(notNeoTask).configureEach {
+    from project(":Common").sourceSets.main.resources
+}
+
+//jar.finalizedBy('reobfJar')
+
+jar {
+    archiveClassifier = 'slim'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    relocate "org.objectweb.asm", "${project.group}.lib.asm"
+    relocate "org.lwjgl.opencl", "${project.group}.lib.opencl"
+//    relocate "gg.moonflower.molangcompiler", "${project.group}.lib.molangcompiler"
+//    relocate "imgui", "${project.group}.lib.imgui"
+//    relocate "io.imgui", "${project.group}.lib.imgui-natives"
+    relocate "io.github.spair:imgui-java-binding:$imgui_version", "${project.group}.relocated.imgui-java-binding"
+    relocate "io.github.spair:imgui-java-lwjgl3:$imgui_version", "${project.group}.relocated.imgui-java-lwjgl3"
+    relocate "io.github.spair:imgui-java-natives-linux:$imgui_version", "${project.group}.relocated.imgui-java-natives-linux"
+    relocate "io.github.spair:imgui-java-natives-windows:$imgui_version", "${project.group}.relocated.imgui-java-natives-windows"
+    relocate "io.github.spair:imgui-java-natives-macos:$imgui_version", "${project.group}.relocated.imgui-java-natives-macos"
+
+//    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+
+//reobf {
+//    shadowJar {}
+//}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId base.archivesName.get()
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}

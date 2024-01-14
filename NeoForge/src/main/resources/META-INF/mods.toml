@@ -1,0 +1,41 @@
+modLoader = "javafml"
+loaderVersion = "${neoforge_loader_version_range}"
+license = "${license}"
+issueTrackerURL = "https://github.com/FoundryMC/Veil/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+#updateJSONURL="https://change.me.example.invalid/updates.json" #optional (see https://docs.neoforged.net/docs/misc/updatechecker/)
+#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional (displayed in the mod UI)
+logoFile = "${mod_id}.png" #optional
+credits = "${credits}" #optional
+authors = "${mod_author}" #optional
+description = '''${description}'''
+
+[[mixins]]
+config = "${mod_id}-common.mixins.json"
+[[mixins]]
+config = "${mod_id}-neoforge.mixins.json"
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"
+
+[[dependencies.${ mod_id }]] #optional
+modId = "neoforge"
+type = "required"
+versionRange = "${neoforge_loader_version_range}"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies.${ mod_id }]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# Features are specific properties of the game environment, that you may want to declare you require. This example declares
+# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
+# stop your mod loading on the server for example.
+[features.${ mod_id }]
+openGLVersion = "[4.2,)"

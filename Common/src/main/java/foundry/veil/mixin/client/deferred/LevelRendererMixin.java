@@ -36,10 +36,12 @@ public class LevelRendererMixin {
 
     @Unique
     private final DeferredShaderStateCache veil$cloudCache = new DeferredShaderStateCache();
+    @Unique
     private final DeferredShaderStateCache veil$weatherCache = new DeferredShaderStateCache();
+    @Unique
     private final DeferredShaderStateCache veil$worldborderCache = new DeferredShaderStateCache();
 
-    @Inject(method = "renderChunkLayer", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getShader()Lnet/minecraft/client/renderer/ShaderInstance;", shift = At.Shift.AFTER))
+    @Inject(method = "renderSectionLayer", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getShader()Lnet/minecraft/client/renderer/ShaderInstance;", shift = At.Shift.AFTER))
     public void updateUniforms(RenderType $$0, PoseStack $$1, double $$2, double $$3, double $$4, Matrix4f $$5, CallbackInfo ci) {
         ShaderInstance shader = RenderSystem.getShader();
         Uniform iModelViewMat = shader.getUniform("NormalMat");

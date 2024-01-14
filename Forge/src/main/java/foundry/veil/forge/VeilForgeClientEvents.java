@@ -8,6 +8,7 @@ import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.repository.Pack;
@@ -48,30 +49,9 @@ public class VeilForgeClientEvents {
     }
 
     @SubscribeEvent
-    public static void mousePressed(InputEvent.MouseButton event) {
+    public static void mousePressed(InputEvent.MouseButton.Pre event) {
         if (event.getAction() == GLFW_PRESS && VeilClient.EDITOR_KEY.matchesMouse(event.getButton())) {
             VeilRenderSystem.renderer().getEditorManager().toggle();
         }
-    }
-
-    @SubscribeEvent
-    public void addPackFinders(AddPackFindersEvent event) {
-        if (event.getPackType() == PackType.CLIENT_RESOURCES) {
-
-            // Register test resource pack
-            if (Veil.DEBUG && !FMLLoader.isProduction()) {
-                registerBuiltinPack(event, Veil.veilPath("test_shaders"));
-            }
-
-            // TODO make this pack enabled by default
-            registerBuiltinPack(event, VeilDeferredRenderer.PACK_ID);
-        }
-    }
-
-    private static void registerBuiltinPack(AddPackFindersEvent event, ResourceLocation id) {
-        Path resourcePath = ModList.get().getModFileById(Veil.MODID).getFile().findResource("resourcepacks/" + id.getPath());
-        Pack pack = Pack.readMetaAndCreate(id.toString(), Component.literal(id.getNamespace() + "/" + id.getPath()), false,
-                (path) -> new PathPackResources(path, resourcePath, false), PackType.CLIENT_RESOURCES, Pack.Position.BOTTOM, PackSource.BUILT_IN);
-        event.addRepositorySource(packConsumer -> packConsumer.accept(pack));
     }
 }

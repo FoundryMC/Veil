@@ -1,28 +1,28 @@
-modLoader="javafml" #mandatory
-loaderVersion="[41,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-license="All rights reserved"
-issueTrackerURL="https://github.com/FoundryMC/Veil/issues" #optional
+modLoader = "javafml"
+loaderVersion = "${forge_loader_version_range}"
+license = "${license}"
+issueTrackerURL = "https://github.com/FoundryMC/Veil/issues"
 
-[[mods]] #mandatory
-modId="veil" #mandatory
-version="${file.jarVersion}" #mandatory
-displayName="Veil" #mandatory
-#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-#logoFile="multiloader.png" #optional
-#credits="Thanks for this example mod goes to Java" #optional
-authors="amo, Cappin" #optional
-description="This is the Veil project. It is a collection of tools and utilities that are designed to make it easier for mod developers to do advanced rendering in their mods."
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+#updateJSONURL="https://change.me.example.invalid/updates.json"
+displayURL = "https://modrinth.com/project/veil"
+#logoFile="multiloader.png"
+credits = "${credits}"
+authors = "${mod_author}"
+description = '''${description}'''
 
-[[dependencies.veil]] #optional
-    modId="forge" #mandatory
-    mandatory=true #mandatory
-    versionRange="[41,)" #mandatory
-    ordering="NONE"
-    side="BOTH"
 [[dependencies.veil]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="1.20.1"
-    ordering="NONE"
-    side="BOTH"
+modId = "forge"
+mandatory = true
+versionRange = "${forge_version_range}"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies.veil]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"

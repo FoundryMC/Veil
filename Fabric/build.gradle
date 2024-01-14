@@ -2,9 +2,8 @@ plugins {
     id 'java'
     id 'idea'
     id 'maven-publish'
-    id 'fabric-loom'
-    id 'io.github.juuxel.loom-quiltflower'
-    id 'com.github.johnrengelman.shadow'
+    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"

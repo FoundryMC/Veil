@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 /**
  * Renders all lights in a scene.
  * <p>Lights can be added with {@link #addLight(Light)}, and subsequently removed with
- * {@link #removeLight(Light)}. Lights are automatically updated the next time {@link #render(CullFrustum)}
+ * {@link #removeLight(Light)}. Lights are automatically updated the next time {@link #render(CullFrustum, AdvancedFbo)}
  * is called if {@link Light#isDirty()} is <code>true</code>.
  * </p>
  * <p>There is no way to retrieve a light, so care should be taken to keep track of what lights

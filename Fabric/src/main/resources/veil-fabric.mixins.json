@@ -10,7 +10,9 @@
     "client.EffectInstanceMixin",
     "client.KeyboardHandlerMixin",
     "client.MinecraftMixin",
-    "client.MouseHandlerMixin"
+    "client.MouseHandlerMixin",
+    "client.deferred.ModelBlockRendererMixin",
+    "client.deferred.ParticleEngineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

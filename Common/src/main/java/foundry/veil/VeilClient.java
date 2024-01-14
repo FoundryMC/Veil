@@ -1,8 +1,7 @@
 package foundry.veil;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import foundry.veil.mixin.client.deferred.RenderBuffersAccessor;
+import foundry.veil.ext.BufferSourceExtension;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
 import foundry.veil.render.pipeline.VeilRenderSystem;
@@ -13,7 +12,6 @@ import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ServiceLoader;
-import java.util.SortedMap;
 
 public class VeilClient {
 
@@ -26,8 +24,8 @@ public class VeilClient {
         VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
         VeilEventPlatform.INSTANCE.onVeilRendererAvailable(renderer -> {
             // This fixes moving transparent blocks drawing too early
-            SortedMap<RenderType, BufferBuilder> fixedBuffers = ((RenderBuffersAccessor) Minecraft.getInstance().renderBuffers()).getFixedBuffers();
-            fixedBuffers.put(RenderType.translucentMovingBlock(), new BufferBuilder(RenderType.translucentMovingBlock().bufferSize()));
+            BufferSourceExtension ext = (BufferSourceExtension) Minecraft.getInstance().renderBuffers().bufferSource();
+            ext.veil$addFixedBuffer(RenderType.translucentMovingBlock());
         });
     }
 

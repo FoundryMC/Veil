@@ -40,7 +40,6 @@ import static org.lwjgl.opengl.GL11C.GL_NEAREST;
  *     <li>Transparency post-processing ({@link VeilDeferredRenderer#TRANSPARENT_POST})</li>
  *     <li>Light Shaders via {@link LightRenderer}</li>
  *     <li>Light post-processing ({@link VeilDeferredRenderer#LIGHT_POST})</li>
- *     <li>Skybox Shader(s) via {@link SkyRenderer}</li> TODO
  *     <li>Final image compositing</li>
  *     <li>Final post-processing via {@link PostProcessingManager}</li>
  * </ul>

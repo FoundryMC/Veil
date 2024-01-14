@@ -1,4 +1,4 @@
-package foundry.veil.mixin.client.deferred;
+package foundry.veil.fabric.mixin.client.deferred;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;

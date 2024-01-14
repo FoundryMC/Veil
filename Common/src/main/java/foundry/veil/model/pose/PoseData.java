@@ -29,7 +29,7 @@ public class PoseData {
     public ItemStack stack;
     public InteractionHand hand;
 
-    public float partialTick = Minecraft.getInstance().timer.partialTick;
+    public float partialTick = Minecraft.getInstance().getFrameTime();
     public float equipProgress;
 
 
