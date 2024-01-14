@@ -301,7 +301,7 @@ public final class VeilRenderSystem {
 
         postProcessingManager.runPipeline();
         if (postFramebuffer != null) {
-            postFramebuffer.resolveToScreen();
+            postFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
         }
     }
 }

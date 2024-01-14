@@ -1,8 +1,4 @@
 {
   "depth": true,
-  "color_buffers": [
-    {
-      "format": "RGBA16F"
-    }
-  ]
+  "format": "RGBA16F"
 }
