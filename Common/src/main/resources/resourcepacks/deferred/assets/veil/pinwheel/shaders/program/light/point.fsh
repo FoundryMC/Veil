@@ -36,9 +36,10 @@ void main() {
     vec3 normalVS = texture(NormalSampler, screenUv).xyz;
     float depth = texture(DiffuseDepthSampler, screenUv).r;
     vec3 pos = viewToWorldSpaceDirection(viewPosFromDepth(depth, screenUv));
+    vec3 newLightPos = lightPos - VeilCamera.CameraPosition;
 
     // lighting calculation
-    vec3 offset = lightPos - pos;
+    vec3 offset = newLightPos - pos;
     vec3 lightDirection = (VeilCamera.ViewMat * vec4(normalize(offset), 0.0)).xyz;
     float diffuse = dot(normalVS, lightDirection);
     diffuse = max(0, diffuse);
