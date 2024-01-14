@@ -3,6 +3,7 @@ package foundry.veil.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
@@ -84,24 +85,26 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-        boolean active = resourceManager.listPacks().anyMatch(r -> r.packId().equals(PACK_ID.toString()));
-        if (this.enabled != active) {
-            this.enabled = active;
-            if (active) {
-                LOGGER.info("Deferred Renderer Enabled");
-//                this.lightRenderer.addLight(new DirectionalLight());
-                this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
-            } else {
-                LOGGER.info("Deferred Renderer Disabled");
-                return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
+        return CompletableFuture.<CompletableFuture<Void>>supplyAsync(() -> {
+            boolean active = resourceManager.listPacks().anyMatch(r -> r.packId().equals(PACK_ID.toString()));
+            if (this.enabled != active) {
+                this.enabled = active;
+                if (active) {
+                    LOGGER.info("Deferred Renderer Enabled");
+//                    this.lightRenderer.addLight(new DirectionalLight());
+                    this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
+                } else {
+                    LOGGER.info("Deferred Renderer Disabled");
+                    return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
+                }
             }
-        }
 
-        if (this.enabled) {
-            return this.deferredShaderManager.reload(preparationBarrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
-        }
+            if (this.enabled) {
+                return this.deferredShaderManager.reload(preparationBarrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
+            }
 
-        return preparationBarrier.wait(null);
+            return preparationBarrier.wait(null);
+        }, gameExecutor).thenCompose(future -> future);
     }
 
     @Override

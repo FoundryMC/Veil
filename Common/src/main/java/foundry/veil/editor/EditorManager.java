@@ -61,10 +61,6 @@ public class EditorManager implements PreparableReloadListener {
                         }
                     }
                     ImGui.endDisabled();
-
-                    if (!editor.isEnabled()) {
-                        enabled.set(false);
-                    }
                 }
                 ImGui.endMenu();
             }
@@ -85,6 +81,9 @@ public class EditorManager implements PreparableReloadListener {
             Editor editor = entry.getKey();
             ImBoolean enabled = entry.getValue();
 
+            if (!editor.isEnabled()) {
+                enabled.set(false);
+            }
             if (!enabled.get()) {
                 continue;
             }
