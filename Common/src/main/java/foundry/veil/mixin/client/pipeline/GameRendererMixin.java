@@ -5,14 +5,22 @@ import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.pipeline.VeilRenderer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
+
+    @Shadow
+    @Final
+    private Minecraft minecraft;
 
     @Inject(method = "resize", at = @At(value = "HEAD"))
     public void veil$resizeListener(int pWidth, int pHeight, CallbackInfo ci) {
@@ -34,6 +42,11 @@ public class GameRendererMixin {
     @Inject(method = "render", at = @At("TAIL"))
     public void veil$unbindGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderer().getGuiInfo().unbind();
+    }
+
+    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V"))
+    public int clearMask(int mask) {
+        return 0;
     }
 
     @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LightTexture;turnOnLightLayer()V", ordinal = 0, shift = At.Shift.BEFORE))
