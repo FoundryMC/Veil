@@ -16,7 +16,6 @@ void main() {
     if (color.a < 0.1) {
         discard;
     }
-    fragColor = vec4(0.0);
     fragAlbedo = color;
     fragNormal = vec4(normal, 1.0);
     fragMaterial = vec4(ARMOR_CUTOUT, 0.0, 0.0, 1.0);

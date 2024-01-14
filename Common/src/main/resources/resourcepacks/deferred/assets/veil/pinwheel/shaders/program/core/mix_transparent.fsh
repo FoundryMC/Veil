@@ -24,7 +24,7 @@ void main() {
     vec4 compatibility = texture(CompatibilitySampler, texCoord);
     vec3 light = texture(LightSampler, texCoord).rgb;
     fragColor = vec4(albedo.rgb * light, albedo.a);
-    fragColor.rgb = blend(fragColor.rgb, compatibility);
+    fragColor.rgb = blend(fragColor, compatibility);
     fragColor.a += compatibility.a * (1.0 - fragColor.a);
     gl_FragDepth = texture(DepthSampler, texCoord).r;
 }

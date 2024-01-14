@@ -16,7 +16,6 @@ void main() {
     if (color.a < 0.5) {
         discard;
     }
-    fragColor = vec4(0.0);
     fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 1.0);
     fragMaterial = vec4(BLOCK_CUTOUT, 0.0, 0.0, 1.0);

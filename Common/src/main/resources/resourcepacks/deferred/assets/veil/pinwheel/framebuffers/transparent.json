@@ -15,7 +15,7 @@
     },
     {
       "name": "MaterialSampler",
-      "format": "R16F"
+      "format": "RGB16F"
     },
     {
       "name": "VanillaLightSampler",

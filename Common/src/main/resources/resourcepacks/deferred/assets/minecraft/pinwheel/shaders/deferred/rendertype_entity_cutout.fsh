@@ -19,7 +19,6 @@ void main() {
     }
     color *= vertexColor * ColorModulator;
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-    fragColor = vec4(0.0);
     fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 1.0);
     fragMaterial = vec4(ENTITY_CUTOUT, 0.0, 0.0, 1.0);
