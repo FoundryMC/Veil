@@ -58,9 +58,6 @@ dependencies {
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
 
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
-
     implementation "gg.moonflower:molang-compiler:$molang_compiler_version"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
 
