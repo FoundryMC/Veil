@@ -23,13 +23,13 @@ file="META-INF/accesstransformer.cfg"
 
 [[dependencies.${ mod_id }]] #optional
 modId = "neoforge"
-type = "required"
+mandatory=true
 versionRange = "${neoforge_loader_version_range}"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.${ mod_id }]]
 modId = "minecraft"
-type = "required"
+mandatory=true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
