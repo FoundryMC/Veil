@@ -10,7 +10,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class ParticleRenderTypeMixin {
 
     /**
-     * @reason This corrects the blend function for particles. This also fixes particles in Fabulous graphics
+     * This corrects the blend function for particles. This also fixes particles in Fabulous graphics
+     *
      * @author Ocelot
      */
     @Redirect(method = "begin", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;defaultBlendFunc()V"))
