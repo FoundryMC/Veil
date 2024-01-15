@@ -30,6 +30,7 @@
     "client.deferred.RenderTypeMixin",
     "client.deferred.ShaderStateMixin",
     "client.deferred.VertexBufferMixin",
+    "client.deferred.WindowMixin",
     "client.imgui.ImGuiImplGlfwMixin",
     "client.imgui.KeyboardHandlerMixin",
     "client.imgui.MouseHandlerMixin",
