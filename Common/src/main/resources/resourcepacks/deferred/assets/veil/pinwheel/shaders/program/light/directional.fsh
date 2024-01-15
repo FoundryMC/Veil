@@ -6,7 +6,7 @@ in vec2 texCoord;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
-uniform sampler2D MaterialSampler;
+uniform usampler2D MaterialSampler;
 uniform sampler2D VanillaLightSampler;
 uniform sampler2D DiffuseDepthSampler;
 

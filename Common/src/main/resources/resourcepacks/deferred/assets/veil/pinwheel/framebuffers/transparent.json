@@ -11,11 +11,11 @@
     },
     {
       "name": "NormalSampler",
-      "format": "RGB16F"
+      "format": "RGB8_SNORM"
     },
     {
       "name": "MaterialSampler",
-      "format": "RGB16F"
+      "format": "RGB8UI"
     },
     {
       "name": "VanillaLightSampler",

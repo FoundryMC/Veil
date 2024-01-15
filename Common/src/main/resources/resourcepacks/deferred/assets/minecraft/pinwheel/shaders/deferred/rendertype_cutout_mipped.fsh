@@ -18,7 +18,7 @@ void main() {
     }
     fragAlbedo = vec4(color.rgb, 1.0);
     fragNormal = vec4(normal, 1.0);
-    fragMaterial = vec4(BLOCK_CUTOUT, 0.0, 0.0, 1.0);
+    fragMaterial = ivec4(BLOCK_CUTOUT, 0, 0, 1);
     fragLightSampler = vec4(texCoord2, 0.0, 1.0);
     fragLightMap = lightmapColor;
 }

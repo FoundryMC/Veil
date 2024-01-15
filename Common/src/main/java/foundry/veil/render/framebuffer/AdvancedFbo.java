@@ -427,6 +427,7 @@ public interface AdvancedFbo extends NativeResource {
         private int mipmaps;
         private int samples;
         private int format;
+        private int internalFormat;
         private boolean linear;
         private String name;
 
@@ -444,6 +445,7 @@ public interface AdvancedFbo extends NativeResource {
             this.mipmaps = 0;
             this.samples = 1;
             this.format = GL_RGBA;
+            this.internalFormat = GL_RGBA8;
             this.linear = false;
             this.name = null;
         }
@@ -529,9 +531,11 @@ public interface AdvancedFbo extends NativeResource {
          * Sets the format to use for texture attachments. {@link GL11#GL_RGBA} is the default.
          *
          * @param format The new format to use
+         * @param format The new internal format to use
          */
-        public Builder setFormat(int format) {
+        public Builder setFormat(int format, int internalFormat) {
             this.format = format;
+            this.internalFormat = internalFormat;
             return this;
         }
 
@@ -605,7 +609,7 @@ public interface AdvancedFbo extends NativeResource {
         public Builder addColorTextureBuffer(int width, int height, int dataType) {
             this.colorAttachments.add(
                     new AdvancedFboTextureAttachment(GL_COLOR_ATTACHMENT0,
-                            this.format,
+                            this.internalFormat,
                             this.format,
                             dataType,
                             width,
@@ -695,7 +699,7 @@ public interface AdvancedFbo extends NativeResource {
         public Builder setDepthTextureBuffer(int width, int height, int dataType) {
             Validate.isTrue(this.depthAttachment == null, "Only one depth attachment can be applied to an FBO.");
             this.depthAttachment = new AdvancedFboTextureAttachment(GL_DEPTH_ATTACHMENT,
-                    this.format,
+                    this.internalFormat,
                     this.format,
                     dataType,
                     width,
