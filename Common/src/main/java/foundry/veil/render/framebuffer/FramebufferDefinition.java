@@ -50,6 +50,7 @@ public record FramebufferDefinition(MolangExpression width,
                                             Optional.of(new FramebufferAttachmentDefinition(
                                                     FramebufferAttachmentDefinition.Type.TEXTURE,
                                                     FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT,
+                                                    FramebufferAttachmentDefinition.DataType.FLOAT,
                                                     true,
                                                     false,
                                                     0,
@@ -94,6 +95,9 @@ public record FramebufferDefinition(MolangExpression width,
                     FramebufferAttachmentDefinition.Format.CODEC
                             .optionalFieldOf("format", FramebufferAttachmentDefinition.Format.RGBA8)
                             .forGetter(definition -> definition.colorBuffers[0].format()),
+                    FramebufferAttachmentDefinition.DataType.CODEC
+                            .optionalFieldOf("dataType", FramebufferAttachmentDefinition.DataType.UNSIGNED_BYTE)
+                            .forGetter(definition -> definition.colorBuffers[0].dataType()),
                     Codec.BOOL.optionalFieldOf("linear", false)
                             .forGetter(definition -> definition.colorBuffers[0].linear()),
                     Codec.INT.optionalFieldOf("levels", 0)
@@ -102,12 +106,13 @@ public record FramebufferDefinition(MolangExpression width,
                             .forGetter(definition -> Optional.ofNullable(definition.colorBuffers[0].name())),
                     FramebufferDefinition.DEPTH_CODEC.fieldOf("depth")
                             .forGetter(definition -> Optional.ofNullable(definition.depthBuffer))
-            ).apply(instance, (width, height, type, format, linear, levels, name, depth) ->
+            ).apply(instance, (width, height, type, format, dataType, linear, levels, name, depth) ->
                     new FramebufferDefinition(width,
                             height,
                             new FramebufferAttachmentDefinition[]{
                                     new FramebufferAttachmentDefinition(type,
                                             format,
+                                            dataType,
                                             false,
                                             linear,
                                             levels,
@@ -167,7 +172,6 @@ public record FramebufferDefinition(MolangExpression width,
         AdvancedFbo.Builder builder = AdvancedFbo.withSize(width, height);
 
         for (FramebufferAttachmentDefinition definition : this.colorBuffers) {
-            builder.setFormat(definition.format().getId());
             if (definition.type() == FramebufferAttachmentDefinition.Type.RENDER_BUFFER) {
                 builder.setSamples(definition.levels())
                         .addColorRenderBuffer();
@@ -175,6 +179,7 @@ public record FramebufferDefinition(MolangExpression width,
                 builder.setMipmaps(definition.levels())
                         .setLinear(definition.linear())
                         .setName(definition.name())
+                        .setFormat(definition.format().getId())
                         .addColorTextureBuffer();
             }
         }
@@ -187,7 +192,8 @@ public record FramebufferDefinition(MolangExpression width,
                 builder.setMipmaps(this.depthBuffer.levels())
                         .setLinear(this.depthBuffer.linear())
                         .setName(this.depthBuffer.name())
-                        .setDepthTextureBuffer(this.depthBuffer.format().getId());
+                        .setFormat(this.depthBuffer.format().getId())
+                        .setDepthTextureBuffer();
             }
         }
 
