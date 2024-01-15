@@ -104,7 +104,7 @@ public class DeferredEditor extends SingleWindowEditor {
         if (ImGui.button("Add Test Light")) {
             if (player != null) {
                 Vec3 pos = player.getEyePosition();
-                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setColor(new Vector3f(1.0F, 1.0F, 1.0F).mul(4)).setRadius(15));
+                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setColor(new Vector3f(1.0F, 1.0F, 1.0F).mul(10)).setRadius(15));
             }
         }
         ImGui.endDisabled();
@@ -116,11 +116,13 @@ public class DeferredEditor extends SingleWindowEditor {
             AdvancedFbo deferredFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED_FINAL);
             AdvancedFbo transparentBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
             AdvancedFbo transparentFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_FINAL);
+            AdvancedFbo lightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
 
             this.drawBuffers("Opaque", deferredBuffer);
             this.drawBuffers("Opaque Final", deferredFinalBuffer);
             this.drawBuffers("Transparent", transparentBuffer);
             this.drawBuffers("Transparent Final", transparentFinalBuffer);
+            this.drawBuffers("Light", lightBuffer);
 
             ImGui.endTabBar();
         }
