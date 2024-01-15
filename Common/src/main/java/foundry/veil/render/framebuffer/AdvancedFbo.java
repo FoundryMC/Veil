@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.system.NativeResource;
 
 import java.util.LinkedList;
@@ -451,6 +452,25 @@ public interface AdvancedFbo extends NativeResource {
             Validate.inclusiveBetween(0, VeilRenderSystem.maxColorAttachments(), this.colorAttachments.size());
         }
 
+        private void validateSamples() {
+            int samples = -1;
+            for (AdvancedFboAttachment attachment : this.colorAttachments) {
+                if (!(attachment instanceof AdvancedFboRenderAttachment)) {
+                    continue;
+                }
+                if (samples == -1) {
+                    samples = attachment.getLevels();
+                    continue;
+                }
+                if (attachment.getLevels() != samples) {
+                    throw new IllegalArgumentException("Framebuffer attachments need to have the same number of samples to be complete.");
+                }
+            }
+            if (samples != -1 && this.depthAttachment instanceof AdvancedFboRenderAttachment && this.depthAttachment.getLevels() != samples) {
+                throw new IllegalArgumentException("Framebuffer attachments need to have the same number of samples to be complete.");
+            }
+        }
+
         /**
          * Adds copies of the buffers inside the specified fbo.
          *
@@ -547,7 +567,7 @@ public interface AdvancedFbo extends NativeResource {
         }
 
         /**
-         * Adds a color texture buffer with the size of the framebuffer and 1 mipmap level.
+         * Adds a color texture buffer with the size of the framebuffer and {@link GL11C#GL_UNSIGNED_BYTE GL_UNSIGNED_BYTE} as the format.
          */
         public Builder addColorTextureBuffer() {
             this.addColorTextureBuffer(this.width, this.height, GL_UNSIGNED_BYTE);
@@ -555,16 +575,38 @@ public interface AdvancedFbo extends NativeResource {
         }
 
         /**
-         * Adds a color texture buffer with the specified size and the specified mipmap levels.
+         * Adds a color texture buffer with the specified size and {@link GL11C#GL_UNSIGNED_BYTE GL_UNSIGNED_BYTE} as the format.
          *
          * @param width  The width of the texture buffer
          * @param height The height of the texture buffer
+         */
+        public Builder addColorTextureBuffer(int width, int height) {
+            this.addColorTextureBuffer(width, height, GL_UNSIGNED_BYTE);
+            return this;
+        }
+
+        /**
+         * Adds a color texture buffer with the specified data type.
+         *
+         * @param dataType The format of the data internally
+         */
+        public Builder addColorTextureBuffer(int dataType) {
+            this.addColorTextureBuffer(this.width, this.height, dataType);
+            return this;
+        }
+
+        /**
+         * Adds a color texture buffer with the specified size and data type.
+         *
+         * @param width    The width of the texture buffer
+         * @param height   The height of the texture buffer
+         * @param dataType The format of the data internally
          */
         public Builder addColorTextureBuffer(int width, int height, int dataType) {
             this.colorAttachments.add(
                     new AdvancedFboTextureAttachment(GL_COLOR_ATTACHMENT0,
                             this.format,
-                            GL_RGBA,
+                            this.format,
                             dataType,
                             width,
                             height,
@@ -615,47 +657,47 @@ public interface AdvancedFbo extends NativeResource {
         }
 
         /**
-         * Sets the depth texture buffer to the size of the framebuffer.
+         * Sets the depth texture buffer to the size of the framebuffer and {@link GL11C#GL_FLOAT GL_FLOAT} as the format.
          */
         public Builder setDepthTextureBuffer() {
-            this.setDepthTextureBuffer(this.width, this.height);
+            this.setDepthTextureBuffer(this.width, this.height, GL_FLOAT);
             return this;
         }
 
         /**
-         * Sets the depth texture buffer to the specified size.
+         * Sets the depth texture buffer to the specified size and {@link GL11C#GL_FLOAT GL_FLOAT} as the format.
          *
          * @param width  The width of the texture buffer
          * @param height The height of the texture buffer
          */
         public Builder setDepthTextureBuffer(int width, int height) {
-            this.setDepthTextureBuffer(width, height, GL_DEPTH_COMPONENT);
+            this.setDepthTextureBuffer(width, height, GL_FLOAT);
             return this;
         }
 
         /**
-         * Sets the depth texture buffer to the specified format.
+         * Sets the depth texture buffer to the size of the framebuffer and specified data type.
          *
-         * @param format The format of the texture
+         * @param dataType The format of the data internally
          */
-        public Builder setDepthTextureBuffer(int format) {
-            this.setDepthTextureBuffer(this.width, this.height, format);
+        public Builder setDepthTextureBuffer(int dataType) {
+            this.setDepthTextureBuffer(this.width, this.height, dataType);
             return this;
         }
 
         /**
-         * Sets the depth texture buffer to the specified size and format.
+         * Sets the depth texture buffer to the specified size and data type.
          *
-         * @param width  The width of the texture buffer
-         * @param height The height of the texture buffer
-         * @param format The format of the texture
+         * @param width    The width of the texture buffer
+         * @param height   The height of the texture buffer
+         * @param dataType The format of the data internally
          */
-        public Builder setDepthTextureBuffer(int width, int height, int format) {
+        public Builder setDepthTextureBuffer(int width, int height, int dataType) {
             Validate.isTrue(this.depthAttachment == null, "Only one depth attachment can be applied to an FBO.");
             this.depthAttachment = new AdvancedFboTextureAttachment(GL_DEPTH_ATTACHMENT,
-                    format,
-                    GL_DEPTH_COMPONENT,
-                    GL_FLOAT,
+                    this.format,
+                    this.format,
+                    dataType,
                     width,
                     height,
                     this.mipmaps,
@@ -701,33 +743,12 @@ public interface AdvancedFbo extends NativeResource {
             if (this.colorAttachments.isEmpty()) {
                 throw new IllegalArgumentException("Framebuffer needs at least one color attachment to be complete.");
             }
-            int samples = -1;
-            for (AdvancedFboAttachment attachment : this.colorAttachments) {
-                if (!(attachment instanceof AdvancedFboRenderAttachment)) {
-                    continue;
-                }
-                if (samples == -1) {
-                    samples = attachment.getLevels();
-                    continue;
-                }
-                if (attachment.getLevels() != samples) {
-                    throw new IllegalArgumentException(
-                            "Framebuffer attachments need to have the same number of samples to be complete.");
-                }
-            }
-            if (samples != -1 &&
-                    this.depthAttachment instanceof AdvancedFboRenderAttachment &&
-                    this.depthAttachment.getLevels() != samples) {
-                throw new IllegalArgumentException(
-                        "Framebuffer attachments need to have the same number of samples to be complete.");
-            }
-            AdvancedFbo advancedFbo = new AdvancedFboImpl(this.width, this.height,
-                    this.colorAttachments.toArray(new AdvancedFboAttachment[0]),
-                    this.depthAttachment);
+            this.validateSamples();
+            AdvancedFbo framebuffer = new AdvancedFboImpl(this.width, this.height, this.colorAttachments.toArray(new AdvancedFboAttachment[0]), this.depthAttachment);
             if (create) {
-                advancedFbo.create();
+                framebuffer.create();
             }
-            return advancedFbo;
+            return framebuffer;
         }
     }
 }
