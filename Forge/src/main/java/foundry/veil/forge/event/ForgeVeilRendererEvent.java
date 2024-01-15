@@ -1,6 +1,6 @@
 package foundry.veil.forge.event;
 
-import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.api.client.render.VeilRenderer;
 import net.minecraftforge.eventbus.api.Event;
 
 /**

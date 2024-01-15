@@ -3,7 +3,7 @@ package foundry.veil.mixin.client.deferred;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
 import foundry.veil.ext.CompositeStateExtension;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;

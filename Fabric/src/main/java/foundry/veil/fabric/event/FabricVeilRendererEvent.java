@@ -1,6 +1,6 @@
 package foundry.veil.fabric.event;
 
-import foundry.veil.event.VeilRendererEvent;
+import foundry.veil.api.event.VeilRendererEvent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 

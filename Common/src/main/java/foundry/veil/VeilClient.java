@@ -4,8 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import foundry.veil.ext.BufferSourceExtension;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
-import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.render.shader.RenderTypeRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -20,7 +19,6 @@ public class VeilClient {
 
     @ApiStatus.Internal
     public static void init() {
-        RenderTypeRegistry.init();
         VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
         VeilEventPlatform.INSTANCE.onVeilRendererAvailable(renderer -> {
             // This fixes moving transparent blocks drawing too early

@@ -1,7 +1,7 @@
 package foundry.veil.forge.event;
 
-import foundry.veil.render.post.PostPipeline;
-import foundry.veil.render.post.PostProcessingManager;
+import foundry.veil.api.client.render.post.PostPipeline;
+import foundry.veil.api.client.render.post.PostProcessingManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
 

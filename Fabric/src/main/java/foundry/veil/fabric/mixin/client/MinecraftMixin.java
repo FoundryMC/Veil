@@ -3,7 +3,7 @@ package foundry.veil.fabric.mixin.client;
 import foundry.veil.VeilClient;
 import foundry.veil.fabric.event.FabricFreeNativeResourcesEvent;
 import foundry.veil.fabric.event.FabricVeilRendererEvent;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import org.spongepowered.asm.mixin.Mixin;

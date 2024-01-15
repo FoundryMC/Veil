@@ -1,11 +1,11 @@
 package foundry.veil.mixin.client.shader;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.render.pipeline.VeilRenderer;
-import foundry.veil.render.shader.modifier.ReplaceShaderModification;
-import foundry.veil.render.shader.modifier.ShaderModification;
-import foundry.veil.render.shader.program.ShaderProgram;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.impl.client.render.shader.modifier.ReplaceShaderModification;
+import foundry.veil.impl.client.render.shader.modifier.ShaderModification;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;

@@ -1,6 +1,6 @@
 package foundry.veil.mixin.client.deferred;
 
-import foundry.veil.render.wrapper.DeferredShaderStateCache;
+import foundry.veil.impl.client.render.deferred.DeferredShaderStateCache;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Final;

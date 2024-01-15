@@ -2,10 +2,11 @@ package foundry.veil.forge;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
-import foundry.veil.render.VeilVanillaShaders;
-import foundry.veil.render.deferred.VeilDeferredRenderer;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +30,6 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
-
-import static foundry.veil.forge.VeilForgeClientEvents.OVERLAY;
 
 @ApiStatus.Internal
 public class VeilForgeClient {
@@ -56,7 +55,7 @@ public class VeilForgeClient {
     }
 
     private static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", OVERLAY);
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "uitooltip", VeilUITooltipRenderer::renderOverlay);
     }
 
     private static void registerShaders(RegisterShadersEvent event) {

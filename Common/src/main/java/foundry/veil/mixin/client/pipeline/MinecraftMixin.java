@@ -1,6 +1,6 @@
 package foundry.veil.mixin.client.pipeline;
 
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

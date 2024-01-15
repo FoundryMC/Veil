@@ -1,6 +1,6 @@
 package foundry.veil.mixin.client.pipeline;
 
-import foundry.veil.render.wrapper.CullFrustum;
+import foundry.veil.api.client.render.CullFrustum;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 import org.joml.FrustumIntersection;

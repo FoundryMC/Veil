@@ -1,6 +1,9 @@
 package foundry.veil.ext;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
 public interface VertexBufferExtension {
 
-    void drawInstanced(int instances);
+    void veil$drawInstanced(int instances);
 }

@@ -2,9 +2,9 @@ package foundry.veil.mixin.client.shader;
 
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.Uniform;
-import foundry.veil.render.shader.VanillaShaderImportProcessor;
-import foundry.veil.render.shader.program.ShaderProgramImpl;
-import foundry.veil.render.wrapper.VanillaUniformWrapper;
+import foundry.veil.impl.client.render.shader.VanillaShaderImportProcessor;
+import foundry.veil.impl.client.render.shader.ShaderProgramImpl;
+import foundry.veil.impl.client.render.wrapper.VanillaUniformWrapper;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.asm.mixin.Final;
