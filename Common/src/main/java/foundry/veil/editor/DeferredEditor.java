@@ -102,7 +102,7 @@ public class DeferredEditor extends SingleWindowEditor {
         if (ImGui.button("Add Test Light")) {
             if (player != null) {
                 Vec3 pos = player.getEyePosition();
-                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setRadius(10));
+                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setRadius(5));
             }
         }
         ImGui.endDisabled();

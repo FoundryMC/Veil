@@ -3,10 +3,10 @@ package foundry.veil.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
-import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.FramebufferManager;
 import foundry.veil.render.framebuffer.VeilFramebuffers;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.post.PostPipeline;
 import foundry.veil.render.post.PostProcessingManager;
 import foundry.veil.render.shader.ShaderManager;
@@ -233,7 +233,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     }
 
     @ApiStatus.Internal
-    public void blit(CullFrustum frustum) {
+    public void blit() {
         if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;
         }
@@ -252,6 +252,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
+        CullFrustum frustum = VeilRenderSystem.renderer().getCullingFrustum();
         this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
         this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
 

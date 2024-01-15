@@ -47,7 +47,7 @@ public abstract class FrustumMixin implements CullFrustum {
 
     @Override
     public boolean testAab(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        return this.cubeInFrustum(minX, minY, minX, maxX, maxY, maxZ);
+        return this.cubeInFrustum(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Override

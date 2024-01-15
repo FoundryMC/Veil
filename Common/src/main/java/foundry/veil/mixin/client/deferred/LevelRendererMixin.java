@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import foundry.veil.ext.LevelRendererExtension;
 import foundry.veil.render.VeilVanillaShaders;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.wrapper.CullFrustum;
@@ -27,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Supplier;
 
 @Mixin(LevelRenderer.class)
-public class LevelRendererMixin {
+public class LevelRendererMixin implements LevelRendererExtension {
 
     @Shadow
     private Frustum cullingFrustum;
@@ -139,7 +140,11 @@ public class LevelRendererMixin {
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     public void blit(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci) {
-        CullFrustum frustum = VeilRenderBridge.create(this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum);
-        VeilRenderSystem.renderer().getDeferredRenderer().blit(frustum);
+        VeilRenderSystem.renderer().getDeferredRenderer().blit();
+    }
+
+    @Override
+    public CullFrustum veil$getCullFrustum() {
+        return VeilRenderBridge.create(this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum);
     }
 }
