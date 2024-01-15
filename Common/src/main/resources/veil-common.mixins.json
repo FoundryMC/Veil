@@ -48,6 +48,7 @@
     "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",
     "debug.DebugKeyboardHandlerMixin",
+    "debug.MinecraftMixin",
     "debug.RenderDocker"
   ],
   "injectors": {

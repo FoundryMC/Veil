@@ -1,6 +1,7 @@
 #include veil:common
 #include veil:deferred_utils
 #include veil:color_utilities
+#include veil:light
 
 in vec3 lightPos;
 in vec3 lightColor;
@@ -9,7 +10,7 @@ in float falloff;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
-uniform sampler2D MaterialSampler;
+uniform usampler2D MaterialSampler;
 uniform sampler2D VanillaLightSampler;
 uniform sampler2D DiffuseDepthSampler;
 
@@ -41,7 +42,7 @@ void main() {
     vec3 offset = lightPos - pos;
     vec3 lightDirection = (VeilCamera.ViewMat * vec4(normalize(offset), 0.0)).xyz;
     float diffuse = dot(normalVS, lightDirection);
-    diffuse = max(0, diffuse);
+    diffuse = max(MINECRAFT_AMBIENT_LIGHT, diffuse);
     diffuse *= attenuate_no_cusp(length(offset), radius, falloff);
 
     fragColor = vec4(diffuse * lightColor, 1.0);

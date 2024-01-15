@@ -4,7 +4,7 @@
 in vec2 texCoord;
 
 uniform sampler2D NormalSampler;
-uniform sampler2D MaterialSampler;
+uniform usampler2D MaterialSampler;
 uniform sampler2D LightMapSampler;
 
 uniform float LightShading0;
@@ -31,7 +31,7 @@ float getVanillaBrightness(vec3 Normal) {
 
 void main() {
     vec3 normalVS = texture(NormalSampler, texCoord).xyz;
-    float material = texture(MaterialSampler, texCoord).r;
+    uint material = texture(MaterialSampler, texCoord).r;
     fragColor = vec4(1.0);
     if (isBlock(material)) {
         fragColor.rgb *= vec3(getVanillaBrightness(normalVS));

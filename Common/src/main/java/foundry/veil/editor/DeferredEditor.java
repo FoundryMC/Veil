@@ -1,12 +1,10 @@
 package foundry.veil.editor;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.render.deferred.LightRenderer;
 import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.deferred.light.PointLight;
-import foundry.veil.render.framebuffer.AdvancedFbo;
-import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
-import foundry.veil.render.framebuffer.FramebufferManager;
-import foundry.veil.render.framebuffer.VeilFramebuffers;
+import foundry.veil.render.framebuffer.*;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.pipeline.VeilRenderer;
 import foundry.veil.render.shader.TextureDownloader;
@@ -18,13 +16,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+
+import static org.lwjgl.opengl.GL11C.*;
 
 public class DeferredEditor extends SingleWindowEditor {
 
@@ -102,7 +104,7 @@ public class DeferredEditor extends SingleWindowEditor {
         if (ImGui.button("Add Test Light")) {
             if (player != null) {
                 Vec3 pos = player.getEyePosition();
-                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setRadius(5));
+                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setColor(new Vector3f(1.0F, 1.0F, 1.0F).mul(4)).setRadius(15));
             }
         }
         ImGui.endDisabled();
@@ -183,7 +185,7 @@ public class DeferredEditor extends SingleWindowEditor {
                     }
                     ImGui.beginGroup();
                     AdvancedFboTextureAttachment attachment = buffer.getColorTextureAttachment(i);
-                    ImGui.text(attachment.getName() != null ? attachment.getName() : "Attachment " + i);
+                    ImGui.text(this.getAttachmentName(i, attachment));
                     ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
                     ImGui.endGroup();
                 }
@@ -194,7 +196,7 @@ public class DeferredEditor extends SingleWindowEditor {
                     }
                     ImGui.beginGroup();
                     AdvancedFboTextureAttachment attachment = buffer.getDepthTextureAttachment();
-                    ImGui.text(attachment.getName() != null ? attachment.getName() : "Depth");
+                    ImGui.text(this.getAttachmentName(-1, attachment));
                     ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
                     ImGui.endGroup();
                 }
@@ -202,6 +204,22 @@ public class DeferredEditor extends SingleWindowEditor {
             ImGui.endTabItem();
         }
         ImGui.endDisabled();
+    }
+
+    private String getAttachmentName(int index, AdvancedFboTextureAttachment attachment) {
+        RenderSystem.bindTexture(attachment.getId());
+        StringBuilder attachmentName = new StringBuilder(attachment.getName() != null ? attachment.getName() : index == -1 ? "Depth" : ("Attachment " + index));
+
+        int internalFormat = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+        for (FramebufferAttachmentDefinition.Format format : FramebufferAttachmentDefinition.Format.values()) {
+            if (internalFormat == format.getInternalId()) {
+                attachmentName.append(" (").append(format.name()).append(")");
+                return attachmentName.toString();
+            }
+        }
+
+        attachmentName.append(" (0x").append(Integer.toHexString(internalFormat).toUpperCase(Locale.ROOT)).append(")");
+        return attachmentName.toString();
     }
 
     @Override
