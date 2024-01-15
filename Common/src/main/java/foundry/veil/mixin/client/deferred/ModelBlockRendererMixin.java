@@ -2,9 +2,9 @@ package foundry.veil.mixin.client.deferred;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import foundry.veil.render.deferred.DeferredVertexConsumer;
-import foundry.veil.render.deferred.VeilDeferredRenderer;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.impl.client.render.deferred.DeferredVertexConsumer;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;

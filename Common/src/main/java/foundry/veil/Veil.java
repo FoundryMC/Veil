@@ -1,6 +1,6 @@
 package foundry.veil;
 
-import foundry.veil.molang.VeilMolang;
+import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.platform.services.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import net.minecraft.resources.ResourceLocation;

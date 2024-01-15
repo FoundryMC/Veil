@@ -2,7 +2,7 @@ package foundry.veil.mixin.client.shader;
 
 import com.mojang.blaze3d.shaders.EffectProgram;
 import com.mojang.blaze3d.shaders.Program;
-import foundry.veil.render.shader.VanillaShaderImportProcessor;
+import foundry.veil.impl.client.render.shader.VanillaShaderImportProcessor;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;

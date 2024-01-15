@@ -1,6 +1,6 @@
 package foundry.veil.fabric.event;
 
-import foundry.veil.event.FreeNativeResourcesEvent;
+import foundry.veil.api.event.FreeNativeResourcesEvent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 

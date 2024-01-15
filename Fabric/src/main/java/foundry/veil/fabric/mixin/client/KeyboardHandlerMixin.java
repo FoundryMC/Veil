@@ -1,7 +1,7 @@
 package foundry.veil.fabric.mixin.client;
 
 import foundry.veil.VeilClient;
-import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Final;

@@ -1,8 +1,8 @@
 package foundry.veil.platform.services;
 
-import foundry.veil.event.FreeNativeResourcesEvent;
-import foundry.veil.event.VeilPostProcessingEvent;
-import foundry.veil.event.VeilRendererEvent;
+import foundry.veil.api.event.FreeNativeResourcesEvent;
+import foundry.veil.api.event.VeilPostProcessingEvent;
+import foundry.veil.api.event.VeilRendererEvent;
 
 import java.util.ServiceLoader;
 

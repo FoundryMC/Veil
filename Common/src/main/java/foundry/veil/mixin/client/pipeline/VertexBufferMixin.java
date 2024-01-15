@@ -23,7 +23,7 @@ public abstract class VertexBufferMixin implements VertexBufferExtension {
     protected abstract VertexFormat.IndexType getIndexType();
 
     @Override
-    public void drawInstanced(int instances) {
+    public void veil$drawInstanced(int instances) {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> this._drawInstanced(instances));
         } else {

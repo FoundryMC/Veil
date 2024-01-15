@@ -2,10 +2,10 @@ package foundry.veil.fabric;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.render.VeilVanillaShaders;
-import foundry.veil.render.deferred.VeilDeferredRenderer;
-import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.render.ui.VeilUITooltipRenderer;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.impl.client.render.VeilUITooltipRenderer;
+import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -26,7 +26,7 @@ public class VeilFabricClient implements ClientModInitializer {
         VeilClient.init();
         HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
             Minecraft client = Minecraft.getInstance();
-            VeilUITooltipRenderer.OVERLAY.render(client.gui, matrices, tickDelta, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
+            VeilUITooltipRenderer.renderOverlay(client.gui, matrices, tickDelta, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(() -> VeilRenderSystem.renderer().getDeferredRenderer().reset()));

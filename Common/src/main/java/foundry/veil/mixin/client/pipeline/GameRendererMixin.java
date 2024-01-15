@@ -1,15 +1,12 @@
 package foundry.veil.mixin.client.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.render.pipeline.VeilFirstPersonRenderer;
-import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderer;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -17,10 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
-
-    @Shadow
-    @Final
-    private Minecraft minecraft;
 
     @Inject(method = "resize", at = @At(value = "HEAD"))
     public void veil$resizeListener(int pWidth, int pHeight, CallbackInfo ci) {

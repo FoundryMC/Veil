@@ -1,7 +1,7 @@
-import foundry.veil.opencl.CLBuffer;
-import foundry.veil.opencl.CLEnvironment;
-import foundry.veil.opencl.CLKernel;
-import foundry.veil.opencl.VeilOpenCL;
+import foundry.veil.api.opencl.CLBuffer;
+import foundry.veil.api.opencl.CLEnvironment;
+import foundry.veil.api.opencl.CLKernel;
+import foundry.veil.api.opencl.VeilOpenCL;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

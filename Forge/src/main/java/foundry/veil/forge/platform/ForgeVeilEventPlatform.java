@@ -1,8 +1,8 @@
 package foundry.veil.forge.platform;
 
-import foundry.veil.event.FreeNativeResourcesEvent;
-import foundry.veil.event.VeilPostProcessingEvent;
-import foundry.veil.event.VeilRendererEvent;
+import foundry.veil.api.event.FreeNativeResourcesEvent;
+import foundry.veil.api.event.VeilPostProcessingEvent;
+import foundry.veil.api.event.VeilRendererEvent;
 import foundry.veil.forge.event.ForgeFreeNativeResourcesEvent;
 import foundry.veil.forge.event.ForgeVeilPostProcessingEvent;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
