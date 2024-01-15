@@ -1,6 +1,7 @@
 package foundry.veil.render.deferred.light;
 
 import foundry.veil.render.wrapper.CullFrustum;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -13,19 +14,19 @@ import java.nio.ByteBuffer;
  */
 public class PointLight extends Light implements InstancedLight, PositionedLight<PointLight> {
 
-    protected final Vector3f position;
+    protected final Vector3d position;
     protected float radius;
     protected float falloff;
 
     public PointLight() {
-        this.position = new Vector3f();
+        this.position = new Vector3d();
         this.radius = 1.0F;
         this.falloff = 0.0F;
     }
 
     @Override
     public void store(ByteBuffer buffer) {
-        this.position.get(buffer.position(), buffer);
+        this.position.getf(buffer.position(), buffer);
         this.color.get(buffer.position() + Float.BYTES * 3, buffer);
         buffer.position(buffer.position() + Float.BYTES * 6);
         buffer.putFloat(this.radius);
@@ -34,19 +35,17 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
 
     @Override
     public boolean isVisible(CullFrustum frustum) {
-        float minX = this.position.x() - this.radius;
-        float minY = this.position.y() - this.radius;
-        float minZ = this.position.z() - this.radius;
-        float maxX = this.position.x() + this.radius;
-        float maxY = this.position.y() + this.radius;
-        float maxZ = this.position.z() + this.radius;
+        double minX = this.position.x() - this.radius;
+        double minY = this.position.y() - this.radius;
+        double minZ = this.position.z() - this.radius;
+        double maxX = this.position.x() + this.radius;
+        double maxY = this.position.y() + this.radius;
+        double maxZ = this.position.z() + this.radius;
         return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    /**
-     * @return The position of this light
-     */
-    public Vector3f getPosition() {
+    @Override
+    public Vector3d getPosition() {
         return this.position;
     }
 
@@ -75,7 +74,7 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
     }
 
     @Override
-    public PointLight setPosition(float x, float y, float z) {
+    public PointLight setPosition(double x, double y, double z) {
         this.position.set(x, y, z);
         this.markDirty();
         return this;

@@ -1,4 +1,4 @@
-package foundry.veil.mixin.debug;
+package foundry.veil.mixin.client.deferred;
 
 import foundry.veil.render.deferred.VeilDeferredRenderer;
 import foundry.veil.render.pipeline.VeilRenderSystem;

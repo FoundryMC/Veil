@@ -1,5 +1,7 @@
 package foundry.veil.render.deferred.light;
 
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -14,14 +16,14 @@ public interface PositionedLight<T extends PositionedLight<T>> {
     /**
      * @return The position of this light
      */
-    Vector3f getPosition();
+    Vector3d getPosition();
 
     /**
      * Sets the origin position of this light.
      *
      * @param position The position of the light
      */
-    default T setPosition(Vector3fc position) {
+    default T setPosition(Vector3dc position) {
         return this.setPosition(position.x(), position.y(), position.z());
     }
 
@@ -32,5 +34,5 @@ public interface PositionedLight<T extends PositionedLight<T>> {
      * @param y The y position of the light
      * @param z The z position of the light
      */
-    T setPosition(float x, float y, float z);
+    T setPosition(double x, double y, double z);
 }

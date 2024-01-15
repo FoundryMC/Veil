@@ -9,8 +9,7 @@
     "BowItemMixin",
     "CrossbowItemMixin",
     "InstrumentItemMixin",
-    "TridentItemMixin",
-    "client.pipeline.ReloadableResourceManagerAccessor"
+    "TridentItemMixin"
   ],
   "client": [
     "client.AgeableListModelMixin",
@@ -23,6 +22,7 @@
     "client.deferred.AmbientOcclusionFaceMixin",
     "client.deferred.BufferSourceMixin",
     "client.deferred.CompositeStateMixin",
+    "client.deferred.DebugScreenOverlayMixin",
     "client.deferred.LevelRendererMixin",
     "client.deferred.ParticleRenderTypeMixin",
     "client.deferred.RenderTypeMixin",
@@ -36,6 +36,7 @@
     "client.pipeline.GameRendererMixin",
     "client.pipeline.LevelRendererMixin",
     "client.pipeline.MinecraftMixin",
+    "client.pipeline.ReloadableResourceManagerAccessor",
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
     "client.pipeline.VertexBufferMixin",
@@ -44,7 +45,7 @@
     "client.shader.ProgramManagerMixin",
     "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",
-    "debug.DebugScreenOverlayMixin",
+    "debug.DebugKeyboardHandlerMixin",
     "debug.RenderDocker"
   ],
   "injectors": {

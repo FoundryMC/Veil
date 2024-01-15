@@ -14,6 +14,10 @@ vec3 viewToWorldSpaceDirection(vec3 direction) {
     return (VeilCamera.IViewMat * vec4(direction, 0.0)).xyz;
 }
 
+vec3 viewToWorldSpace(vec3 positionVS) {
+    return VeilCamera.CameraPosition + (VeilCamera.IViewMat * vec4(positionVS, 1.0)).xyz;
+}
+
 vec3 viewToPlayerSpace(vec3 positionVS) {
     return (VeilCamera.IViewMat * vec4(positionVS, 1.0)).xyz;
 }
