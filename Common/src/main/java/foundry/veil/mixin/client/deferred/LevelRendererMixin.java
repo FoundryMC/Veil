@@ -6,11 +6,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.render.VeilVanillaShaders;
 import foundry.veil.render.pipeline.VeilRenderSystem;
+import foundry.veil.render.wrapper.CullFrustum;
 import foundry.veil.render.wrapper.DeferredShaderStateCache;
 import foundry.veil.render.wrapper.VeilRenderBridge;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -20,7 +22,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Supplier;
@@ -34,6 +35,10 @@ public class LevelRendererMixin {
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
+
+    @Shadow
+    @Nullable
+    private Frustum capturedFrustum;
 
     @Unique
     private final DeferredShaderStateCache veil$cloudCache = new DeferredShaderStateCache();
@@ -122,18 +127,19 @@ public class LevelRendererMixin {
     }
 
     // This makes sure the breaking texture is drawn into the opaque buffer
-    @Inject(method = "renderLevel", at=@At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = At.Shift.BEFORE))
-    public void preDrawCrumblingOpaque(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci){
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = At.Shift.BEFORE))
+    public void preDrawCrumblingOpaque(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci) {
         VeilRenderSystem.renderer().getDeferredRenderer().beginOpaque();
     }
 
-    @Inject(method = "renderLevel", at=@At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = At.Shift.AFTER))
-    public void postDrawCrumblingOpaque(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci){
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", ordinal = 0, shift = At.Shift.AFTER))
+    public void postDrawCrumblingOpaque(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci) {
         VeilRenderSystem.renderer().getDeferredRenderer().beginTranslucent();
     }
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     public void blit(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci) {
-        VeilRenderSystem.renderer().getDeferredRenderer().blit(VeilRenderBridge.create(this.cullingFrustum));
+        CullFrustum frustum = VeilRenderBridge.create(this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum);
+        VeilRenderSystem.renderer().getDeferredRenderer().blit(frustum);
     }
 }

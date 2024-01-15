@@ -115,6 +115,11 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     }
 
     @ApiStatus.Internal
+    public void reset() {
+        this.lightRenderer.free();
+    }
+
+    @ApiStatus.Internal
     public void setup() {
         if (!this.isEnabled() || this.state == RendererState.DISABLED) {
             return;

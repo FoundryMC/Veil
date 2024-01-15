@@ -4,10 +4,12 @@ import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.render.VeilVanillaShaders;
 import foundry.veil.render.deferred.VeilDeferredRenderer;
+import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.ui.VeilUITooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -23,9 +25,11 @@ public class VeilFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         VeilClient.init();
         HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
-            VeilUITooltipRenderer.OVERLAY.render(Minecraft.getInstance().gui, matrices, tickDelta, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+            Minecraft client = Minecraft.getInstance();
+            VeilUITooltipRenderer.OVERLAY.render(client.gui, matrices, tickDelta, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(() -> VeilRenderSystem.renderer().getDeferredRenderer().reset()));
 
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 
