@@ -2,6 +2,7 @@ package foundry.veil.editor;
 
 import foundry.veil.render.deferred.LightRenderer;
 import foundry.veil.render.deferred.VeilDeferredRenderer;
+import foundry.veil.render.deferred.light.PointLight;
 import foundry.veil.render.framebuffer.AdvancedFbo;
 import foundry.veil.render.framebuffer.AdvancedFboTextureAttachment;
 import foundry.veil.render.framebuffer.FramebufferManager;
@@ -14,6 +15,8 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -92,6 +95,17 @@ public class DeferredEditor extends SingleWindowEditor {
                 definitions.remove(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
             }
         }
+
+        LocalPlayer player = Minecraft.getInstance().player;
+        ImGui.sameLine();
+        ImGui.beginDisabled(player == null);
+        if (ImGui.button("Add Test Light")) {
+            if (player != null) {
+                Vec3 pos = player.getEyePosition();
+                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setRadius(10));
+            }
+        }
+        ImGui.endDisabled();
 
         ImGui.text("Framebuffers");
         if (ImGui.beginTabBar("Framebuffers")) {
