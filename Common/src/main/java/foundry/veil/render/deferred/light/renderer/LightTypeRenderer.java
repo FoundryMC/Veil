@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.render.deferred.LightRenderer;
 import foundry.veil.render.deferred.light.Light;
+import foundry.veil.render.wrapper.CullFrustum;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.NativeResource;
 
 import java.util.List;
@@ -26,9 +26,10 @@ public interface LightTypeRenderer<T extends Light> extends NativeResource {
      *
      * @param lightRenderer The light renderer instance
      * @param lights        The lights to render
+     * @param frustum       The culling view frustum
      */
     @ApiStatus.OverrideOnly
-    void renderLights(@NotNull LightRenderer lightRenderer, List<T> lights);
+    void renderLights(LightRenderer lightRenderer, List<T> lights, CullFrustum frustum);
 
     /**
      * @return A full screen unit quad for drawing a light

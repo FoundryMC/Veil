@@ -6,10 +6,11 @@ import foundry.veil.ext.VertexBufferExtension;
 import foundry.veil.render.deferred.LightRenderer;
 import foundry.veil.render.deferred.light.InstancedLight;
 import foundry.veil.render.deferred.light.Light;
-import org.jetbrains.annotations.NotNull;
+import foundry.veil.render.wrapper.CullFrustum;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15C.*;
@@ -25,6 +26,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     protected final int lightSize;
     protected int maxLights;
 
+    private final List<T> visibleLights;
     private final VertexBuffer vbo;
     private final int instancedVbo;
 
@@ -39,6 +41,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     public InstancedLightRenderer(int maxLights, int lightSize) {
         this.maxLights = maxLights;
         this.lightSize = lightSize;
+        this.visibleLights = new ArrayList<>();
         this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.instancedVbo = glGenBuffers();
 
@@ -56,7 +59,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     /**
      * @return The mesh data each instanced light will be rendered with use
      */
-    protected @NotNull BufferBuilder.RenderedBuffer createMesh() {
+    protected BufferBuilder.RenderedBuffer createMesh() {
         return LightTypeRenderer.createQuad();
     }
 
@@ -71,7 +74,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
      * @param lightRenderer The renderer instance
      * @param lights        All lights in the order they are in the instanced buffer
      */
-    protected abstract void setupRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<T> lights);
+    protected abstract void setupRenderState(LightRenderer lightRenderer, List<T> lights);
 
     /**
      * Clears the render state after drawing all lights.
@@ -79,9 +82,9 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
      * @param lightRenderer The renderer instance
      * @param lights        All lights in the order they are in the instanced buffer
      */
-    protected abstract void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<T> lights);
+    protected abstract void clearRenderState(LightRenderer lightRenderer, List<T> lights);
 
-    private void updateAllLights(@NotNull List<T> lights) {
+    private void updateAllLights(List<T> lights) {
         this.oldSize = lights.size();
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -99,22 +102,33 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     }
 
     @Override
-    public void renderLights(@NotNull LightRenderer lightRenderer, @NotNull List<T> lights) {
+    public void renderLights(LightRenderer lightRenderer, List<T> lights, CullFrustum frustum) {
+        this.visibleLights.clear();
+        for (T light : lights) {
+            if (light.isVisible(frustum)) {
+                this.visibleLights.add(light);
+            }
+        }
+
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
         this.vbo.bind();
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
         // If there is no space, then resize
-        if (lights.size() > this.maxLights) {
+        if (this.visibleLights.size() > this.maxLights) {
             this.oldSize = 0;
             this.maxLights += (int) Math.ceil(this.maxLights / 2.0);
             glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_STREAM_DRAW);
         }
 
-        if (this.oldSize != lights.size()) {
-            this.updateAllLights(lights);
+        if (this.oldSize != this.visibleLights.size()) {
+            this.updateAllLights(this.visibleLights);
         } else {
-            for (int i = 0; i < lights.size(); i++) {
-                T light = lights.get(i);
+            for (int i = 0; i < this.visibleLights.size(); i++) {
+                T light = this.visibleLights.get(i);
                 if (light.isDirty()) {
                     light.clean();
                     try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -127,12 +141,12 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
             }
         }
 
-        this.setupRenderState(lightRenderer, lights);
+        this.setupRenderState(lightRenderer, this.visibleLights);
         lightRenderer.applyShader();
 
-        ((VertexBufferExtension) this.vbo).drawInstanced(lights.size());
+        ((VertexBufferExtension) this.vbo).drawInstanced(this.visibleLights.size());
 
-        this.clearRenderState(lightRenderer, lights);
+        this.clearRenderState(lightRenderer, this.visibleLights);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         VertexBuffer.unbind();

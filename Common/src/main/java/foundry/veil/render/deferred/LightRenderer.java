@@ -133,13 +133,14 @@ public class LightRenderer implements NativeResource {
      * @param type The type of lights to get
      * @return A list of all lights of the specified type in the scene
      */
-    public List<? extends Light> getLights(Light.Type type) {
+    @SuppressWarnings("unchecked")
+    public <T extends Light> List<T> getLights(Light.Type type) {
         LightData<?> data = this.lights.get(type);
         if (data == null) {
             return Collections.emptyList();
         }
 
-        return data.lightsView();
+        return (List<T>) data.lightsView();
     }
 
     /**
@@ -213,14 +214,16 @@ public class LightRenderer implements NativeResource {
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
-        consumer.accept("Lights: " + this.lights.values().stream().mapToInt(data -> data.lights().size()).sum());
+        CullFrustum frustum = VeilRenderSystem.renderer().getCullingFrustum();
+        int visible = this.lights.values().stream().mapToInt(data -> (int) data.lights().stream().filter(light -> light.isVisible(frustum)).count()).sum();
+        int all = this.lights.values().stream().mapToInt(data -> data.lights().size()).sum();
+        consumer.accept("Lights: " + visible + " / " + all);
     }
 
     @ApiStatus.Internal
     private record LightData<T extends Light>(LightTypeRenderer<T> renderer,
                                               List<T> lights,
-                                              List<T> lightsView,
-                                              List<T> visibleLights) implements NativeResource {
+                                              List<T> lightsView) implements NativeResource {
 
         private LightData {
             Objects.requireNonNull(renderer, "renderer");
@@ -231,8 +234,7 @@ public class LightRenderer implements NativeResource {
         private LightData(LightTypeRenderer<T> renderer, List<T> lights) {
             this(Objects.requireNonNull(renderer, "renderer"),
                     Objects.requireNonNull(lights, "lights"),
-                    Collections.unmodifiableList(lights),
-                    new LinkedList<>());
+                    Collections.unmodifiableList(lights));
         }
 
         @SuppressWarnings("unchecked")
@@ -241,14 +243,7 @@ public class LightRenderer implements NativeResource {
         }
 
         private void render(LightRenderer lightRenderer, CullFrustum frustum) {
-            this.visibleLights.clear();
-            for (T light : this.lights) {
-                if (light.isVisible(frustum)) {
-                    this.visibleLights.add(light);
-                }
-            }
-
-            this.renderer.renderLights(lightRenderer, this.visibleLights);
+            this.renderer.renderLights(lightRenderer, this.lights, frustum);
         }
 
         @SuppressWarnings("unchecked")

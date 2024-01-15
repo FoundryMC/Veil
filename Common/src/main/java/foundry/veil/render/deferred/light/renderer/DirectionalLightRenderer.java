@@ -6,7 +6,7 @@ import foundry.veil.render.deferred.light.DirectionalLight;
 import foundry.veil.render.pipeline.VeilRenderSystem;
 import foundry.veil.render.shader.VeilShaders;
 import foundry.veil.render.shader.program.ShaderProgram;
-import org.jetbrains.annotations.NotNull;
+import foundry.veil.render.wrapper.CullFrustum;
 
 import java.util.List;
 
@@ -27,7 +27,11 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
     }
 
     @Override
-    public void renderLights(@NotNull LightRenderer lightRenderer, @NotNull List<DirectionalLight> lights) {
+    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, CullFrustum frustum) {
+        if (lights.isEmpty()) {
+            return;
+        }
+
         VeilRenderSystem.setShader(VeilShaders.LIGHT_DIRECTIONAL);
         lightRenderer.applyShader();
 
