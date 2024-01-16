@@ -4,7 +4,7 @@ package foundry.veil.impl.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.pose.ExtendedPose;
 import foundry.veil.api.client.pose.PoseData;
-import foundry.veil.api.client.pose.PoseRegistry;
+import foundry.veil.api.client.registry.PoseRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;

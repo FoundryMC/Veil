@@ -1,10 +1,11 @@
-package foundry.veil.api.client.render.post;
+package foundry.veil.api.client.registry;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.stage.BlitPostStage;
 import foundry.veil.api.client.render.post.stage.CopyPostStage;
 import foundry.veil.api.client.render.post.stage.MaskPostStage;
