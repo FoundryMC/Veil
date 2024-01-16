@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public class DieOnCollisionModule extends CollisionModule {
-    public static final Codec<DieOnCollisionModule> CODEC = Codec.unit(new DieOnCollisionModule(QuasarParticle::remove));
-    public DieOnCollisionModule(Consumer<QuasarParticle> collisionFunction) {
+public class DieOnCollisionParticleModule extends CollisionParticleModule {
+    public static final Codec<DieOnCollisionParticleModule> CODEC = Codec.unit(new DieOnCollisionParticleModule(QuasarParticle::remove));
+    public DieOnCollisionParticleModule(Consumer<QuasarParticle> collisionFunction) {
         super(QuasarParticle::remove);
     }
 

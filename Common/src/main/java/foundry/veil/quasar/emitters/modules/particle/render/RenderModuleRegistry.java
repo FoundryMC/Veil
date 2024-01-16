@@ -23,13 +23,13 @@ public class RenderModuleRegistry {
 
     public static void bootstrap() {}
 
-    private static final BiMap<ResourceLocation, RenderModule> MODULES_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, RenderParticleModule> MODULES_BY_ID = HashBiMap.create();
 
-    public static void register(ResourceLocation id, RenderModule module) {
+    public static void register(ResourceLocation id, RenderParticleModule module) {
         MODULES_BY_ID.put(id, module);
     }
 
-    public static RenderModule getModule(ResourceLocation id) {
+    public static RenderParticleModule getModule(ResourceLocation id) {
         return MODULES_BY_ID.get(id);
     }
 
@@ -37,7 +37,7 @@ public class RenderModuleRegistry {
         MODULES_BY_ID.clear();
     }
 
-    public static ResourceLocation getModuleId(RenderModule initModule) {
+    public static ResourceLocation getModuleId(RenderParticleModule initModule) {
         return MODULES_BY_ID.inverse().get(initModule);
     }
 }

@@ -3,20 +3,34 @@ package foundry.veil.quasar.fx;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 public class Trail {
+
     public enum TilingMode {
         NONE,
         STRETCH,
-        REPEAT
+        REPEAT;
+
+        public static final Codec<TilingMode> CODEC = Codec.STRING.flatXmap(name -> {
+            for (TilingMode value : TilingMode.values()) {
+                if (value.name().equalsIgnoreCase(name)) {
+                    return DataResult.success(value);
+                }
+            }
+            return DataResult.error(() -> "Unknown Tiling Mode");
+        }, tilingMode1 -> DataResult.success(tilingMode1.name().toLowerCase(Locale.ROOT)));
     }
+
     private Vec3[] points;
     private Vec3[] rotations;
     private int color;
@@ -61,7 +75,7 @@ public class Trail {
     }
 
     public void setPoints(Vec3[] points) {
-        if(points.length > length) {
+        if (points.length > length) {
             Vec3[] newPoints = new Vec3[length];
             System.arraycopy(points, points.length - length, newPoints, 0, length);
             points = newPoints;
@@ -94,14 +108,14 @@ public class Trail {
     }
 
     public void pushPoint(Vec3 point) {
-        if(timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 3 == 0) {
+        if (timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 3 == 0) {
             //remove the last point in the array
             Vec3[] newPoints = new Vec3[points.length - 1];
             System.arraycopy(points, 1, newPoints, 0, points.length - 1);
             points = newPoints;
             return;
         }
-        if(points.length == 0) {
+        if (points.length == 0) {
             points = new Vec3[]{point};
             return;
         }
@@ -115,7 +129,7 @@ public class Trail {
             return;
         }
         // add point to end of array and remove first point if array is longer than length
-        if(points[0] == Vec3.ZERO) {
+        if (points[0] == Vec3.ZERO) {
             points[0] = point;
             return;
         }
@@ -132,7 +146,7 @@ public class Trail {
     }
 
     public void pushRotatedPoint(Vec3 point, Vec3 rotation) {
-        if(timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 5 == 0 && points.length > 0) {
+        if (timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 5 == 0 && points.length > 0) {
             //remove the last point in the array
             Vec3[] newPoints = new Vec3[points.length - 1];
             System.arraycopy(points, 1, newPoints, 0, points.length - 1);
@@ -142,12 +156,12 @@ public class Trail {
             rotations = newRotations;
             return;
         }
-        if(points.length == 0) {
+        if (points.length == 0) {
             points = new Vec3[]{point};
             rotations = new Vec3[]{rotation};
             return;
         }
-        if(points[0] == Vec3.ZERO) {
+        if (points[0] == Vec3.ZERO) {
             points[0] = point;
             rotations = new Vec3[]{rotation};
             return;
@@ -161,7 +175,7 @@ public class Trail {
             timeout++;
             return;
         }
-        if(rotations == null) {
+        if (rotations == null) {
             rotations = new Vec3[]{rotation};
         }
         // add point to end of array and remove first point if array is longer than length
@@ -188,9 +202,9 @@ public class Trail {
         RenderSystem.disableCull();
         Vector3f[][] corners = new Vector3f[points.length][2];
         for (int i = 0; i < points.length; i++) {
-            if(i % frequency != 0) continue;
+            if (i % frequency != 0) continue;
             float width = widthFunction.apply((float) i / (points.length - 1));
-            Vector3f topOffset = new Vector3f(0, (width / 2f),0);
+            Vector3f topOffset = new Vector3f(0, (width / 2f), 0);
             Vector3f bottomOffset = new Vector3f(0, -(width / 2f), 0);
             if (billboard) {
                 Vec3 a = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().subtract(points[i]).normalize();
@@ -202,10 +216,10 @@ public class Trail {
                 axis.mul(-1);
                 axis.cross(dirToNextPoint);
                 topOffset = new Vector3f(axis);
-                topOffset.mul(width/2f);
+                topOffset.mul(width / 2f);
                 bottomOffset = new Vector3f(axis);
-                bottomOffset.mul(-width/2f);
-            } else if(rotations[i] != null && parentRotation) {
+                bottomOffset.mul(-width / 2f);
+            } else if (rotations[i] != null && parentRotation) {
                 Vec3 a = rotations[Math.min(i + frequency, rotations.length - 1)];
                 Vector3f cameraDirection = new Vector3f((float) a.x, (float) a.y, (float) a.z);
                 Vec3 b = points[Math.min(i + frequency, points.length - 1)].subtract(points[i]).normalize();
@@ -215,14 +229,14 @@ public class Trail {
                 axis.mul(-1);
                 axis.cross(dirToNextPoint);
                 topOffset = new Vector3f(axis);
-                topOffset.mul(width/2f);
+                topOffset.mul(width / 2f);
                 bottomOffset = new Vector3f(axis);
-                bottomOffset.mul(-width/2f);
+                bottomOffset.mul(-width / 2f);
             }
             topOffset.add((float) points[i].x, (float) points[i].y, (float) points[i].z);
             bottomOffset.add((float) points[i].x, (float) points[i].y, (float) points[i].z);
-            corners[i/frequency][0] = topOffset;
-            corners[i/frequency][1] = bottomOffset;
+            corners[i / frequency][0] = topOffset;
+            corners[i / frequency][1] = bottomOffset;
         }
         renderPoints(stack, consumer, light, corners, color);
         RenderSystem.enableCull();
@@ -240,10 +254,10 @@ public class Trail {
             Vector3f bottom = corners[i][1];
             Vector3f nextTop = corners[i + 1][0];
             Vector3f nextBottom = corners[i + 1][1];
-            if(nextTop == null || nextBottom == null || top == null || bottom == null) continue;
+            if (nextTop == null || nextBottom == null || top == null || bottom == null) continue;
             float u = 0;
             float u1 = 1;
-            if(tilingMode == TilingMode.STRETCH) {
+            if (tilingMode == TilingMode.STRETCH) {
                 u = (float) i / (corners.length - 1);
                 u1 = (float) (i + 1) / (corners.length - 1);
             }

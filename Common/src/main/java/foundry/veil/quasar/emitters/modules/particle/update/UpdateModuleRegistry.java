@@ -9,6 +9,7 @@ import com.mojang.serialization.DataResult;
 import net.minecraft.resources.ResourceLocation;
 
 public class UpdateModuleRegistry {
+
     private static final BiMap<String, ModuleType<?>> MODULES = HashBiMap.create();
 
     public static final Codec<ModuleType<?>> MODULE_MAP_CODEC = Codec.STRING.comapFlatMap(name -> {
@@ -23,20 +24,20 @@ public class UpdateModuleRegistry {
 
     public static void bootstrap() {}
 
-    private static final BiMap<ResourceLocation, UpdateModule> MODULES_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, UpdateParticleModule> MODULES_BY_ID = HashBiMap.create();
 
-    public static void register(ResourceLocation id, UpdateModule module) {
+    public static void register(ResourceLocation id, UpdateParticleModule module) {
         MODULES_BY_ID.put(id, module);
     }
 
-    public static UpdateModule getModule(ResourceLocation id) {
+    public static UpdateParticleModule getModule(ResourceLocation id) {
         if(!MODULES_BY_ID.containsKey(id)) {
             Veil.LOGGER.error("Update module %s does not exist!".formatted(id));
             return null;
         } else return MODULES_BY_ID.get(id);
     }
 
-    public static ResourceLocation getModuleId(UpdateModule module) {
+    public static ResourceLocation getModuleId(UpdateParticleModule module) {
         return MODULES_BY_ID.inverse().get(module);
     }
 

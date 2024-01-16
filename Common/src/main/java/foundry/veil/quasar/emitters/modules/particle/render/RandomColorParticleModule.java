@@ -5,10 +5,10 @@ import foundry.veil.quasar.emitters.modules.ModuleType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector4f;
 
-public class RandomColorModule implements RenderModule {
+public class RandomColorParticleModule implements RenderParticleModule {
     Vector4f[] colors;
 
-    public RandomColorModule(Vector4f... colors) {
+    public RandomColorParticleModule(Vector4f... colors) {
         this.colors = colors;
     }
     @Override

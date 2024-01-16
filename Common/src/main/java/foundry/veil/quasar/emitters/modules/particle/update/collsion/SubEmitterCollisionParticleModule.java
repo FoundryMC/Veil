@@ -8,21 +8,20 @@ import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.PointForce;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public class SubEmitterCollisionModule extends CollisionModule {
-    public static final Codec<SubEmitterCollisionModule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("subemitter").forGetter(SubEmitterCollisionModule::getSubEmitter)
-    ).apply(instance, SubEmitterCollisionModule::new));
+public class SubEmitterCollisionParticleModule extends CollisionParticleModule {
+    public static final Codec<SubEmitterCollisionParticleModule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("subemitter").forGetter(SubEmitterCollisionParticleModule::getSubEmitter)
+    ).apply(instance, SubEmitterCollisionParticleModule::new));
     private ResourceLocation subEmitter;
 
     public ResourceLocation getSubEmitter() {
         return subEmitter;
     }
 
-    public SubEmitterCollisionModule(ResourceLocation subEmitter) {
+    public SubEmitterCollisionParticleModule(ResourceLocation subEmitter) {
         super(particle -> {
             ParticleContext context = particle.getContext();
             ParticleEmitter emitter = ParticleEmitterRegistry.getEmitter(subEmitter).instance();

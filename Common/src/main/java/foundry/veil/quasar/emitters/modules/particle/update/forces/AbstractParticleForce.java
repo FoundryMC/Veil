@@ -1,21 +1,22 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
 import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.emitters.modules.particle.update.UpdateModule;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 
-public abstract class AbstractParticleForce implements UpdateModule {
-    public float strength;
-    public float falloff;
+public abstract class AbstractParticleForce implements UpdateParticleModule {
+
+    protected float strength;
+    protected float falloff;
 
     public abstract void applyForce(QuasarParticle particle);
 
     @Override
     public void run(QuasarParticle particle) {
-        applyForce(particle);
+        this.applyForce(particle);
     }
 
     public float getStrength() {
-        return strength;
+        return this.strength;
     }
 
     public void setStrength(float strength) {
@@ -23,7 +24,7 @@ public abstract class AbstractParticleForce implements UpdateModule {
     }
 
     public float getFalloff() {
-        return falloff;
+        return this.falloff;
     }
 
     public void setFalloff(float falloff) {
@@ -34,5 +35,7 @@ public abstract class AbstractParticleForce implements UpdateModule {
         return false;
     }
 
-    public abstract <T extends AbstractParticleForce> T copy();
+    public abstract AbstractParticleForce copy();
 }
+
+

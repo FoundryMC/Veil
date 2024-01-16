@@ -8,11 +8,10 @@ import foundry.veil.quasar.emitters.ParticleSystemManager;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public class InitSubEmitter implements InitModule {
+public class InitSubEmitter implements InitParticleModule {
     public static final Codec<InitSubEmitter> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     ResourceLocation.CODEC.fieldOf("subemitter").forGetter(InitSubEmitter::getSubEmitter)

@@ -4,9 +4,8 @@ import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * A force that applies a vortex force to a particle.
  * @see AbstractParticleForce
- * @see foundry.veil.quasar.emitters.modules.particle.update.UpdateModule
+ * @see UpdateParticleModule
  * <p>
  *     Vortex forces are forces that are applied in a circular motion around a center point.
  *     They are useful for simulating whirlpools or tornadoes.

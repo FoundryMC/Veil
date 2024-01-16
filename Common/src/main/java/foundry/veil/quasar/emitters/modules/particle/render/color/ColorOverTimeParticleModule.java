@@ -9,13 +9,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector4f;
 
-public class ColorOverTimeModule extends ColorModule {
-    public static final Codec<ColorOverTimeModule> CODEC = RecordCodecBuilder.create(instance ->
+public class ColorOverTimeParticleModule extends ColorParticleModule {
+    public static final Codec<ColorOverTimeParticleModule> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    ColorGradient.CODEC.fieldOf("gradient").forGetter(ColorOverTimeModule::getGradient)
-            ).apply(instance, ColorOverTimeModule::new));
+                    ColorGradient.CODEC.fieldOf("gradient").forGetter(ColorOverTimeParticleModule::getGradient)
+            ).apply(instance, ColorOverTimeParticleModule::new));
     ColorGradient gradient;
-    public ColorOverTimeModule(ColorGradient gradient) {
+    public ColorOverTimeParticleModule(ColorGradient gradient) {
         super(gradient.getColor(0));
         this.gradient = gradient;
     }

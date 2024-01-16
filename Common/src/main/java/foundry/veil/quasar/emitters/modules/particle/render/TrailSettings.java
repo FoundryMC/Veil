@@ -1,10 +1,10 @@
 package foundry.veil.quasar.emitters.modules.particle.render;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.fx.Trail;
 import foundry.veil.quasar.util.CodecUtil;
 import foundry.veil.quasar.util.TriFunction;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.type.ImBoolean;
@@ -14,6 +14,7 @@ import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,47 +25,45 @@ import static foundry.veil.quasar.client.particle.data.SpriteData.BLANK_TEXTURE;
 public class TrailSettings {
     public static final Codec<TrailSettings> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.INT.fieldOf("trailFrequency").forGetter(settings -> settings.trailFrequency),
-                    Codec.INT.fieldOf("trailLength").forGetter(settings -> settings.trailLength),
-                    CodecUtil.VECTOR4F_CODEC.fieldOf("trailColor").xmap(
-                            s -> s == null ? new Vector4f(0.0f, 0.0f, 0.0f, 1.0f) : s,
-                            s -> s == null ? new Vector4f(0.0f, 0.0f, 0.0f, 1.0f) : s).forGetter(settings -> settings.trailColor),
-                    Codec.FLOAT.fieldOf("trailWidthModifier").forGetter(settings -> 1f),
+                    Codec.INT.optionalFieldOf("trailFrequency", 1).forGetter(settings -> settings.trailFrequency),
+                    Codec.INT.optionalFieldOf("trailLength", 20).forGetter(settings -> settings.trailLength),
+                    CodecUtil.VECTOR4F_CODEC.optionalFieldOf("trailColor", new Vector4f(0.0F, 0.0F, 0.0F, 1.0F)).forGetter(settings -> settings.trailColor),
+                    Codec.FLOAT.fieldOf("trailWidthModifier").forGetter(settings -> settings.trailWidthModifierFloat),
                     ResourceLocation.CODEC.fieldOf("trailTexture").forGetter(settings -> settings.trailTexture),
                     Codec.FLOAT.fieldOf("trailPointModifier").forGetter(settings -> 1f),
-                    Codec.STRING.fieldOf("tilingMode").orElse("STRETCH").xmap(
-                            Trail.TilingMode::valueOf,
-                            Enum::name
-                    ).forGetter(settings -> settings.tilingMode),
-                    Codec.BOOL.fieldOf("billboard").orElse(true).forGetter(settings -> settings.billboard),
-                    Codec.BOOL.fieldOf("parentRotation").orElse(false).forGetter(settings -> settings.parentRotation)
+                    Trail.TilingMode.CODEC.optionalFieldOf("tilingMode", Trail.TilingMode.STRETCH).forGetter(settings -> settings.tilingMode),
+                    Codec.BOOL.optionalFieldOf("billboard", true).forGetter(settings -> settings.billboard),
+                    Codec.BOOL.optionalFieldOf("parentRotation", false).forGetter(settings -> settings.parentRotation)
             ).apply(instance, TrailSettings::new)
     );
-    protected int trailFrequency = 1;
-    protected int trailLength = 20;
-    protected Vector4f trailColor = new Vector4f(1, 1, 1, 1);
-    protected BiFunction<Float, Float, Float> trailWidthModifier = (width, ageScale) -> 1f;
-    protected TriFunction<Vector4f, Integer, Vec3, Vector4f> trailPointModifier = (point, index, velocity) -> point;
-    protected ResourceLocation trailTexture = BLANK_TEXTURE;
-    protected Trail.TilingMode tilingMode = Trail.TilingMode.STRETCH;
-    protected boolean billboard = true;
-    protected boolean parentRotation = false;
-    protected float trailWidthModifierFloat = 1f;
+    private int trailFrequency = 1;
+    private int trailLength = 20;
+    private Vector4f trailColor = new Vector4f(1, 1, 1, 1);
+    private TrailWidthModifier trailWidthModifier = (width, ageScale) -> 1f;
+    private TrailPointModifier trailPointModifier = (point, index, velocity) -> point;
+    private ResourceLocation trailTexture = BLANK_TEXTURE;
+    private Trail.TilingMode tilingMode = Trail.TilingMode.STRETCH;
+    private boolean billboard = true;
+    private boolean parentRotation = false;
+    private float trailWidthModifierFloat = 1f;
 
-    public TrailSettings(int trailFrequency, int trailLength, Vector4f trailColor, BiFunction<Float, Float, Float> trailWidthModifier, ResourceLocation trailTexture, TriFunction<Vector4f, Integer, Vec3, Vector4f> trailPointModifier) {
+    public TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, TrailWidthModifier trailWidthModifier, ResourceLocation trailTexture, TrailPointModifier trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {
         this.trailFrequency = trailFrequency;
         this.trailLength = trailLength;
-        this.trailColor = trailColor;
+        this.trailColor = new Vector4f(trailColor);
         this.trailWidthModifier = trailWidthModifier;
         this.trailTexture = trailTexture;
         this.trailPointModifier = trailPointModifier;
+        this.tilingMode = tilingMode;
+        this.billboard = billboard;
+        this.parentRotation = parentRotation;
     }
 
-    private TrailSettings(int trailFrequency, int trailLength, Vector4f trailColor, float trailWidthModifier, ResourceLocation trailTexture, float trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {
+    private TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, float trailWidthModifier, ResourceLocation trailTexture, float trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {
         this.trailFrequency = trailFrequency;
         this.trailLength = trailLength;
-        this.trailColor = trailColor;
-        this.trailWidthModifier = (width, ageScale) -> ((float)Math.sin(width * 3.15)/2f) * trailWidthModifier * trailWidthModifierFloat;
+        this.trailColor = new Vector4f(trailColor);
+        this.trailWidthModifier = (width, ageScale) -> ((float) Math.sin(width * 3.15) / 2f) * trailWidthModifier * this.trailWidthModifierFloat;
         this.trailTexture = trailTexture;
         this.trailPointModifier = (point, index, velocity) -> point;
         this.tilingMode = tilingMode;
@@ -77,7 +76,7 @@ public class TrailSettings {
     }
 
     public boolean getParentRotation() {
-        return parentRotation;
+        return this.parentRotation;
     }
 
     public void setBillboard(boolean billboard) {
@@ -85,7 +84,7 @@ public class TrailSettings {
     }
 
     public boolean getBillboard() {
-        return billboard;
+        return this.billboard;
     }
 
     public void setTilingMode(Trail.TilingMode tilingMode) {
@@ -93,15 +92,15 @@ public class TrailSettings {
     }
 
     public Trail.TilingMode getTilingMode() {
-        return tilingMode;
+        return this.tilingMode;
     }
 
-    public void setTrailPointModifier(TriFunction<Vector4f, Integer, Vec3, Vector4f> trailPointModifier) {
+    public void setTrailPointModifier(TrailPointModifier trailPointModifier) {
         this.trailPointModifier = trailPointModifier;
     }
 
-    public TriFunction<Vector4f, Integer, Vec3, Vector4f> getTrailPointModifier() {
-        return trailPointModifier;
+    public TrailPointModifier getTrailPointModifier() {
+        return this.trailPointModifier;
     }
 
     public void setTrailFrequency(int trailFrequency) {
@@ -116,7 +115,7 @@ public class TrailSettings {
         this.trailColor = trailColor;
     }
 
-    public void setTrailWidthModifier(BiFunction<Float, Float, Float> trailWidthModifier) {
+    public void setTrailWidthModifier(TrailWidthModifier trailWidthModifier) {
         this.trailWidthModifier = trailWidthModifier;
     }
 
@@ -125,57 +124,67 @@ public class TrailSettings {
     }
 
     public int getTrailFrequency() {
-        return trailFrequency;
+        return this.trailFrequency;
     }
 
     public int getTrailLength() {
-        return trailLength;
+        return this.trailLength;
     }
 
     public Vector4f getTrailColor() {
-        return trailColor;
+        return this.trailColor;
     }
 
-    public BiFunction<Float, Float, Float> getTrailWidthModifier() {
-        return trailWidthModifier;
+    public TrailWidthModifier getTrailWidthModifier() {
+        return this.trailWidthModifier;
     }
 
     public ResourceLocation getTrailTexture() {
-        return trailTexture;
+        return this.trailTexture;
     }
 
     public void renderImGuiSettings() {
-        ImString trailTextureString = new ImString(trailTexture.toString());
+        ImString trailTextureString = new ImString(this.trailTexture.toString());
         ImGui.inputText("Trail Texture" + this.hashCode(), trailTextureString);
-        trailTexture = new ResourceLocation(trailTextureString.get());
-        ImInt trailFrequencyInt = new ImInt(trailFrequency);
+        this.trailTexture = new ResourceLocation(trailTextureString.get());
+        ImInt trailFrequencyInt = new ImInt(this.trailFrequency);
         ImGui.inputInt("Trail Frequency" + this.hashCode(), trailFrequencyInt);
-        trailFrequency = trailFrequencyInt.get();
-        ImInt trailLengthInt = new ImInt(trailLength);
+        this.trailFrequency = trailFrequencyInt.get();
+        ImInt trailLengthInt = new ImInt(this.trailLength);
         ImGui.inputInt("Trail Length" + this.hashCode(), trailLengthInt);
-        trailLength = trailLengthInt.get();
-        float[] trailColorVector4f = new float[]{trailColor.x(), trailColor.y(), trailColor.z(), trailColor.w()};
+        this.trailLength = trailLengthInt.get();
+        float[] trailColorVector4f = new float[]{this.trailColor.x(), this.trailColor.y(), this.trailColor.z(), this.trailColor.w()};
         ImGui.colorEdit4("Trail Color" + this.hashCode(), trailColorVector4f, ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreview);
-        trailColor = new Vector4f(trailColorVector4f[0], trailColorVector4f[1], trailColorVector4f[2], trailColorVector4f[3]);
-        if(ImGui.beginCombo("Tiling Mode" + this.hashCode(), tilingMode.name())){
+        this.trailColor = new Vector4f(trailColorVector4f[0], trailColorVector4f[1], trailColorVector4f[2], trailColorVector4f[3]);
+        if (ImGui.beginCombo("Tiling Mode" + this.hashCode(), this.tilingMode.name())) {
             ImGui.pushItemWidth(-1);
-            List<Trail.TilingMode> tilingModes = Arrays.asList(Trail.TilingMode.values());
-            for(Trail.TilingMode tilingMode : tilingModes){
-                if(ImGui.selectable(tilingMode.name() + this.hashCode())){
+            Trail.TilingMode[] tilingModes = Trail.TilingMode.values();
+            for (Trail.TilingMode tilingMode : tilingModes) {
+                if (ImGui.selectable(tilingMode.name() + this.hashCode())) {
                     this.tilingMode = tilingMode;
                 }
             }
             ImGui.popItemWidth();
             ImGui.endCombo();
         }
-        ImBoolean billboardBoolean = new ImBoolean(billboard);
+        ImBoolean billboardBoolean = new ImBoolean(this.billboard);
         ImGui.checkbox("Billboard" + this.hashCode(), billboardBoolean);
-        billboard = billboardBoolean.get();
-        ImBoolean parentRotationBoolean = new ImBoolean(parentRotation);
+        this.billboard = billboardBoolean.get();
+        ImBoolean parentRotationBoolean = new ImBoolean(this.parentRotation);
         ImGui.checkbox("Parent Rotation" + this.hashCode(), parentRotationBoolean);
-        parentRotation = parentRotationBoolean.get();
+        this.parentRotation = parentRotationBoolean.get();
         ImFloat trailWidthModifierFloat = new ImFloat(this.trailWidthModifierFloat);
         ImGui.inputFloat("Trail Width Modifier" + this.hashCode(), trailWidthModifierFloat);
         this.trailWidthModifierFloat = trailWidthModifierFloat.get();
+    }
+
+    @FunctionalInterface
+    public interface TrailPointModifier {
+        Vector4f modify(Vector4f point, Integer index, Vec3 velocity);
+    }
+
+    @FunctionalInterface
+    public interface TrailWidthModifier {
+        float modify(float ageScale, double ageMultiplier);
     }
 }

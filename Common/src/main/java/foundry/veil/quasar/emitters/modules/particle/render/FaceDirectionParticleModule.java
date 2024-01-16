@@ -2,14 +2,13 @@ package foundry.veil.quasar.emitters.modules.particle.render;
 
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
-import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-public class FaceDirectionModule implements RenderModule {
+public class FaceDirectionParticleModule implements RenderParticleModule {
     Vec3 direction;
 
-    public FaceDirectionModule(Vec3 direction) {
+    public FaceDirectionParticleModule(Vec3 direction) {
         this.direction = direction;
     }
     @Override

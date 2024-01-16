@@ -4,7 +4,7 @@ import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import org.jetbrains.annotations.NotNull;
 
-public class BounceModule implements UpdateModule {
+public class BounceParticleModule implements UpdateParticleModule {
     @Override
     public void run(QuasarParticle particle) {
         if(false){

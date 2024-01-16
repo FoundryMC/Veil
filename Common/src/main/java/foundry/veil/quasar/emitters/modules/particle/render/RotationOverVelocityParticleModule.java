@@ -7,10 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
 
-public class RotationOverVelocityModule implements RenderModule {
+public class RotationOverVelocityParticleModule implements RenderParticleModule {
     BiFunction<QuasarParticle, Float, Vec3> rotationFunction;
 
-    public RotationOverVelocityModule(BiFunction<QuasarParticle, Float, Vec3> rotationFunction) {
+    public RotationOverVelocityParticleModule(BiFunction<QuasarParticle, Float, Vec3> rotationFunction) {
         this.rotationFunction = rotationFunction;
     }
     @Override

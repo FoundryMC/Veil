@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.resources.ResourceLocation;
 
+// TODO replace
 public class InitModuleRegistry {
     private static final BiMap<String, ModuleType<?>> MODULES = HashBiMap.create();
 
@@ -23,13 +24,13 @@ public class InitModuleRegistry {
 
     public static void bootstrap() {}
 
-    private static final BiMap<ResourceLocation, InitModule> MODULES_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, InitParticleModule> MODULES_BY_ID = HashBiMap.create();
 
-    public static void register(ResourceLocation id, InitModule module) {
+    public static void register(ResourceLocation id, InitParticleModule module) {
         MODULES_BY_ID.put(id, module);
     }
 
-    public static InitModule getModule(ResourceLocation id) {
+    public static InitParticleModule getModule(ResourceLocation id) {
         return MODULES_BY_ID.get(id);
     }
 
@@ -37,7 +38,7 @@ public class InitModuleRegistry {
         MODULES_BY_ID.clear();
     }
 
-    public static ResourceLocation getModuleId(InitModule initModule) {
+    public static ResourceLocation getModuleId(InitParticleModule initModule) {
         return MODULES_BY_ID.inverse().get(initModule);
     }
 }

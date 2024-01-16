@@ -11,10 +11,10 @@ import java.util.function.BiFunction;
 /*
  This is exactly the same as {@link RotationOverVelocityModule}, the name is just to make it more clear what it does.
  */
-public class RotationOverLifetimeModule implements RenderModule {
+public class RotationOverLifetimeParticleModule implements RenderParticleModule {
     BiFunction<QuasarParticle, Float, Vec3> rotationFunction;
 
-    public RotationOverLifetimeModule(BiFunction<QuasarParticle, Float, Vec3> rotationFunction) {
+    public RotationOverLifetimeParticleModule(BiFunction<QuasarParticle, Float, Vec3> rotationFunction) {
         this.rotationFunction = rotationFunction;
     }
     @Override

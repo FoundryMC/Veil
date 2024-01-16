@@ -4,7 +4,7 @@ import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import imgui.type.ImBoolean;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A force that applies a wind force to a particle.
  * @see AbstractParticleForce
- * @see foundry.veil.quasar.emitters.modules.particle.update.UpdateModule
+ * @see UpdateParticleModule
  *
  * <p>
  *     Wind forces are useful for simulating wind.

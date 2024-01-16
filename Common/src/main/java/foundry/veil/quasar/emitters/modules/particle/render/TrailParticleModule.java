@@ -4,7 +4,6 @@ import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,22 +11,22 @@ import java.util.List;
 /**
  * A module that adds trails to a particle.
  * @see TrailSettings
- * @see RenderModule
+ * @see RenderParticleModule
  * @see foundry.veil.quasar.emitters.modules.particle.render.RenderData
  * WARNING: Trails add a lot of time to the rendering process, so use them sparingly.
  */
-public class TrailModule implements RenderModule {
-    public static final Codec<TrailModule> CODEC = RecordCodecBuilder.create(instance ->
+public class TrailParticleModule implements RenderParticleModule {
+    public static final Codec<TrailParticleModule> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     TrailSettings.CODEC.listOf().fieldOf("settings").forGetter(module -> module.settings)
-            ).apply(instance, TrailModule::new));
+            ).apply(instance, TrailParticleModule::new));
     List<TrailSettings> settings;
 
-    public TrailModule(TrailSettings... settings) {
+    public TrailParticleModule(TrailSettings... settings) {
         this.settings = List.of(settings);
     }
 
-    public TrailModule(List<TrailSettings> settings) {
+    public TrailParticleModule(List<TrailSettings> settings) {
         this.settings = settings;
     }
     @Override

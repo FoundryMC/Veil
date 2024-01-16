@@ -2,17 +2,17 @@ package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.fields.VectorField;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A force that applies the force created in a vector field to a particle.
  * @see AbstractParticleForce
- * @see foundry.veil.quasar.emitters.modules.particle.update.UpdateModule
+ * @see UpdateParticleModule
  * @see VectorField
  *
  * <p>

@@ -1,15 +1,32 @@
 package foundry.veil.quasar.util;
 
 import com.mojang.serialization.Codec;
-import org.joml.Vector4f;
+import com.mojang.serialization.DataResult;
+import org.joml.*;
 
 import java.util.List;
 
 public class CodecUtil {
-    public static final Codec<Vector4f> VECTOR4F_CODEC = Codec.FLOAT.listOf().xmap(list -> {
-        if(list.size() != 4) {
-            throw new IllegalArgumentException("Vector4f must have 4 elements!");
+
+    public static final Codec<Vector2fc> VECTOR2F_CODEC = Codec.FLOAT.listOf()
+            .flatXmap(list -> check(3, list), list -> check(2, list))
+            .xmap(list -> new Vector2f(list.get(0), list.get(1)),
+                    vector -> List.of(vector.x(), vector.y()));
+
+    public static final Codec<Vector3fc> VECTOR3F_CODEC = Codec.FLOAT.listOf()
+            .flatXmap(list -> check(3, list), list -> check(3, list))
+            .xmap(list -> new Vector3f(list.get(0), list.get(1), list.get(2)),
+                    vector -> List.of(vector.x(), vector.y(), vector.z()));
+
+    public static final Codec<Vector4fc> VECTOR4F_CODEC = Codec.FLOAT.listOf()
+            .flatXmap(list -> check(4, list), list -> check(4, list))
+            .xmap(list -> new Vector4f(list.get(0), list.get(1), list.get(2), list.get(3)),
+                    vector -> List.of(vector.x(), vector.y(), vector.z(), vector.w()));
+
+    private static DataResult<List<Float>> check(int size, List<Float> list) {
+        if (list.size() != size) {
+            return DataResult.error(() -> "Vector" + size + "f must have " + size + " elements!");
         }
-        return new Vector4f(list.get(0), list.get(1), list.get(2), list.get(3));
-    }, vector -> List.of(vector.x(), vector.y(), vector.z(), vector.w()));
+        return DataResult.success(list);
+    }
 }

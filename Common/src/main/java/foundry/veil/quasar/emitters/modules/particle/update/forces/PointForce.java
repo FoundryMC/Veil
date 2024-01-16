@@ -26,7 +26,7 @@ public class PointForce extends AbstractParticleForce {
             );
     private Supplier<Vec3> point;
     public Supplier<Vec3> getPoint() {
-        return point;
+        return this.point;
     }
 
     public void setPoint(Supplier<Vec3> point) {
@@ -39,7 +39,7 @@ public class PointForce extends AbstractParticleForce {
     private float range;
 
     public float getRange() {
-        return range;
+        return this.range;
     }
 
     public void setRange(float range) {
@@ -62,13 +62,13 @@ public class PointForce extends AbstractParticleForce {
 
     @Override
     public void applyForce(QuasarParticle particle) {
-        if(point == null) return;
-        double dist = particle.getPos().subtract(point.get()).length();
-        if(dist < range) {
+        if(this.point == null) return;
+        double dist = particle.getPos().subtract(this.point.get()).length();
+        if(dist < this.range) {
             // apply force to particle to move away from the point
-            Vec3 particleToPoint = point.get().subtract(particle.getPos());
+            Vec3 particleToPoint = this.point.get().subtract(particle.getPos());
             Vec3 particleToPointUnit = particleToPoint.normalize();
-            Vec3 particleToPointUnitScaled = particleToPointUnit.scale(-strength);
+            Vec3 particleToPointUnitScaled = particleToPointUnit.scale(-this.strength);
             particle.addForce(particleToPointUnitScaled);
         }
     }
@@ -82,12 +82,12 @@ public class PointForce extends AbstractParticleForce {
 
     @Override
     public boolean shouldRemove() {
-        return !shouldStay.get();
+        return !this.shouldStay.get();
     }
 
     @Override
     public PointForce copy() {
-        return new PointForce(point, range, strength, falloff);
+        return new PointForce(this.point, this.range, this.strength, this.falloff);
     }
 
     

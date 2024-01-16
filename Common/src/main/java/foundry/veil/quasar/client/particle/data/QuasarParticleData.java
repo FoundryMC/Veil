@@ -8,15 +8,14 @@ import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.emitters.ICustomParticleData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmissionParticleSettings;
-import foundry.veil.quasar.emitters.modules.particle.init.InitModule;
+import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.init.InitModuleRegistry;
-import foundry.veil.quasar.emitters.modules.particle.render.RenderModule;
+import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderModuleRegistry;
-import foundry.veil.quasar.emitters.modules.particle.update.UpdateModule;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateModuleRegistry;
-import foundry.veil.quasar.emitters.modules.particle.update.collsion.CollisionModule;
+import foundry.veil.quasar.emitters.modules.particle.update.collsion.CollisionParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
-import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -67,10 +66,10 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
                     ).forGetter(QuasarParticleData::getUpdateModules),
                     ResourceLocation.CODEC.listOf().fieldOf("collision_modules").orElse(List.of()).xmap(
                             r -> {
-                                return r.stream().map(f -> (CollisionModule) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList());
+                                return r.stream().map(f -> (CollisionParticleModule) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList());
                             },
                             r -> {
-                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((CollisionModule) f)).collect(Collectors.toList());
+                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((CollisionParticleModule) f)).collect(Collectors.toList());
                             }
                     ).forGetter(QuasarParticleData::getCollisionModules),
                     ResourceLocation.CODEC.listOf().fieldOf("forces").xmap(
@@ -78,7 +77,7 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
                                 return r.stream().map(f -> (AbstractParticleForce) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList());
                             },
                             r -> {
-                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((UpdateModule) f)).collect(Collectors.toList());
+                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((UpdateParticleModule) f)).collect(Collectors.toList());
                             }
                     ).forGetter(QuasarParticleData::getForces),
                     ResourceLocation.CODEC.listOf().fieldOf("render_modules").xmap(
@@ -111,10 +110,10 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
     public float velocityStretchFactor = 0;
     public List<ResourceLocation> subEmitters = new ArrayList<>();
     public List<AbstractParticleForce> forces = new ArrayList<>();
-    public List<InitModule> initModules = new ArrayList<>();
-    public List<RenderModule> renderModules = new ArrayList<>();
-    public List<UpdateModule> updateModules = new ArrayList<>();
-    public List<CollisionModule> collisionModules = new ArrayList<>();
+    public List<InitParticleModule> initModules = new ArrayList<>();
+    public List<RenderParticleModule> renderModules = new ArrayList<>();
+    public List<UpdateParticleModule> updateModules = new ArrayList<>();
+    public List<CollisionParticleModule> collisionModules = new ArrayList<>();
     public ParticleRenderType renderType;
     public ParticleEmitter parentEmitter;
 
@@ -164,35 +163,35 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         return renderStyle;
     }
 
-    public void addInitModule(InitModule module) {
+    public void addInitModule(InitParticleModule module) {
         initModules.add(module);
     }
 
-    public void addInitModules(InitModule... modules) {
+    public void addInitModules(InitParticleModule... modules) {
         initModules.addAll(Arrays.asList(modules));
     }
 
-    public void addRenderModule(RenderModule module) {
+    public void addRenderModule(RenderParticleModule module) {
         renderModules.add(module);
     }
 
-    public void addRenderModules(RenderModule... modules) {
+    public void addRenderModules(RenderParticleModule... modules) {
         renderModules.addAll(Arrays.asList(modules));
     }
 
-    public void addUpdateModule(UpdateModule module) {
+    public void addUpdateModule(UpdateParticleModule module) {
         updateModules.add(module);
     }
 
-    public void addUpdateModules(UpdateModule... modules) {
+    public void addUpdateModules(UpdateParticleModule... modules) {
         updateModules.addAll(Arrays.asList(modules));
     }
 
-    public void addCollisionModule(CollisionModule module) {
+    public void addCollisionModule(CollisionParticleModule module) {
         collisionModules.add(module);
     }
 
-    public void addCollisionModules(CollisionModule... modules) {
+    public void addCollisionModules(CollisionParticleModule... modules) {
         collisionModules.addAll(Arrays.asList(modules));
     }
 
@@ -241,19 +240,19 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         return forces;
     }
 
-    public List<InitModule> getInitModules() {
+    public List<InitParticleModule> getInitModules() {
         return initModules;
     }
 
-    public List<RenderModule> getRenderModules() {
+    public List<RenderParticleModule> getRenderModules() {
         return renderModules;
     }
 
-    public List<UpdateModule> getUpdateModules() {
+    public List<UpdateParticleModule> getUpdateModules() {
         return updateModules;
     }
 
-    public List<CollisionModule> getCollisionModules() {
+    public List<CollisionParticleModule> getCollisionModules() {
         return collisionModules;
     }
 
@@ -311,7 +310,7 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
 
     public QuasarParticleData instance() {
         QuasarParticleData data = new QuasarParticleData(particleSettings, shouldCollide, faceVelocity, velocityStretchFactor);
-        data.initModules = initModules.stream().map(InitModule::copy).filter(Objects::nonNull).collect(Collectors.toList());
+        data.initModules = initModules.stream().map(InitParticleModule::copy).filter(Objects::nonNull).collect(Collectors.toList());
         data.updateModules = updateModules;
         data.renderModules = renderModules;
         data.collisionModules = collisionModules;
