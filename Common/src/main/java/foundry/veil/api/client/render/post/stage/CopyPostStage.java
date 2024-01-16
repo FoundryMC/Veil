@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.post.PostPipeline;
-import foundry.veil.api.client.render.post.PostPipelineStageRegistry;
+import foundry.veil.api.client.registry.PostPipelineStageRegistry;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;

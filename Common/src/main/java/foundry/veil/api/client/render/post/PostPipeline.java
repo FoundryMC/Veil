@@ -2,6 +2,7 @@ package foundry.veil.api.client.render.post;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.serialization.Codec;
+import foundry.veil.api.client.registry.PostPipelineStageRegistry;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.shader.program.MutableShaderUniformAccess;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
