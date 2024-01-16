@@ -3,6 +3,9 @@ package foundry.veil.quasar.client.particle;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.api.client.render.deferred.light.PointLight;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
 import foundry.veil.quasar.client.particle.data.QuasarParticleRenderData;
 import foundry.veil.quasar.client.particle.data.QuasarParticleRenderType;
@@ -10,6 +13,7 @@ import foundry.veil.quasar.client.particle.data.SpriteData;
 import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
+import foundry.veil.quasar.emitters.modules.particle.init.LightModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.TrailParticleModule;
@@ -17,6 +21,7 @@ import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule
 import foundry.veil.quasar.emitters.modules.particle.update.collsion.CollisionParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
 import foundry.veil.quasar.fx.Trail;
+import foundry.veil.quasar.util.ColorGradient;
 import foundry.veil.quasar.util.MathUtil;
 import foundry.veil.api.client.render.shader.RenderTypeRegistry;
 import net.minecraft.client.Camera;
@@ -42,6 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import static foundry.veil.quasar.emitters.modules.particle.init.LightModule.toLightColor;
 
 public class QuasarParticle extends Particle {
     public static final Vec3[] PLANE = {
@@ -116,6 +123,8 @@ public class QuasarParticle extends Particle {
     protected double ozRot = 0;
     protected boolean faceVelocity = false;
     protected float velocityStretchFactor = 0.0f;
+    public PointLight light;
+    public ColorGradient lightGradient;
 
     protected List<TrailParticleModule> trailModules = new ArrayList<>();
     List<ResourceLocation> subEmitters = new ArrayList<>();
@@ -296,6 +305,11 @@ public class QuasarParticle extends Particle {
     public void remove() {
         this.parentEmitter.particleCount--;
         super.remove();
+        if(VeilRenderSystem.renderer().getDeferredRenderer().isEnabled()){
+            if(this.light != null) {
+                VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer().removeLight(this.light);
+            }
+        }
     }
 
     private static final double MAXIMUM_COLLISION_VELOCITY_SQUARED = Mth.square(100.0D);
@@ -334,6 +348,14 @@ public class QuasarParticle extends Particle {
         }
     }
 
+    private void updateLight(float partialTick){
+        if(this.light == null) return;
+        Vec3 lerpedPos = new Vec3(Mth.lerp(partialTick, this.xo, this.x), Mth.lerp(partialTick, this.yo, this.y), Mth.lerp(partialTick, this.zo, this.z));
+        this.light.setPosition(lerpedPos.x, lerpedPos.y, lerpedPos.z);
+        LightModule lightModule = (LightModule) this.initModules.stream().filter(m -> m instanceof LightModule).findFirst().orElse(null);
+        if(lightModule == null) return;
+        this.light.setColor(toLightColor(this.lightGradient.getColor((float) age / lifetime)).mul(lightModule.getBrightness()));
+    }
     private static final ResourceLocation STONE_TEXTURE = new ResourceLocation("minecraft", "textures/block/dirt.png");
 
     private RenderData renderData = null;
@@ -410,6 +432,7 @@ public class QuasarParticle extends Particle {
         float lerpedZ = (float) (Mth.lerp(partialTicks, this.zo, this.z) - projectedView.z());
 
         int light = LightTexture.FULL_BRIGHT;//getLightColor(partialTicks);
+        this.updateLight(partialTicks);
         Vec3 motionDirection = new Vec3(this.xd, this.yd, this.zd).normalize();
         this.renderStyle.render(this, new QuasarParticleRenderData(motionDirection, new Vec3(lerpedX, lerpedY, lerpedZ), light, builder, ageMultiplier, partialTicks));
 

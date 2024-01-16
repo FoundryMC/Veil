@@ -1,10 +1,11 @@
 {
     "sprite_data": {
-        "sprite": "veil:textures/particle/wisp.png"
+        "sprite": "veil:textures/special/blank.png"
     },
-    "render_style": "BILLBOARD",
+    "render_style": "CUBE",
     "init_modules": [
-        "veil:rocket"
+        "veil:rocket",
+        "veil:rocket_light"
     ],
     "update_modules": [],
     "collision_modules": [

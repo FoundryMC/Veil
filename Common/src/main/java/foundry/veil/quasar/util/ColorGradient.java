@@ -15,12 +15,6 @@ public class ColorGradient {
                     AlphaPoint.CODEC.listOf().fieldOf("alpha_points").forGetter(ColorGradient::getAlphaPoints)
             ).apply(instance, ColorGradient::new)
     );
-    // a list of RGB points that define the gradient. The first point should have a percent of 0, and the last point should have a percent of 1.
-    // allows for a gradient to be defined with a list of points, rather than a start and end color.
-    // the gradient will be linearly interpolated between the points.
-    // a secondary list of alpha points can be defined, which will be interpolated in the same way as the RGB points.
-    // if no alpha points are defined, the alpha will be interpolated linearly between the first and last alpha points, which by default are 0 and 1.
-
     private RGBPoint[] points;
     private AlphaPoint[] alphaPoints;
 

@@ -1,0 +1,141 @@
+{
+  "module": "color_over_lifetime",
+  "gradient": {
+    "rgb_points": [
+      {
+        "percent": 0,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.1,
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.2,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.3,
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.4,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.5,
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.6,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.7,
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.8,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      },
+      {
+        "percent": 0.9,
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "percent": 1.0,
+        "color": [
+          1,
+          0.984,
+          0.0
+        ]
+      }
+    ],
+    "alpha_points": [
+      {
+        "percent": 0,
+        "alpha": 1
+      },
+      {
+        "percent": 0.1,
+        "alpha": 0.0
+      },
+      {
+        "percent": 0.2,
+        "alpha": 1
+      },
+      {
+        "percent": 0.3,
+        "alpha": 0.0
+      },
+      {
+        "percent": 0.4,
+        "alpha": 1
+      },
+      {
+        "percent": 0.5,
+        "alpha": 0.0
+      },
+      {
+        "percent": 0.6,
+        "alpha": 1
+      },
+      {
+        "percent": 0.7,
+        "alpha": 0.0
+      },
+      {
+        "percent": 0.8,
+        "alpha": 1
+      },
+      {
+        "percent": 0.9,
+        "alpha": 0.0
+      },
+      {
+        "percent": 1.0,
+        "alpha": 1
+      }
+    ]
+  }
+}

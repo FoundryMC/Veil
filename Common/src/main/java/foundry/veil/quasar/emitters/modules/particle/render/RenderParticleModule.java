@@ -12,7 +12,6 @@ public interface RenderParticleModule extends ParticleModule {
         }
         return renderModule.getType();
     }, ModuleType::getCodec);
-    @Override
     default Codec<ParticleModule> getDispatchCodec(){
         return DISPATCH_CODEC;
     }

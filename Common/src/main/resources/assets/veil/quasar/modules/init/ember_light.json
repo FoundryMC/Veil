@@ -1,0 +1,36 @@
+{
+  "module": "light",
+  "gradient": {
+    "rgb_points": [
+      {
+        "percent": 0,
+        "color": [1,0.5,0]
+      },
+      {
+        "percent": 0.25,
+        "color": [0.5,0.25,0]
+      },
+      {
+        "percent": 1,
+        "color": [0,0,0]
+      }
+    ],
+    "alpha_points": [
+      {
+        "percent": 0,
+        "alpha": 1
+      },
+      {
+        "percent": 0.15,
+        "alpha": 1
+      },
+      {
+        "percent": 1,
+        "alpha": 1
+      }
+    ]
+  },
+  "brightness": 1.25,
+  "falloff": 2.0,
+  "radius": 0.75
+}

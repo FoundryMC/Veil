@@ -2,11 +2,13 @@ package foundry.veil.quasar.emitters.modules;
 
 import foundry.veil.quasar.emitters.modules.particle.init.*;
 import foundry.veil.quasar.emitters.modules.particle.init.forces.InitialVelocityForce;
+import foundry.veil.quasar.emitters.modules.particle.init.LightModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderModuleRegistry;
 import foundry.veil.quasar.emitters.modules.particle.render.TrailParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.color.ColorParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.color.ColorOverTimeParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.color.ColorOverVelocityParticleModule;
+import foundry.veil.quasar.emitters.modules.particle.update.BounceParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.TickSubEmitter;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateModuleRegistry;
 import foundry.veil.quasar.emitters.modules.particle.update.collsion.DieOnCollisionParticleModule;
@@ -16,12 +18,14 @@ import com.mojang.serialization.Codec;
 
 public interface ModuleType<T extends ParticleModule> {
 
-    // INIOT
+    // INIT
     ModuleType<InitialVelocityForce> INITIAL_VELOCITY = registerInitModule("initial_velocity", InitialVelocityForce.CODEC);
     ModuleType<InitColorParticleModule> INIT_COLOR = registerInitModule("init_color", InitColorParticleModule.CODEC);
     ModuleType<InitSubEmitter> INIT_SUB_EMITTER = registerInitModule("init_sub_emitter", InitSubEmitter.CODEC);
     ModuleType<InitRandomColorParticleModule> INIT_RANDOM_COLOR = registerInitModule("init_random_color", InitRandomColorParticleModule.CODEC);
     ModuleType<InitRandomRotationParticleModule> INIT_RANDOM_ROTATION = registerInitModule("init_random_rotation", InitRandomRotationParticleModule.CODEC);
+    ModuleType<LightModule> LIGHT_MODULE = registerInitModule("light", LightModule.CODEC);
+
 
     // RENDER
     ModuleType<TrailParticleModule> TRAIL = registerRenderModule("trail", TrailParticleModule.CODEC);
@@ -36,6 +40,7 @@ public interface ModuleType<T extends ParticleModule> {
     // UPDATE - COLLISION
     ModuleType<DieOnCollisionParticleModule> DIE_ON_COLLISION = registerUpdateModule("die_on_collision", DieOnCollisionParticleModule.CODEC);
     ModuleType<SubEmitterCollisionParticleModule> SUB_EMITTER_COLLISION = registerUpdateModule("sub_emitter_collision", SubEmitterCollisionParticleModule.CODEC);
+    ModuleType<BounceParticleModule> BOUNCE = registerUpdateModule("bounce", BounceParticleModule.CODEC);
 
 
     // UPDATE - FORCES

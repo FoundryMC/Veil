@@ -4,11 +4,13 @@
     },
     "render_style": "CUBE",
     "init_modules": [
-        "veil:smoke_vel"
+        "veil:smoke_vel",
+        "veil:ember_light"
     ],
-    "update_modules": [],
+    "update_modules": [
+        "veil:collision/spark_bounce"
+    ],
     "collision_modules": [
-        "veil:collision/die_on_collide"
     ],
     "forces": [
         "veil:force/vector_field/test_vector_field",
@@ -20,5 +22,5 @@
     ],
     "face_velocity": true,
     "velocity_stretch_factor": 1.0,
-    "should_collide": true
+    "should_collide": false
 }

@@ -74,7 +74,8 @@ public class VeilFabricClient implements ClientModInitializer {
             LiteralArgumentBuilder<FabricClientCommandSource> builder = LiteralArgumentBuilder.literal("quasar");
             builder.then(ClientCommandManager.argument("emitter", ResourceLocationArgument.id()).suggests(EMITTER_SUGGESTION_PROVIDER).then(ClientCommandManager.argument("position", Vec3Argument.vec3()).executes(context1 -> {
                 ParticleEmitter emitter = ParticleEmitterRegistry.getEmitter(context1.getArgument("emitter", ResourceLocation.class)).instance();
-                emitter.setPosition(Minecraft.getInstance().player.position());
+                WorldCoordinates pos = context1.getArgument("position", WorldCoordinates.class);
+                emitter.setPosition(pos.getPosition(context1.getSource().getEntity().createCommandSourceStack()));
                 emitter.setLevel(Minecraft.getInstance().level);
                 ParticleSystemManager.getInstance().addParticleSystem(emitter);
                 return 1;

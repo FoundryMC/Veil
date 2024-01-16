@@ -4,7 +4,8 @@
     },
     "render_style": "CUBE",
     "init_modules": [
-        "veil:swiftshot_velocity"
+        "veil:swiftshot_velocity",
+        "veil:enderman_light"
     ],
     "update_modules": [],
     "collision_modules": [
