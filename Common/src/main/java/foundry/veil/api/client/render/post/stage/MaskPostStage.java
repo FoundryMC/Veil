@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.render.post.PostPipeline;
-import foundry.veil.api.client.render.post.PostPipelineStageRegistry;
+import foundry.veil.api.client.registry.PostPipelineStageRegistry;
 
 /**
  * Sets the color and depth masks.

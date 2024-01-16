@@ -1,5 +1,7 @@
-package foundry.veil.api.client.pose;
+package foundry.veil.api.client.registry;
 
+import foundry.veil.api.client.pose.ExtendedPose;
+import foundry.veil.api.client.pose.PoseData;
 import foundry.veil.api.client.util.Easings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
