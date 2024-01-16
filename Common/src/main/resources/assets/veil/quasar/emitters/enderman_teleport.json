@@ -1,0 +1,10 @@
+{
+    "emitter_module": {
+        "max_lifetime": 1,
+        "loop": false,
+        "rate": 1,
+        "count": 64
+    },
+    "emitter_settings": "veil:swiftshot_settings",
+    "particle_data": "veil:swiftshot_data"
+}

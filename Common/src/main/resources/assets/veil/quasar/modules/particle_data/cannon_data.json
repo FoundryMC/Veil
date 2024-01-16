@@ -1,0 +1,27 @@
+{
+    "sprite_data": {
+        "sprite": "minecraft:textures/block/iron_block.png"
+    },
+    "render_style": "CUBE",
+    "init_modules": [
+        "veil:cannon_velocity",
+        "veil:smoke_big_init",
+        "veil:smoke_small_init"
+    ],
+    "update_modules": [
+        "veil:basic_smoke_tick_sub"
+    ],
+    "collision_modules": [
+    ],
+    "forces": [
+        "veil:force/drag/shrapnel_drag",
+        "veil:force/gravity/shrapnel_gravity",
+        "veil:force/vector_field/test_vector_field"
+    ],
+    "render_modules": [
+        "veil:color/swiftshot_color"
+    ],
+    "face_velocity": true,
+    "velocity_stretch_factor": 0.0,
+    "should_collide": true
+}

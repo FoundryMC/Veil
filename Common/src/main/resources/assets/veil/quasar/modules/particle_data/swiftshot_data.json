@@ -1,0 +1,26 @@
+{
+    "sprite_data": {
+        "sprite": "veil:textures/special/blank.png"
+    },
+    "render_style": "CUBE",
+    "init_modules": [
+        "veil:swiftshot_velocity"
+    ],
+    "update_modules": [],
+    "collision_modules": [
+    ],
+    "forces": [
+        "veil:force/point_force/test_point",
+        "veil:force/vortex/swiftshot_vortex",
+        "veil:force/drag/test_drag",
+        "veil:force/gravity/test_gravity",
+        "veil:force/vector_field/test_vector_field"
+    ],
+    "render_modules": [
+        "veil:color/swiftshot_color",
+        "veil:trail/swiftshot_trail"
+    ],
+    "face_velocity": true,
+    "velocity_stretch_factor": 2.0,
+    "should_collide": false
+}

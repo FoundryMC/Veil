@@ -1,7 +1,9 @@
 package foundry.veil;
 
+import com.google.gson.Gson;
 import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.platform.services.VeilPlatform;
+import foundry.veil.quasar.emitters.modules.ModuleType;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,6 +18,7 @@ public class Veil {
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
     public static final boolean DEBUG;
     public static final boolean IMGUI;
+    public static final Gson GSON = new Gson();
 
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
 
@@ -36,6 +39,7 @@ public class Veil {
             LOGGER.info("ImGui Disabled");
         }
         VeilMolang.set(MolangCompiler.create(MolangCompiler.DEFAULT_FLAGS, Veil.class.getClassLoader()));
+        ModuleType.bootstrap();
     }
 
     public static ResourceLocation veilPath(String path) {

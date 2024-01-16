@@ -59,3 +59,10 @@ extendable method com/mojang/blaze3d/shaders/Uniform set (Lorg/joml/Matrix3f;)V
 
 # Deferred Renderer
 mutable field net/minecraft/client/renderer/RenderType$CompositeState states Lcom/google/common/collect/ImmutableList;
+
+# Quasar
+accessible field net/minecraft/client/particle/Particle stoppedByCollision Z
+accessible class net/minecraft/client/particle/ParticleEngine$MutableSpriteSet
+accessible field net/minecraft/client/renderer/RenderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER Lnet/minecraft/client/renderer/RenderStateShard$ShaderStateShard;
+accessible field net/minecraft/client/renderer/RenderStateShard COLOR_WRITE Lnet/minecraft/client/renderer/RenderStateShard$WriteMaskStateShard;
+accessible field net/minecraft/client/renderer/RenderStateShard NO_CULL Lnet/minecraft/client/renderer/RenderStateShard$CullStateShard;

@@ -1,0 +1,18 @@
+{
+    "module": "trail",
+    "settings": [
+        {
+            "trailWidthModifier": 0.48,
+            "trailTexture": "veil:textures/special/flamestexture.png",
+            "trailPointModifier": 1.0,
+            "trailFrequency": 5,
+            "trailLength": 25,
+            "trailColor": [
+                0.45,
+                0.45,
+                0.45,
+                0.75
+            ]
+        }
+    ]
+}

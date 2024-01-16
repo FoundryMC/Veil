@@ -1,0 +1,13 @@
+{
+    "init_modules": [],
+    "update_modules": [],
+    "forces": [
+        "veil:force/vector_field/test_vector_field",
+        "veil:force/wind/test_wind"
+    ],
+    "render_modules": [
+        "veil:trail/test_trail"
+    ],
+    "face_velocity": true,
+    "should_collide": true
+}
