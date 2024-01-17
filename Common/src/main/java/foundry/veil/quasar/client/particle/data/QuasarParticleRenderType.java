@@ -24,14 +24,12 @@ public class QuasarParticleRenderType implements ParticleRenderType {
 
     @Override
     public void begin(BufferBuilder builder, TextureManager textureManager) {
+        RenderSystem.depthMask(true);
         RenderSystem.setShader(() -> RenderTypeRegistry.QUASAR_PARTICLE_ADDITIVE_MULTIPLY);
         RenderSystem.setShaderTexture(0, this.texture);
 
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-//        RenderSystem.depthMask(true);
-//        RenderSystem.disableBlend();
 
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
     }
