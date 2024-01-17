@@ -136,7 +136,7 @@ public class QuasarParticle extends Particle {
     List<UpdateParticleModule> updateModules = new ArrayList<>();
     List<CollisionParticleModule> collisionModules = new ArrayList<>();
     public SpriteData spriteData = SpriteData.BLANK;
-    ParticleRenderType renderType = RENDER_TYPE_FLAT;
+   private final ParticleRenderType renderType;
     float speed;
     ParticleEmitter parentEmitter;
 
@@ -170,10 +170,6 @@ public class QuasarParticle extends Particle {
         this.speed = data.particleSettings.getParticleSpeed();
         this.parentEmitter = data.parentEmitter;
         this.parentEmitter.particleCount++;
-    }
-
-    public QuasarParticle() {
-        super(null, 0, 0, 0);
     }
 
     public List<ResourceLocation> getSubEmitters() {
@@ -371,7 +367,7 @@ public class QuasarParticle extends Particle {
     public void render(VertexConsumer builder, Camera camera, float partialTicks) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RENDER_TYPE_FLAT.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
+        this.renderType.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
         builder = bufferBuilder;
 
         if (this.renderData == null) {
@@ -438,7 +434,7 @@ public class QuasarParticle extends Particle {
         Vec3 motionDirection = new Vec3(this.xd, this.yd, this.zd).normalize();
         this.renderStyle.render(this, new QuasarParticleRenderData(motionDirection, new Vec3(lerpedX, lerpedY, lerpedZ), light, builder, ageMultiplier, partialTicks));
 
-        RENDER_TYPE_FLAT.end(tesselator);
+        this.renderType.end(tesselator);
     }
 
     // FIXME PLEASE renderer
