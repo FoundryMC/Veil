@@ -34,7 +34,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
 }
 
-rootProject.name = 'Veil-Quasar'
+rootProject.name = 'Veil'
 // Quilt isn't 1.20, so it has to be excluded for now
 // include("Common", "Fabric", "Forge", "Quilt")
 include("Common", "Fabric", "Forge")
