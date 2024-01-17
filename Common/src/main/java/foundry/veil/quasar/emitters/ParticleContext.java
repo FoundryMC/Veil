@@ -1,7 +1,10 @@
 package foundry.veil.quasar.emitters;
 
 import foundry.veil.quasar.client.particle.QuasarParticle;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleContext {
@@ -34,6 +37,22 @@ public class ParticleContext {
             return ((ParticleAccessorExtension)this.particle).getPosition();
         } else {
             return this.position;
+        }
+    }
+
+    public BlockState getBlockstateInOrUnder() {
+        if(this.entity != null) {
+            return this.entity.level().getBlockState(this.entity.blockPosition());
+        } else if (this.particle != null) {
+            BlockState in = Minecraft.getInstance().level.getBlockState(BlockPos.containing(((ParticleAccessorExtension)this.particle).getPosition().add(0, 0.5, 0)));
+            BlockState under = Minecraft.getInstance().level.getBlockState(BlockPos.containing(((ParticleAccessorExtension)this.particle).getPosition().add(0, -0.5, 0)));
+            if (in.isAir()) {
+                return under;
+            } else {
+                return in;
+            }
+        } else {
+            return null;
         }
     }
 

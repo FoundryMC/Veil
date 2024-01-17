@@ -2,9 +2,9 @@
     "sprite_data": {
         "sprite": "veil:textures/special/blank.png"
     },
-    "render_style": "CUBE",
+    "render_style": "BILLBOARD",
     "init_modules": [
-        "veil:smoke_vel",
+        "veil:block_vel",
         "veil:ember_light"
     ],
     "update_modules": [
@@ -14,11 +14,10 @@
     ],
     "forces": [
         "veil:force/vector_field/test_vector_field",
-        "veil:force/gravity/test_gravity",
-        "veil:force/drag/test_drag"
+        "veil:force/drag/test_drag",
+        "veil:force/gravity/test_gravity"
     ],
     "render_modules": [
-        "veil:color/rocket_smoke_color_over_lifetime"
     ],
     "face_velocity": true,
     "velocity_stretch_factor": 1.0,

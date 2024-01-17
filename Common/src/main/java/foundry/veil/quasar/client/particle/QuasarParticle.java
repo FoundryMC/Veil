@@ -31,6 +31,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -107,6 +108,7 @@ public class QuasarParticle extends Particle {
     private ResourceLocation dataId;
     private RenderStyle renderStyle = RenderStyle.BILLBOARD;
     private static final ParticleRenderType RENDER_TYPE_FLAT = new QuasarParticleRenderType();
+    public TextureAtlasSprite sprite = null;
 
     protected float scale;
     public boolean shouldCollide = false;
@@ -133,7 +135,7 @@ public class QuasarParticle extends Particle {
     List<RenderParticleModule> renderModules = new ArrayList<>();
     List<UpdateParticleModule> updateModules = new ArrayList<>();
     List<CollisionParticleModule> collisionModules = new ArrayList<>();
-    SpriteData spriteData = SpriteData.BLANK;
+    public SpriteData spriteData = SpriteData.BLANK;
     ParticleRenderType renderType = RENDER_TYPE_FLAT;
     float speed;
     ParticleEmitter parentEmitter;
@@ -431,7 +433,7 @@ public class QuasarParticle extends Particle {
         float lerpedY = (float) (Mth.lerp(partialTicks, this.yo, this.y) - projectedView.y());
         float lerpedZ = (float) (Mth.lerp(partialTicks, this.zo, this.z) - projectedView.z());
 
-        int light = LightTexture.FULL_BRIGHT;//getLightColor(partialTicks);
+        int light = getLightColor(partialTicks);
         this.updateLight(partialTicks);
         Vec3 motionDirection = new Vec3(this.xd, this.yd, this.zd).normalize();
         this.renderStyle.render(this, new QuasarParticleRenderData(motionDirection, new Vec3(lerpedX, lerpedY, lerpedZ), light, builder, ageMultiplier, partialTicks));
@@ -555,6 +557,7 @@ public class QuasarParticle extends Particle {
                 }
             }
         }),
+        // TODO: FIX UVS THEYRE FUCKED
         BILLBOARD((particle, data) -> {
             float lerpedYaw = Mth.lerp(data.partialTicks, particle.oYaw, particle.yaw);
             float lerpedPitch = Mth.lerp(data.partialTicks, particle.oPitch, particle.pitch);
@@ -568,6 +571,9 @@ public class QuasarParticle extends Particle {
 
             Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
             RenderSystem.setShaderTexture(0, particle.spriteData.sprite);
+            if(particle.sprite != null) {
+                RenderSystem.setShaderTexture(0, particle.sprite.atlasLocation());
+            }
             // turn quat into pitch and yaw
             for (int j = 0; j < 4; j++) {
                 Vector3f vec = faceVerts[j].scale(-1).toVector3f();
@@ -588,15 +594,31 @@ public class QuasarParticle extends Particle {
                 if (j == 0) {
                     u = 0;
                     v = 0;
+                    if(particle.sprite != null) {
+                        u = particle.sprite.getU0();
+                        v = particle.sprite.getV0();
+                    }
                 } else if (j == 1) {
                     u = 1;
                     v = 0;
+                    if(particle.sprite != null) {
+                        u = particle.sprite.getU1();
+                        v = particle.sprite.getV0();
+                    }
                 } else if (j == 2) {
                     u = 1;
                     v = 1;
+                    if(particle.sprite != null) {
+                        u = particle.sprite.getU1();
+                        v = particle.sprite.getV1();
+                    }
                 } else {
                     u = 0;
                     v = 1;
+                    if(particle.sprite != null) {
+                        u = particle.sprite.getU0();
+                        v = particle.sprite.getV1();
+                    }
                 }
                 int spritesheetRows = particle.spriteData.getFrameHeight();
                 int spritesheetColumns = particle.spriteData.getFrameWidth();
@@ -612,6 +634,10 @@ public class QuasarParticle extends Particle {
                 // get the u and v coordinates of the frame, using u and v which are this vertex's u and v
                 float u1 = u * (1f / spritesheetColumns) + frameColumn * (1f / spritesheetColumns);
                 float v1 = v * (1f / spritesheetRows) + frameRow * (1f / spritesheetRows);
+                if(particle.sprite != null){
+                    u1 = u;
+                    v1 = v;
+                }
                 data.builder.vertex(vec.x, vec.y, vec.z)
                         .uv(u1, v1)
                         .color(particle.rCol, particle.gCol, particle.bCol, particle.alpha)

@@ -25,6 +25,7 @@ public interface ModuleType<T extends ParticleModule> {
     ModuleType<InitRandomColorParticleModule> INIT_RANDOM_COLOR = registerInitModule("init_random_color", InitRandomColorParticleModule.CODEC);
     ModuleType<InitRandomRotationParticleModule> INIT_RANDOM_ROTATION = registerInitModule("init_random_rotation", InitRandomRotationParticleModule.CODEC);
     ModuleType<LightModule> LIGHT_MODULE = registerInitModule("light", LightModule.CODEC);
+    ModuleType<BlockParticleModule> BLOCK_PARTICLE = registerInitModule("block", BlockParticleModule.CODEC);
 
 
     // RENDER
