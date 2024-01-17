@@ -27,9 +27,9 @@ import java.util.function.Supplier;
  *     The range parameter determines the maximum distance from the point at which the force is applied.
  *     If the distance from the point is greater than the range, the force is not applied.
  *     The position parameter determines the position of the point.
- *     The position parameter can be a Vec3 or a Supplier<Vec3>.
+ *     The position parameter can be a Vec3 or a Supplier Vec3.
  *     If the position parameter is a Vec3, the position of the point is fixed.
- *     If the position parameter is a Supplier<Vec3>, the position of the point is updated every tick.
+ *     If the position parameter is a Supplier Vec3, the position of the point is updated every tick.
  *     This allows the point to move.
  * </p>
  */

@@ -52,8 +52,8 @@ public class EmitterModule implements BaseEmitterModule {
      * @param position    Position of the emitter
      * @param maxLifetime Maximum number of ticks the emitter will be active for
      * @param loop        Whether or not the emitter will loop. If true, the emitter will reset after maxLifetime ticks
-     * @param rate        The rate at which particles are emitted. <count> particles per <rate> ticks.
-     * @param count       The number of particles emitted per <rate> ticks
+     * @param rate        The rate at which particles are emitted. count particles per rate ticks.
+     * @param count       The number of particles emitted per rate ticks
      */
     public EmitterModule(Vec3 position, int maxLifetime, boolean loop, int rate, int count) {
         this.position = position;
@@ -116,14 +116,14 @@ public class EmitterModule implements BaseEmitterModule {
     }
 
     /**
-     * The rate at which particles are emitted. <count> particles per <rate> ticks.
+     * The rate at which particles are emitted. count particles per rate ticks.
      */
     public int getRate() {
         return rate;
     }
 
     /**
-     * The number of particles emitted per <rate> ticks
+     * The number of particles emitted per rate ticks
      */
     public int getCount() {
         return count;
@@ -165,14 +165,14 @@ public class EmitterModule implements BaseEmitterModule {
     }
 
     /**
-     * Set the rate at which particles are emitted. <count> particles per <rate> ticks.
+     * Set the rate at which particles are emitted. count particles per rate ticks.
      */
     public void setRate(int rate) {
         this.rate = rate;
     }
 
     /**
-     * Set the number of particles emitted per <rate> ticks
+     * Set the number of particles emitted per rate ticks
      */
     public void setCount(int count) {
         this.count = count;
