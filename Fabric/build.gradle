@@ -118,7 +118,7 @@ processResources {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId base.archivesName.get()
+            artifactId (base.archivesName.get() + "-quasar")
             from components.java
         }
     }
