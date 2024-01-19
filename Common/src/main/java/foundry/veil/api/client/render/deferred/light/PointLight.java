@@ -2,6 +2,7 @@ package foundry.veil.api.client.render.deferred.light;
 
 import foundry.veil.api.client.render.CullFrustum;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import java.nio.ByteBuffer;
@@ -26,7 +27,7 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
     @Override
     public void store(ByteBuffer buffer) {
         this.position.getf(buffer.position(), buffer);
-        this.color.get(buffer.position() + Float.BYTES * 3, buffer);
+        this.getColor().mul(this.getBrightness(), new Vector3f()).get(buffer.position() + Float.BYTES * 3, buffer);
         buffer.position(buffer.position() + Float.BYTES * 6);
         buffer.putFloat(this.radius);
         buffer.putFloat(this.falloff);
@@ -73,6 +74,11 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
     }
 
     @Override
+    public PointLight setBrightness(float brightness) {
+        return (PointLight) super.setBrightness(brightness);
+    }
+
+    @Override
     public PointLight setPosition(double x, double y, double z) {
         this.position.set(x, y, z);
         this.markDirty();
@@ -112,6 +118,6 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
                 .setPosition(this.position)
                 .setColor(this.color)
                 .setRadius(this.radius)
-                .setColor(this.color);
+                .setBrightness(this.brightness);
     }
 }

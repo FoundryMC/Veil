@@ -16,10 +16,12 @@ import java.util.function.Supplier;
 public abstract class Light implements Cloneable {
 
     protected final Vector3f color;
+    protected float brightness;
     private boolean dirty;
 
     public Light() {
         this.color = new Vector3f(1.0F);
+        this.brightness = 1.0F;
         this.markDirty();
     }
 
@@ -93,6 +95,23 @@ public abstract class Light implements Cloneable {
         this.color.set(((color >> 16) & 0xFF) / 255.0F, ((color >> 8) & 0xFF) / 255.0F, (color & 0xFF) / 255.0F);
         this.markDirty();
         return this;
+    }
+
+    /**
+     * Sets the brightness of the light. This acts as a multiplier on the light's color.
+     * @param brightness The new brightness of the light.
+     */
+    public Light setBrightness(float brightness) {
+        this.brightness = brightness;
+        this.markDirty();
+        return this;
+    }
+
+    /**
+     * @return The brightness multiplier of the light.
+     */
+    public float getBrightness() {
+        return this.brightness;
     }
 
     /**

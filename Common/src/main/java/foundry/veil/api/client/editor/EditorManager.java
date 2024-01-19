@@ -37,6 +37,7 @@ public class EditorManager implements PreparableReloadListener {
         this.add(new OpenCLEditor());
         this.add(new DeviceInfoViewer());
         this.add(new DeferredEditor());
+        this.add(new LightEditor());
 
         resourceManager.registerReloadListener(this);
     }
