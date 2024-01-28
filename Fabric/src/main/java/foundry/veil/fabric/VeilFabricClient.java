@@ -45,9 +45,8 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class VeilFabricClient implements ClientModInitializer {
 
-    public static final SuggestionProvider<FabricClientCommandSource> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> {
-        return SharedSuggestionProvider.suggestResource(ParticleEmitterRegistry.getEmitterNames(), builder);
-    };
+    public static final SuggestionProvider<FabricClientCommandSource> EMITTER_SUGGESTION_PROVIDER = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ParticleEmitterRegistry.getEmitterNames(), builder);
+
     @Override
     public void onInitializeClient() {
         VeilClient.init();
@@ -62,10 +61,12 @@ public class VeilFabricClient implements ClientModInitializer {
 
         // Register test resource pack
         FabricLoader loader = FabricLoader.getInstance();
+        ModContainer container = loader.getModContainer(Veil.MODID).orElseThrow();
         if (Veil.DEBUG && loader.isDevelopmentEnvironment()) {
-            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.NORMAL);
+            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), container, ResourcePackActivationType.NORMAL);
+            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_particles"), container, ResourcePackActivationType.NORMAL);
         }
-        ResourceManagerHelper.registerBuiltinResourcePack(VeilDeferredRenderer.PACK_ID, loader.getModContainer(Veil.MODID).orElseThrow(), ResourcePackActivationType.DEFAULT_ENABLED);
+        ResourceManagerHelper.registerBuiltinResourcePack(VeilDeferredRenderer.PACK_ID, container, ResourcePackActivationType.DEFAULT_ENABLED);
 
         CoreShaderRegistrationCallback.EVENT.register(context -> VeilVanillaShaders.registerShaders(context::register));
         VeilJsonListeners.registerListeners((type, id, listener) -> ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FabricReloadListener(Veil.veilPath(id), listener)));

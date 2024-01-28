@@ -4,7 +4,7 @@ import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.platform.registry.ParticleTypeRegistry;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -54,6 +54,6 @@ public class VeilForgeClientEvents {
     }
     @SubscribeEvent
     public void registerParticleFactories(RegisterParticleProvidersEvent event){
-        event.registerSpecial(ParticleTypeRegistry.QUASAR_BASE.get(), new QuasarParticle.Factory());
+        event.registerSpecial(ParticleTypeRegistry.QUASAR_BASE.get(), new QuasarVanillaParticle.Factory());
     }
 }

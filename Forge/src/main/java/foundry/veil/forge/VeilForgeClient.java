@@ -72,6 +72,7 @@ public class VeilForgeClient {
             // Register test resource pack
             if (Veil.DEBUG && !FMLLoader.isProduction()) {
                 registerBuiltinPack(event, Veil.veilPath("test_shaders"));
+                registerBuiltinPack(event, Veil.veilPath("test_particles"));
             }
 
             // TODO make this pack enabled by default
