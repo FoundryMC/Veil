@@ -3,6 +3,7 @@ package foundry.veil.api.client.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
@@ -253,7 +254,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
-        CullFrustum frustum = VeilRenderSystem.renderer().getCullingFrustum();
+        CullFrustum frustum = VeilRenderer.getCullingFrustum();
         this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
         this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
 

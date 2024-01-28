@@ -54,6 +54,5 @@ public class DeferredShaderStateCache {
             this.veil$deferredShader = deferredShader != null ? deferredShader.toShaderInstance() : null;
         }
         return Objects.requireNonNullElse(this.veil$deferredShader, shaderInstance);
-
     }
 }

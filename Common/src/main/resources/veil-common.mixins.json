@@ -23,7 +23,6 @@
     "client.deferred.DebugScreenOverlayMixin",
     "client.deferred.LevelRendererMixin",
     "client.deferred.ModelBlockRendererMixin",
-    "client.deferred.ParticleEngineMixin",
     "client.deferred.ParticleRenderTypeMixin",
     "client.deferred.RenderBuffersAccessor",
     "client.deferred.RenderTypeMixin",
