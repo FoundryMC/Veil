@@ -9,6 +9,8 @@ import foundry.veil.api.client.render.shader.VeilShaders;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.CullFrustum;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.List;
 
@@ -40,7 +42,9 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
 
         this.vbo.bind();
         for (DirectionalLight light : lights) {
-            shader.setVector("LightColor", light.getColor());
+            Vector3fc lightColor = light.getColor();
+            float brightness = light.getBrightness();
+            shader.setVector("LightColor", lightColor.x() * brightness, lightColor.y() * brightness, lightColor.z() * brightness);
             shader.setVector("LightDirection", light.getDirection());
             this.vbo.draw();
         }

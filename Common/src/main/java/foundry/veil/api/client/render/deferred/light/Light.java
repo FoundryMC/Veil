@@ -1,8 +1,8 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
-import foundry.veil.api.client.render.CullFrustum;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -16,10 +16,12 @@ import java.util.function.Supplier;
 public abstract class Light implements Cloneable {
 
     protected final Vector3f color;
+    protected float brightness;
     private boolean dirty;
 
     public Light() {
         this.color = new Vector3f(1.0F);
+        this.brightness = 1.0F;
         this.markDirty();
     }
 
@@ -96,6 +98,24 @@ public abstract class Light implements Cloneable {
     }
 
     /**
+     * Sets the brightness of the light. This acts as a multiplier on the light's color.
+     *
+     * @param brightness The new brightness of the light.
+     */
+    public Light setBrightness(float brightness) {
+        this.brightness = brightness;
+        this.markDirty();
+        return this;
+    }
+
+    /**
+     * @return The brightness multiplier of the light.
+     */
+    public float getBrightness() {
+        return this.brightness;
+    }
+
+    /**
      * @return If this light needs to be re-uploaded to the renderer
      */
     public boolean isDirty() {
@@ -111,6 +131,7 @@ public abstract class Light implements Cloneable {
     public abstract Light clone();
 
     // FIXME Use a proper registry
+
     /**
      * Types of lights that can exist.
      *

@@ -26,8 +26,10 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
     @Override
     public void store(ByteBuffer buffer) {
         this.position.getf(buffer.position(), buffer);
-        this.color.get(buffer.position() + Float.BYTES * 3, buffer);
-        buffer.position(buffer.position() + Float.BYTES * 6);
+        buffer.position(buffer.position() + Float.BYTES * 3);
+        buffer.putFloat(this.color.x() * this.brightness);
+        buffer.putFloat(this.color.y() * this.brightness);
+        buffer.putFloat(this.color.z() * this.brightness);
         buffer.putFloat(this.radius);
         buffer.putFloat(this.falloff);
     }
@@ -73,6 +75,11 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
     }
 
     @Override
+    public PointLight setBrightness(float brightness) {
+        return (PointLight) super.setBrightness(brightness);
+    }
+
+    @Override
     public PointLight setPosition(double x, double y, double z) {
         this.position.set(x, y, z);
         this.markDirty();
@@ -112,6 +119,6 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
                 .setPosition(this.position)
                 .setColor(this.color)
                 .setRadius(this.radius)
-                .setColor(this.color);
+                .setBrightness(this.brightness);
     }
 }
