@@ -1,8 +1,8 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
-import foundry.veil.api.client.render.CullFrustum;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -99,6 +99,7 @@ public abstract class Light implements Cloneable {
 
     /**
      * Sets the brightness of the light. This acts as a multiplier on the light's color.
+     *
      * @param brightness The new brightness of the light.
      */
     public Light setBrightness(float brightness) {
@@ -130,6 +131,7 @@ public abstract class Light implements Cloneable {
     public abstract Light clone();
 
     // FIXME Use a proper registry
+
     /**
      * Types of lights that can exist.
      *

@@ -1,6 +1,5 @@
 package foundry.veil.impl.client.editor;
 
-import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
@@ -10,7 +9,10 @@ import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
 import imgui.ImGui;
 import imgui.ImVec4;
-import imgui.flag.*;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiDataType;
+import imgui.flag.ImGuiHoveredFlags;
+import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LightEditor extends SingleWindowEditor {
+
     private final Light.Type[] lightTypes;
 
     public LightEditor() {
@@ -58,7 +61,7 @@ public class LightEditor extends SingleWindowEditor {
             ImGui.indent();
             for (int i = 0; i < lights.size(); i++) {
                 Light light = lights.get(i);
-                boolean visible = light.isVisible(VeilRenderSystem.renderer().getCullingFrustum());
+                boolean visible = light.isVisible(VeilRenderer.getCullingFrustum());
 
                 if (!visible) {
                     ImVec4 textColor = ImGui.getStyle().getColor(ImGuiCol.Text);
@@ -89,19 +92,17 @@ public class LightEditor extends SingleWindowEditor {
         if (ImGui.isItemHovered(ImGuiHoveredFlags.None)) {
             ImGui.setTooltip("Add a new light to the world");
         }
-        if (ImGui.beginPopup("add_light_popup")){
+        if (ImGui.beginPopup("add_light_popup")) {
             ImGui.text("Choose Light Type:");
             for (Light.Type lightType : this.lightTypes) {
                 if (ImGui.selectable(lightType.name())) {
-                    Light light = null;
-                    switch (lightType) {
-                        case POINT:
+                    Light light = switch (lightType) {
+                        case POINT -> {
                             Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-                            light = new PointLight().setPosition(cameraPos.x(), cameraPos.y(), cameraPos.z()).setRadius(15.0F);
-                            break;
-                        case DIRECTIONAL:
-                            light = new DirectionalLight().setDirection(0, -1, 0);
-                    }
+                            yield new PointLight().setPosition(cameraPos.x(), cameraPos.y(), cameraPos.z()).setRadius(15.0F);
+                        }
+                        case DIRECTIONAL -> new DirectionalLight().setDirection(0, -1, 0);
+                    };
 
                     lightRenderer.addLight(light.setColor(new Vector3f(1.0F, 1.0F, 1.0F)).setBrightness(1.0F));
                 }
@@ -112,14 +113,11 @@ public class LightEditor extends SingleWindowEditor {
 
     private static void renderLightComponents(Light light, int index) {
         LightRenderer lightRenderer = VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer();
-
-        String name = light.getType().name() + "#" + light.hashCode();
-
         ImBoolean notDeleted = new ImBoolean(true);
-        if (ImGui.collapsingHeader(name, notDeleted)) {
+        if (ImGui.collapsingHeader(light.getType().name() + "#" + light.hashCode(), notDeleted)) {
             renderLightAttributeComponents(light, index);
         }
-        if (notDeleted.get() == false) {
+        if (!notDeleted.get()) {
             lightRenderer.removeLight(light);
         }
         ImGui.separator();
@@ -134,7 +132,7 @@ public class LightEditor extends SingleWindowEditor {
         float[] editLightColor = new float[]{lightColor.x(), lightColor.y(), lightColor.z()};
 
         ImGui.indent();
-        if (ImGui.dragScalar("##brightness" + index, ImGuiDataType.Float, editBrightness, 0.02F, 0.0F)) {
+        if (ImGui.dragScalar("##brightness" + index, ImGuiDataType.Float, editBrightness, 0.02F)) {
             light.setBrightness(editBrightness.get());
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
