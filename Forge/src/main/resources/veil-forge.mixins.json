@@ -4,12 +4,14 @@
   "package": "foundry.veil.forge.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "veil.refmap.json",
-  "injectors": {
-    "defaultRequire": 1
-  },
   "client": [
     "MinecraftMixin",
     "client.deferred.ModelBlockRendererMixin",
+    "client.deferred.ParticleEngineMixin",
+    "MinecraftMixin",
     "client.deferred.ParticleEngineMixin"
-  ]
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

@@ -128,7 +128,7 @@ public class VeilRenderer implements NativeResource {
     /**
      * @return The culling frustum for the renderer
      */
-    public CullFrustum getCullingFrustum() {
+    public static CullFrustum getCullingFrustum() {
         return ((LevelRendererExtension) Minecraft.getInstance().levelRenderer).veil$getCullFrustum();
     }
 
