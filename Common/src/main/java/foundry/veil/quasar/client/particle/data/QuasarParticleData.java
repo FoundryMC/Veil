@@ -8,12 +8,12 @@ import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.ICustomParticleData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmissionParticleSettings;
-import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.init.InitModuleRegistry;
-import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
+import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderModuleRegistry;
-import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
+import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateModuleRegistry;
+import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.collsion.CollisionParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -87,16 +87,16 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
                         data.forces = forces;
                         data.spriteData = spriteData;
                         data.renderStyle = style;
-                        data.renderType = new QuasarParticleRenderType().setTexture(spriteData.getSprite());
-                return data;
+                        data.renderType = new QuasarParticleRenderType().setTexture(spriteData.sprite());
+                        return data;
                     }
             )
     );
 
-    public ResourceLocation registryId;
     public SpriteData spriteData;
     public QuasarVanillaParticle.RenderStyle renderStyle;
-    public final EmissionParticleSettings particleSettings;
+    @Deprecated
+    public EmissionParticleSettings particleSettings;
     public boolean shouldCollide = true;
     public boolean faceVelocity = false;
     public float velocityStretchFactor = 0;
@@ -144,7 +144,7 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
     }
 
     public ResourceLocation getRegistryId() {
-        return registryId;
+        return QuasarParticleDataRegistry.getDataId(this);
     }
 
     public SpriteData getSpriteData() {
@@ -292,7 +292,7 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         return DESERIALIZER;
     }
 
-    public static final Deserializer<QuasarParticleData> DESERIALIZER = new Deserializer<QuasarParticleData>() {
+    public static final Deserializer<QuasarParticleData> DESERIALIZER = new Deserializer<>() {
         @Override
         public QuasarParticleData fromCommand(ParticleType<QuasarParticleData> type, StringReader reader) throws CommandSyntaxException {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("Don't use this");
@@ -317,7 +317,6 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         data.renderModules = renderModules;
         data.collisionModules = collisionModules;
         data.forces = forces.stream().filter(Objects::nonNull).map(AbstractParticleForce::copy).collect(Collectors.toList());
-        data.registryId = registryId;
         data.spriteData = spriteData;
         data.renderStyle = renderStyle;
         data.renderType = renderType;

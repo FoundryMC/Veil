@@ -12,10 +12,10 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.util.Map;
 
 public class EmitterSettingsJsonListener extends SimpleJsonResourceReloadListener {
+    
     public EmitterSettingsJsonListener() {
         super(Veil.GSON, "quasar/modules/emitter/settings");
     }
-
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
@@ -27,8 +27,7 @@ public class EmitterSettingsJsonListener extends SimpleJsonResourceReloadListene
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, dataResult.error().get().message()));
                 continue;
             }
-            EmitterSettingsModule data = dataResult.getOrThrow(false, Veil.LOGGER::error);
-            EmitterSettingsRegistry.register(id, data);
+            EmitterSettingsRegistry.register(id, dataResult.result().orElseThrow());
         }
     }
 }

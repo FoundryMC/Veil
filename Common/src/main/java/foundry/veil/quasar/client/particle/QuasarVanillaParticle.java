@@ -153,7 +153,7 @@ public class QuasarVanillaParticle extends Particle {
         this.trailModules = data.initModules.stream().filter(m -> m instanceof TrailParticleModule).map(m -> (TrailParticleModule) m).collect(Collectors.toList());
         this.scale = data.particleSettings.getParticleSize();
         this.lifetime = data.particleSettings.getParticleLifetime() + 1;
-        this.dataId = data.registryId;
+        this.dataId = data.getRegistryId();
         this.renderStyle = data.renderStyle;
         this.spriteData = data.spriteData;
         this.initModules.forEach(m -> m.run(this));
@@ -569,7 +569,7 @@ public class QuasarVanillaParticle extends Particle {
                             QuasarVanillaParticle.CUBE[i * 4 + 2],
                             QuasarVanillaParticle.CUBE[i * 4 + 3]
                     };
-                    RenderSystem.setShaderTexture(0, particle.spriteData.sprite);
+                    RenderSystem.setShaderTexture(0, particle.spriteData.sprite());
                     for (int j = 0; j < 4; j++) {
                         Vector3f vec = faceVerts[j].toVector3f().mul(-1);
                         if (vec.z < 0 && particle.velocityStretchFactor != 0.0f) {
@@ -603,7 +603,7 @@ public class QuasarVanillaParticle extends Particle {
                 };
 
                 Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
-                RenderSystem.setShaderTexture(0, particle.spriteData.sprite);
+                RenderSystem.setShaderTexture(0, particle.spriteData.sprite());
                 if (particle.sprite != null) {
                     RenderSystem.setShaderTexture(0, particle.sprite.atlasLocation());
                 }
@@ -652,10 +652,10 @@ public class QuasarVanillaParticle extends Particle {
                             v = particle.sprite.getV1();
                         }
                     }
-                    int spritesheetRows = particle.spriteData.getFrameHeight();
-                    int spritesheetColumns = particle.spriteData.getFrameWidth();
-                    int spriteCount = particle.spriteData.getFrameCount();
-                    float animationSpeed = particle.spriteData.getFrameTime();
+                    int spritesheetRows = particle.spriteData.frameHeight();
+                    int spritesheetColumns = particle.spriteData.frameWidth();
+                    int spriteCount = particle.spriteData.frameCount();
+                    float animationSpeed = particle.spriteData.frameTime();
                     // get frame index from age + partial ticks, but it should be an integer.
                     int frameIndex = (int) ((particle.age + partialTicks) / animationSpeed);
                     // get the frame index in the spritesheet

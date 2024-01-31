@@ -41,6 +41,8 @@ public class ParticleEmitterData {
         this.count = count;
         this.emitterSettingsModule = emitterSettingsModule;
         this.data = data;
+        // FIXME
+        this.data.particleSettings = emitterSettingsModule.emissionParticleSettings();
     }
 
     /**
