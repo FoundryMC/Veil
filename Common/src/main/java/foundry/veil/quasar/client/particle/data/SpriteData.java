@@ -33,22 +33,22 @@ public class SpriteData {
     }
 
     public ResourceLocation getSprite() {
-        return sprite;
+        return this.sprite;
     }
 
     public int getFrameCount() {
-        return frameCount;
+        return this.frameCount;
     }
 
     public float getFrameTime() {
-        return frameTime;
+        return this.frameTime;
     }
 
     public int getFrameWidth() {
-        return frameWidth;
+        return this.frameWidth;
     }
 
     public int getFrameHeight() {
-        return frameHeight;
+        return this.frameHeight;
     }
 }

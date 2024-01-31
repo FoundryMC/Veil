@@ -1,12 +1,10 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +59,7 @@ public class PointForce extends AbstractParticleForce {
 
 
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         if(this.point == null) return;
         double dist = particle.getPos().subtract(this.point.get()).length();
         if(dist < this.range) {

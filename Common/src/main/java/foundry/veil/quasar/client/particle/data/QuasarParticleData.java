@@ -4,7 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.ICustomParticleData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmissionParticleSettings;
@@ -34,7 +34,7 @@ import static foundry.veil.platform.registry.ParticleTypeRegistry.QUASAR_BASE;
  * Data that is passed to each particle when it is created.
  *
  * @see ICustomParticleData
- * @see QuasarParticle
+ * @see QuasarVanillaParticle
  * @see foundry.veil.quasar.emitters.ParticleContext
  * <p>
  * This class is used to store all the data that is passed to each particle when it is created.
@@ -65,27 +65,19 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
                             r -> r.stream().map(UpdateModuleRegistry::getModuleId).collect(Collectors.toList())
                     ).forGetter(QuasarParticleData::getUpdateModules),
                     ResourceLocation.CODEC.listOf().fieldOf("collision_modules").orElse(List.of()).xmap(
-                            r -> {
-                                return r.stream().map(f -> (CollisionParticleModule) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList());
-                            },
-                            r -> {
-                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((CollisionParticleModule) f)).collect(Collectors.toList());
-                            }
+                            r -> r.stream().map(f -> (CollisionParticleModule) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList()),
+                            r -> r.stream().map(UpdateModuleRegistry::getModuleId).collect(Collectors.toList())
                     ).forGetter(QuasarParticleData::getCollisionModules),
                     ResourceLocation.CODEC.listOf().fieldOf("forces").xmap(
-                            r -> {
-                                return r.stream().map(f -> (AbstractParticleForce) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList());
-                            },
-                            r -> {
-                                return r.stream().map(f -> UpdateModuleRegistry.getModuleId((UpdateParticleModule) f)).collect(Collectors.toList());
-                            }
+                            r -> r.stream().map(f -> (AbstractParticleForce) UpdateModuleRegistry.getModule(f)).collect(Collectors.toList()),
+                            r -> r.stream().map(UpdateModuleRegistry::getModuleId).collect(Collectors.toList())
                     ).forGetter(QuasarParticleData::getForces),
                     ResourceLocation.CODEC.listOf().fieldOf("render_modules").xmap(
                             r -> r.stream().map(RenderModuleRegistry::getModule).collect(Collectors.toList()),
                             r -> r.stream().map(RenderModuleRegistry::getModuleId).collect(Collectors.toList())
                     ).forGetter(QuasarParticleData::getRenderModules),
                     SpriteData.CODEC.fieldOf("sprite_data").orElse(SpriteData.BLANK).forGetter(QuasarParticleData::getSpriteData),
-                    Codec.STRING.fieldOf("render_style").orElse("BILLBOARD").xmap(QuasarParticle.RenderStyle::valueOf, QuasarParticle.RenderStyle::name).forGetter(QuasarParticleData::getRenderStyle)
+                    Codec.STRING.fieldOf("render_style").orElse("BILLBOARD").xmap(QuasarVanillaParticle.RenderStyle::valueOf, QuasarVanillaParticle.RenderStyle::name).forGetter(QuasarParticleData::getRenderStyle)
             ).apply(i, (shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forces, renderModules, spriteData, style) -> {
                         QuasarParticleData data = new QuasarParticleData(shouldCollide, faceVelocity, velocityStretchFactor);
                         data.initModules = initModules;
@@ -103,8 +95,8 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
 
     public ResourceLocation registryId;
     public SpriteData spriteData;
-    public QuasarParticle.RenderStyle renderStyle;
-    public EmissionParticleSettings particleSettings;
+    public QuasarVanillaParticle.RenderStyle renderStyle;
+    public final EmissionParticleSettings particleSettings;
     public boolean shouldCollide = true;
     public boolean faceVelocity = false;
     public float velocityStretchFactor = 0;
@@ -159,54 +151,66 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         return spriteData;
     }
 
-    public QuasarParticle.RenderStyle getRenderStyle() {
+    public QuasarVanillaParticle.RenderStyle getRenderStyle() {
         return renderStyle;
     }
 
+    @Deprecated
     public void addInitModule(InitParticleModule module) {
         initModules.add(module);
     }
 
+    @Deprecated
     public void addInitModules(InitParticleModule... modules) {
         initModules.addAll(Arrays.asList(modules));
     }
 
+    @Deprecated
     public void addRenderModule(RenderParticleModule module) {
         renderModules.add(module);
     }
 
+    @Deprecated
     public void addRenderModules(RenderParticleModule... modules) {
         renderModules.addAll(Arrays.asList(modules));
     }
 
+    @Deprecated
     public void addUpdateModule(UpdateParticleModule module) {
         updateModules.add(module);
     }
 
+    @Deprecated
     public void addUpdateModules(UpdateParticleModule... modules) {
         updateModules.addAll(Arrays.asList(modules));
     }
 
+    @Deprecated
     public void addCollisionModule(CollisionParticleModule module) {
         collisionModules.add(module);
     }
 
+    @Deprecated
     public void addCollisionModules(CollisionParticleModule... modules) {
         collisionModules.addAll(Arrays.asList(modules));
     }
 
+    @Deprecated
     public void addForce(AbstractParticleForce force) {
         forces.add(force);
     }
 
+    @Deprecated
     public void addForces(AbstractParticleForce... forces) {
         this.forces.addAll(Arrays.asList(forces));
     }
 
+    @Deprecated
     public void addSubEmitter(ResourceLocation emitter) {
         subEmitters.add(emitter);
     }
 
+    @Deprecated
     public void addSubEmitters(ResourceLocation... emitters) {
         subEmitters.addAll(Arrays.asList(emitters));
     }
@@ -214,10 +218,6 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
 
     public EmissionParticleSettings getParticleSettings() {
         return particleSettings;
-    }
-
-    public void setParticleSettings(EmissionParticleSettings particleSettings) {
-        this.particleSettings = particleSettings;
     }
 
     public boolean shouldCollide() {
@@ -304,17 +304,19 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         }
     };
 
+    @Deprecated
     public void removeForces(AbstractParticleForce[] forces) {
         this.forces.removeAll(Arrays.asList(forces));
     }
 
+    @Deprecated
     public QuasarParticleData instance() {
         QuasarParticleData data = new QuasarParticleData(particleSettings, shouldCollide, faceVelocity, velocityStretchFactor);
-        data.initModules = initModules.stream().map(InitParticleModule::copy).filter(Objects::nonNull).collect(Collectors.toList());
+        data.initModules = initModules.stream().filter(Objects::nonNull).map(InitParticleModule::copy).collect(Collectors.toList());
         data.updateModules = updateModules;
         data.renderModules = renderModules;
         data.collisionModules = collisionModules;
-        data.forces = forces.stream().map(AbstractParticleForce::copy).filter(Objects::nonNull).map(s -> (AbstractParticleForce) s).collect(Collectors.toList());
+        data.forces = forces.stream().filter(Objects::nonNull).map(AbstractParticleForce::copy).collect(Collectors.toList());
         data.registryId = registryId;
         data.spriteData = spriteData;
         data.renderStyle = renderStyle;
@@ -323,6 +325,7 @@ public class QuasarParticleData implements ICustomParticleData<QuasarParticleDat
         return data;
     }
 
+    @Deprecated
     public void setFaceVelocity(boolean face) {
         this.faceVelocity = face;
     }

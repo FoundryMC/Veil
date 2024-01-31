@@ -2,7 +2,7 @@ package foundry.veil.quasar.emitters.modules.particle.init;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.util.CodecUtil;
 import org.joml.Vector4fc;
@@ -15,7 +15,7 @@ public record InitColorParticleModule(Vector4fc color) implements InitParticleMo
             ).apply(instance, InitColorParticleModule::new));
 
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         particle.setColor(this.color);
     }
 

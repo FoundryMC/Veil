@@ -1,34 +1,38 @@
 package foundry.veil.quasar.emitters;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import foundry.veil.quasar.client.particle.data.QuasarParticleDataRegistry;
+import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsRegistry;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderModuleRegistry;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateModuleRegistry;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Set;
 
+@Deprecated
 public class ParticleEmitterRegistry {
-    private static final BiMap<ResourceLocation, ParticleEmitter> EMITTERS_BY_ID = HashBiMap.create();
 
-    public static void bootstrap(){
+    private static final BiMap<ResourceLocation, ParticleEmitterData> EMITTERS_BY_ID = HashBiMap.create();
+
+    public static void bootstrap() {
         EmitterSettingsRegistry.bootstrap();
         QuasarParticleDataRegistry.bootstrap();
         UpdateModuleRegistry.bootstrap();
         RenderModuleRegistry.bootstrap();
     }
 
-    public static void register(ResourceLocation id, ParticleEmitter emitter) {
+    public static void register(ResourceLocation id, ParticleEmitterData emitter) {
         EMITTERS_BY_ID.put(id, emitter);
     }
 
-    public static ParticleEmitter getEmitter(ResourceLocation id) {
+    public static @Nullable ParticleEmitterData getEmitter(ResourceLocation id) {
         return EMITTERS_BY_ID.get(id);
     }
 
-    public static ResourceLocation getEmitterId(ParticleEmitter emitter) {
+    public static @Nullable ResourceLocation getEmitterId(ParticleEmitterData emitter) {
         return EMITTERS_BY_ID.inverse().get(emitter);
     }
 
@@ -36,11 +40,7 @@ public class ParticleEmitterRegistry {
         EMITTERS_BY_ID.clear();
     }
 
-    public static Iterable<ResourceLocation> getEmitterNames() {
-        return EMITTERS_BY_ID.keySet().stream().toList();
-    }
-
-    public static List<ResourceLocation> getEmitters() {
-        return EMITTERS_BY_ID.keySet().stream().toList();
+    public static Set<ResourceLocation> getEmitters() {
+        return EMITTERS_BY_ID.keySet();
     }
 }

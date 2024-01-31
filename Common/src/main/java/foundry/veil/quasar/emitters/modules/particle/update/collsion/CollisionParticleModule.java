@@ -1,8 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.update.collsion;
 
-import com.mojang.serialization.Codec;
-import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.emitters.modules.ParticleModule;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import org.jetbrains.annotations.NotNull;
@@ -10,13 +8,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 public class CollisionParticleModule implements UpdateParticleModule {
-    Consumer<QuasarParticle> collisionFunction;
+    Consumer<QuasarVanillaParticle> collisionFunction;
 
-    public CollisionParticleModule(Consumer<QuasarParticle> collisionFunction) {
+    public CollisionParticleModule(Consumer<QuasarVanillaParticle> collisionFunction) {
         this.collisionFunction = collisionFunction;
     }
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         collisionFunction.accept(particle);
     }
 

@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -72,7 +72,7 @@ public class VortexForce extends AbstractParticleForce {
         this.range = range;
     }
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         double dist = particle.getPos().subtract(vortexCenter.get()).length();
         if(dist < range) {
             // apply force to particle to move around the vortex center on the vortex axis, but do not modify outwards/inwards velocity

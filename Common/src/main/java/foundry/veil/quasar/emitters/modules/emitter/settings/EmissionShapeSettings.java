@@ -1,19 +1,24 @@
 package foundry.veil.quasar.emitters.modules.emitter.settings;
 
-import foundry.veil.quasar.emitters.modules.emitter.settings.shapes.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.quasar.emitters.modules.emitter.settings.shapes.*;
+import foundry.veil.quasar.util.CodecUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.joml.Vector3fc;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class EmissionShapeSettings {
-    public static final BiMap<String, AbstractEmitterShape> SHAPES = HashBiMap.create(Map.of(
+
+    // FIXME
+    public static final BiMap<String, EmitterShape> SHAPES = HashBiMap.create(Map.of(
             "point", new Point(),
             "hemisphere", new Hemisphere(),
             "cylinder", new Cylinder(),
@@ -23,158 +28,48 @@ public class EmissionShapeSettings {
             "disc", new Disc(),
             "plane", new Plane()
     ));
-    public static final Codec<EmissionShapeSettings> CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(
-                Codec.STRING.fieldOf("shape").xmap(
-                        s -> SHAPES.getOrDefault(s.toLowerCase(), new Point()),
-                       s -> SHAPES.inverse().get(s)).forGetter(EmissionShapeSettings::getShape),
-                Vec3.CODEC.fieldOf("dimensions").forGetter(EmissionShapeSettings::getDimensions),
-                Vec3.CODEC.fieldOf("rotation").forGetter(EmissionShapeSettings::getRotation),
-                Codec.BOOL.fieldOf("from_surface").forGetter(EmissionShapeSettings::isFromSurface)
-        ).apply(instance, EmissionShapeSettings::new);
-    });
-    public ResourceLocation registryName;
-    Supplier<Vec3> dimensions;
-    Supplier<Vec3> position;
-    Supplier<Vec3> rotation;
-    RandomSource randomSource;
-    boolean fromSurface;
-    AbstractEmitterShape shape;
-    private EmissionShapeSettings(AbstractEmitterShape shape, Vec3 dimensions, Vec3 position, Vec3 rotation, RandomSource randomSource, boolean fromSurface) {
-        this.dimensions = () -> dimensions;
-        this.position = () -> position;
-        this.randomSource = randomSource;
-        this.fromSurface = fromSurface;
-        this.rotation = () -> rotation;
-        this.shape = shape;
-    }
+    public static final Codec<EmissionShapeSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("shape").xmap(
+                    s -> SHAPES.getOrDefault(s.toLowerCase(), new Point()),
+                    s -> SHAPES.inverse().get(s)).forGetter(EmissionShapeSettings::getShape),
+            CodecUtil.VECTOR3F_CODEC.fieldOf("dimensions").forGetter(EmissionShapeSettings::getDimensions),
+            CodecUtil.VECTOR3F_CODEC.fieldOf("rotation").forGetter(EmissionShapeSettings::getRotation),
+            Codec.BOOL.fieldOf("from_surface").forGetter(EmissionShapeSettings::isFromSurface)
+    ).apply(instance, EmissionShapeSettings::new));
 
-    private EmissionShapeSettings(AbstractEmitterShape shape, Vec3 dimensions, Vec3 rotation, boolean fromSurface) {
-        this.dimensions = () -> dimensions;
-        this.fromSurface = fromSurface;
-        this.rotation = () -> rotation;
-        this.shape = shape;
-    }
+    private final EmitterShape shape;
+    private final Vector3fc dimensions;
+    private final Vector3fc rotation;
+    private final boolean fromSurface;
 
-    public EmissionShapeSettings(AbstractEmitterShape shape, Supplier<Vec3> dimensions, Supplier<Vec3> position, Supplier<Vec3> rotation, RandomSource randomSource, boolean fromSurface) {
+    private EmissionShapeSettings(EmitterShape shape, Vector3fc dimensions, Vector3fc rotation, boolean fromSurface) {
+        this.shape = shape;
         this.dimensions = dimensions;
-        this.position = position;
-        this.randomSource = randomSource;
-        this.fromSurface = fromSurface;
         this.rotation = rotation;
-        this.shape = shape;
+        this.fromSurface = fromSurface;
     }
 
-    public EmissionShapeSettings instance(){
-        EmissionShapeSettings instance = new EmissionShapeSettings(shape, dimensions, position, rotation, randomSource, fromSurface);
-        instance.registryName = registryName;
-        return instance;
+    public @Nullable ResourceLocation getRegistryId() {
+        return EmitterSettingsRegistry.getShapeSettingsId(this);
     }
 
-    public ResourceLocation getRegistryId() {
-        return registryName;
+    public Vector3d getPos(RandomSource randomSource, Vector3dc pos) {
+        return this.shape.getPoint(randomSource, this.dimensions, this.rotation, pos, this.fromSurface);
     }
 
-    public Vec3 getPos(){
-        return shape.getPoint(this.randomSource, this.dimensions.get(), this.rotation.get(), this.position.get(), this.fromSurface);
-    }
-    public AbstractEmitterShape getShape(){
-        return shape;
+    public EmitterShape getShape() {
+        return this.shape;
     }
 
-    public Vec3 getDimensions(){
-        return dimensions.get();
+    public Vector3fc getDimensions() {
+        return this.dimensions;
     }
 
-    public Vec3 getRotation(){
-        return rotation.get();
+    public Vector3fc getRotation() {
+        return this.rotation;
     }
 
-    public boolean isFromSurface(){
-        return fromSurface;
-    }
-
-    public void setRandomSource(RandomSource randomSource) {
-        this.randomSource = randomSource;
-    }
-    public void setPosition(Supplier<Vec3> position) {
-        this.position = position;
-    }
-    public void setPosition(Vec3 position) {
-        this.position = () -> position;
-    }
-
-    public void setShape(AbstractEmitterShape shape) {
-        this.shape = shape;
-    }
-
-    public void setDimensions(Vec3 dimensions) {
-        this.dimensions = () -> dimensions;
-    }
-
-    public void setRotation(Vec3 rotation) {
-        this.rotation = () -> rotation;
-    }
-
-    public void setFromSurface(boolean surface) {
-        this.fromSurface = surface;
-    }
-
-    public static class Builder {
-        private Supplier<Vec3> dimensions;
-        private Supplier<Vec3> position;
-        private Supplier<Vec3> rotation;
-        private RandomSource randomSource;
-        private boolean fromSurface;
-        private AbstractEmitterShape shape;
-
-        public Builder setDimensions(Supplier<Vec3> dimensions) {
-            this.dimensions = dimensions;
-            return this;
-        }
-
-        public Builder setPosition(Supplier<Vec3> position) {
-            this.position = position;
-            return this;
-        }
-
-        public Builder setRotation(Supplier<Vec3> rotation) {
-            this.rotation = rotation;
-            return this;
-        }
-
-        public Builder setRandomSource(RandomSource randomSource) {
-            this.randomSource = randomSource;
-            return this;
-        }
-
-        public Builder setFromSurface(boolean fromSurface) {
-            this.fromSurface = fromSurface;
-            return this;
-        }
-
-        public Builder setShape(AbstractEmitterShape shape) {
-            this.shape = shape;
-            return this;
-        }
-
-        public Builder setDimensions(Vec3 dimensions) {
-            this.dimensions = () -> dimensions;
-            return this;
-        }
-
-        public Builder setPosition(Vec3 position) {
-            this.position = () -> position;
-            return this;
-        }
-
-        public Builder setRotation(Vec3 rotation) {
-            this.rotation = () -> rotation;
-            return this;
-        }
-
-        public EmissionShapeSettings build() {
-            return new EmissionShapeSettings(shape, dimensions, position, rotation, randomSource, fromSurface);
-        }
+    public boolean isFromSurface() {
+        return this.fromSurface;
     }
 }

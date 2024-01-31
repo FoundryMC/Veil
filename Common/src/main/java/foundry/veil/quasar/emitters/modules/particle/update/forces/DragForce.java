@@ -1,11 +1,9 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
-import imgui.type.ImBoolean;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A force that applies a drag force to a particle.
@@ -27,7 +25,7 @@ public class DragForce extends AbstractParticleForce {
     }
 
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         particle.modifyForce(this.strength);
     }
 

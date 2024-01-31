@@ -1,10 +1,8 @@
 {
-    "emitter_module": {
-        "max_lifetime": 1,
-        "loop": false,
-        "rate": 1,
-        "count": 1
-    },
-    "emitter_settings": "veil:cannon_settings",
-    "particle_data": "veil:cannon_data"
+  "max_lifetime": 1,
+  "loop": false,
+  "rate": 1,
+  "count": 1,
+  "emitter_settings": "veil:cannon_settings",
+  "particle_data": "veil:cannon_data"
 }

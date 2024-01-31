@@ -28,7 +28,6 @@ public class EmitterSettingsJsonListener extends SimpleJsonResourceReloadListene
                 continue;
             }
             EmitterSettingsModule data = dataResult.getOrThrow(false, Veil.LOGGER::error);
-            data.registryName = id;
             EmitterSettingsRegistry.register(id, data);
         }
     }

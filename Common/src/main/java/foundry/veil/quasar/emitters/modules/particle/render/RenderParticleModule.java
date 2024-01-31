@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.render;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ParticleModule;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
@@ -16,5 +16,5 @@ public interface RenderParticleModule extends ParticleModule {
         return DISPATCH_CODEC;
     }
 
-    void apply(QuasarParticle particle, float partialTicks, RenderData data);
+    void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data);
 }

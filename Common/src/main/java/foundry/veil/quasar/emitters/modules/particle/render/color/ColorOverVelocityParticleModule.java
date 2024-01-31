@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.render.color;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
 import foundry.veil.quasar.util.ColorGradient;
@@ -26,11 +26,11 @@ public class ColorOverVelocityParticleModule extends ColorParticleModule {
     }
 
     @Override
-    public void apply(QuasarParticle particle, float partialTicks, RenderData data) {
+    public void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
         double vel = particle.getDeltaMovement().length();
         vel = Math.min(vel, 1);
         Vector4f col = gradient.getColor((float) vel);
-        data.setRGBA(col.x(), col.y(), col.z(), col.w());
+        data.setColor(col.x(), col.y(), col.z(), col.w());
     }
 
     @Override

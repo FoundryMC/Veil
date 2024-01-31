@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.update;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,14 +8,14 @@ import java.util.function.Consumer;
 
 public class CustomUpdateParticleModule implements UpdateParticleModule {
 
-    private final Consumer<QuasarParticle> updateFunction;
+    private final Consumer<QuasarVanillaParticle> updateFunction;
 
-    public CustomUpdateParticleModule(Consumer<QuasarParticle> updateFunction) {
+    public CustomUpdateParticleModule(Consumer<QuasarVanillaParticle> updateFunction) {
         this.updateFunction = updateFunction;
     }
 
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         this.updateFunction.accept(particle);
     }
 

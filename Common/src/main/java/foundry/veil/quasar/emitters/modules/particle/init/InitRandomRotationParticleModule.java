@@ -1,11 +1,10 @@
 package foundry.veil.quasar.emitters.modules.particle.init;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 public class InitRandomRotationParticleModule implements InitParticleModule {
     public static final Codec<InitRandomRotationParticleModule> CODEC = RecordCodecBuilder.create(i ->
@@ -25,7 +24,7 @@ public class InitRandomRotationParticleModule implements InitParticleModule {
     }
 
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         if(particle.getAge() == 0) {
             double x = Math.random() * (this.maxDegrees.x - this.minDegrees.x) + this.minDegrees.x;
             double y = Math.random() * (this.maxDegrees.y - this.minDegrees.y) + this.minDegrees.y;

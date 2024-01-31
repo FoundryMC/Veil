@@ -1,10 +1,8 @@
 {
-    "emitter_module": {
-        "max_lifetime": 40,
-        "loop": false,
-        "rate": 1,
-        "count": 16
-    },
-    "emitter_settings": "veil:basic_smoke",
-    "particle_data": "veil:basic_smoke"
+  "max_lifetime": 40,
+  "loop": false,
+  "rate": 1,
+  "count": 16,
+  "emitter_settings": "veil:basic_smoke",
+  "particle_data": "veil:basic_smoke"
 }

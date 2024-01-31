@@ -1,13 +1,14 @@
 package foundry.veil.quasar.emitters.modules.particle.init;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
+import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
 import foundry.veil.quasar.emitters.modules.ModuleType;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,19 +24,17 @@ public class InitSubEmitter implements InitParticleModule {
     }
 
     public ResourceLocation getSubEmitter() {
-        return subEmitter;
+        return this.subEmitter;
     }
 
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         ParticleContext context = particle.getContext();
-        ParticleEmitter emitter = ParticleEmitterRegistry.getEmitter(subEmitter).instance();
-        if(emitter == null) return;
-        emitter.setPosition(context.particle.getPos());
-        emitter.setLevel(context.particle.getLevel());
-        emitter.getEmitterSettingsModule().getEmissionShapeSettings().setRandomSource(context.particle.getLevel().random);
-        emitter.getEmitterSettingsModule().getEmissionShapeSettings().setPosition(context.particle.getPos());
-        ParticleSystemManager.getInstance().addDelayedParticleSystem(emitter);
+        ParticleEmitterData emitter = ParticleEmitterRegistry.getEmitter(this.subEmitter);
+        if (emitter == null) return;
+        ParticleEmitter instance = new ParticleEmitter(context.getLevel(), emitter);
+        instance.setPosition(context.getPosition());
+        ParticleSystemManager.getInstance().addParticleSystem(instance);
     }
 
     @NotNull

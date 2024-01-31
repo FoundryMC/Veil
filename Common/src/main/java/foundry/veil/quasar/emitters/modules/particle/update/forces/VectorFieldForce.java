@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.fields.VectorField;
@@ -37,7 +37,7 @@ public class VectorFieldForce extends AbstractParticleForce {
         this.falloff = decay;
     }
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         particle.addForce(vectorField.getVector(particle.getPos()).scale(strength));
     }
 

@@ -1,16 +1,16 @@
 package foundry.veil.quasar.emitters;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
-import foundry.veil.quasar.client.particle.data.QuasarParticleDataRegistry;
-import foundry.veil.quasar.emitters.modules.emitter.EmitterModule;
+import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsModule;
-import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsRegistry;
 import foundry.veil.quasar.emitters.modules.particle.init.forces.InitialVelocityForce;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 /*
  *  TODO:
@@ -26,119 +26,141 @@ import net.minecraft.world.phys.Vec3;
  *   OPTIONAL OnRenderAction that can be set to run when a particle is rendered
  */
 public class ParticleEmitter {
-    public static final Codec<ParticleEmitter> CODEC = RecordCodecBuilder.create(i ->
-            i.group(
-                    EmitterModule.CODEC.fieldOf("emitter_module").forGetter(ParticleEmitter::getEmitterModule),
-                    ResourceLocation.CODEC.fieldOf("emitter_settings").xmap(
-                            EmitterSettingsRegistry::getSettings,
-                            EmitterSettingsModule::getRegistryId
-                    ).forGetter(ParticleEmitter::getEmitterSettingsModule),
-                    ResourceLocation.CODEC.fieldOf("particle_data").xmap(
-                            QuasarParticleDataRegistry::getData,
-                            QuasarParticleData::getRegistryId
-                    ).forGetter(ParticleEmitter::getParticleData)
-            ).apply(i, ParticleEmitter::new)
-            );
-    public ResourceLocation registryName;
-    public boolean isComplete = false;
-    private boolean active = false;
-    EmitterModule emitterModule;
-    EmitterSettingsModule emitterSettingsModule;
-    float maxYOffset = 0.0f;
-    private Level level;
-//    private Entity linkedEntity;
-    QuasarParticleData data;
-    public int particleCount = 0;
 
-    public ParticleEmitter(Level level, EmitterModule emitterModule, EmitterSettingsModule emitterSettingsModule) {
+    private final Level level;
+    private final Vector3d position;
+    private final ParticleEmitterData data;
+    QuasarParticleData particleData;
+
+    private boolean removed;
+    private int particleCount = 0;
+
+    /**
+     * Current number of ticks the emitter has been active for
+     */
+    private int age;
+
+    public ParticleEmitter(Level level, ParticleEmitterData data) {
         this.level = level;
-        this.emitterModule = emitterModule;
-        this.emitterSettingsModule = emitterSettingsModule;
-        this.data = new QuasarParticleData(emitterSettingsModule.getEmissionParticleSettings(), true, true);
-        this.data.parentEmitter = this;
-    }
-
-    public ParticleEmitter(EmitterModule emitterModule, EmitterSettingsModule emitterSettingsModule, QuasarParticleData data) {
-        this(null, emitterModule, emitterSettingsModule);
         this.data = data;
-        data.setParticleSettings(emitterSettingsModule.getEmissionParticleSettings());
-        this.data.parentEmitter = this;
+        this.position = new Vector3d();
+        this.particleData = data.getParticleData().instance();
+        this.particleData.parentEmitter = this;
     }
 
-    public ParticleEmitter(Level level, EmitterModule emitterModule, EmitterSettingsModule emitterSettingsModule, QuasarParticleData quasarParticleData) {
-        this(level, emitterModule, emitterSettingsModule);
-        this.data = quasarParticleData;
-        data.setParticleSettings(emitterSettingsModule.getEmissionParticleSettings());
-        this.data.parentEmitter = this;
+    /**
+     * Marks this emitter to be removed next tick.
+     */
+    public void remove() {
+        this.removed = true;
     }
 
-    public ParticleEmitter instance(){
-        ParticleEmitter em = new ParticleEmitter(this.level, this.emitterModule.instance(), this.emitterSettingsModule.instance(), this.data.instance());
-        em.registryName = this.registryName;
-        return em;
+    /**
+     * Resets the emitter to its initial state
+     */
+    public void reset() {
+        this.age = 0;
+        this.removed = false;
     }
 
-    public boolean isActive() {
-        return active;
+    public @Nullable ResourceLocation getRegistryName() {
+        return ParticleEmitterRegistry.getEmitterId(this.data);
     }
 
-    public void setLevel(Level level) {
-        this.level = level;
-        this.emitterSettingsModule.getEmissionShapeSettings().setRandomSource(level.random);
+    /**
+     * Whether the emitter has completed its lifetime
+     */
+    public boolean isRemoved() {
+        return this.removed;
     }
 
-    public void setPosition(Vec3 position){
-        this.emitterModule.setPosition(position);
-        this.emitterSettingsModule.getEmissionShapeSettings().setPosition(position);
+    /**
+     * Position of the emitter
+     */
+    public Vector3d getPosition() {
+        return this.position;
     }
+
+    /**
+     * Number of ticks the emitter has been active for
+     */
+    public int getAge() {
+        return this.age;
+    }
+
+    public int getParticleCount() {
+        return this.particleCount;
+    }
+
+    @Deprecated
+    public void setPosition(Vec3 position) {
+        this.position.set(position.x, position.y, position.z);
+    }
+
+    public void setPosition(Vector3dc position) {
+        this.position.set(position);
+    }
+
     public QuasarParticleData getParticleData() {
-        return data;
+        return this.particleData;
     }
 
-    public EmitterModule getEmitterModule() {
-        return emitterModule;
-    }
-
+    @Deprecated
     public EmitterSettingsModule getEmitterSettingsModule() {
-        return emitterSettingsModule;
+        return this.data.getEmitterSettingsModule();
     }
 
     public void run() {
         // apply spread
 
-        if (this.emitterModule.getCurrentLifetime() == 0) {
-            this.active = true;
-        }
-        if (level.isClientSide) {
-            Vec3 particlePos = emitterSettingsModule.getEmissionShapeSettings().getPos();
-            Vec3 particleDirection = emitterSettingsModule.getEmissionParticleSettings().getInitialDirection().scale(emitterSettingsModule.getEmissionParticleSettings().getParticleSpeed());
-            QuasarParticleData d2 = data.instance();
+//        if (emitterModule.getCurrentLifetime() == 0) {
+//            this.active = true;
+//        }
+        if (this.level.isClientSide()) {
+            EmitterSettingsModule emitterSettingsModule = this.data.getEmitterSettingsModule();
+            Vector3dc particlePos = emitterSettingsModule.emissionShapeSettings().getPos(this.level.random, this.position);
+            Vec3 particleDirection = emitterSettingsModule.emissionParticleSettings().getInitialDirection().scale(emitterSettingsModule.emissionParticleSettings().getParticleSpeed());
+            QuasarParticleData d2 = this.particleData.instance();
             d2.getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
                 InitialVelocityForce force = (InitialVelocityForce) f;
-                if(force.takesParentRotation()){
+                if (force.takesParentRotation()) {
                     force.velocityDirection = force.velocityDirection
-                            .xRot((float) -Math.toRadians(emitterSettingsModule.getEmissionShapeSettings().getRotation().x))
-                            .yRot((float) -Math.toRadians(emitterSettingsModule.getEmissionShapeSettings().getRotation().y))
-                            .zRot((float) -Math.toRadians(emitterSettingsModule.getEmissionShapeSettings().getRotation().z));
-                    float e = 0;
+                            .xRot((float) -Math.toRadians(emitterSettingsModule.emissionShapeSettings().getRotation().x()))
+                            .yRot((float) -Math.toRadians(emitterSettingsModule.emissionShapeSettings().getRotation().y()))
+                            .zRot((float) -Math.toRadians(emitterSettingsModule.emissionShapeSettings().getRotation().z()));
                 }
             });
-            level.addParticle(d2, true, particlePos.x(), particlePos.y(), particlePos.z(), particleDirection.x(), particleDirection.y(), particleDirection.z());
+            this.level.addParticle(d2, true, particlePos.x(), particlePos.y(), particlePos.z(), particleDirection.x(), particleDirection.y(), particleDirection.z());
         }
     }
 
+    /**
+     * Tick the emitter. This is run to track the basic functionality of the emitter.
+     */
     public void tick() {
-        emitterModule.tick(() -> {
-            if(emitterModule.getCurrentLifetime() % emitterModule.getRate() == 0 || emitterModule.getCurrentLifetime() == 1){
-                int i = 0;
-                while (i < emitterModule.getCount()){
-                    this.run();
-                    i++;
-                }
+        if (this.age % this.data.getRate() == 0) {
+            int count = (int) (this.data.getCount() * ParticleSystemManager.getInstance().getSpawnScale());
+            for (int i = 0; i < count; i++) {
+                this.run();
             }
-        });
-        if(emitterModule.isComplete()){
-            this.isComplete = true;
         }
+        this.age++;
+        if (this.age >= this.data.getMaxLifetime()) {
+            if (this.data.isLoop()) {
+                this.age = 0;
+            } else {
+                this.remove();
+            }
+        }
+    }
+
+    @ApiStatus.Internal
+    public void particleAdded() {
+        this.particleCount++;
+    }
+
+    @ApiStatus.Internal
+    public void particleRemoved() {
+        this.particleCount--;
     }
 }

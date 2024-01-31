@@ -1,10 +1,8 @@
 package foundry.veil.platform.registry;
 
 import foundry.veil.Veil;
-import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.client.particle.QuasarParticleType;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 

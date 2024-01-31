@@ -1,10 +1,8 @@
 {
-    "emitter_module": {
-        "max_lifetime": 20,
-        "loop": false,
-        "rate": 2,
-        "count": 1
-    },
-    "emitter_settings": "veil:rocket",
-    "particle_data": "veil:rocket"
+  "max_lifetime": 20,
+  "loop": false,
+  "rate": 2,
+  "count": 1,
+  "emitter_settings": "veil:rocket",
+  "particle_data": "veil:rocket"
 }

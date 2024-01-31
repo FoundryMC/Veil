@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.init;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.ParticleModule;
 
@@ -13,7 +13,7 @@ public interface InitParticleModule extends ParticleModule {
             .dispatch("module", renderModule -> Objects.requireNonNull(renderModule.getType(),
             renderModule.getClass().getName() + " cannot be serialized"), ModuleType::getCodec);
 
-    void run(QuasarParticle particle);
+    void run(QuasarVanillaParticle particle);
 
     default InitParticleModule copy() {
         return this;

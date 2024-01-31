@@ -3,16 +3,19 @@ package foundry.veil.quasar.emitters;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
 import net.minecraft.world.phys.Vec3;
 
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ParticleSystemManager {
+
     private static ParticleSystemManager instance;
-    private Queue<ParticleEmitter> particleEmitters = new ConcurrentLinkedQueue<>();
-    private Queue<ParticleEmitter> particleSystemsToRemove = new ConcurrentLinkedQueue<>();
-    private Queue<ParticleEmitter> particleSystemsToAdd = new ConcurrentLinkedQueue<>();
+    private final List<ParticleEmitter> particleEmitters = new ArrayList<>();
+    private final Queue<ParticleEmitter> particleSystemsToAdd = new ConcurrentLinkedQueue<>();
     public static int PARTICLE_COUNT = 0;
+
     public static ParticleSystemManager getInstance() {
         if (instance == null) {
             instance = new ParticleSystemManager();
@@ -20,65 +23,48 @@ public class ParticleSystemManager {
         return instance;
     }
 
-    public void applyForceToParticles(Vec3 center, float radius, AbstractParticleForce... forces){
-        for (ParticleEmitter particleEmitter : particleEmitters) {
-                if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
-                    particleEmitter.getParticleData().addForces(forces);
-                }
-        }
+    public void applyForceToParticles(Vec3 center, float radius, AbstractParticleForce... forces) {
+//        for (ParticleEmitter particleEmitter : this.particleEmitters) {
+//                if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
+//                    particleEmitter.getParticleData().addForces(forces);
+//                }
+//        }
     }
 
-    public void removeForcesFromParticles(Vec3 center, float radius, AbstractParticleForce... forces){
-        for (ParticleEmitter particleEmitter : particleEmitters) {
-            if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
-                particleEmitter.getParticleData().removeForces(forces);
-            }
-        }
+    public void removeForcesFromParticles(Vec3 center, float radius, AbstractParticleForce... forces) {
+//        for (ParticleEmitter particleEmitter : this.particleEmitters) {
+//            if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
+//                particleEmitter.getParticleData().removeForces(forces);
+//            }
+//        }
     }
 
     public void addParticleSystem(ParticleEmitter particleEmitter) {
-        ParticleEmitter emitter = particleEmitter;
-//        EmitterInstantiationEvent event = new EmitterInstantiationEvent(emitter);
-//        MinecraftForge.EVENT_BUS.post(event);
-//        emitter = event.getEmitter();
-        particleEmitters.add(emitter);
-    }
-
-    public void addDelayedParticleSystem(ParticleEmitter particleEmitter) {
-        ParticleEmitter emitter = particleEmitter;
-//        EmitterInstantiationEvent event = new EmitterInstantiationEvent(emitter);
-//        MinecraftForge.EVENT_BUS.post(event);
-//        emitter = event.getEmitter();
-        particleSystemsToAdd.add(emitter);
-    }
-
-    public void removeDelayedParticleSystem(ParticleEmitter particleEmitter) {
-        particleSystemsToRemove.add(particleEmitter);
+        this.particleSystemsToAdd.add(particleEmitter);
     }
 
     public void clear() {
-        particleEmitters.clear();
+        this.particleEmitters.clear();
     }
 
     public void tick() {
-        particleEmitters.addAll(particleSystemsToAdd);
-        particleSystemsToAdd.clear();
-        particleEmitters.forEach(ParticleEmitter::tick);
-        particleEmitters.removeIf(emitter -> emitter.isComplete);
-        particleEmitters.removeAll(particleSystemsToRemove);
-        particleSystemsToRemove.clear();
-        tickLimiter();
+        this.particleEmitters.addAll(this.particleSystemsToAdd);
+        this.particleSystemsToAdd.clear();
+
+        Iterator<ParticleEmitter> iterator = this.particleEmitters.iterator();
+        while (iterator.hasNext()) {
+            ParticleEmitter emitter = iterator.next();
+            emitter.tick();
+            if (emitter.isRemoved()) {
+                iterator.remove();
+            }
+        }
+
+        PARTICLE_COUNT = this.particleEmitters.stream().mapToInt(emitter -> emitter.getParticleCount()).sum();
+        // FIXME
     }
 
-    public void tickLimiter() {
-        PARTICLE_COUNT = particleEmitters.stream().mapToInt(emitter -> emitter.particleCount).sum();
-        float delta = (float) (PARTICLE_COUNT - 1000) / 3000;
-//        float fpsDelta = (float) Minecraft.getInstance().getFps() / OptimizationUtil.getStableFps();
-//        delta = Math.min(delta, fpsDelta);
-        float rate = 1 - delta * 0.66f;
-        particleEmitters.forEach(emitter -> {
-            emitter.emitterModule.setRate((int) Math.max(1, emitter.emitterModule.baseRate * rate));
-            emitter.emitterModule.setCount((int) Math.max(1, emitter.emitterModule.baseCount * rate));
-        });
+    public float getSpawnScale() {
+        return 1 - (float) (PARTICLE_COUNT - 1000) / 3000 * 0.66f;
     }
 }

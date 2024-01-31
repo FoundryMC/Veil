@@ -1,10 +1,8 @@
 {
-    "emitter_module": {
-        "max_lifetime": 640,
-        "loop": false,
-        "rate": 2,
-        "count": 2
-    },
-    "emitter_settings": "veil:test_settings",
-    "particle_data": "veil:test_data"
+  "max_lifetime": 640,
+  "loop": false,
+  "rate": 2,
+  "count": 2,
+  "emitter_settings": "veil:test_settings",
+  "particle_data": "veil:test_data"
 }

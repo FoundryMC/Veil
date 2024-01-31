@@ -28,7 +28,6 @@ public class ShapeSettingsJsonListener extends SimpleJsonResourceReloadListener 
                 continue;
             }
             EmissionShapeSettings data = dataResult.getOrThrow(false, Veil.LOGGER::error);
-            data.registryName = id;
             EmitterSettingsRegistry.register(id, data);
         }
     }

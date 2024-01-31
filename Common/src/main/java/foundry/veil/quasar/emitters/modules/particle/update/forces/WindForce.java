@@ -1,6 +1,6 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -47,7 +47,7 @@ public class WindForce extends AbstractParticleForce {
         this.falloff = falloff;
     }
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         particle.addForce(windDirection.scale(windSpeed));
     }
 

@@ -1,10 +1,8 @@
 {
-    "emitter_module": {
-        "max_lifetime": 1,
-        "loop": false,
-        "rate": 1,
-        "count": 32
-    },
-    "emitter_settings": "veil:swiftshot_shrapnel",
-    "particle_data": "veil:swiftshot_shrapnel_data"
+  "max_lifetime": 1,
+  "loop": false,
+  "rate": 1,
+  "count": 32,
+  "emitter_settings": "veil:swiftshot_shrapnel",
+  "particle_data": "veil:swiftshot_shrapnel_data"
 }

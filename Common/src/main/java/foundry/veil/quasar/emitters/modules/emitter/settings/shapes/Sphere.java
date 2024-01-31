@@ -5,31 +5,36 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.*;
 
-public class Sphere extends AbstractEmitterShape {
+import java.lang.Math;
+
+public class Sphere implements EmitterShape {
+
     @Override
-    public Vec3 getPoint(RandomSource randomSource, Vec3 dimensions, Vec3 rotation, Vec3 position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
         double x = randomSource.nextDouble() * 2 - 1;
         double y = randomSource.nextDouble() * 2 - 1;
         double z = randomSource.nextDouble() * 2 - 1;
-        Vec3 normal = new Vec3(x, y, z).normalize();
-        if(!fromSurface){
-            normal = normal.scale(randomSource.nextDouble()).normalize();
-            dimensions = dimensions.multiply(
-                    randomSource.nextDouble(),
-                    randomSource.nextDouble(),
-                    randomSource.nextDouble()
+        Vector3d normal = new Vector3d(x, y, z).normalize();
+        Vector3fc dim = dimensions;
+        if (!fromSurface) {
+            normal.mul(randomSource.nextDouble()).normalize();
+            dim = dimensions.mul(
+                    randomSource.nextFloat(),
+                    randomSource.nextFloat(),
+                    randomSource.nextFloat(),
+                    new Vector3f()
             );
         }
-        Vec3 pos = normal.multiply(dimensions);
-        pos = pos.xRot((float) Math.toRadians(rotation.x())).yRot((float) Math.toRadians(rotation.y())).zRot((float) Math.toRadians(rotation.z()));
-        return pos.add(position);    }
+        Vector3d pos = normal.mul(dim);
+        pos = pos.rotateX((float) Math.toRadians(rotation.x())).rotateY((float) Math.toRadians(rotation.y())).rotateZ((float) Math.toRadians(rotation.z()));
+        return pos.add(position);
+    }
 
     @Override
-    public void renderShape(PoseStack stack, VertexConsumer consumer, Vec3 dimensions, Vec3 rotation) {
-        float radius = (float) dimensions.x();
+    public void renderShape(PoseStack stack, VertexConsumer consumer, Vector3fc dimensions, Vector3fc rotation) {
+        float radius = dimensions.x();
         Matrix4f matrix4f = stack.last().pose();
         for(int i = 0; i < 32; i++){
             for(int j = 0; j < 32; j++){

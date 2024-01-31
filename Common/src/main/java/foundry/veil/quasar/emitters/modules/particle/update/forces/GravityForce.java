@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import imgui.type.ImBoolean;
@@ -23,7 +23,7 @@ public class GravityForce extends AbstractParticleForce {
     }
 
     @Override
-    public void applyForce(QuasarParticle particle) {
+    public void applyForce(QuasarVanillaParticle particle) {
         particle.setGravity(this.strength);
     }
 

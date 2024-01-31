@@ -1,51 +1,25 @@
 package foundry.veil.quasar.emitters.modules.emitter.settings;
 
-import foundry.veil.quasar.emitters.modules.emitter.BaseEmitterModule;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.quasar.emitters.modules.emitter.BaseEmitterModule;
 import net.minecraft.resources.ResourceLocation;
 
-public class EmitterSettingsModule implements BaseEmitterModule {
-    // TODO: Get the settings from a "registry" by resource location so you can split up files
-    public static final Codec<EmitterSettingsModule> CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(
-                ResourceLocation.CODEC.fieldOf("shape").xmap(
-                        EmitterSettingsRegistry::getShapeSettings,
-                        EmissionShapeSettings::getRegistryId
-                ).forGetter(EmitterSettingsModule::getEmissionShapeSettings),
-                ResourceLocation.CODEC.fieldOf("particle").xmap(
-                        EmitterSettingsRegistry::getParticleSettings,
-                        EmissionParticleSettings::getRegistryId
-                ).forGetter(EmitterSettingsModule::getEmissionParticleSettings)
-        ).apply(instance, EmitterSettingsModule::new);
-    });
-    public ResourceLocation registryName;
-    EmissionShapeSettings emissionShapeSettings;
-    EmissionParticleSettings emissionParticleSettings;
+public record EmitterSettingsModule(EmissionShapeSettings emissionShapeSettings,
+                                    EmissionParticleSettings emissionParticleSettings) implements BaseEmitterModule {
 
-    public EmitterSettingsModule(EmissionShapeSettings emissionShapeSettings, EmissionParticleSettings emissionParticleSettings) {
-        this.emissionShapeSettings = emissionShapeSettings;
-        this.emissionParticleSettings = emissionParticleSettings;
-    }
+    public static final Codec<EmitterSettingsModule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("shape").xmap(
+                    EmitterSettingsRegistry::getShapeSettings,
+                    EmissionShapeSettings::getRegistryId
+            ).forGetter(EmitterSettingsModule::emissionShapeSettings),
+            ResourceLocation.CODEC.fieldOf("particle").xmap(
+                    EmitterSettingsRegistry::getParticleSettings,
+                    EmissionParticleSettings::getRegistryId
+            ).forGetter(EmitterSettingsModule::emissionParticleSettings)
+    ).apply(instance, EmitterSettingsModule::new));
 
     public ResourceLocation getRegistryId() {
-        return registryName;
+        return EmitterSettingsRegistry.getSettingsId(this);
     }
-
-    public EmitterSettingsModule instance() {
-        EmitterSettingsModule instance =  new EmitterSettingsModule(emissionShapeSettings.instance(), emissionParticleSettings.instance());
-        instance.registryName = registryName;
-        return instance;
-    }
-
-    public EmissionShapeSettings getEmissionShapeSettings() {
-        return emissionShapeSettings;
-    }
-
-    public EmissionParticleSettings getEmissionParticleSettings() {
-        return emissionParticleSettings;
-    }
-
-
-
 }

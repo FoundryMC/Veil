@@ -2,7 +2,7 @@ package foundry.veil.quasar.emitters.modules.particle.init;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.util.CodecUtil;
 import org.joml.Vector4fc;
@@ -34,7 +34,7 @@ public class InitRandomColorParticleModule implements InitParticleModule {
     }
 
     @Override
-    public void run(QuasarParticle particle) {
+    public void run(QuasarVanillaParticle particle) {
         if (particle.getAge() == 0) {
             int index = (int) (Math.random() * this.color.length);
             Vector4fc color = this.color[index];

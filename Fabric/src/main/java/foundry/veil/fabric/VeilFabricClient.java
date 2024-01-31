@@ -10,8 +10,8 @@ import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.fabric.util.FabricReloadListener;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.platform.registry.ParticleTypeRegistry;
-import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.command.QuasarParticleCommand;
+import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
+import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
@@ -29,23 +29,21 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-
 
 @ApiStatus.Internal
 public class VeilFabricClient implements ClientModInitializer {
 
-    public static final SuggestionProvider<FabricClientCommandSource> EMITTER_SUGGESTION_PROVIDER = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ParticleEmitterRegistry.getEmitterNames(), builder);
+    public static final SuggestionProvider<FabricClientCommandSource> EMITTER_SUGGESTION_PROVIDER = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ParticleEmitterRegistry.getEmitters().stream(), builder);
 
     @Override
     public void onInitializeClient() {
@@ -70,15 +68,22 @@ public class VeilFabricClient implements ClientModInitializer {
 
         CoreShaderRegistrationCallback.EVENT.register(context -> VeilVanillaShaders.registerShaders(context::register));
         VeilJsonListeners.registerListeners((type, id, listener) -> ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FabricReloadListener(Veil.veilPath(id), listener)));
-        ParticleFactoryRegistry.getInstance().register(ParticleTypeRegistry.QUASAR_BASE.get(), (it) -> new QuasarParticle.Factory());
+        ParticleFactoryRegistry.getInstance().register(ParticleTypeRegistry.QUASAR_BASE.get(), (it) -> new QuasarVanillaParticle.Factory());
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             LiteralArgumentBuilder<FabricClientCommandSource> builder = LiteralArgumentBuilder.literal("quasar");
-            builder.then(ClientCommandManager.argument("emitter", ResourceLocationArgument.id()).suggests(EMITTER_SUGGESTION_PROVIDER).then(ClientCommandManager.argument("position", Vec3Argument.vec3()).executes(context1 -> {
-                ParticleEmitter emitter = ParticleEmitterRegistry.getEmitter(context1.getArgument("emitter", ResourceLocation.class)).instance();
-                WorldCoordinates pos = context1.getArgument("position", WorldCoordinates.class);
-                emitter.setPosition(pos.getPosition(context1.getSource().getEntity().createCommandSourceStack()));
-                emitter.setLevel(Minecraft.getInstance().level);
-                ParticleSystemManager.getInstance().addParticleSystem(emitter);
+            builder.then(ClientCommandManager.argument("emitter", ResourceLocationArgument.id()).suggests(EMITTER_SUGGESTION_PROVIDER).then(ClientCommandManager.argument("position", Vec3Argument.vec3()).executes(ctx -> {
+                ResourceLocation id = ctx.getArgument("emitter", ResourceLocation.class);
+                ParticleEmitterData emitter = ParticleEmitterRegistry.getEmitter(id);
+                FabricClientCommandSource source = ctx.getSource();
+                if (emitter == null) {
+                    source.sendError(Component.literal("Unknown emitter: " + id));
+                    return 0;
+                }
+
+                ParticleEmitter instance = new ParticleEmitter(source.getWorld(), emitter);
+                WorldCoordinates pos = ctx.getArgument("position", WorldCoordinates.class);
+                instance.setPosition(pos.getPosition(source.getEntity().createCommandSourceStack()));
+                ParticleSystemManager.getInstance().addParticleSystem(instance);
                 return 1;
             })));
             dispatcher.register(builder);

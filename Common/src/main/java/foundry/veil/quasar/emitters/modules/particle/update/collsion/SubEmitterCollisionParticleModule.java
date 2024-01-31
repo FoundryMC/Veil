@@ -1,13 +1,14 @@
 package foundry.veil.quasar.emitters.modules.particle.update.collsion;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
 import foundry.veil.quasar.emitters.modules.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.PointForce;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,19 +25,17 @@ public class SubEmitterCollisionParticleModule extends CollisionParticleModule {
     public SubEmitterCollisionParticleModule(ResourceLocation subEmitter) {
         super(particle -> {
             ParticleContext context = particle.getContext();
-            ParticleEmitter emitter = ParticleEmitterRegistry.getEmitter(subEmitter).instance();
-            if(emitter == null) return;
-            emitter.setPosition(context.position);
-            emitter.setLevel(context.particle.getLevel());
-//            emitter.getEmitterSettingsModule().getEmissionParticleSettings().setInitialDirection(context.velocity.scale(-1f));
-            emitter.getEmitterSettingsModule().getEmissionShapeSettings().setRandomSource(context.particle.getLevel().random);
+            ParticleEmitterData emitter = ParticleEmitterRegistry.getEmitter(subEmitter);
+            if (emitter == null) return;
+            ParticleEmitter instance = new ParticleEmitter(context.getLevel(), emitter);
+            instance.setPosition(context.getPosition());
             // TODO: Make this an option inside the force modules
-            emitter.getParticleData().getForces().forEach(force -> {
-                if(force instanceof PointForce pf){
-                    pf.setPoint(context.position);
+            instance.getParticleData().getForces().forEach(force -> {
+                if (force instanceof PointForce pf) {
+                    pf.setPoint(context.getPosition());
                 }
             });
-            ParticleSystemManager.getInstance().addParticleSystem(emitter);
+            ParticleSystemManager.getInstance().addParticleSystem(instance);
         });
         this.subEmitter = subEmitter;
     }
