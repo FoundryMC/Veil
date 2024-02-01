@@ -4,6 +4,7 @@ import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.forge.event.ForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
 import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
@@ -46,6 +47,7 @@ public class VeilForgeClient {
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
         MinecraftForge.EVENT_BUS.post(new ForgeVeilRendererEvent(VeilRenderSystem.renderer()));
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilRegisterFixedBuffersEvent(ForgeRenderTypeStageHandler::register));
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {

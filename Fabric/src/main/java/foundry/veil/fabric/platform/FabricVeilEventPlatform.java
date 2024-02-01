@@ -1,11 +1,7 @@
 package foundry.veil.fabric.platform;
 
-import foundry.veil.api.event.FreeNativeResourcesEvent;
-import foundry.veil.api.event.VeilPostProcessingEvent;
-import foundry.veil.api.event.VeilRendererEvent;
-import foundry.veil.fabric.event.FabricFreeNativeResourcesEvent;
-import foundry.veil.fabric.event.FabricVeilPostProcessingEvent;
-import foundry.veil.fabric.event.FabricVeilRendererEvent;
+import foundry.veil.api.event.*;
+import foundry.veil.fabric.event.*;
 import foundry.veil.platform.services.VeilEventPlatform;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -30,5 +26,15 @@ public class FabricVeilEventPlatform implements VeilEventPlatform {
     @Override
     public void postVeilPostProcessing(VeilPostProcessingEvent.Post event) {
         FabricVeilPostProcessingEvent.POST.register(event);
+    }
+
+    @Override
+    public void onVeilRegisterFixedBuffers(VeilRegisterFixedBuffersEvent event) {
+        FabricVeilRegisterFixedBuffersEvent.EVENT.register(event);
+    }
+
+    @Override
+    public void onVeilRenderTypeStageRender(VeilRenderLevelStageEvent event) {
+        FabricVeilRenderLevelStageEvent.EVENT.register(event);
     }
 }

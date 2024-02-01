@@ -5,11 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "veil.refmap.json",
   "mixins": [
-    "tooltip.BlockEntityMixin",
     "chargable.BowItemMixin",
     "chargable.CrossbowItemMixin",
     "chargable.InstrumentItemMixin",
-    "chargable.TridentItemMixin"
+    "chargable.TridentItemMixin",
+    "tooltip.BlockEntityMixin"
   ],
   "client": [
     "client.anim.AgeableListModelMixin",
@@ -17,13 +17,11 @@
     "client.anim.ItemInHandRendererMixin",
     "client.anim.ModelPartMixin",
     "client.deferred.AmbientOcclusionFaceMixin",
-    "client.deferred.CompositeStateMixin",
     "client.deferred.DebugScreenOverlayMixin",
     "client.deferred.LevelRendererMixin",
     "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleRenderTypeMixin",
     "client.deferred.RenderBuffersAccessor",
-    "client.deferred.RenderTypeMixin",
     "client.deferred.ShaderStateMixin",
     "client.deferred.VertexBufferMixin",
     "client.deferred.WindowMixin",
@@ -45,6 +43,9 @@
     "client.shader.ProgramMixin",
     "client.shader.ShaderInstanceMixin",
     "client.skeleton.ClientLevelMixin",
+    "client.stage.CompositeStateMixin",
+    "client.stage.RenderStateShardAccessor",
+    "client.stage.RenderTypeMixin",
     "debug.DebugKeyboardHandlerMixin",
     "debug.MinecraftMixin",
     "debug.RenderDocker"
