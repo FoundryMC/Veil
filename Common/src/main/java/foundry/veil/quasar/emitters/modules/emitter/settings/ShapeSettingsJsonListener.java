@@ -22,7 +22,7 @@ public class ShapeSettingsJsonListener extends SimpleJsonResourceReloadListener 
         EmitterSettingsRegistry.clearRegisteredShapeSettings();
         for(Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()){
             ResourceLocation id = entry.getKey();
-            DataResult<EmissionShapeSettings> dataResult = EmissionShapeSettings.CODEC.parse(JsonOps.INSTANCE, entry.getValue());
+            DataResult<EmitterShapeSettings> dataResult = EmitterShapeSettings.DIRECT_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
             if(dataResult.error().isPresent()){
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, dataResult.error().get().message()));
                 continue;

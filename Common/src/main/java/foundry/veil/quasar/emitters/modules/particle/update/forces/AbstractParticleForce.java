@@ -3,6 +3,7 @@ package foundry.veil.quasar.emitters.modules.particle.update.forces;
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 
+@Deprecated
 public abstract class AbstractParticleForce implements UpdateParticleModule {
 
     protected float strength;
@@ -11,7 +12,7 @@ public abstract class AbstractParticleForce implements UpdateParticleModule {
     public abstract void applyForce(QuasarVanillaParticle particle);
 
     @Override
-    public void run(QuasarVanillaParticle particle) {
+    public void update(QuasarVanillaParticle particle) {
         this.applyForce(particle);
     }
 

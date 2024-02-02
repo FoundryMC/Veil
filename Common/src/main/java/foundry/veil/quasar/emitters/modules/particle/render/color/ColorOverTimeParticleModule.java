@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.render.color;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
 import foundry.veil.quasar.util.ColorGradient;
 import com.mojang.serialization.Codec;
@@ -25,7 +25,7 @@ public class ColorOverTimeParticleModule extends ColorParticleModule {
     }
 
     @Override
-    public void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
+    public void render(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
         double life = (double) particle.getAge() / particle.getLifetime();
         Vector4f col = gradient.getColor((float) life);
         data.setColor(col.x(), col.y(), col.z(), col.w());

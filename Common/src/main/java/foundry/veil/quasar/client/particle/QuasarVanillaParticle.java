@@ -12,7 +12,7 @@ import foundry.veil.quasar.client.particle.data.SpriteData;
 import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.init.LightModule;
+import foundry.veil.quasar.emitters.modules.particle.render.LightModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.render.TrailParticleModule;
@@ -24,7 +24,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -35,15 +34,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static foundry.veil.quasar.emitters.modules.particle.init.LightModule.toLightColor;
+import static foundry.veil.quasar.emitters.modules.particle.render.LightModule.toLightColor;
 
 @Deprecated
 public class QuasarVanillaParticle extends Particle {
@@ -118,7 +115,9 @@ public class QuasarVanillaParticle extends Particle {
     protected float oyRot = 0;
     protected boolean faceVelocity = false;
     protected float velocityStretchFactor = 0.0f;
+    @Deprecated
     public PointLight light;
+    @Deprecated
     public ColorGradient lightGradient;
     private boolean stoppedByCollision;
 
@@ -144,24 +143,26 @@ public class QuasarVanillaParticle extends Particle {
         this.velocityStretchFactor = data.velocityStretchFactor;
         this.setScale(0.2F);
         this.previousMotion = new Vec3(motionX, motionY, motionZ);
-        this.renderModules = data.renderModules;
-        this.initModules = data.initModules;
-        this.updateModules = data.updateModules;
-        this.collisionModules = data.collisionModules;
-        this.forces = data.forces;
-        this.subEmitters = data.subEmitters;
-        this.trailModules = data.initModules.stream().filter(m -> m instanceof TrailParticleModule).map(m -> (TrailParticleModule) m).collect(Collectors.toList());
-        this.scale = data.particleSettings.getParticleSize();
-        this.lifetime = data.particleSettings.getParticleLifetime() + 1;
+        ParticleModuleSet moduleSet = QuasarParticle.createModuleSet(data);
+        // FIXME
+        this.renderModules = new ArrayList<>();//data.renderModules;
+        this.initModules = new ArrayList<>();//data.initModules;
+        this.updateModules = new ArrayList<>();//data.updateModules;
+        this.collisionModules = new ArrayList<>();//data.collisionModules;
+        this.forces = new ArrayList<>();//data.forces;
+        this.subEmitters = new ArrayList<>();//data.subEmitters;
+        this.trailModules = new ArrayList<>();//data.initModules.stream().filter(m -> m instanceof TrailParticleModule).map(m -> (TrailParticleModule) m).collect(Collectors.toList());
+        this.scale = data.particleSettings.value().particleSize(this.random);
+        this.lifetime = data.particleSettings.value().particleLifetime(this.random) + 1;
         this.dataId = data.getRegistryId();
         this.renderStyle = data.renderStyle;
         this.spriteData = data.spriteData;
-        this.initModules.forEach(m -> m.run(this));
+        this.initModules.forEach(m -> m.init(this));
         this.oxRot = this.xRot;
         this.oyRot = this.yRot;
         this.oRoll = this.roll;
         this.renderType = data.renderType;
-        this.speed = data.particleSettings.getParticleSpeed();
+        this.speed = data.particleSettings.value().particleSpeed(this.random);
         this.parentEmitter = data.parentEmitter;
         this.parentEmitter.particleAdded();
     }
@@ -244,14 +245,14 @@ public class QuasarVanillaParticle extends Particle {
         this.position = new Vec3(this.x, this.y, this.z);
         if ((this.stoppedByCollision || this.onGround)) {
             this.collisionModules.forEach(m -> {
-                m.run(this);
+                m.update(this);
             });
         }
         if (!this.shouldCollide && !this.collisionModules.isEmpty()) {
             this.shouldCollide = true;
         }
         this.updateModules.forEach(m -> {
-            m.run(this);
+            m.update(this);
         });
         this.forces.forEach(force -> {
             force.applyForce(this);
@@ -373,7 +374,7 @@ public class QuasarVanillaParticle extends Particle {
         this.renderData.setBlue(this.bCol);
         this.renderData.setAlpha(this.alpha);
 
-        this.renderModules.forEach(m -> m.apply(this, partialTicks, this.renderData));
+        this.renderModules.forEach(m -> m.render(this, partialTicks, this.renderData));
         this.renderData.render(new Vector3d(this.x, this.y, this.z), new Vector3f(this.xRot, this.yRot, this.roll), this.scale, partialTicks);
         this.rCol = this.renderData.getRed();
         this.gCol = this.renderData.getGreen();
@@ -542,19 +543,6 @@ public class QuasarVanillaParticle extends Particle {
 
     public ParticleContext getContext() {
         return new ParticleContext(this.position, this.previousMotion, this);
-    }
-
-    public static class Factory implements ParticleProvider<QuasarParticleData> {
-
-        @Override
-        public Particle createParticle(@NotNull QuasarParticleData data, ClientLevel world, double x, double y, double z, double motionX,
-                                       double motionY, double motionZ) {
-            QuasarVanillaParticle particle = new QuasarVanillaParticle(data, world, x, y, z, motionX, motionY, motionZ);
-            particle.shouldCollide = data.shouldCollide;
-            particle.faceVelocity = data.faceVelocity;
-            particle.velocityStretchFactor = data.velocityStretchFactor;
-            return particle;
-        }
     }
 
     public enum RenderStyle implements RenderFunction {

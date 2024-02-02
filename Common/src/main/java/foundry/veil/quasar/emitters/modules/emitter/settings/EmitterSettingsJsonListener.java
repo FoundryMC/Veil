@@ -22,7 +22,7 @@ public class EmitterSettingsJsonListener extends SimpleJsonResourceReloadListene
         EmitterSettingsRegistry.clearRegisteredSettings();
         for(Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()){
             ResourceLocation id = entry.getKey();
-            DataResult<EmitterSettingsModule> dataResult = EmitterSettingsModule.CODEC.parse(JsonOps.INSTANCE, entry.getValue());
+            DataResult<EmitterSettingsModuleData> dataResult = EmitterSettingsModuleData.DIRECT_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
             if(dataResult.error().isPresent()){
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, dataResult.error().get().message()));
                 continue;

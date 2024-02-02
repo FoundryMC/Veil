@@ -3,7 +3,7 @@ package foundry.veil;
 import com.google.gson.Gson;
 import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.platform.services.VeilPlatform;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -39,7 +39,6 @@ public class Veil {
             LOGGER.info("ImGui Disabled");
         }
         VeilMolang.set(MolangCompiler.create(MolangCompiler.DEFAULT_FLAGS, Veil.class.getClassLoader()));
-        ModuleType.bootstrap();
     }
 
     public static ResourceLocation veilPath(String path) {

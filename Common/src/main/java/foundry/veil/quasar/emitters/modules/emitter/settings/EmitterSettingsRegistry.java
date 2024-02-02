@@ -5,43 +5,43 @@ import com.google.common.collect.HashBiMap;
 import net.minecraft.resources.ResourceLocation;
 
 public class EmitterSettingsRegistry {
-    private static final BiMap<ResourceLocation, EmissionParticleSettings> PARTICLE_SETTINGS_BY_ID = HashBiMap.create();
-    private static final BiMap<ResourceLocation, EmissionShapeSettings> SHAPE_SETTINGS_BY_ID = HashBiMap.create();
-    private static final BiMap<ResourceLocation, EmitterSettingsModule> SETTINGS_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, ParticleSettings> PARTICLE_SETTINGS_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, EmitterShapeSettings> SHAPE_SETTINGS_BY_ID = HashBiMap.create();
+    private static final BiMap<ResourceLocation, EmitterSettingsModuleData> SETTINGS_BY_ID = HashBiMap.create();
 
-    public static void register(ResourceLocation id, EmissionParticleSettings settings) {
+    public static void register(ResourceLocation id, ParticleSettings settings) {
         PARTICLE_SETTINGS_BY_ID.put(id, settings);
     }
 
-    public static void register(ResourceLocation id, EmissionShapeSettings settings) {
+    public static void register(ResourceLocation id, EmitterShapeSettings settings) {
         SHAPE_SETTINGS_BY_ID.put(id, settings);
     }
 
-    public static void register(ResourceLocation id, EmitterSettingsModule settings) {
+    public static void register(ResourceLocation id, EmitterSettingsModuleData settings) {
         SETTINGS_BY_ID.put(id, settings);
     }
 
-    public static EmissionParticleSettings getParticleSettings(ResourceLocation id) {
+    public static ParticleSettings getParticleSettings(ResourceLocation id) {
         return PARTICLE_SETTINGS_BY_ID.get(id);
     }
 
-    public static EmissionShapeSettings getShapeSettings(ResourceLocation id) {
+    public static EmitterShapeSettings getShapeSettings(ResourceLocation id) {
         return SHAPE_SETTINGS_BY_ID.get(id);
     }
 
-    public static EmitterSettingsModule getSettings(ResourceLocation id) {
+    public static EmitterSettingsModuleData getSettings(ResourceLocation id) {
         return SETTINGS_BY_ID.get(id);
     }
 
-    public static ResourceLocation getParticleSettingsId(EmissionParticleSettings settings) {
+    public static ResourceLocation getParticleSettingsId(ParticleSettings settings) {
         return PARTICLE_SETTINGS_BY_ID.inverse().get(settings);
     }
 
-    public static ResourceLocation getShapeSettingsId(EmissionShapeSettings settings) {
+    public static ResourceLocation getShapeSettingsId(EmitterShapeSettings settings) {
         return SHAPE_SETTINGS_BY_ID.inverse().get(settings);
     }
 
-    public static ResourceLocation getSettingsId(EmitterSettingsModule settings) {
+    public static ResourceLocation getSettingsId(EmitterSettingsModuleData settings) {
         return SETTINGS_BY_ID.inverse().get(settings);
     }
 

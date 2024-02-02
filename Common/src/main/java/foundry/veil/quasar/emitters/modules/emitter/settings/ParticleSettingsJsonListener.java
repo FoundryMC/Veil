@@ -22,7 +22,7 @@ public class ParticleSettingsJsonListener extends SimpleJsonResourceReloadListen
         EmitterSettingsRegistry.clearRegisteredParticleSettings();
         for(Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()){
             ResourceLocation id = entry.getKey();
-            DataResult<EmissionParticleSettings> dataResult = EmissionParticleSettings.CODEC.parse(JsonOps.INSTANCE, entry.getValue());
+            DataResult<ParticleSettings> dataResult = ParticleSettings.DIRECT_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
             if(dataResult.error().isPresent()){
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, dataResult.error().get().message()));
                 continue;

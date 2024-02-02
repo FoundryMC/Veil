@@ -7,8 +7,7 @@ import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
-import foundry.veil.quasar.emitters.modules.ModuleType;
-import foundry.veil.quasar.emitters.modules.particle.update.forces.PointForce;
+import foundry.veil.quasar.data.module.ModuleType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,11 +29,12 @@ public class SubEmitterCollisionParticleModule extends CollisionParticleModule {
             ParticleEmitter instance = new ParticleEmitter(context.getLevel(), emitter);
             instance.setPosition(context.getPosition());
             // TODO: Make this an option inside the force modules
-            instance.getParticleData().getForces().forEach(force -> {
-                if (force instanceof PointForce pf) {
-                    pf.setPoint(context.getPosition());
-                }
-            });
+//            instance.getParticleData().getForces().forEach(force -> {
+//                if (force instanceof PointForce pf) {
+//                    pf.setPoint(context.getPosition());
+//                }
+//            });
+            // FIXME
             ParticleSystemManager.getInstance().addParticleSystem(instance);
         });
         this.subEmitter = subEmitter;

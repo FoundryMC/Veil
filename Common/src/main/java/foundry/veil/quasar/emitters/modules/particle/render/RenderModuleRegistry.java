@@ -1,13 +1,15 @@
 package foundry.veil.quasar.emitters.modules.particle.render;
 
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.resources.ResourceLocation;
 
+@Deprecated
 public class RenderModuleRegistry {
+
     private static final BiMap<String, ModuleType<?>> MODULES = HashBiMap.create();
 
     public static final Codec<ModuleType<?>> MODULE_MAP_CODEC = Codec.STRING.comapFlatMap(name -> {
@@ -20,8 +22,6 @@ public class RenderModuleRegistry {
     public static void register(String name, ModuleType<?> type) {
         MODULES.put(name, type);
     }
-
-    public static void bootstrap() {}
 
     private static final BiMap<ResourceLocation, RenderParticleModule> MODULES_BY_ID = HashBiMap.create();
 

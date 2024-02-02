@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.render;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class TrailParticleModule implements RenderParticleModule {
         this.settings = settings;
     }
     @Override
-    public void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
+    public void render(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
         List<TrailSettings> settings = data.getTrails();
         settings.addAll(this.settings);
         data.addTrails(settings);

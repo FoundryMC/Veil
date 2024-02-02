@@ -22,7 +22,7 @@ public class QuasarParticleDataListener extends SimpleJsonResourceReloadListener
         QuasarParticleDataRegistry.clearRegisteredData();
         for (Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()) {
             ResourceLocation id = entry.getKey();
-            DataResult<QuasarParticleData> dataResult = QuasarParticleData.CODEC.parse(JsonOps.INSTANCE, entry.getValue());
+            DataResult<QuasarParticleData> dataResult = QuasarParticleData.DIRECT_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
             if (dataResult.error().isPresent()) {
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, dataResult.error().get().message()));
                 continue;

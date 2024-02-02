@@ -4,8 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
 import foundry.veil.quasar.client.particle.data.QuasarParticleDataRegistry;
-import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsModule;
+import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsModuleData;
 import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsRegistry;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 
 public class ParticleEmitterData {
@@ -16,10 +17,7 @@ public class ParticleEmitterData {
                     Codec.BOOL.optionalFieldOf("loop", false).forGetter(ParticleEmitterData::isLoop),
                     Codec.INT.fieldOf("rate").forGetter(ParticleEmitterData::getRate),
                     Codec.INT.fieldOf("count").forGetter(ParticleEmitterData::getCount),
-                    ResourceLocation.CODEC.fieldOf("emitter_settings").xmap(
-                            EmitterSettingsRegistry::getSettings,
-                            EmitterSettingsModule::getRegistryId
-                    ).forGetter(ParticleEmitterData::getEmitterSettingsModule),
+                    EmitterSettingsModuleData.CODEC.fieldOf("emitter_settings").forGetter(ParticleEmitterData::getEmitterSettingsModule),
                     ResourceLocation.CODEC.fieldOf("particle_data").xmap(
                             QuasarParticleDataRegistry::getData,
                             QuasarParticleData::getRegistryId
@@ -31,10 +29,10 @@ public class ParticleEmitterData {
     private final boolean loop;
     private final int rate;
     private final int count;
-    private final EmitterSettingsModule emitterSettingsModule;
+    private final Holder<EmitterSettingsModuleData> emitterSettingsModule;
     private final QuasarParticleData data;
 
-    public ParticleEmitterData(int maxLifetime, boolean loop, int rate, int count, EmitterSettingsModule emitterSettingsModule, QuasarParticleData data) {
+    public ParticleEmitterData(int maxLifetime, boolean loop, int rate, int count, Holder<EmitterSettingsModuleData> emitterSettingsModule, QuasarParticleData data) {
         this.maxLifetime = maxLifetime;
         this.loop = loop;
         this.rate = rate;
@@ -42,7 +40,7 @@ public class ParticleEmitterData {
         this.emitterSettingsModule = emitterSettingsModule;
         this.data = data;
         // FIXME
-        this.data.particleSettings = emitterSettingsModule.emissionParticleSettings();
+        this.data.particleSettings = emitterSettingsModule.value().emissionParticleSettings();
     }
 
     /**
@@ -78,8 +76,7 @@ public class ParticleEmitterData {
         return this.data;
     }
 
-    public EmitterSettingsModule getEmitterSettingsModule() {
+    public Holder<EmitterSettingsModuleData> getEmitterSettingsModule() {
         return this.emitterSettingsModule;
     }
-
 }

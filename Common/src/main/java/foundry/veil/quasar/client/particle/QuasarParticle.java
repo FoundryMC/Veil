@@ -10,6 +10,7 @@ import org.joml.Vector3fc;
 public class QuasarParticle {
 
     private final QuasarParticleData data;
+    private final ParticleModuleSet modules;
     private final Vector3d position;
     private final Vector3f rotation;
     private float scale;
@@ -18,11 +19,17 @@ public class QuasarParticle {
 
     public QuasarParticle(QuasarParticleData data) {
         this.data = data;
+        this.modules = ParticleModuleSet.builder().build();
         this.position = new Vector3d();
         this.rotation = new Vector3f();
         this.scale = 1.0F;
 
         this.renderData = new RenderData();
+    }
+
+    public static ParticleModuleSet createModuleSet(QuasarParticleData data) {
+        ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
+        return builder.build();
     }
 
     public void tick() {

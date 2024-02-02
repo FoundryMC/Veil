@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.render.color;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
 import foundry.veil.quasar.util.CodecUtil;
@@ -24,7 +24,7 @@ public class ColorParticleModule implements RenderParticleModule {
         this.color = color;
     }
     @Override
-    public void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
+    public void render(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
         data.setColor(color.x(), color.y(), color.z(), color.w());
     }
 

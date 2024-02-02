@@ -4,7 +4,7 @@ import foundry.veil.Veil;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import foundry.veil.quasar.emitters.modules.ParticleModule;
+import foundry.veil.quasar.data.module.ParticleModuleData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -23,12 +23,12 @@ public class UpdateModuleJsonListener extends SimpleJsonResourceReloadListener {
         UpdateModuleRegistry.clearRegisteredModules();
         for(Map.Entry<ResourceLocation, JsonElement> entry : elements.entrySet()){
             ResourceLocation id = entry.getKey();
-            DataResult<ParticleModule> moduleDataResult = UpdateParticleModule.DISPATCH_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
+            DataResult<ParticleModuleData> moduleDataResult = ParticleModuleData.UPDATE_DIRECT_CODEC.parse(JsonOps.INSTANCE, entry.getValue());
             if(moduleDataResult.error().isPresent()){
                 Veil.LOGGER.error("Could not read %s. %s".formatted(id, moduleDataResult.error().get().message()));
                 continue;
             }
-            ParticleModule module = moduleDataResult.getOrThrow(false, Veil.LOGGER::error);
+            ParticleModuleData module = moduleDataResult.getOrThrow(false, Veil.LOGGER::error);
             UpdateModuleRegistry.register(id, (UpdateParticleModule) module);
         }
     }

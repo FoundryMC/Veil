@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "veil.refmap.json",
   "mixins": [
-    "client.quasar.EntityMixin",
     "chargable.BowItemMixin",
     "chargable.CrossbowItemMixin",
     "chargable.InstrumentItemMixin",
@@ -38,6 +37,7 @@
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
     "client.pipeline.VertexBufferMixin",
+    "client.quasar.EntityMixin",
     "client.quasar.EntityModelSetMixin",
     "client.quasar.EntityRendererMixin",
     "client.quasar.ModelPartMixin",

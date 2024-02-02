@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.update.forces;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.fields.VectorField;
 import com.mojang.serialization.Codec;

@@ -2,5 +2,9 @@ package foundry.veil.quasar.emitters.modules;
 
 public interface ParticleModule {
 
-    ModuleType<?> getType();
+    /**
+     * Called when the module is removed.
+     */
+    default void onRemove() {
+    }
 }

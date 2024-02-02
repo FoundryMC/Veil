@@ -3,7 +3,7 @@ package foundry.veil.quasar.emitters.modules.particle.update;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import org.jetbrains.annotations.NotNull;
 
 public class BounceParticleModule implements UpdateParticleModule {
@@ -18,7 +18,7 @@ public class BounceParticleModule implements UpdateParticleModule {
         this.bounciness = bounciness;
     }
     @Override
-    public void run(QuasarVanillaParticle particle) {
+    public void update(QuasarVanillaParticle particle) {
         if ((particle.isOnGround() || particle.stoppedByCollision()) && (particle.getYDelta() * particle.getYDelta() > 0.05D || particle.getXDelta() * particle.getXDelta() > 0.05D
                 || particle.getZDelta() * particle.getZDelta() > 0.05D)) {
             particle.setYDelta((-particle.getYDelta() * 0.3D * bounciness * 0.4));

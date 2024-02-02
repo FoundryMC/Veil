@@ -1,9 +1,8 @@
-package foundry.veil.mixin;
+package foundry.veil.mixin.client.quasar;
 
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.util.EntityExtension;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

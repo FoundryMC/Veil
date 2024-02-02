@@ -12,6 +12,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.Map;
 
+@Deprecated
 public class InitModuleJsonListener extends SimpleJsonResourceReloadListener {
 
     public InitModuleJsonListener() {

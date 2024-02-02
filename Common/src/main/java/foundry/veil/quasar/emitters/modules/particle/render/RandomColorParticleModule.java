@@ -1,7 +1,7 @@
 package foundry.veil.quasar.emitters.modules.particle.render;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector4f;
 
@@ -14,7 +14,7 @@ public class RandomColorParticleModule implements RenderParticleModule {
     }
 
     @Override
-    public void apply(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
+    public void render(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
         int index = (int) (Math.random() * this.colors.length);
         Vector4f color = this.colors[index];
         data.setColor(color.x(), color.y(), color.z(), color.w());

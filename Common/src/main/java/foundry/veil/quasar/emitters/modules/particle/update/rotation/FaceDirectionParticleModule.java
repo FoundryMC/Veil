@@ -1,13 +1,11 @@
 package foundry.veil.quasar.emitters.modules.particle.update.rotation;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.joml.Vector3fc;
 
 public class FaceDirectionParticleModule implements UpdateParticleModule {
 
@@ -18,7 +16,7 @@ public class FaceDirectionParticleModule implements UpdateParticleModule {
     }
 
     @Override
-    public void run(QuasarVanillaParticle particle) {
+    public void update(QuasarVanillaParticle particle) {
         // calculate pitch yaw and roll from current pitch yaw and roll to direction
 //        Vector3fc rotation = particle.getRotation();
 //        float currentPitch = rotation.x();

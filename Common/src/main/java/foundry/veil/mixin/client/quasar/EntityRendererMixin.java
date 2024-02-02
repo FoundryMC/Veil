@@ -21,16 +21,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class EntityRendererMixin<T extends Entity> {
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void render(T pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
-        if (pEntity.isOnFire()) {
-            if (((EntityExtension) pEntity).getEmitters().isEmpty()) {
+    public void render(T entity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
+        EntityExtension extension = (EntityExtension) entity;
+        if (entity.isOnFire()) {
+            if (extension.getEmitters().isEmpty()) {
                 ParticleEmitterData emitter = ParticleEmitterRegistry.getEmitter(new ResourceLocation("veil:basic_smoke"));
                 if (emitter == null) {
                     return;
                 }
 
-                ParticleEmitter instance = new ParticleEmitter(pEntity.level(), emitter);
-                instance.setPosition(pEntity.position());
+                ParticleEmitter instance = new ParticleEmitter(entity.level(), emitter);
+                instance.setPosition(entity.position());
 //                instance.getEmitterSettingsModule().emissionShapeSettings().setDimensions(
 //                        new Vector3f(
 //                                pEntity.getBbWidth(),
@@ -40,24 +41,25 @@ public abstract class EntityRendererMixin<T extends Entity> {
 //                );
 //                instance.setLoop(true);
 //                instance.setMaxLifetime(5);
-                instance.getParticleData().getForces().forEach(force -> {
-                    if (force instanceof PointForce pf) {
-                        pf.setPoint(pEntity::position);
-                    }
-                });
-                ((EntityExtension) pEntity).addEmitter(instance);
+//                instance.getParticleData().getForces().forEach(force -> {
+//                    if (force instanceof PointForce pf) {
+//                        pf.setPoint(pEntity::position);
+//                    }
+//                });
+                // FIXME
+                extension.addEmitter(instance);
                 ParticleSystemManager.getInstance().addParticleSystem(instance);
             } else {
 //                ((EntityExtension) pEntity).getEmitters().stream().filter(emitter -> emitter.registryName.toString().equals("veil:basic_smoke")).forEach(emitter -> emitter.getEmitterModule().setMaxLifetime(5));
             }
         } else {
 //            ((EntityExtension) pEntity).getEmitters().stream().filter(emitter -> emitter.registryName.toString().equals("veil:basic_smoke")).forEach(p -> p.getEmitterModule().setLoop(false));
-            ((EntityExtension) pEntity).getEmitters().forEach(emitter -> {
+            extension.getEmitters().forEach(emitter -> {
                 if ("veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName()))) {
                     emitter.remove();
                 }
             });
-            ((EntityExtension) pEntity).getEmitters().removeIf(emitter -> "veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName())));
+            extension.getEmitters().removeIf(emitter -> "veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName())));
         }
     }
 }

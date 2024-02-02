@@ -8,7 +8,7 @@ import foundry.veil.quasar.emitters.ParticleContext;
 import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 

@@ -3,7 +3,7 @@ package foundry.veil.quasar.emitters.modules.particle.init.forces;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.emitters.modules.ModuleType;
+import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
 import net.minecraft.world.phys.Vec3;
@@ -40,11 +40,6 @@ public class InitialVelocityForce extends AbstractParticleForce implements InitP
         if (particle.getAge() == 0) {
             particle.addForce(velocityDirection.normalize().scale(strength));
         }
-    }
-
-    @Override
-    public void run(QuasarVanillaParticle particle) {
-        applyForce(particle);
     }
 
     @NotNull
