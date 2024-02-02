@@ -14,6 +14,9 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class VeilPostProcessingEvent {
 
+    private VeilPostProcessingEvent() {
+    }
+
     /**
      * Fired before Veil runs the default post-processing steps.
      *
