@@ -1,6 +1,7 @@
 package foundry.veil.api.client.render.deferred.light;
 
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.impl.client.render.deferred.light.AreaLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
 import org.joml.Vector3f;
@@ -139,7 +140,8 @@ public abstract class Light implements Cloneable {
      */
     public enum Type {
         DIRECTIONAL(DirectionalLightRenderer::new),
-        POINT(PointLightRenderer::new);
+        POINT(PointLightRenderer::new),
+        AREA(AreaLightRenderer::new);
 
         private final Supplier<LightTypeRenderer<?>> rendererFactory;
 
