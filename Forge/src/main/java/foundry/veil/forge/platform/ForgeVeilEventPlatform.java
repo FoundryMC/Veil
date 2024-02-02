@@ -61,6 +61,11 @@ public class ForgeVeilEventPlatform implements VeilEventPlatform {
     @Override
     public void onVeilRegisterFixedBuffers(VeilRegisterFixedBuffersEvent event) {
         MinecraftForge.EVENT_BUS.<ForgeVeilRegisterFixedBuffersEvent>addListener(forgeEvent -> event.onRegisterFixedBuffers((stage, renderType) -> {
+            if (stage == null) {
+                forgeEvent.register(null, renderType);
+                return;
+            }
+
             RenderLevelStageEvent.Stage forgeStage = STAGE_MAPPING.get(stage);
             if (forgeStage != null) {
                 forgeEvent.register(forgeStage, renderType);

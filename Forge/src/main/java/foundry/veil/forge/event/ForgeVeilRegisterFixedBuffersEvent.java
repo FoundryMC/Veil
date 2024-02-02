@@ -6,6 +6,7 @@ import foundry.veil.platform.services.VeilEventPlatform;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.Event;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
@@ -27,10 +28,10 @@ public class ForgeVeilRegisterFixedBuffersEvent extends Event {
     /**
      * Registers a fixed render type.
      *
-     * @param stage      The stage the buffer should be finished after
+     * @param stage      The stage the buffer should be finished after or <code>null</code> to do it manually
      * @param renderType The render type to finish
      */
-    public void register(RenderLevelStageEvent.Stage stage, RenderType renderType) {
+    public void register(@Nullable RenderLevelStageEvent.Stage stage, RenderType renderType) {
         this.registry.accept(stage, renderType);
     }
 }

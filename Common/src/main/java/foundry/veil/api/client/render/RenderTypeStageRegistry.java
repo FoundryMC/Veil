@@ -25,6 +25,16 @@ public class RenderTypeStageRegistry {
     /**
      * Registers a render stage. The specified shards will be added to the specified render type during construction.
      *
+     * @param renderType The render type to add the stage to
+     * @param shards     The shards to add to all matching render types
+     */
+    public static synchronized void addStage(RenderType renderType, RenderStateShard... shards) {
+        addStage(((RenderStateShardAccessor) renderType).getName(), shards);
+    }
+
+    /**
+     * Registers a render stage. The specified shards will be added to the specified render type during construction.
+     *
      * @param name   The name of the render type to add the stage to
      * @param shards The shards to add to all matching render types
      */
@@ -45,7 +55,7 @@ public class RenderTypeStageRegistry {
      * @param filter The filter for what render types to add the stage to
      * @param shards The shards to add to all matching render types
      */
-    public static synchronized void addGenericStage(Predicate<RenderType> filter, RenderStateShard... shards) {
+    public static synchronized void addGenericStage(Predicate<RenderType.CompositeRenderType> filter, RenderStateShard... shards) {
         if (shards.length == 0) {
             throw new IllegalArgumentException("No shards provided");
         }
@@ -79,6 +89,6 @@ public class RenderTypeStageRegistry {
         CREATED_RENDER_TYPES.add(renderType);
     }
 
-    private record GenericStage(Predicate<RenderType> filter, RenderStateShard... shards) {
+    private record GenericStage(Predicate<RenderType.CompositeRenderType> filter, RenderStateShard... shards) {
     }
 }

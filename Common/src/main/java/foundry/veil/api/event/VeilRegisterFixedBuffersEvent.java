@@ -1,6 +1,7 @@
 package foundry.veil.api.event;
 
 import net.minecraft.client.renderer.RenderType;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * <p>Fired to register additional fixed render types.</p>
@@ -29,9 +30,9 @@ public interface VeilRegisterFixedBuffersEvent {
         /**
          * Registers the specified render type as a fixed buffer. That means all render calls using it will be batched until the specified stage is drawn.
          *
-         * @param stage      The stage to draw the buffer after
+         * @param stage      The stage to draw the buffer after or <code>null</code> to do it manually
          * @param renderType The render type to register
          */
-        void registerFixedBuffer(VeilRenderLevelStageEvent.Stage stage, RenderType renderType);
+        void registerFixedBuffer(@Nullable VeilRenderLevelStageEvent.Stage stage, RenderType renderType);
     }
 }

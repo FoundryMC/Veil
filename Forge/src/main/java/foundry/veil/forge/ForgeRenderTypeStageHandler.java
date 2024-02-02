@@ -12,6 +12,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -21,11 +22,13 @@ public class ForgeRenderTypeStageHandler {
 
     private static final Map<RenderLevelStageEvent.Stage, Set<RenderType>> STAGE_RENDER_TYPES = new HashMap<>();
 
-    public static synchronized void register(RenderLevelStageEvent.Stage stage, RenderType renderType) {
+    public static synchronized void register(@Nullable RenderLevelStageEvent.Stage stage, RenderType renderType) {
         SortedMap<RenderType, BufferBuilder> fixedBuffers = ((RenderBuffersAccessor) Minecraft.getInstance().renderBuffers()).getFixedBuffers();
         fixedBuffers.computeIfAbsent(renderType, type -> new BufferBuilder(type.bufferSize()));
 
-        STAGE_RENDER_TYPES.computeIfAbsent(stage, unused -> new HashSet<>()).add(renderType);
+        if (stage != null) {
+            STAGE_RENDER_TYPES.computeIfAbsent(stage, unused -> new HashSet<>()).add(renderType);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
