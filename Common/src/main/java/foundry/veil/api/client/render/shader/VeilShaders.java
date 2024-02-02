@@ -43,6 +43,7 @@ public final class VeilShaders {
     public static final ResourceLocation LIGHT_AMBIENT = light("ambient");
     public static final ResourceLocation LIGHT_DIRECTIONAL = light("directional");
     public static final ResourceLocation LIGHT_POINT = light("point");
+    public static final ResourceLocation LIGHT_AREA = light("area");
     public static final ResourceLocation LIGHT_VANILLA = light("vanilla");
     public static final ResourceLocation LIGHT_VANILLA_LIGHTMAP = light("vanilla_lightmap");
     public static final ResourceLocation LIGHT_SKY = light("sky");

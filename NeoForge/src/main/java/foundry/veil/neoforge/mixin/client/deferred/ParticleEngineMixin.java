@@ -1,11 +1,9 @@
 package foundry.veil.neoforge.mixin.client.deferred;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import foundry.veil.render.pipeline.VeilRenderSystem;
-import foundry.veil.render.wrapper.DeferredShaderStateCache;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.impl.client.render.deferred.DeferredShaderStateCache;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
