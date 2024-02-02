@@ -5,8 +5,9 @@ import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilVanillaShaders;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
-import foundry.veil.impl.client.render.VeilUITooltipRenderer;
+import foundry.veil.forge.event.ForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
+import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.util.VeilJsonListeners;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
@@ -46,8 +47,9 @@ public class VeilForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
+        VeilJsonListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
         MinecraftForge.EVENT_BUS.post(new ForgeVeilRendererEvent(VeilRenderSystem.renderer()));
-        registerClientReloadListeners(event);
+        MinecraftForge.EVENT_BUS.post(new ForgeVeilRegisterFixedBuffersEvent(ForgeRenderTypeStageHandler::register));
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
@@ -77,14 +79,6 @@ public class VeilForgeClient {
 
             // TODO make this pack enabled by default
             registerBuiltinPack(event, VeilDeferredRenderer.PACK_ID);
-        }
-    }
-
-    private static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {
-        try {
-            VeilJsonListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
