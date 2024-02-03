@@ -2,8 +2,8 @@ package foundry.veil.api.client.render.deferred.light;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import foundry.veil.ext.VertexBufferExtension;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.ext.VertexBufferExtension;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
@@ -19,6 +19,8 @@ import static org.lwjgl.opengl.GL15C.*;
  * @author Ocelot
  */
 public abstract class InstancedLightRenderer<T extends Light & InstancedLight> implements LightTypeRenderer<T> {
+
+    private static final int MAX_UPLOADS = 400;
 
     protected final int lightSize;
     protected int maxLights;
@@ -86,15 +88,22 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int pointer = 0;
-            ByteBuffer dataBuffer = stack.malloc(lights.size() * this.lightSize);
+            long offset = 0;
+            ByteBuffer dataBuffer = stack.malloc(Math.min(MAX_UPLOADS, lights.size()) * this.lightSize);
             for (T light : lights) {
                 light.clean();
                 dataBuffer.position((pointer++) * this.lightSize);
                 light.store(dataBuffer);
+                if (pointer >= MAX_UPLOADS) {
+                    dataBuffer.rewind();
+                    glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
+                    offset += dataBuffer.capacity();
+                    pointer = 0;
+                }
             }
 
             dataBuffer.rewind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0L, dataBuffer);
+            glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
         }
     }
 

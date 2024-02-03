@@ -1,10 +1,8 @@
 package foundry.veil.quasar.emitters;
 
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.client.particle.data.QuasarParticleData;
+import foundry.veil.quasar.data.EmitterSettings;
 import foundry.veil.quasar.data.ParticleEmitterData;
-import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsModuleData;
-import foundry.veil.quasar.emitters.modules.particle.init.forces.InitialVelocityForce;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -33,8 +31,7 @@ public class ParticleEmitter {
 
     private final ClientLevel level;
     private final Vector3d position;
-    private final ParticleEmitterData data;
-    private final QuasarParticleData particleData;
+    private final ParticleEmitterData emitterData;
 
     private boolean removed;
     private int particleCount = 0;
@@ -46,9 +43,8 @@ public class ParticleEmitter {
 
     public ParticleEmitter(ClientLevel level, ParticleEmitterData data) {
         this.level = level;
-        this.data = data;
+        this.emitterData = data;
         this.position = new Vector3d();
-        this.particleData = data.getParticleData();
     }
 
     /**
@@ -67,7 +63,7 @@ public class ParticleEmitter {
     }
 
     public @Nullable ResourceLocation getRegistryName() {
-        return ParticleEmitterRegistry.getEmitterId(this.data);
+        return this.emitterData.getRegistryId();
     }
 
     /**
@@ -82,6 +78,10 @@ public class ParticleEmitter {
      */
     public Vector3d getPosition() {
         return this.position;
+    }
+
+    public ParticleEmitterData getData() {
+        return this.emitterData;
     }
 
     /**
@@ -104,11 +104,6 @@ public class ParticleEmitter {
         this.position.set(position);
     }
 
-    @Deprecated
-    public QuasarParticleData getParticleData() {
-        return this.data.getParticleData();
-    }
-
     private void run() {
         // apply spread
 
@@ -116,37 +111,36 @@ public class ParticleEmitter {
 //            this.active = true;
 //        }
         RandomSource random = this.level.random;
-        EmitterSettingsModuleData emitterSettingsModule = this.data.getEmitterSettingsModule().value();
-        Vector3dc particlePos = emitterSettingsModule.emitterShapeSettings().value().getPos(random, this.position);
-        Vector3fc particleDirection = emitterSettingsModule.emissionParticleSettings().value().particleDirection(random);
-        QuasarParticleData data = this.data.getParticleData().instance();
-        data.parentEmitter = this;
-        data.getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
-            InitialVelocityForce force = (InitialVelocityForce) f;
-            if (force.takesParentRotation()) {
-                Vector3fc rotation = emitterSettingsModule.emitterShapeSettings().value().getRotation();
-                force.velocityDirection = force.velocityDirection
-                        .xRot((float) -Math.toRadians(rotation.x()))
-                        .yRot((float) -Math.toRadians(rotation.y()))
-                        .zRot((float) -Math.toRadians(rotation.z()));
-            }
-        });
-        Minecraft.getInstance().particleEngine.add(new QuasarVanillaParticle(data, this.level, particlePos.x(), particlePos.y(), particlePos.z(), particleDirection.x(), particleDirection.y(), particleDirection.z()));
+        EmitterSettings emitterSettings = this.emitterData.emitterSettings();
+        Vector3dc particlePos = emitterSettings.emitterShapeSettings().getPos(random, this.position);
+        Vector3fc particleDirection = emitterSettings.particleSettings().particleDirection(random);
+        // TODO
+//        this.getParticleData().getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
+//            InitialVelocityForce force = (InitialVelocityForce) f;
+//            if (force.takesParentRotation()) {
+//                Vector3fc rotation = emitterSettings.emitterShapeSettings().value().getRotation();
+//                force.velocityDirection = force.velocityDirection
+//                        .xRot((float) -Math.toRadians(rotation.x()))
+//                        .yRot((float) -Math.toRadians(rotation.y()))
+//                        .zRot((float) -Math.toRadians(rotation.z()));
+//            }
+//        });
+        Minecraft.getInstance().particleEngine.add(new QuasarVanillaParticle(this.emitterData.particleData(), this.emitterData.emitterSettings().particleSettings(), this, this.level, particlePos.x(), particlePos.y(), particlePos.z(), particleDirection.x(), particleDirection.y(), particleDirection.z()));
     }
 
     /**
      * Tick the emitter. This is run to track the basic functionality of the emitter.
      */
     public void tick() {
-        if (this.age % this.data.getRate() == 0) {
-            int count = (int) (this.data.getCount() * ParticleSystemManager.getInstance().getSpawnScale());
+        if (this.age % this.emitterData.rate() == 0) {
+            int count = (int) (this.emitterData.count() * ParticleSystemManager.getInstance().getSpawnScale());
             for (int i = 0; i < count; i++) {
                 this.run();
             }
         }
         this.age++;
-        if (this.age >= this.data.getMaxLifetime()) {
-            if (this.data.isLoop()) {
+        if (this.age >= this.emitterData.maxLifetime()) {
+            if (this.emitterData.loop()) {
                 this.age = 0;
             } else {
                 this.remove();

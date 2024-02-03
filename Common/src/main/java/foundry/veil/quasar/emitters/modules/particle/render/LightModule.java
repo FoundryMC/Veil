@@ -3,8 +3,9 @@ package foundry.veil.quasar.emitters.modules.particle.render;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
-import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
+import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.init.LightModuleData;
+import foundry.veil.quasar.emitters.modules.particle.RenderParticleModule;
 import org.joml.Vector4f;
 
 public class LightModule implements RenderParticleModule {
@@ -18,7 +19,7 @@ public class LightModule implements RenderParticleModule {
     }
 
     @Override
-    public void render(QuasarVanillaParticle particle, float partialTicks, RenderData data) {
+    public void render(QuasarParticle particle, float partialTicks) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
         if (!deferredRenderer.isEnabled()) {
             return;
@@ -37,7 +38,7 @@ public class LightModule implements RenderParticleModule {
                     .setFalloff(this.data.falloff());
             deferredRenderer.getLightRenderer().addLight(this.light);
         }
-        this.light.setPosition(data.getRenderPosition());
+        this.light.setPosition(particle.getRenderData().getRenderPosition());
         this.light.setColor(color.x, color.y, color.z);
         this.light.setBrightness(brightness);
     }

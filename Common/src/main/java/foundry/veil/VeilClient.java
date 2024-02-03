@@ -7,7 +7,6 @@ import foundry.veil.api.client.render.shader.RenderTypeRegistry;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
-import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -28,7 +27,6 @@ public class VeilClient {
         VeilEventPlatform.INSTANCE.onVeilRegisterFixedBuffers(registry -> registry.registerFixedBuffer(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucentMovingBlock()));
         RenderTypeStageRegistry.addGenericStage(renderType -> true, new RenderStateShard(Veil.MODID + ":deferred", () -> VeilRenderSystem.renderer().getDeferredRenderer().setup(), () -> VeilRenderSystem.renderer().getDeferredRenderer().clear()) {
         });
-        ParticleEmitterRegistry.bootstrap();
     }
 
     @ApiStatus.Internal

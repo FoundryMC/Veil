@@ -3,80 +3,45 @@ package foundry.veil.quasar.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
-import foundry.veil.quasar.client.particle.data.QuasarParticleDataRegistry;
-import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsModuleData;
-import foundry.veil.quasar.emitters.modules.emitter.settings.EmitterSettingsRegistry;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
-public class ParticleEmitterData {
+/**
+ * @param maxLifetime
+ * @param loop                        Whether the emitter will loop. If <code>true</code>, the emitter will reset after maxLifetime ticks
+ * @param rate                        The rate at which particles are emitted. Count particles per rate ticks.
+ * @param count                       The number of particles emitted per rate ticks
+ * @param emitterSettingsModuleHolder The settings for how to emit particles
+ * @param particleDataHolder          The particle to emit
+ */
+public record ParticleEmitterData(int maxLifetime,
+                                  boolean loop,
+                                  int rate,
+                                  int count,
+                                  Holder<EmitterSettings> emitterSettingsModuleHolder,
+                                  Holder<QuasarParticleData> particleDataHolder) {
 
-    public static final Codec<ParticleEmitterData> CODEC = RecordCodecBuilder.create(i ->
-            i.group(
-                    Codec.INT.fieldOf("max_lifetime").forGetter(ParticleEmitterData::getMaxLifetime),
-                    Codec.BOOL.optionalFieldOf("loop", false).forGetter(ParticleEmitterData::isLoop),
-                    Codec.INT.fieldOf("rate").forGetter(ParticleEmitterData::getRate),
-                    Codec.INT.fieldOf("count").forGetter(ParticleEmitterData::getCount),
-                    EmitterSettingsModuleData.CODEC.fieldOf("emitter_settings").forGetter(ParticleEmitterData::getEmitterSettingsModule),
-                    ResourceLocation.CODEC.fieldOf("particle_data").xmap(
-                            QuasarParticleDataRegistry::getData,
-                            QuasarParticleData::getRegistryId
-                    ).forGetter(ParticleEmitterData::getParticleData)
-            ).apply(i, ParticleEmitterData::new)
-    );
+    public static final Codec<ParticleEmitterData> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("max_lifetime").forGetter(ParticleEmitterData::maxLifetime),
+            Codec.BOOL.optionalFieldOf("loop", false).forGetter(ParticleEmitterData::loop),
+            Codec.INT.fieldOf("rate").forGetter(ParticleEmitterData::rate),
+            Codec.INT.fieldOf("count").forGetter(ParticleEmitterData::count),
+            EmitterSettings.CODEC.fieldOf("emitter_settings").forGetter(ParticleEmitterData::emitterSettingsModuleHolder),
+            QuasarParticleData.CODEC.fieldOf("particle_data").forGetter(ParticleEmitterData::particleDataHolder)
+    ).apply(instance, ParticleEmitterData::new));
+    public static final Codec<Holder<ParticleEmitterData>> CODEC = RegistryFileCodec.create(QuasarParticles.EMITTER, DIRECT_CODEC);
 
-    private final int maxLifetime;
-    private final boolean loop;
-    private final int rate;
-    private final int count;
-    private final Holder<EmitterSettingsModuleData> emitterSettingsModule;
-    private final QuasarParticleData data;
-
-    public ParticleEmitterData(int maxLifetime, boolean loop, int rate, int count, Holder<EmitterSettingsModuleData> emitterSettingsModule, QuasarParticleData data) {
-        this.maxLifetime = maxLifetime;
-        this.loop = loop;
-        this.rate = rate;
-        this.count = count;
-        this.emitterSettingsModule = emitterSettingsModule;
-        this.data = data;
-        // FIXME
-        this.data.particleSettings = emitterSettingsModule.value().emissionParticleSettings();
+    public EmitterSettings emitterSettings() {
+        return this.emitterSettingsModuleHolder.value();
     }
 
-    /**
-     * The rate at which particles are emitted. Count particles per rate ticks.
-     */
-    public int getRate() {
-        return this.rate;
+    public QuasarParticleData particleData() {
+        return this.particleDataHolder.value();
     }
 
-    /**
-     * The number of particles emitted per rate ticks
-     */
-    public int getCount() {
-        return this.count;
-    }
-
-    /**
-     * The maximum number of ticks the emitter will be active for
-     */
-    public int getMaxLifetime() {
-        return this.maxLifetime;
-    }
-
-    /**
-     * Whether the emitter will loop. If true, the emitter will reset after maxLifetime ticks
-     */
-    public boolean isLoop() {
-        return this.loop;
-    }
-
-    // FIXME
-    public QuasarParticleData getParticleData() {
-        return this.data;
-    }
-
-    public Holder<EmitterSettingsModuleData> getEmitterSettingsModule() {
-        return this.emitterSettingsModule;
+    public @Nullable ResourceLocation getRegistryId() {
+        return this.particleData().getRegistryId();
     }
 }

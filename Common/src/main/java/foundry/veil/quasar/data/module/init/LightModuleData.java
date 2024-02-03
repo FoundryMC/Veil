@@ -3,7 +3,6 @@ package foundry.veil.quasar.data.module.init;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.ParticleModuleSet;
-import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import foundry.veil.quasar.emitters.modules.particle.render.LightModule;
@@ -22,8 +21,8 @@ public record LightModuleData(ColorGradient color,
     ).apply(instance, LightModuleData::new));
 
     @Override
-    public void registerModules(QuasarParticle particle, ParticleModuleSet.Builder registry) {
-        registry.addModule(new LightModule(this));
+    public void addModules(ParticleModuleSet.Builder builder) {
+        builder.addModule(new LightModule(this));
     }
 
     @Override

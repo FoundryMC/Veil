@@ -44,6 +44,8 @@
     "client.quasar.ParticleAccessor",
     "client.quasar.ParticleEngineAccessor",
     "client.quasar.ParticleMixin",
+    "client.quasar.RegistryDataAccessor",
+    "client.quasar.RegistryDataLoaderAccessor",
     "client.shader.EffectInstanceMixin",
     "client.shader.GameRendererAccessor",
     "client.shader.GameRendererMixin",

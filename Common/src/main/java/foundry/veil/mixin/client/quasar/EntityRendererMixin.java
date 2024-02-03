@@ -1,17 +1,13 @@
 package foundry.veil.mixin.client.quasar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
 import foundry.veil.quasar.emitters.ParticleSystemManager;
-import foundry.veil.quasar.emitters.modules.particle.update.forces.PointForce;
 import foundry.veil.quasar.util.EntityExtension;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,12 +21,11 @@ public abstract class EntityRendererMixin<T extends Entity> {
         EntityExtension extension = (EntityExtension) entity;
         if (entity.isOnFire()) {
             if (extension.getEmitters().isEmpty()) {
-                ParticleEmitterData emitter = ParticleEmitterRegistry.getEmitter(new ResourceLocation("veil:basic_smoke"));
-                if (emitter == null) {
+                ParticleEmitter instance = ParticleSystemManager.getInstance().createEmitter(entity.level(), new ResourceLocation("veil:basic_smoke"));
+                if (instance == null) {
                     return;
                 }
 
-                ParticleEmitter instance = new ParticleEmitter(entity.level(), emitter);
                 instance.setPosition(entity.position());
 //                instance.getEmitterSettingsModule().emissionShapeSettings().setDimensions(
 //                        new Vector3f(

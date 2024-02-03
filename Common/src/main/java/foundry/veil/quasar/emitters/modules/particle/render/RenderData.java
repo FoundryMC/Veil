@@ -2,18 +2,20 @@ package foundry.veil.quasar.emitters.modules.particle.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.shader.RenderTypeRegistry;
+import foundry.veil.quasar.client.particle.data.QuasarParticleRenderType;
+import foundry.veil.quasar.client.particle.data.SpriteData;
 import foundry.veil.quasar.fx.Trail;
 import foundry.veil.quasar.util.MathUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.jetbrains.annotations.Nullable;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +35,11 @@ public class RenderData {
     private float green;
     private float blue;
     private float alpha;
+    public float renderAge;
+    public float agePercent;
+    private SpriteData spriteData;
+    private TextureAtlasSprite atlasSprite;
+    private final ParticleRenderType renderType;
     private final List<TrailSettings> trails;
     private final List<Trail> renderTrails;
 
@@ -50,6 +57,10 @@ public class RenderData {
         this.green = 1.0F;
         this.blue = 1.0F;
         this.alpha = 1.0F;
+        this.renderAge = 0.0F;
+        this.spriteData = null;
+        this.atlasSprite = null;
+        this.renderType = new QuasarParticleRenderType();
         this.trails = new ArrayList<>();
         this.renderTrails = new ArrayList<>();
     }
@@ -62,13 +73,15 @@ public class RenderData {
     }
 
     @ApiStatus.Internal
-    public void render(Vector3dc position, Vector3fc rotation, float scale, float partialTicks) {
+    public void render(Vector3dc position, Vector3fc rotation, float scale, int age, int lifetime, float partialTicks) {
         this.position.set(position);
         this.rotation.set(rotation);
         this.scale = scale;
         this.prevPosition.lerp(this.position, partialTicks, this.renderPosition);
         this.prevRotation.lerp(this.rotation, partialTicks, this.renderRotation);
         this.renderScale = Mth.lerp(partialTicks, this.prevScale, this.scale);
+        this.renderAge = age + partialTicks;
+        this.agePercent = Math.min(this.renderAge / (float) lifetime, 1.0F);
     }
 
     public Vector3dc getRenderPosition() {
@@ -81,6 +94,14 @@ public class RenderData {
 
     public float getRenderScale() {
         return this.renderScale;
+    }
+
+    public float getRenderAge() {
+        return this.renderAge;
+    }
+
+    public float getAgePercent() {
+        return this.agePercent;
     }
 
     public float getRed() {
@@ -97,6 +118,18 @@ public class RenderData {
 
     public float getAlpha() {
         return this.alpha;
+    }
+
+    public @Nullable SpriteData getSpriteData() {
+        return this.spriteData;
+    }
+
+    public TextureAtlasSprite getAtlasSprite() {
+        return this.atlasSprite;
+    }
+
+    public ParticleRenderType getRenderType() {
+        return this.renderType;
     }
 
     public List<TrailSettings> getTrails() {
@@ -131,10 +164,6 @@ public class RenderData {
         return this.renderTrails;
     }
 
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
     public void setRed(float red) {
         this.red = red;
     }
@@ -158,11 +187,26 @@ public class RenderData {
         this.alpha = alpha;
     }
 
+    public void setColor(Vector4fc color) {
+        this.red = color.x();
+        this.green = color.y();
+        this.blue = color.z();
+        this.alpha = color.w();
+    }
+
     public void addTrails(TrailSettings... trails) {
         this.trails.addAll(List.of(trails));
     }
 
     public void addTrails(Collection<TrailSettings> trails) {
         this.trails.addAll(trails);
+    }
+
+    public void setSpriteData(@Nullable SpriteData spriteData) {
+        this.spriteData = spriteData;
+    }
+
+    public void setAtlasSprite(@Nullable TextureAtlasSprite atlasSprite) {
+        this.atlasSprite = atlasSprite;
     }
 }

@@ -23,7 +23,12 @@ public class CodecUtil {
             .xmap(list -> new Vector4f(list.get(0), list.get(1), list.get(2), list.get(3)),
                     vector -> List.of(vector.x(), vector.y(), vector.z(), vector.w()));
 
-    private static DataResult<List<Float>> check(int size, List<Float> list) {
+    public static final Codec<Vector3dc> VECTOR3D_CODEC = Codec.DOUBLE.listOf()
+            .flatXmap(list -> check(3, list), list -> check(3, list))
+            .xmap(list -> new Vector3d(list.get(0), list.get(1), list.get(2)),
+                    vector -> List.of(vector.x(), vector.y(), vector.z()));
+
+    private static <T> DataResult<List<T>> check(int size, List<T> list) {
         if (list.size() != size) {
             return DataResult.error(() -> "Vector" + size + "f must have " + size + " elements!");
         }

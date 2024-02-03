@@ -1,25 +1,14 @@
 package foundry.veil.quasar.client.particle;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.deferred.light.PointLight;
-import foundry.veil.api.client.render.shader.RenderTypeRegistry;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.quasar.client.particle.data.QuasarParticleData;
-import foundry.veil.quasar.client.particle.data.QuasarParticleRenderType;
 import foundry.veil.quasar.client.particle.data.SpriteData;
-import foundry.veil.quasar.emitters.ParticleContext;
+import foundry.veil.quasar.data.ParticleSettings;
 import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.modules.particle.init.InitParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.render.LightModule;
 import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
-import foundry.veil.quasar.emitters.modules.particle.render.RenderParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.render.TrailParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.update.UpdateParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.update.collsion.CollisionParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
-import foundry.veil.quasar.util.ColorGradient;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,7 +16,6 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -37,13 +25,11 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.lang.Math;
-import java.util.ArrayList;
 import java.util.List;
-
-import static foundry.veil.quasar.emitters.modules.particle.render.LightModule.toLightColor;
 
 @Deprecated
 public class QuasarVanillaParticle extends Particle {
+
     public static final Vec3[] PLANE = {
             // plane from -1 to 1 on Y axis and -1 to 1 on X axis
             new Vec3(-1, 1, 0), new Vec3(1, 1, 0), new Vec3(1, -1, 0), new Vec3(-1, -1, 0)
@@ -68,111 +54,50 @@ public class QuasarVanillaParticle extends Particle {
             // RIGHT
             new Vec3(1, -1, 1), new Vec3(1, 1, 1), new Vec3(1, 1, -1), new Vec3(1, -1, -1)};
 
-    private static final ParticleRenderType RENDER_TYPE_EMISSIVE = new ParticleRenderType() {
-        @Override
-        public void begin(BufferBuilder builder, TextureManager textureManager) {
-            RenderSystem.disableCull();
-            RenderSystem.depthMask(false);
-            RenderSystem.enableBlend();
-
-            //
-            RenderSystem.setShader(() -> RenderTypeRegistry.QUASAR_PARTICLE_ADDITIVE_MULTIPLY);
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                    GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-            // opaque
-//			RenderSystem.depthMask(true);
-//			RenderSystem.disableBlend();
-//			RenderSystem.enableLighting();
-
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-        }
-
-        @Override
-        public void end(Tesselator tessellator) {
-            tessellator.end();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                    GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.enableCull();
-        }
-    };
-
     private final ResourceLocation dataId;
     private RenderStyle renderStyle = RenderStyle.BILLBOARD;
-    private static final ParticleRenderType RENDER_TYPE_FLAT = new QuasarParticleRenderType();
     public TextureAtlasSprite sprite = null;
 
-    protected float scale;
     public boolean shouldCollide = false;
     protected boolean emissive = true;
-    protected Vec3 previousMotion = Vec3.ZERO;
-    protected Vec3 previousPosition = Vec3.ZERO;
-    protected Vec3 initialPosition = Vec3.ZERO;
-    protected Vec3 position = Vec3.ZERO;
-    protected float xRot = 0;
-    protected float oxRot = 0;
-    protected float yRot = 0;
-    protected float oyRot = 0;
-    protected boolean faceVelocity = false;
-    protected float velocityStretchFactor = 0.0f;
-    @Deprecated
-    public PointLight light;
-    @Deprecated
-    public ColorGradient lightGradient;
     private boolean stoppedByCollision;
 
-    protected List<TrailParticleModule> trailModules = new ArrayList<>();
-    List<ResourceLocation> subEmitters = new ArrayList<>();
-    List<AbstractParticleForce> forces = new ArrayList<>();
-    List<InitParticleModule> initModules = new ArrayList<>();
-    List<RenderParticleModule> renderModules = new ArrayList<>();
-    List<UpdateParticleModule> updateModules = new ArrayList<>();
-    List<CollisionParticleModule> collisionModules = new ArrayList<>();
-    public SpriteData spriteData = SpriteData.BLANK;
-    private final ParticleRenderType renderType;
-    float speed;
-    ParticleEmitter parentEmitter;
+    //    protected List<TrailParticleModule> trailModules = new ArrayList<>();
+    private final QuasarParticle particle;
+    //    List<ResourceLocation> subEmitters = new ArrayList<>();
+//    List<AbstractParticleForce> forces = new ArrayList<>();
+//    List<InitParticleModule> initModules = new ArrayList<>();
+//    List<RenderParticleModule> renderModules = new ArrayList<>();
+//    List<UpdateParticleModule> updateModules = new ArrayList<>();
+//    List<CollisionParticleModule> collisionModules = new ArrayList<>();
+    private final ParticleEmitter parentEmitter;
 
-    public QuasarVanillaParticle(QuasarParticleData data, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    public QuasarVanillaParticle(QuasarParticleData data, ParticleSettings particleSettings, ParticleEmitter parentEmitter, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
         super(world, x, y, z);
         this.xd = motionX;
         this.yd = motionY;
         this.zd = motionZ;
-        this.initialPosition = new Vec3(x, y, z);
-        this.faceVelocity = data.faceVelocity;
-        this.velocityStretchFactor = data.velocityStretchFactor;
-        this.setScale(0.2F);
-        this.previousMotion = new Vec3(motionX, motionY, motionZ);
-        ParticleModuleSet moduleSet = QuasarParticle.createModuleSet(data);
-        // FIXME
-        this.renderModules = new ArrayList<>();//data.renderModules;
-        this.initModules = new ArrayList<>();//data.initModules;
-        this.updateModules = new ArrayList<>();//data.updateModules;
-        this.collisionModules = new ArrayList<>();//data.collisionModules;
-        this.forces = new ArrayList<>();//data.forces;
-        this.subEmitters = new ArrayList<>();//data.subEmitters;
-        this.trailModules = new ArrayList<>();//data.initModules.stream().filter(m -> m instanceof TrailParticleModule).map(m -> (TrailParticleModule) m).collect(Collectors.toList());
-        this.scale = data.particleSettings.value().particleSize(this.random);
-        this.lifetime = data.particleSettings.value().particleLifetime(this.random) + 1;
-        this.dataId = data.getRegistryId();
-        this.renderStyle = data.renderStyle;
-        this.spriteData = data.spriteData;
-        this.initModules.forEach(m -> m.init(this));
-        this.oxRot = this.xRot;
-        this.oyRot = this.yRot;
-        this.oRoll = this.roll;
-        this.renderType = data.renderType;
-        this.speed = data.particleSettings.value().particleSpeed(this.random);
-        this.parentEmitter = data.parentEmitter;
-        this.parentEmitter.particleAdded();
-    }
 
-    public List<ResourceLocation> getSubEmitters() {
-        return this.subEmitters;
+        this.particle = new QuasarParticle(world, data, particleSettings, parentEmitter);
+        this.particle.getPosition().set(x, y, z);
+        this.particle.init();
+        // FIXME
+//        this.renderModules = new ArrayList<>();//data.renderModules;
+//        this.initModules = new ArrayList<>();//data.initModules;
+//        this.updateModules = new ArrayList<>();//data.updateModules;
+//        this.collisionModules = new ArrayList<>();//data.collisionModules;
+//        this.forces = new ArrayList<>();//data.forces;
+//        this.subEmitters = new ArrayList<>();//data.subEmitters;
+//        this.trailModules = new ArrayList<>();//data.initModules.stream().filter(m -> m instanceof TrailParticleModule).map(m -> (TrailParticleModule) m).collect(Collectors.toList());
+        this.dataId = data.getRegistryId();
+        this.renderStyle = data.renderStyle();
+        this.parentEmitter = parentEmitter;
+
+        this.setScale(this.particle.getScale());
     }
 
     public void setScale(float scale) {
-        this.scale = scale;
+        this.particle.setScale(scale);
         this.setSize(scale * 0.5f, scale * 0.5f);
     }
 
@@ -180,46 +105,32 @@ public class QuasarVanillaParticle extends Particle {
         return this.dataId;
     }
 
-    public float getScale() {
-        return this.scale;
-    }
-
     public double getXDelta() {
-        return (float) this.xd;
+        return this.particle.getVelocity().x();
     }
 
     public double getYDelta() {
-        return (float) this.yd;
+        return this.particle.getVelocity().y();
     }
 
     public double getZDelta() {
-        return (float) this.zd;
+        return this.particle.getVelocity().z();
     }
 
     public void setXDelta(double x) {
-        this.xd = x;
+        this.particle.getVelocity().x = x;
     }
 
     public void setYDelta(double y) {
-        this.yd = y;
+        this.particle.getVelocity().y = y;
     }
 
     public void setZDelta(double z) {
-        this.zd = z;
+        this.particle.getVelocity().z = z;
     }
 
-    public void setDeltaMovement(Vec3 delta) {
-        this.xd = delta.x;
-        this.yd = delta.y;
-        this.zd = delta.z;
-    }
-
-    public void setAlpha(float alpha) {
-        this.alpha = alpha;
-    }
-
-    public Vec3 getDeltaMovement() {
-        return new Vec3(this.xd, this.yd, this.zd);
+    public Vector3d getDeltaMovement() {
+        return this.particle.getVelocity();
     }
 
     public boolean isOnGround() {
@@ -236,76 +147,66 @@ public class QuasarVanillaParticle extends Particle {
 
     @Override
     public void tick() {
-//        MinecraftForge.EVENT_BUS.post(new QuasarParticleTickEvent(this));
-        if (this.renderData != null) {
-            this.renderData.tick();
-        }
-        this.hasPhysics = true;
-        Vec3 motion = new Vec3(this.xd, this.yd, this.zd);
-        this.position = new Vec3(this.x, this.y, this.z);
+        this.particle.tick();
+//        this.hasPhysics = true;
+        Vector3d motion = this.particle.getVelocity();
+        Vector3d position = this.particle.getPosition();
+        Vector3f rotation = this.particle.getRotation();
+        this.x = position.x;
         if ((this.stoppedByCollision || this.onGround)) {
-            this.collisionModules.forEach(m -> {
-                m.update(this);
-            });
+            this.particle.getModules().collide(this.particle);
         }
-        if (!this.shouldCollide && !this.collisionModules.isEmpty()) {
+        if (!this.shouldCollide && this.particle.getModules().getCollisionModules().length > 0) {
             this.shouldCollide = true;
         }
-        this.updateModules.forEach(m -> {
-            m.update(this);
-        });
-        this.forces.forEach(force -> {
-            force.applyForce(this);
-        });
-        this.xd *= this.speed;
-        this.yd *= this.speed;
-        this.zd *= this.speed;
+        // friction module
+//        this.xd *= this.speed;
+//        this.yd *= this.speed;
+//        this.zd *= this.speed;
 
-        if (this.previousPosition.x == this.position.x) {
-            this.stoppedByCollision = true;
-        }
-        if (this.previousPosition.z == this.position.z) {
-            this.stoppedByCollision = true;
-        }
-        this.previousMotion = motion;
-        this.previousPosition = this.position;
-        this.oxRot = this.xRot;
-        this.oyRot = this.yRot;
-        this.oRoll = this.roll;
-        if (this.faceVelocity) {
-            motion = motion.normalize();
-            this.xRot = (float) Math.atan2(motion.y, Math.sqrt(motion.x * motion.x + motion.z * motion.z));
-            this.yRot = (float) Math.atan2(motion.x, motion.z);
+        if (this.particle.getData().faceVelocity()) {
+            Vector3d normalizedMotion = motion.normalize(new Vector3d());
+            rotation.x = (float) Math.atan2(normalizedMotion.y, Math.sqrt(normalizedMotion.x * normalizedMotion.x + normalizedMotion.z * normalizedMotion.z));
+            rotation.y = (float) Math.atan2(normalizedMotion.x, normalizedMotion.z);
             if (this.renderStyle == RenderStyle.BILLBOARD) {
-                this.yRot += Math.PI / 2;
+                rotation.y += (float) (Math.PI / 2.0);
             }
         }
-        super.tick();
-        List<Entity> entities = this.level.getEntities(null, this.getBoundingBox().inflate(this.scale * 2f));
-        for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity && this.shouldCollide) {
-                if (livingEntity.isAlive()) {
+
+        // vanilla particle
+        this.yd -= 0.04 * (double) this.gravity;
+        this.move(this.xd, this.yd, this.zd);
+        if (this.speedUpWhenYMotionIsBlocked && this.y == this.yo) {
+            this.xd *= 1.1;
+            this.zd *= 1.1;
+        }
+
+        this.xd *= this.friction;
+        this.yd *= this.friction;
+        this.zd *= this.friction;
+        if (this.onGround) {
+            this.xd *= 0.699999988079071;
+            this.zd *= 0.699999988079071;
+        }
+
+        if (this.shouldCollide) {
+            List<Entity> entities = this.level.getEntities(null, this.getBoundingBox().inflate(this.particle.getScale() * 2f));
+            for (Entity entity : entities) {
+                if (entity instanceof LivingEntity livingEntity && livingEntity.isAlive()) {
                     this.stoppedByCollision = true;
                 }
             }
         }
 
-        // parent tick
-        // end parent tick
-        if (this.age >= this.lifetime - 1) {
+        if (this.particle.isRemoved()) {
             this.remove();
         }
     }
 
     @Override
     public void remove() {
-        this.parentEmitter.particleRemoved();
+        this.particle.onRemove();
         super.remove();
-        if (VeilRenderSystem.renderer().getDeferredRenderer().isEnabled()) {
-            if (this.light != null) {
-                VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer().removeLight(this.light);
-            }
-        }
     }
 
     private static final double MAXIMUM_COLLISION_VELOCITY_SQUARED = Mth.square(100.0D);
@@ -335,52 +236,37 @@ public class QuasarVanillaParticle extends Particle {
             this.onGround = d1 != pY && d1 < 0.0D;
             if (d0 != pX) {
                 this.xd = 0.0D;
+                this.stoppedByCollision = true;
             }
 
             if (d2 != pZ) {
                 this.zd = 0.0D;
+                this.stoppedByCollision = true;
             }
-
         }
     }
-
-    private void updateLight(float partialTick) {
-        if (this.light == null) return;
-        Vec3 lerpedPos = new Vec3(Mth.lerp(partialTick, this.xo, this.x), Mth.lerp(partialTick, this.yo, this.y), Mth.lerp(partialTick, this.zo, this.z));
-        this.light.setPosition(lerpedPos.x, lerpedPos.y, lerpedPos.z);
-        LightModule lightModule = (LightModule) this.initModules.stream().filter(m -> m instanceof LightModule).findFirst().orElse(null);
-        if (lightModule == null) return;
-        this.light.setColor(toLightColor(this.lightGradient.getColor((float) this.age / this.lifetime)).mul(lightModule.getBrightness()));
-    }
-
-    private static final ResourceLocation STONE_TEXTURE = new ResourceLocation("minecraft", "textures/block/dirt.png");
-
-    private RenderData renderData = null;
 
     @Override
     public void render(VertexConsumer builder, Camera camera, float partialTicks) {
+        RenderData renderData = this.particle.getRenderData();
+        ParticleRenderType renderType = renderData.getRenderType();
+
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        this.renderType.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
+        renderType.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
         builder = bufferBuilder;
 
-        if (this.renderData == null) {
-            this.renderData = new RenderData();
-        }
+        renderData.setRed(this.rCol);
+        renderData.setGreen(this.gCol);
+        renderData.setBlue(this.bCol);
+        renderData.setAlpha(this.alpha);
 
-        this.renderData.setScale(this.scale);
-        this.renderData.setRed(this.rCol);
-        this.renderData.setGreen(this.gCol);
-        this.renderData.setBlue(this.bCol);
-        this.renderData.setAlpha(this.alpha);
-
-        this.renderModules.forEach(m -> m.render(this, partialTicks, this.renderData));
-        this.renderData.render(new Vector3d(this.x, this.y, this.z), new Vector3f(this.xRot, this.yRot, this.roll), this.scale, partialTicks);
-        this.rCol = this.renderData.getRed();
-        this.gCol = this.renderData.getGreen();
-        this.bCol = this.renderData.getBlue();
-        this.alpha = this.renderData.getAlpha();
-        Vector3fc rotation = this.renderData.getRenderRotation();
+        this.particle.render(partialTicks);
+        this.rCol = renderData.getRed();
+        this.gCol = renderData.getGreen();
+        this.bCol = renderData.getBlue();
+        this.alpha = renderData.getAlpha();
+        Vector3fc rotation = renderData.getRenderRotation();
         this.roll = rotation.z();
         if (!camera.isInitialized()) {
             return;
@@ -417,18 +303,17 @@ public class QuasarVanillaParticle extends Particle {
 //            });
 //        }
         int packedLight = this.emissive ? LightTexture.FULL_BRIGHT : this.getLightColor(partialTicks);
-        this.renderData.renderTrails(projectedView, packedLight);
+        renderData.renderTrails(projectedView, packedLight);
 
-        this.updateLight(partialTicks);
-        Vector3dc renderPosition = this.renderData.getRenderPosition();
+        Vector3dc renderPosition = renderData.getRenderPosition();
         Vector3f renderOffset = new Vector3f(
                 (float) (renderPosition.x() - projectedView.x()),
                 (float) (renderPosition.y() - projectedView.y()),
                 (float) (renderPosition.z() - projectedView.z()));
         Vector3dc motionDirection = new Vector3d(this.xd, this.yd, this.zd).normalize();
-        this.renderStyle.render(this, this.renderData, renderOffset, motionDirection, packedLight, builder, ageMultiplier, partialTicks);
+        this.renderStyle.render(this, renderData, renderOffset, motionDirection, packedLight, builder, ageMultiplier, partialTicks);
 
-        this.renderType.end(tesselator);
+        renderType.end(tesselator);
     }
 
     // FIXME PLEASE renderer
@@ -439,86 +324,86 @@ public class QuasarVanillaParticle extends Particle {
 
     // FIXME temporary
 
-    public void setPitch(float pitch) {
-        this.xRot = pitch;
-        // this.rotation.x = pitch;
-    }
-
-    public void setYaw(float yaw) {
-        this.yRot = yaw;
-        // this.rotation.y = yaw;
-    }
-
-    public void setRoll(float roll) {
-        this.roll = roll;
-        // this.rotation.z = roll;
-    }
-
-    public void setRotation(float pitch, float yaw, float roll) {
-        this.xRot = pitch;
-        this.yRot = yaw;
-        this.roll = roll;
-        //  this.rotation.set(pitch, yaw, roll);
-    }
-
-    public void setRotation(Vector3fc rotation) {
-        this.xRot = rotation.x();
-        this.yRot = rotation.y();
-        this.roll = rotation.z();
-        // this.rotation.set(rotation);
-    }
-
-    public void setRotation(Vector3dc rotation) {
-        this.xRot = (float) rotation.x();
-        this.yRot = (float) rotation.y();
-        this.roll = (float) rotation.z();
-        // this.rotation.set(rotation);
-    }
-
-    public void vectorToRotation(Vector3dc vector) {
-        this.setRotation((float) Math.asin(vector.y()), (float) Math.atan2(vector.x(), vector.z()), 0);
-        // this.rotation.set((float) Math.asin(vector.y()), (float) Math.atan2(vector.x(), vector.z()), 0);
-    }
+//    public void setPitch(float pitch) {
+//        this.xRot = pitch;
+//        // this.rotation.x = pitch;
+//    }
+//
+//    public void setYaw(float yaw) {
+//        this.yRot = yaw;
+//        // this.rotation.y = yaw;
+//    }
+//
+//    public void setRoll(float roll) {
+//        this.roll = roll;
+//        // this.rotation.z = roll;
+//    }
+//
+//    public void setRotation(float pitch, float yaw, float roll) {
+//        this.xRot = pitch;
+//        this.yRot = yaw;
+//        this.roll = roll;
+//        //  this.rotation.set(pitch, yaw, roll);
+//    }
+//
+//    public void setRotation(Vector3fc rotation) {
+//        this.xRot = rotation.x();
+//        this.yRot = rotation.y();
+//        this.roll = rotation.z();
+//        // this.rotation.set(rotation);
+//    }
+//
+//    public void setRotation(Vector3dc rotation) {
+//        this.xRot = (float) rotation.x();
+//        this.yRot = (float) rotation.y();
+//        this.roll = (float) rotation.z();
+//        // this.rotation.set(rotation);
+//    }
+//
+//    public void vectorToRotation(Vector3dc vector) {
+//        this.setRotation((float) Math.asin(vector.y()), (float) Math.atan2(vector.x(), vector.z()), 0);
+//        // this.rotation.set((float) Math.asin(vector.y()), (float) Math.atan2(vector.x(), vector.z()), 0);
+//    }
 
     // END
 
-    public Vec3 getPos() {
-        return new Vec3(this.x, this.y, this.z);
-    }
-
-    public void addForce(Vec3 force) {
-        this.xd += force.x;
-        this.yd += force.y;
-        this.zd += force.z;
-    }
-
-    public void addForce(double x, double y, double z) {
-        this.xd += x;
-        this.yd += y;
-        this.zd += z;
-    }
-
-    public void modifyForce(double modifier) {
-        this.xd *= modifier;
-        this.yd *= modifier;
-        this.zd *= modifier;
-    }
-
-    public void modifyForce(Vec3 modifier) {
-        this.xd *= modifier.x;
-        this.yd *= modifier.y;
-        this.zd *= modifier.z;
-    }
+//    public Vec3 getPos() {
+//        return new Vec3(this.x, this.y, this.z);
+//    }
+//
+//    public void addForce(Vec3 force) {
+//        this.xd += force.x;
+//        this.yd += force.y;
+//        this.zd += force.z;
+//    }
+//
+//    public void addForce(double x, double y, double z) {
+//        this.xd += x;
+//        this.yd += y;
+//        this.zd += z;
+//    }
+//
+//    public void modifyForce(double modifier) {
+//        this.xd *= modifier;
+//        this.yd *= modifier;
+//        this.zd *= modifier;
+//    }
+//
+//    public void modifyForce(Vec3 modifier) {
+//        this.xd *= modifier.x;
+//        this.yd *= modifier.y;
+//        this.zd *= modifier.z;
+//    }
 
     public int getAge() {
-        return this.age;
+        return this.particle.getAge();
     }
 
-    public void addRotation(Vec3 rot) {
-        this.xRot += (float) rot.x;
-        this.yRot += (float) rot.y;
-        this.roll += (float) rot.z;
-    }
+//    public void addRotation(Vec3 rot) {
+//        this.xRot += (float) rot.x;
+//        this.yRot += (float) rot.y;
+//        this.roll += (float) rot.z;
+//    }
 
 //    public void overrideRotation(Vec3 rot) {
 //        this.yaw = (float) rot.x;
@@ -526,24 +411,20 @@ public class QuasarVanillaParticle extends Particle {
 //        this.roll = (float) rot.z;
 //    }
 
-    public void setColor(Vector4fc color) {
-        this.rCol = color.x();
-        this.gCol = color.y();
-        this.bCol = color.z();
-        this.alpha = color.w();
-    }
+//    public void setColor(Vector4fc color) {
+//        this.rCol = color.x();
+//        this.gCol = color.y();
+//        this.bCol = color.z();
+//        this.alpha = color.w();
+//    }
 
     public Level getLevel() {
         return this.level;
     }
 
-    public List<AbstractParticleForce> getForces() {
-        return this.forces;
-    }
-
-    public ParticleContext getContext() {
-        return new ParticleContext(this.position, this.previousMotion, this);
-    }
+//    public ParticleContext getContext() {
+//        return new ParticleContext(this.position, this.previousMotion, this);
+//    }
 
     public enum RenderStyle implements RenderFunction {
         CUBE {
@@ -557,16 +438,21 @@ public class QuasarVanillaParticle extends Particle {
                             QuasarVanillaParticle.CUBE[i * 4 + 2],
                             QuasarVanillaParticle.CUBE[i * 4 + 3]
                     };
-                    RenderSystem.setShaderTexture(0, particle.spriteData.sprite());
+                    SpriteData spriteData = renderData.getSpriteData();
+                    if (particle.sprite != null) {
+                        RenderSystem.setShaderTexture(0, particle.sprite.atlasLocation());
+                    } else if (spriteData != null) {
+                        RenderSystem.setShaderTexture(0, spriteData.sprite());
+                    }
                     for (int j = 0; j < 4; j++) {
                         Vector3f vec = faceVerts[j].toVector3f().mul(-1);
-                        if (vec.z < 0 && particle.velocityStretchFactor != 0.0f) {
-                            vec.set(vec.x, vec.y, vec.z * (1 + particle.velocityStretchFactor));
+                        if (vec.z < 0 && particle.particle.getData().velocityStretchFactor() != 0.0f) {
+                            vec.set(vec.x, vec.y, vec.z * (1 + particle.particle.getData().velocityStretchFactor()));
                         }
                         vec = vec.rotateX(rotation.x())
                                 .rotateY(rotation.y())
                                 .rotateZ(rotation.z())
-                                .mul((float) (particle.scale * ageModifier))
+                                .mul((float) (renderData.getRenderScale() * ageModifier))
                                 .add(renderOffset);
 
                         builder.vertex(vec.x, vec.y, vec.z)
@@ -578,7 +464,7 @@ public class QuasarVanillaParticle extends Particle {
                 }
             }
         },
-        // TODO: FIX UVS THEYRE FUCKED
+        // TODO: FIX UVS THEY'RE FUCKED
         BILLBOARD {
             @Override
             public void render(QuasarVanillaParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
@@ -591,78 +477,71 @@ public class QuasarVanillaParticle extends Particle {
                 };
 
                 Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
-                RenderSystem.setShaderTexture(0, particle.spriteData.sprite());
+                SpriteData spriteData = renderData.getSpriteData();
                 if (particle.sprite != null) {
                     RenderSystem.setShaderTexture(0, particle.sprite.atlasLocation());
+                } else if (spriteData != null) {
+                    RenderSystem.setShaderTexture(0, spriteData.sprite());
                 }
+
                 // turn quat into pitch and yaw
                 for (int j = 0; j < 4; j++) {
                     Vector3f vec = faceVerts[j].toVector3f().mul(-1.0F);
-                    if (particle.velocityStretchFactor > 0f) {
-                        vec.set(vec.x * (1 + particle.velocityStretchFactor), vec.y, vec.z);
+                    if (particle.particle.getData().velocityStretchFactor() > 0f) {
+                        vec.set(vec.x * (1 + particle.particle.getData().velocityStretchFactor()), vec.y, vec.z);
                     }
-                    if (particle.faceVelocity) {
+                    if (particle.particle.getData().faceVelocity()) {
                         vec.rotateX(rotation.x())
                                 .rotateY(rotation.y())
                                 .rotateZ(rotation.z());
                     }
 //                vec = vec.xRot(lerpedPitch).yRot(lerpedYaw).zRot(lerpedRoll);
-                    faceCameraRotation.transform(vec).mul((float) (particle.scale * ageModifier)).add(renderOffset);
+                    faceCameraRotation.transform(vec).mul((float) (renderData.getRenderScale() * ageModifier)).add(renderOffset);
 
-                    float u = 0;
-                    float v = 0;
+                    float u, v;
                     if (j == 0) {
                         u = 0;
                         v = 0;
-                        if (particle.sprite != null) {
-                            u = particle.sprite.getU0();
-                            v = particle.sprite.getV0();
-                        }
                     } else if (j == 1) {
                         u = 1;
                         v = 0;
-                        if (particle.sprite != null) {
-                            u = particle.sprite.getU1();
-                            v = particle.sprite.getV0();
-                        }
                     } else if (j == 2) {
                         u = 1;
                         v = 1;
-                        if (particle.sprite != null) {
-                            u = particle.sprite.getU1();
-                            v = particle.sprite.getV1();
-                        }
                     } else {
                         u = 0;
                         v = 1;
-                        if (particle.sprite != null) {
-                            u = particle.sprite.getU0();
-                            v = particle.sprite.getV1();
-                        }
                     }
-                    int spritesheetRows = particle.spriteData.frameHeight();
-                    int spritesheetColumns = particle.spriteData.frameWidth();
-                    int spriteCount = particle.spriteData.frameCount();
-                    float animationSpeed = particle.spriteData.frameTime();
-                    // get frame index from age + partial ticks, but it should be an integer.
-                    int frameIndex = (int) ((particle.age + partialTicks) / animationSpeed);
-                    // get the frame index in the spritesheet
-                    int frameIndexInSpritesheet = frameIndex % spriteCount;
-                    // get the row and column of the frame in the spritesheet
-                    int frameRow = frameIndexInSpritesheet / spritesheetColumns;
-                    int frameColumn = frameIndexInSpritesheet % spritesheetColumns;
-                    // get the u and v coordinates of the frame, using u and v which are this vertex's u and v
-                    float u1 = u * (1f / spritesheetColumns) + frameColumn * (1f / spritesheetColumns);
-                    float v1 = v * (1f / spritesheetRows) + frameRow * (1f / spritesheetRows);
-                    if (particle.sprite != null) {
-                        u1 = u;
-                        v1 = v;
+                    if (spriteData != null) {
+                        int spritesheetRows = spriteData.frameHeight();
+                        int spritesheetColumns = spriteData.frameWidth();
+                        int spriteCount = spriteData.frameCount();
+                        float animationSpeed = spriteData.frameTime();
+                        // get frame index from age + partial ticks, but it should be an integer.
+                        int frameIndex = (int) ((particle.age + partialTicks) / animationSpeed);
+                        // get the frame index in the spritesheet
+                        int frameIndexInSpritesheet = frameIndex % spriteCount;
+                        // get the row and column of the frame in the spritesheet
+                        int frameRow = frameIndexInSpritesheet / spritesheetColumns;
+                        int frameColumn = frameIndexInSpritesheet % spritesheetColumns;
+                        // get the u and v coordinates of the frame, using u and v which are this vertex's u and v
+                        u *= (1f / spritesheetColumns) + frameColumn * (1f / spritesheetColumns);
+                        v *= (1f / spritesheetRows) + frameRow * (1f / spritesheetRows);
                     }
-                    builder.vertex(vec.x, vec.y, vec.z)
-                            .uv(u1, v1)
-                            .color(particle.rCol, particle.gCol, particle.bCol, particle.alpha)
-                            .uv2(light)
-                            .endVertex();
+//                    if (particle.sprite != null) {
+//                        u1 = u;
+//                        v1 = v;
+//                    }
+                    builder.vertex(vec.x, vec.y, vec.z);
+                    TextureAtlasSprite atlasSprite = renderData.getAtlasSprite();
+                    if (atlasSprite != null) {
+                        atlasSprite.wrap(builder).uv(u, v);
+                    } else {
+                        builder.uv(u, v);
+                    }
+                    builder.color(particle.rCol, particle.gCol, particle.bCol, particle.alpha);
+                    builder.uv2(light);
+                    builder.endVertex();
                 }
             }
         };

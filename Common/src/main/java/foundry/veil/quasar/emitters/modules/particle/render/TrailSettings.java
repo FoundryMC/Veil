@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.fx.Trail;
 import foundry.veil.quasar.util.CodecUtil;
-import foundry.veil.quasar.util.TriFunction;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.type.ImBoolean;
@@ -16,35 +15,29 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
-
-import static foundry.veil.quasar.client.particle.data.SpriteData.BLANK_TEXTURE;
-
 public class TrailSettings {
-    public static final Codec<TrailSettings> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    Codec.INT.optionalFieldOf("trailFrequency", 1).forGetter(settings -> settings.trailFrequency),
-                    Codec.INT.optionalFieldOf("trailLength", 20).forGetter(settings -> settings.trailLength),
-                    CodecUtil.VECTOR4F_CODEC.optionalFieldOf("trailColor", new Vector4f(0.0F, 0.0F, 0.0F, 1.0F)).forGetter(settings -> settings.trailColor),
-                    Codec.FLOAT.fieldOf("trailWidthModifier").forGetter(settings -> settings.trailWidthModifierFloat),
-                    ResourceLocation.CODEC.fieldOf("trailTexture").forGetter(settings -> settings.trailTexture),
-                    Codec.FLOAT.fieldOf("trailPointModifier").forGetter(settings -> 1f),
-                    Trail.TilingMode.CODEC.optionalFieldOf("tilingMode", Trail.TilingMode.STRETCH).forGetter(settings -> settings.tilingMode),
-                    Codec.BOOL.optionalFieldOf("billboard", true).forGetter(settings -> settings.billboard),
-                    Codec.BOOL.optionalFieldOf("parentRotation", false).forGetter(settings -> settings.parentRotation)
-            ).apply(instance, TrailSettings::new)
-    );
-    private int trailFrequency = 1;
-    private int trailLength = 20;
-    private Vector4f trailColor = new Vector4f(1, 1, 1, 1);
-    private TrailWidthModifier trailWidthModifier = (width, ageScale) -> 1f;
-    private TrailPointModifier trailPointModifier = (point, index, velocity) -> point;
-    private ResourceLocation trailTexture = BLANK_TEXTURE;
-    private Trail.TilingMode tilingMode = Trail.TilingMode.STRETCH;
-    private boolean billboard = true;
-    private boolean parentRotation = false;
+
+    public static final Codec<TrailSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.optionalFieldOf("trailFrequency", 1).forGetter(settings -> settings.trailFrequency),
+            Codec.INT.optionalFieldOf("trailLength", 20).forGetter(settings -> settings.trailLength),
+            CodecUtil.VECTOR4F_CODEC.optionalFieldOf("trailColor", new Vector4f(1.0F)).forGetter(settings -> settings.trailColor),
+            Codec.FLOAT.fieldOf("trailWidthModifier").forGetter(settings -> settings.trailWidthModifierFloat),
+            ResourceLocation.CODEC.fieldOf("trailTexture").forGetter(settings -> settings.trailTexture),
+            Codec.FLOAT.fieldOf("trailPointModifier").forGetter(settings -> 1.0F),
+            Trail.TilingMode.CODEC.optionalFieldOf("tilingMode", Trail.TilingMode.STRETCH).forGetter(settings -> settings.tilingMode),
+            Codec.BOOL.optionalFieldOf("billboard", true).forGetter(settings -> settings.billboard),
+            Codec.BOOL.optionalFieldOf("parentRotation", false).forGetter(settings -> settings.parentRotation)
+    ).apply(instance, TrailSettings::new));
+
+    private int trailFrequency;
+    private int trailLength;
+    private Vector4f trailColor;
+    private TrailWidthModifier trailWidthModifier;
+    private TrailPointModifier trailPointModifier;
+    private ResourceLocation trailTexture;
+    private Trail.TilingMode tilingMode;
+    private boolean billboard;
+    private boolean parentRotation;
     private float trailWidthModifierFloat = 1f;
 
     public TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, TrailWidthModifier trailWidthModifier, ResourceLocation trailTexture, TrailPointModifier trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {

@@ -1,4 +1,4 @@
 {
-  "module": "sub_emitter_collision",
+  "module": "veil:sub_emitter_collision",
   "subemitter": "veil:basic_smoke"
 }

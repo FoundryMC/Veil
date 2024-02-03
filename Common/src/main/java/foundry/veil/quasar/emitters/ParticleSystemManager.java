@@ -1,7 +1,11 @@
 package foundry.veil.quasar.emitters;
 
-import foundry.veil.quasar.emitters.modules.particle.update.forces.AbstractParticleForce;
-import net.minecraft.world.phys.Vec3;
+import foundry.veil.quasar.data.QuasarParticles;
+import foundry.veil.quasar.data.ParticleEmitterData;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,20 +27,13 @@ public class ParticleSystemManager {
         return instance;
     }
 
-    public void applyForceToParticles(Vec3 center, float radius, AbstractParticleForce... forces) {
-//        for (ParticleEmitter particleEmitter : this.particleEmitters) {
-//                if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
-//                    particleEmitter.getParticleData().addForces(forces);
-//                }
-//        }
-    }
+    public @Nullable ParticleEmitter createEmitter(Level level, ResourceLocation name) {
+        if (!(level instanceof ClientLevel clientLevel)) {
+            return null;
+        }
 
-    public void removeForcesFromParticles(Vec3 center, float radius, AbstractParticleForce... forces) {
-//        for (ParticleEmitter particleEmitter : this.particleEmitters) {
-//            if(particleEmitter.emitterModule.getPosition().distanceTo(center) < radius){
-//                particleEmitter.getParticleData().removeForces(forces);
-//            }
-//        }
+        ParticleEmitterData data = QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER).get(name);
+        return data != null ? new ParticleEmitter(clientLevel, data) : null;
     }
 
     public void addParticleSystem(ParticleEmitter particleEmitter) {
@@ -60,7 +57,7 @@ public class ParticleSystemManager {
             }
         }
 
-        PARTICLE_COUNT = this.particleEmitters.stream().mapToInt(emitter -> emitter.getParticleCount()).sum();
+        PARTICLE_COUNT = this.particleEmitters.stream().mapToInt(ParticleEmitter::getParticleCount).sum();
         // FIXME
     }
 

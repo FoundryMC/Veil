@@ -9,24 +9,13 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.api.client.render.shader.RenderTypeRegistry;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
 
 public class QuasarParticleRenderType implements ParticleRenderType {
-    private ResourceLocation texture;
-
-    public QuasarParticleRenderType() {
-    }
-
-    public QuasarParticleRenderType setTexture(ResourceLocation texture) {
-        this.texture = texture;
-        return this;
-    }
 
     @Override
     public void begin(BufferBuilder builder, TextureManager textureManager) {
         RenderSystem.depthMask(true);
         RenderSystem.setShader(() -> RenderTypeRegistry.QUASAR_PARTICLE_ADDITIVE_MULTIPLY);
-        RenderSystem.setShaderTexture(0, this.texture);
 
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);

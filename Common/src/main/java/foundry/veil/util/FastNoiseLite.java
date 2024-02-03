@@ -60,41 +60,41 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 @SuppressWarnings("unused")
 public class FastNoiseLite {
-    public static final Codec<FastNoiseLite> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    Codec.FLOAT.fieldOf("frequency").forGetter(FastNoiseLite::GetFrequency),
-                    Codec.INT.fieldOf("seed").forGetter(FastNoiseLite::GetSeed),
-                    Codec.STRING.fieldOf("fractal_type").orElse("Fbm").xmap(FractalType::valueOf, Enum::name).forGetter(FastNoiseLite::GetFractalType),
-                    Codec.INT.fieldOf("octaves").orElse(1).forGetter(FastNoiseLite::GetFractalOctaves),
-                    Codec.FLOAT.fieldOf("lacunarity").orElse(2.0f).forGetter(FastNoiseLite::GetFractalLacunarity),
-                    Codec.FLOAT.fieldOf("gain").orElse(0.5f).forGetter(FastNoiseLite::GetFractalGain),
-                    Codec.STRING.fieldOf("cellular_distance_function").orElse("Euclidean").xmap(CellularDistanceFunction::valueOf, Enum::name).forGetter(FastNoiseLite::GetCellularDistanceFunction),
-                    Codec.STRING.fieldOf("cellular_return_type").orElse("CellValue").xmap(CellularReturnType::valueOf, Enum::name).forGetter(FastNoiseLite::GetCellularReturnType),
-                    Codec.STRING.fieldOf("noise_type").orElse("OpenSimplex2").xmap(NoiseType::valueOf, Enum::name).forGetter(FastNoiseLite::GetNoiseType),
-                    Codec.STRING.fieldOf("rotation_type_3d").orElse("None").xmap(RotationType3D::valueOf, Enum::name).forGetter(FastNoiseLite::GetRotationType3D),
-                    Codec.STRING.fieldOf("domain_warp_type").orElse("OpenSimplex2").xmap(DomainWarpType::valueOf, Enum::name).forGetter(FastNoiseLite::GetDomainWarpType),
-                    Codec.FLOAT.fieldOf("domain_warp_amp").orElse(1.0f).forGetter(FastNoiseLite::GetDomainWarpAmp)
-            ).apply(instance, (frequency, seed, fractalType, octaves, lacunarity, gain, cellularDistanceFunction, cellularReturnType, noiseType, rotationType3D, domainWarpType, domainWarpAmp) -> {
-                        FastNoiseLite noise = new FastNoiseLite();
-                        noise.SetFrequency(frequency);
-                        noise.SetSeed(seed);
-                        noise.SetFractalType(fractalType);
-                        noise.SetFractalOctaves(octaves);
-                        noise.SetFractalLacunarity(lacunarity);
-                        noise.SetFractalGain(gain);
-                        noise.SetCellularDistanceFunction(cellularDistanceFunction);
-                        noise.SetCellularReturnType(cellularReturnType);
-                        noise.SetNoiseType(noiseType);
-                        noise.SetRotationType3D(rotationType3D);
-                        noise.SetDomainWarpType(domainWarpType);
-                        noise.SetDomainWarpAmp(domainWarpAmp);
-                        return noise;
-                    }
-            ));
+
+    public static final Codec<FastNoiseLite> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.FLOAT.fieldOf("frequency").forGetter(FastNoiseLite::GetFrequency),
+            Codec.INT.fieldOf("seed").forGetter(FastNoiseLite::GetSeed),
+            Codec.STRING.fieldOf("fractal_type").xmap(FractalType::valueOf, Enum::name).orElse(FractalType.FBm).forGetter(FastNoiseLite::GetFractalType),
+            Codec.INT.optionalFieldOf("octaves", 1).forGetter(FastNoiseLite::GetFractalOctaves),
+            Codec.FLOAT.optionalFieldOf("lacunarity", 2.0F).forGetter(FastNoiseLite::GetFractalLacunarity),
+            Codec.FLOAT.optionalFieldOf("gain", 0.5F).forGetter(FastNoiseLite::GetFractalGain),
+            Codec.STRING.fieldOf("cellular_distance_function").xmap(CellularDistanceFunction::valueOf, Enum::name).orElse(CellularDistanceFunction.Euclidean).forGetter(FastNoiseLite::GetCellularDistanceFunction),
+            Codec.STRING.fieldOf("cellular_return_type").xmap(CellularReturnType::valueOf, Enum::name).orElse(CellularReturnType.CellValue).forGetter(FastNoiseLite::GetCellularReturnType),
+            Codec.STRING.fieldOf("noise_type").xmap(NoiseType::valueOf, Enum::name).orElse(NoiseType.OpenSimplex2).forGetter(FastNoiseLite::GetNoiseType),
+            Codec.STRING.fieldOf("rotation_type_3d").xmap(RotationType3D::valueOf, Enum::name).orElse(RotationType3D.None).forGetter(FastNoiseLite::GetRotationType3D),
+            Codec.STRING.fieldOf("domain_warp_type").xmap(DomainWarpType::valueOf, Enum::name).orElse(DomainWarpType.OpenSimplex2).forGetter(FastNoiseLite::GetDomainWarpType),
+            Codec.FLOAT.optionalFieldOf("domain_warp_amp", 1.0F).forGetter(FastNoiseLite::GetDomainWarpAmp)
+    ).apply(instance, (frequency, seed, fractalType, octaves, lacunarity, gain, cellularDistanceFunction, cellularReturnType, noiseType, rotationType3D, domainWarpType, domainWarpAmp) -> {
+        FastNoiseLite noise = new FastNoiseLite();
+        noise.SetFrequency(frequency);
+        noise.SetSeed(seed);
+        noise.SetFractalType(fractalType);
+        noise.SetFractalOctaves(octaves);
+        noise.SetFractalLacunarity(lacunarity);
+        noise.SetFractalGain(gain);
+        noise.SetCellularDistanceFunction(cellularDistanceFunction);
+        noise.SetCellularReturnType(cellularReturnType);
+        noise.SetNoiseType(noiseType);
+        noise.SetRotationType3D(rotationType3D);
+        noise.SetDomainWarpType(domainWarpType);
+        noise.SetDomainWarpAmp(domainWarpAmp);
+        return noise;
+    }));
 
     public void renderImGuiSettings() {
 
     }
+
     public enum NoiseType {
         OpenSimplex2,
         OpenSimplex2S,
@@ -164,78 +164,109 @@ public class FastNoiseLite {
     ;
 
     private int mSeed = 1337;
+
     public int GetSeed() {
         return mSeed;
     }
+
     private float mFrequency = 0.01f;
+
     public float GetFrequency() {
         return mFrequency;
     }
+
     private NoiseType mNoiseType = NoiseType.OpenSimplex2;
+
     public NoiseType GetNoiseType() {
         return mNoiseType;
     }
+
     private RotationType3D mRotationType3D = RotationType3D.None;
+
     public RotationType3D GetRotationType3D() {
         return mRotationType3D;
     }
+
     private TransformType3D mTransformType3D = TransformType3D.DefaultOpenSimplex2;
+
     public TransformType3D GetTransformType3D() {
         return mTransformType3D;
     }
 
     private FractalType mFractalType = FractalType.None;
+
     public FractalType GetFractalType() {
         return mFractalType;
     }
+
     private int mOctaves = 3;
+
     public int GetFractalOctaves() {
         return mOctaves;
     }
+
     private float mLacunarity = 2.0f;
+
     public float GetFractalLacunarity() {
         return mLacunarity;
     }
+
     private float mGain = 0.5f;
+
     public float GetFractalGain() {
         return mGain;
     }
+
     private float mWeightedStrength = 0.0f;
+
     public float GetFractalWeightedStrength() {
         return mWeightedStrength;
     }
+
     private float mPingPongStrength = 2.0f;
+
     public float GetFractalPingPongStrength() {
         return mPingPongStrength;
     }
 
     private float mFractalBounding = 1 / 1.75f;
+
     public float GetFractalBounding() {
         return mFractalBounding;
     }
 
     private CellularDistanceFunction mCellularDistanceFunction = CellularDistanceFunction.EuclideanSq;
+
     public CellularDistanceFunction GetCellularDistanceFunction() {
         return mCellularDistanceFunction;
     }
+
     private CellularReturnType mCellularReturnType = CellularReturnType.Distance;
+
     public CellularReturnType GetCellularReturnType() {
         return mCellularReturnType;
     }
+
     private float mCellularJitterModifier = 1.0f;
+
     public float GetCellularJitterModifier() {
         return mCellularJitterModifier;
     }
 
     private DomainWarpType mDomainWarpType = DomainWarpType.OpenSimplex2;
+
     public DomainWarpType GetDomainWarpType() {
         return mDomainWarpType;
     }
+
     private TransformType3D mWarpTransformType3D = TransformType3D.DefaultOpenSimplex2;
+
     public TransformType3D GetWarpTransformType3D() {
         return mWarpTransformType3D;
     }
+
     private float mDomainWarpAmp = 1.0f;
+
     public float GetDomainWarpAmp() {
         return mDomainWarpAmp;
     }
