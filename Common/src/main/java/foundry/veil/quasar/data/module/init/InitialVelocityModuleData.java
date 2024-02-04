@@ -10,16 +10,16 @@ import foundry.veil.quasar.util.CodecUtil;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
-public record InitialVelocityData(Vector3dc velocityDirection,
-                                  boolean takesParentRotation,
-                                  float strength) implements ParticleModuleData {
+public record InitialVelocityModuleData(Vector3dc velocityDirection,
+                                        boolean takesParentRotation,
+                                        float strength) implements ParticleModuleData {
 
-    public static final Codec<InitialVelocityData> CODEC = RecordCodecBuilder.create(instance ->
+    public static final Codec<InitialVelocityModuleData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    CodecUtil.VECTOR3D_CODEC.fieldOf("direction").forGetter(InitialVelocityData::velocityDirection),
-                    Codec.BOOL.fieldOf("take_parent_rotation").orElse(true).forGetter(InitialVelocityData::takesParentRotation),
-                    Codec.FLOAT.fieldOf("strength").forGetter(InitialVelocityData::strength)
-            ).apply(instance, InitialVelocityData::new));
+                    CodecUtil.VECTOR3D_CODEC.fieldOf("direction").forGetter(InitialVelocityModuleData::velocityDirection),
+                    Codec.BOOL.fieldOf("take_parent_rotation").orElse(true).forGetter(InitialVelocityModuleData::takesParentRotation),
+                    Codec.FLOAT.fieldOf("strength").forGetter(InitialVelocityModuleData::strength)
+            ).apply(instance, InitialVelocityModuleData::new));
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {

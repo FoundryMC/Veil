@@ -1,4 +1,4 @@
-package foundry.veil.quasar.emitters.modules;
+package foundry.veil.quasar.emitters.modules.particle;
 
 public interface ParticleModule {
 

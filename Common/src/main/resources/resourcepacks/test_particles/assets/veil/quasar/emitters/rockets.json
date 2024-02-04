@@ -3,6 +3,9 @@
   "loop": false,
   "rate": 2,
   "count": 1,
-  "emitter_settings": "veil:rocket",
+  "emitter_settings": {
+    "shape": "veil:rocket",
+    "particle_settings": "veil:rocket"
+  },
   "particle_data": "veil:rocket"
 }

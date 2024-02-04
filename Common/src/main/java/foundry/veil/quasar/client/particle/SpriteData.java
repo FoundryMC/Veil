@@ -1,4 +1,4 @@
-package foundry.veil.quasar.client.particle.data;
+package foundry.veil.quasar.client.particle;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

@@ -1,9 +1,8 @@
-package foundry.veil.quasar.emitters.modules.particle.render;
+package foundry.veil.quasar.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.shader.RenderTypeRegistry;
-import foundry.veil.quasar.client.particle.data.QuasarParticleRenderType;
-import foundry.veil.quasar.client.particle.data.SpriteData;
+import foundry.veil.quasar.emitters.modules.particle.render.TrailSettings;
 import foundry.veil.quasar.fx.Trail;
 import foundry.veil.quasar.util.MathUtil;
 import net.minecraft.client.Minecraft;
@@ -22,14 +21,11 @@ import java.util.List;
 
 public class RenderData {
 
-    private final Vector3d position;
     private final Vector3d prevPosition;
     private final Vector3d renderPosition;
-    private final Vector3f rotation;
     private final Vector3f prevRotation;
     private final Vector3f renderRotation;
     private float prevScale;
-    private float scale;
     private float renderScale;
     private float red;
     private float green;
@@ -44,14 +40,11 @@ public class RenderData {
     private final List<Trail> renderTrails;
 
     public RenderData() {
-        this.position = new Vector3d();
         this.prevPosition = new Vector3d();
         this.renderPosition = new Vector3d();
-        this.rotation = new Vector3f();
         this.prevRotation = new Vector3f();
         this.renderRotation = new Vector3f();
         this.prevScale = 1.0F;
-        this.scale = 1.0F;
         this.renderScale = 1.0F;
         this.red = 1.0F;
         this.green = 1.0F;
@@ -66,20 +59,17 @@ public class RenderData {
     }
 
     @ApiStatus.Internal
-    public void tick() {
-        this.prevPosition.set(this.position);
-        this.prevRotation.set(this.rotation);
-        this.prevScale = this.scale;
+    public void tick(Vector3dc position, Vector3fc rotation, float scale) {
+        this.prevPosition.set(position);
+        this.prevRotation.set(rotation);
+        this.prevScale = scale;
     }
 
     @ApiStatus.Internal
     public void render(Vector3dc position, Vector3fc rotation, float scale, int age, int lifetime, float partialTicks) {
-        this.position.set(position);
-        this.rotation.set(rotation);
-        this.scale = scale;
-        this.prevPosition.lerp(this.position, partialTicks, this.renderPosition);
-        this.prevRotation.lerp(this.rotation, partialTicks, this.renderRotation);
-        this.renderScale = Mth.lerp(partialTicks, this.prevScale, this.scale);
+        this.prevPosition.lerp(position, partialTicks, this.renderPosition);
+        this.prevRotation.lerp(rotation, partialTicks, this.renderRotation);
+        this.renderScale = Mth.lerp(partialTicks, this.prevScale, scale);
         this.renderAge = age + partialTicks;
         this.agePercent = Math.min(this.renderAge / (float) lifetime, 1.0F);
     }

@@ -2,25 +2,27 @@ package foundry.veil.quasar.data.module;
 
 import com.mojang.serialization.Codec;
 import foundry.veil.quasar.data.ParticleModuleTypeRegistry;
+import foundry.veil.quasar.data.module.collision.CollisionSubEmitterData;
+import foundry.veil.quasar.data.module.collision.DieOnCollisionModuleData;
 import foundry.veil.quasar.data.module.force.*;
-import foundry.veil.quasar.data.module.init.BlockParticleModuleData;
-import foundry.veil.quasar.data.module.init.InitSubEmitterModuleData;
-import foundry.veil.quasar.data.module.init.InitialVelocityData;
-import foundry.veil.quasar.data.module.init.LightModuleData;
+import foundry.veil.quasar.data.module.init.*;
 import foundry.veil.quasar.data.module.render.ColorParticleModuleData;
 import foundry.veil.quasar.data.module.render.TrailParticleModuleData;
-import foundry.veil.quasar.data.module.update.TickSubEmitterData;
+import foundry.veil.quasar.data.module.update.TickSizeParticleModuleData;
+import foundry.veil.quasar.data.module.update.TickSubEmitterModuleData;
+import foundry.veil.quasar.emitters.modules.particle.init.InitRandomRotationModuleData;
 import org.jetbrains.annotations.ApiStatus;
 
 @FunctionalInterface
 public interface ModuleType<T extends ParticleModuleData> {
 
     // INIT
-    ModuleType<InitialVelocityData> INITIAL_VELOCITY = registerInitModule("initial_velocity", InitialVelocityData.CODEC);
+    ModuleType<InitialVelocityModuleData> INITIAL_VELOCITY = registerInitModule("initial_velocity", InitialVelocityModuleData.CODEC);
     ModuleType<ColorParticleModuleData> INIT_COLOR = registerInitModule("init_color", ColorParticleModuleData.CODEC);
     ModuleType<InitSubEmitterModuleData> INIT_SUB_EMITTER = registerInitModule("init_sub_emitter", InitSubEmitterModuleData.CODEC);
+    ModuleType<InitSizeParticleModuleData> INIT_SIZE = registerInitModule("init_size", InitSizeParticleModuleData.CODEC);
     //    ModuleType<InitRandomColorParticleModule> INIT_RANDOM_COLOR = registerInitModule("init_random_color", InitRandomColorParticleModule.CODEC);
-//    ModuleType<InitRandomRotationParticleModule> INIT_RANDOM_ROTATION = registerInitModule("init_random_rotation", InitRandomRotationParticleModule.CODEC);
+    ModuleType<InitRandomRotationModuleData> INIT_RANDOM_ROTATION = registerInitModule("init_random_rotation", InitRandomRotationModuleData.CODEC);
     ModuleType<LightModuleData> LIGHT = registerInitModule("light", LightModuleData.CODEC);
     ModuleType<BlockParticleModuleData> BLOCK_PARTICLE = registerInitModule("block", BlockParticleModuleData.CODEC);
 
@@ -33,11 +35,12 @@ public interface ModuleType<T extends ParticleModuleData> {
 
     // UPDATE
 
-    ModuleType<TickSubEmitterData> TICK_SUB_EMITTER = registerUpdateModule("tick_sub_emitter", TickSubEmitterData.CODEC);
+    ModuleType<TickSizeParticleModuleData> TICK_SIZE = registerUpdateModule("tick_size", TickSizeParticleModuleData.CODEC);
+    ModuleType<TickSubEmitterModuleData> TICK_SUB_EMITTER = registerUpdateModule("tick_sub_emitter", TickSubEmitterModuleData.CODEC);
 
     // UPDATE - COLLISION
-//    ModuleType<DieOnCollisionParticleModule> DIE_ON_COLLISION = registerUpdateModule("die_on_collision", DieOnCollisionParticleModule.CODEC);
-//    ModuleType<SubEmitterCollisionParticleModule> SUB_EMITTER_COLLISION = registerUpdateModule("sub_emitter_collision", SubEmitterCollisionParticleModule.CODEC);
+    ModuleType<DieOnCollisionModuleData> DIE_ON_COLLISION = registerUpdateModule("die_on_collision", DieOnCollisionModuleData.CODEC);
+    ModuleType<CollisionSubEmitterData> SUB_EMITTER_COLLISION = registerUpdateModule("sub_emitter_collision", CollisionSubEmitterData.CODEC);
 //    ModuleType<BounceParticleModule> BOUNCE = registerUpdateModule("bounce", BounceParticleModule.CODEC);
 
 

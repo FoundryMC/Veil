@@ -3,7 +3,7 @@
 //import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 //import foundry.veil.quasar.data.module.ModuleType;
 //import foundry.veil.quasar.emitters.modules.particle.RenderParticleModule;
-//import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
+//import foundry.veil.quasar.client.particle.RenderData;
 //import org.jetbrains.annotations.NotNull;
 //import org.joml.Vector4f;
 //

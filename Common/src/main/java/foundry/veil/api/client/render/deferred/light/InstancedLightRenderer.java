@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15C.*;
+import static org.lwjgl.system.MemoryUtil.memAddress;
 
 /**
  * Draws lights as instanced quads in the scene.
@@ -102,8 +103,10 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
                 }
             }
 
-            dataBuffer.rewind();
-            glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
+            if (pointer > 0) {
+                dataBuffer.rewind();
+                nglBufferSubData(GL_ARRAY_BUFFER, offset, (long) pointer * this.lightSize, memAddress(dataBuffer));
+            }
         }
     }
 
@@ -126,7 +129,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
         // If there is no space, then resize
         if (this.visibleLights.size() > this.maxLights) {
             this.oldSize = 0;
-            this.maxLights += (int) Math.ceil(this.maxLights / 2.0);
+            this.maxLights = (int) Math.max(Math.ceil(this.maxLights / 2.0), this.visibleLights.size() * 1.5);
             glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_STREAM_DRAW);
         }
 

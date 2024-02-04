@@ -16,7 +16,7 @@ public record GravityForceData(double strength) implements ParticleModuleData {
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
-        builder.addModule(new ConstantForceModule(new Vector3d(0, -this.strength, 0)));
+        builder.addModule(new ConstantForceModule(new Vector3d(0, -this.strength / 400.0, 0)));
     }
 
     @Override

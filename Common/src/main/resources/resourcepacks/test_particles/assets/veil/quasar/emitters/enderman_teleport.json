@@ -3,6 +3,9 @@
   "loop": false,
   "rate": 1,
   "count": 64,
-  "emitter_settings": "veil:swiftshot_settings",
+  "emitter_settings": {
+    "shape": "veil:swiftshot_shape",
+    "particle_settings": "veil:swiftshot"
+  },
   "particle_data": "veil:swiftshot_data"
 }

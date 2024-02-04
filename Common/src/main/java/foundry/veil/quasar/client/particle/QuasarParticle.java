@@ -1,16 +1,11 @@
 package foundry.veil.quasar.client.particle;
 
 import com.mojang.logging.LogUtils;
-import foundry.veil.quasar.client.particle.data.QuasarParticleData;
 import foundry.veil.quasar.data.ParticleSettings;
+import foundry.veil.quasar.data.QuasarParticleData;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.modules.ParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.ForceParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.InitParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.RenderParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.UpdateParticleModule;
-import foundry.veil.quasar.emitters.modules.particle.render.RenderData;
+import foundry.veil.quasar.emitters.modules.particle.*;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
@@ -25,9 +20,13 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class QuasarParticle {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
 
     private final ClientLevel level;
     private final RandomSource randomSource;
@@ -38,6 +37,7 @@ public class QuasarParticle {
     private final Vector3d position;
     private final Vector3d velocity;
     private final Vector3f rotation;
+    private final BlockPos.MutableBlockPos blockPosition;
     private float scale;
     private final int lifetime;
     private int age;
@@ -55,6 +55,7 @@ public class QuasarParticle {
         this.position = new Vector3d();
         this.velocity = new Vector3d();
         this.rotation = new Vector3f();
+        this.blockPosition = new BlockPos.MutableBlockPos();
         this.scale = settings.particleSize(this.randomSource);
         this.lifetime = settings.particleLifetime(this.randomSource);
         this.age = 0;
@@ -88,13 +89,21 @@ public class QuasarParticle {
         for (InitParticleModule initModule : this.modules.getInitModules()) {
             initModule.init(this);
         }
+        this.renderData.tick(this.position, this.rotation, this.scale);
+    }
+
+    @ApiStatus.Internal
+    public static void clearErrors() {
+        REPORTED_MODULES.clear();
     }
 
     private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
         ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
         data.allModules().forEach(module -> {
             if (!module.isBound()) {
-                LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
+                if (REPORTED_MODULES.add(module)) {
+                    LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
+                }
                 return;
             }
             module.value().addModules(builder);
@@ -103,7 +112,7 @@ public class QuasarParticle {
     }
 
     public void tick() {
-        this.renderData.tick();
+        this.renderData.tick(this.position, this.rotation, this.scale);
         for (UpdateParticleModule updateModule : this.modules.getUpdateModules()) {
             updateModule.update(this);
         }
@@ -166,6 +175,10 @@ public class QuasarParticle {
 
     public Vector3d getPosition() {
         return this.position;
+    }
+
+    public BlockPos getBlockPosition() {
+        return this.blockPosition.set(this.position.x, this.position.y, this.position.z);
     }
 
     public Vector3d getVelocity() {

@@ -3,6 +3,9 @@
   "loop": false,
   "rate": 1,
   "count": 32,
-  "emitter_settings": "veil:swiftshot_shrapnel",
+  "emitter_settings": {
+    "shape": "veil:swiftshot_shrapnel",
+    "particle_settings": "veil:swiftshot_shrapnel"
+  },
   "particle_data": "veil:swiftshot_shrapnel_data"
 }

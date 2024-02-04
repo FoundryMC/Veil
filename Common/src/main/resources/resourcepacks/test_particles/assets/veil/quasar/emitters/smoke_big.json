@@ -3,6 +3,9 @@
   "loop": false,
   "rate": 1,
   "count": 1,
-  "emitter_settings": "veil:smoke_big",
+  "emitter_settings": {
+    "shape": "veil:swiftshot_shape",
+    "particle_settings": "veil:smoke_big"
+  },
   "particle_data": "veil:smoke_big"
 }

@@ -13,12 +13,12 @@ import foundry.veil.quasar.emitters.modules.particle.UpdateParticleModule;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
-public record TickSubEmitterData(ResourceLocation subEmitter, int frequency) implements ParticleModuleData {
+public record TickSubEmitterModuleData(ResourceLocation subEmitter, int frequency) implements ParticleModuleData {
 
-    public static final Codec<TickSubEmitterData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("subemitter").forGetter(TickSubEmitterData::subEmitter),
-            Codec.INT.fieldOf("frequency").forGetter(TickSubEmitterData::frequency)
-    ).apply(instance, TickSubEmitterData::new));
+    public static final Codec<TickSubEmitterModuleData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("subemitter").forGetter(TickSubEmitterModuleData::subEmitter),
+            Codec.INT.fieldOf("frequency").forGetter(TickSubEmitterModuleData::frequency)
+    ).apply(instance, TickSubEmitterModuleData::new));
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {

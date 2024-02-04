@@ -3,6 +3,9 @@
   "loop": false,
   "rate": 1,
   "count": 1,
-  "emitter_settings": "veil:cannon_settings",
+  "emitter_settings": {
+    "shape": "veil:cannon",
+    "particle_settings": "veil:cannon"
+  },
   "particle_data": "veil:cannon_data"
 }

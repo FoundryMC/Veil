@@ -1,4 +1,4 @@
-package foundry.veil.quasar.client.particle.data;
+package foundry.veil.quasar.client.particle;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,6 +10,7 @@ import foundry.veil.api.client.render.shader.RenderTypeRegistry;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 
+@Deprecated
 public class QuasarParticleRenderType implements ParticleRenderType {
 
     @Override

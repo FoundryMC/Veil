@@ -1,9 +1,10 @@
-package foundry.veil.quasar.client.particle.data;
+package foundry.veil.quasar.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
-import foundry.veil.quasar.data.QuasarParticles;
+import foundry.veil.quasar.client.particle.SpriteData;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFileCodec;
@@ -16,23 +17,25 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Data that is passed to each particle when it is created.
+ * <p>Data passed to each particle when it is created.</p>
  *
- * @see QuasarVanillaParticle
- * @see foundry.veil.quasar.emitters.ParticleContext
- * <p>
- * This class is used to store all the data that is passed to each particle when it is created.
+ * <p>This class is used to store all the data that is passed to each particle when it is created.
  * This includes the particle settings, whether or not the particle should collide with blocks,
- * whether or not the particle should face its velocity, and the list of sub emitters.
- * This class also stores the list of particle modules that are applied to each particle.
- * These modules are used to modify the particle's behavior.
- * The list of particle modules includes init modules, render modules, update modules, and collision modules.
- * Init modules are applied when the particle is created.
- * Render modules are applied when the particle is rendered.
- * Update modules are applied every tick.
- * Collision modules are applied when the particle collides with a block.
- * This class also stores the list of particle forces that are applied to each particle.
- * These forces are used to modify the particle's velocity.
+ * whether or not the particle should face its velocity, and the list of sub emitters.</p>
+ *
+ * <p>This class also stores the list of particle modules that are applied to each particle.
+ * These modules are used to modify the particle's behavior. The following are valid particle modules:</p>
+ *
+ * <ul>
+ *   <li>Init Modules - Applied when a particle is created</li>
+ *   <li>Update Modules - Applied at the beginning of the particle tick</li>
+ *   <li>Collision Modules - Applied when the particle collides with a block or entity</li>
+ *   <li>Force Modules - Applied each physics tick to update velocity</li>
+ *   <li>Render Modules - Applied when the particle is rendered</li>
+ * </ul>
+ *
+ * @author amo
+ * @see QuasarParticle
  */
 public record QuasarParticleData(boolean shouldCollide,
                                  boolean faceVelocity,

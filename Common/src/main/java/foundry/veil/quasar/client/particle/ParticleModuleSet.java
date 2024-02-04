@@ -1,11 +1,14 @@
 package foundry.veil.quasar.client.particle;
 
-import foundry.veil.quasar.emitters.modules.ParticleModule;
+import foundry.veil.quasar.emitters.modules.particle.ParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Ocelot
+ */
 public class ParticleModuleSet {
 
     private final ParticleModule[] modules;
@@ -22,12 +25,6 @@ public class ParticleModuleSet {
         this.forceModules = forceModules;
         this.collisionModules = collisionModules;
         this.renderModules = renderModules;
-    }
-
-    public void collide(QuasarParticle particle) {
-        for (CollisionParticleModule collisionParticle : this.collisionModules) {
-            collisionParticle.collide(particle);
-        }
     }
 
     public ParticleModule[] getAllModules() {
