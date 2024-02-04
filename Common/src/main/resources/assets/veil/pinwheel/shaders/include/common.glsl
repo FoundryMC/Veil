@@ -27,3 +27,11 @@ vec3 hemiSpherePointCos(vec2 seed, vec3 normal)
     u = 2.0*u - 1.0;
     return normalize( normal + vec3(sqrt(1.0-u*u) * vec2(cos(a), sin(a)), u) );
 }
+
+float map(float value, float min1, float max1, float min2, float max2) {
+    return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
+float mapClamped(float value, float min1, float max1, float min2, float max2) {
+    return clamp(min2 + (value - min1) * (max2 - min2) / (max1 - min1), min2, max2);
+}
