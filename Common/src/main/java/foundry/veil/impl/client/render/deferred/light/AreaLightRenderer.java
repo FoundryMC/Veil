@@ -33,12 +33,6 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
 
         bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
 
-        // TODO: adjust this so it's more tight around the area lamp's boundaries.
-        // same with AreaLight#isVisible(CullFrustum frustum) and in the vertex shader.
-        // minZ = 0, maxZ = light.distance,
-        // minX/minY/maxX/maxY = negative or positive light.size.x/y + sin(light.angle) * light.distance
-        // then multiply by the matrix to rotate and move everything.
-        
         bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
         bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
         bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left

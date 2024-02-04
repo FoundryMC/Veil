@@ -16,7 +16,20 @@ out float maxDistance;
 out float falloff;
 
 void main() {
-    gl_Position = VeilCamera.ProjMat * VeilCamera.ViewMat * vec4(LightMatrix[3].xyz - VeilCamera.CameraPosition + Position * (max(Size.x, Size.y) + Distance), 1.0);
+    vec3 vertexPos = Position;
+    vertexPos.z = clamp(vertexPos.z, min(cos(Angle), 0), 1);
+    float angleTerm = sin(Angle) * Distance;
+    vertexPos *= vec3(Size.x + angleTerm, Size.y + angleTerm, Distance);
+
+    // awful fix but not sure why just multiplying the matrix doesnt work? it does what it should in
+    // all the other calculations. really weird!
+    vec3 lightPos = LightMatrix[3].xyz;
+    mat3 rotationMatrix = mat3(LightMatrix);
+    lightPos = inverse(rotationMatrix) * lightPos;
+    vertexPos = inverse(rotationMatrix) * vertexPos;
+    vertexPos += lightPos;
+    gl_Position = VeilCamera.ProjMat * VeilCamera.ViewMat * vec4(vertexPos - VeilCamera.CameraPosition, 1.0);
+
     lightMat = LightMatrix;
     lightColor = Color;
     size = Size;
