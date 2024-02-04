@@ -44,40 +44,20 @@ float sacos( float x )
 struct AreaLightResult { vec3 position; float angle; };
 AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 planeSize)
 {
-    //idk why i have to do this seperately
-    vec3 lightPos = planeMatrix[3].xyz;
-
+    // no idea why i need to do this
+    planeMatrix[3].xyz *= -1.0;
     // transform the point to the plane's local space
-    vec3 localPoint = (vec4(point, 1.0) * inverse(planeMatrix)).xyz - lightPos;
+    vec3 localSpacePoint = (planeMatrix * vec4(point, 1.0)).xyz;
     // clamp position
-    vec3 pointOnPlane = vec3(clamp(localPoint.xy, -planeSize, planeSize), 0);
+    vec3 localSpacePointOnPlane = vec3(clamp(localSpacePoint.xy, -planeSize, planeSize), 0);
 
-    vec3 direction = normalize(localPoint - pointOnPlane);
+    // calculate the angles
+    vec3 direction = normalize(localSpacePoint - localSpacePointOnPlane);
     float angle = sacos(dot(direction, vec3(0, 0, 1)));
 
     // transform back to global space
-    return AreaLightResult((vec4(pointOnPlane, 1.0) * planeMatrix).xyz + lightPos, angle);
+    return AreaLightResult((inverse(planeMatrix) * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
 }
-
-//float sBox( vec3 ro, vec3 rd, mat4 txx, vec3 rad )
-//{
-//    txx[3].xyz *= -1.0;
-//    vec3 rdd = (txx*vec4(rd,0.0)).xyz;
-//    vec3 roo = (txx*vec4(ro,1.0)).xyz;
-//
-//    vec3 m = 1.0/rdd;
-//    vec3 n = m*roo;
-//    vec3 k = abs(m)*rad;
-//
-//    vec3 t1 = -n - k;
-//    vec3 t2 = -n + k;
-//
-//    float tN = max( max( t1.x, t1.y ), t1.z );
-//    float tF = min( min( t2.x, t2.y ), t2.z );
-//    if( tN > tF || tF < 0.0) return -1.0;
-//
-//    return tN;
-//}
 
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
@@ -102,11 +82,6 @@ void main() {
     // angle falloff
     float angleFalloff = mapClamped(angle, 0.0, maxAngle, 1.0, 0.0);
     diffuse *= smoothstep(0.0, 1.0, angleFalloff);
-
-//    //draw plane
-//    float distToPlane = sBox(VeilCamera.CameraPosition, viewDirFromUv(screenUv), lightMat, vec3(size, 0.0));
-//    float planeLight = 0.0;
-//    if (distToPlane > 0 && distToPlane < length(viewPos)) planeLight = 1000.0;
 
     fragColor = vec4(diffuse * lightColor, 1.0);
 }

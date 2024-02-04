@@ -47,7 +47,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     }
 
     // the bounding box here isn't particularly tight, but it should always encapsulate the light's area.
-    // see AreaLightRenderer#createMesh() for like how to fix this i think. too lazy to do it right now.
     @Override
     public boolean isVisible(CullFrustum frustum) {
         float radius = Math.max(this.size.x, this.size.y) + this.distance;
