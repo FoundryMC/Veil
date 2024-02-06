@@ -16,10 +16,10 @@ public class UpdateSizeParticleModule implements UpdateParticleModule {
     @Override
     public void update(QuasarParticle particle) {
         try {
-            particle.setScale(particle.getEnvironment().resolve(this.size));
+            particle.setRadius(particle.getEnvironment().resolve(this.size));
         } catch (MolangRuntimeException e) {
             e.printStackTrace();
-            particle.setScale(1.0F);
+            particle.setRadius(1.0F);
         }
     }
 }

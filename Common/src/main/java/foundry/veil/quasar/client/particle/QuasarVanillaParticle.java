@@ -1,13 +1,13 @@
 package foundry.veil.quasar.client.particle;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.Veil;
+import foundry.veil.quasar.ParticleEmitter;
 import foundry.veil.quasar.data.ParticleSettings;
 import foundry.veil.quasar.data.QuasarParticleData;
-import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.particle.CollisionParticleModule;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -15,7 +15,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -70,9 +69,10 @@ public class QuasarVanillaParticle extends Particle {
         this.yd = motionY;
         this.zd = motionZ;
 
-        this.particle = new QuasarParticle(world, data, particleSettings, parentEmitter);
-        this.particle.getPosition().set(x, y, z);
-        this.particle.init();
+        this.particle=null;
+//        this.particle = new QuasarParticle(world, data, particleSettings, parentEmitter);
+//        this.particle.getPosition().set(x, y, z);
+//        this.particle.init();
         // FIXME
 //        this.renderModules = new ArrayList<>();//data.renderModules;
 //        this.initModules = new ArrayList<>();//data.initModules;
@@ -88,7 +88,7 @@ public class QuasarVanillaParticle extends Particle {
         //    List<UpdateParticleModule> updateModules = new ArrayList<>();
         //    List<CollisionParticleModule> collisionModules = new ArrayList<>();
 
-        float scale = this.particle.getScale();
+        float scale = this.particle.getRadius();
         float width = this.bbWidth / 2.0F;
         float height = this.bbHeight;
         this.setBoundingBox(new AABB(x - (double) width, y, z - (double) width, x + (double) width, y + (double) height, z + (double) width));
@@ -100,7 +100,6 @@ public class QuasarVanillaParticle extends Particle {
         this.particle.tick();
 //        this.hasPhysics = true;
         Vector3d velocity = this.particle.getVelocity();
-        Vector3d position = this.particle.getPosition();
         Vector3f rotation = this.particle.getRotation();
         if ((this.stoppedByCollision || this.onGround)) {
             for (CollisionParticleModule collisionParticle : this.particle.getModules().getCollisionModules()) {
@@ -142,7 +141,7 @@ public class QuasarVanillaParticle extends Particle {
 //        }
 
         if (this.shouldCollide) {
-            List<Entity> entities = this.level.getEntities(null, this.getBoundingBox().inflate(this.particle.getScale() * 2f));
+            List<Entity> entities = this.level.getEntities(null, this.getBoundingBox().inflate(this.particle.getRadius() * 2f));
             for (Entity entity : entities) {
                 if (entity instanceof LivingEntity livingEntity && livingEntity.isAlive()) {
                     this.stoppedByCollision = true;
@@ -225,11 +224,11 @@ public class QuasarVanillaParticle extends Particle {
     @Override
     public void render(VertexConsumer builder, Camera camera, float partialTicks) {
         RenderData renderData = this.particle.getRenderData();
-        ParticleRenderType renderType = renderData.getRenderType();
+//        ParticleRenderType renderType = renderData.getRenderType();
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        renderType.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
+//        renderType.begin(bufferBuilder, Minecraft.getInstance().getTextureManager());
         builder = bufferBuilder;
 
         this.particle.render(partialTicks);
@@ -264,8 +263,7 @@ public class QuasarVanillaParticle extends Particle {
 //                ps.popPose();
 //            });
 //        }
-        int packedLight = this.emissive ? LightTexture.FULL_BRIGHT : this.getLightColor(partialTicks);
-        renderData.renderTrails(projectedView, packedLight);
+//        renderData.renderTrails(projectedView, LightTexture.FULL_BRIGHT);
 
         Vector3dc renderPosition = renderData.getRenderPosition();
         Vector3fc renderOffset = new Vector3f(
@@ -273,9 +271,9 @@ public class QuasarVanillaParticle extends Particle {
                 (float) (renderPosition.y() - projectedView.y()),
                 (float) (renderPosition.z() - projectedView.z()));
         Vector3dc motionDirection = this.particle.getVelocity().normalize(new Vector3d());
-        this.particle.getData().renderStyle().render(this, renderData, renderOffset, motionDirection, packedLight, builder, 1, partialTicks);
+        this.particle.getData().renderStyle().render(new PoseStack(), this.particle, renderData, renderOffset, motionDirection, this.getLightColor(partialTicks), builder, 1, partialTicks);
 
-        renderType.end(tesselator);
+//        renderType.end(tesselator);
     }
 
     // FIXME PLEASE renderer
@@ -291,7 +289,8 @@ public class QuasarVanillaParticle extends Particle {
     public enum RenderStyle implements RenderFunction {
         CUBE {
             @Override
-            public void render(QuasarVanillaParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+                Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 for (int i = 0; i < 6; i++) {
                     Vec3[] faceVerts = new Vec3[]{
@@ -300,19 +299,13 @@ public class QuasarVanillaParticle extends Particle {
                             QuasarVanillaParticle.CUBE[i * 4 + 2],
                             QuasarVanillaParticle.CUBE[i * 4 + 3]
                     };
-                    SpriteData spriteData = renderData.getSpriteData();
                     TextureAtlasSprite sprite = renderData.getAtlasSprite();
                     if (sprite != null) {
-                        RenderSystem.setShaderTexture(0, sprite.atlasLocation());
                         builder = sprite.wrap(builder); // This makes chaining not work properly
-                    } else if (spriteData != null) {
-                        RenderSystem.setShaderTexture(0, spriteData.sprite());
-                    } else {
-                        RenderSystem.setShaderTexture(0, BLANK);
                     }
                     for (int j = 0; j < 4; j++) {
                         Vector3f vec = faceVerts[j].toVector3f().mul(-1);
-                        QuasarParticleData data = particle.particle.getData();
+                        QuasarParticleData data = particle.getData();
                         if (vec.z < 0 && data.velocityStretchFactor() != 0.0f) {
                             vec.z *= 1 + data.velocityStretchFactor();
                         }
@@ -322,7 +315,7 @@ public class QuasarVanillaParticle extends Particle {
                                 .mul((float) (renderData.getRenderScale() * ageModifier))
                                 .add(renderOffset);
 
-                        builder.vertex(vec.x, vec.y, vec.z);
+                        builder.vertex(matrix4f, vec.x, vec.y, vec.z);
                         builder.uv((float) j / 2, j % 2);
                         builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
                         builder.uv2(light);
@@ -334,7 +327,8 @@ public class QuasarVanillaParticle extends Particle {
         // TODO: FIX UVS THEY'RE FUCKED
         BILLBOARD {
             @Override
-            public void render(QuasarVanillaParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+                Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 Vec3[] faceVerts = new Vec3[]{
                         QuasarVanillaParticle.PLANE[0],
@@ -347,21 +341,16 @@ public class QuasarVanillaParticle extends Particle {
                 SpriteData spriteData = renderData.getSpriteData();
                 TextureAtlasSprite sprite = renderData.getAtlasSprite();
                 if (sprite != null) {
-                    RenderSystem.setShaderTexture(0, sprite.atlasLocation());
                     builder = sprite.wrap(builder); // This makes chaining not work properly
-                } else if (spriteData != null) {
-                    RenderSystem.setShaderTexture(0, spriteData.sprite());
-                } else {
-                    RenderSystem.setShaderTexture(0, BLANK);
                 }
 
                 // turn quat into pitch and yaw
                 for (int j = 0; j < 4; j++) {
                     Vector3f vec = faceVerts[j].toVector3f().mul(-1.0F);
-                    if (particle.particle.getData().velocityStretchFactor() > 0f) {
-                        vec.set(vec.x * (1 + particle.particle.getData().velocityStretchFactor()), vec.y, vec.z);
+                    if (particle.getData().velocityStretchFactor() > 0f) {
+                        vec.set(vec.x * (1 + particle.getData().velocityStretchFactor()), vec.y, vec.z);
                     }
-                    if (particle.particle.getData().faceVelocity()) {
+                    if (particle.getData().faceVelocity()) {
                         vec.rotateX(rotation.x())
                                 .rotateY(rotation.y())
                                 .rotateZ(rotation.z());
@@ -389,7 +378,7 @@ public class QuasarVanillaParticle extends Particle {
                         int spriteCount = spriteData.frameCount();
                         float animationSpeed = spriteData.frameTime();
                         // get frame index from age + partial ticks, but it should be an integer.
-                        int frameIndex = (int) ((particle.age + partialTicks) / animationSpeed);
+                        int frameIndex = (int) (renderData.getRenderAge() / animationSpeed);
                         // get the frame index in the spritesheet
                         int frameIndexInSpritesheet = frameIndex % spriteCount;
                         // get the row and column of the frame in the spritesheet
@@ -403,7 +392,7 @@ public class QuasarVanillaParticle extends Particle {
 //                        u1 = u;
 //                        v1 = v;
 //                    }
-                    builder.vertex(vec.x, vec.y, vec.z);
+                    builder.vertex(matrix4f, vec.x, vec.y, vec.z);
                     builder.uv(u, v);
                     builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
                     builder.uv2(light);
@@ -416,6 +405,6 @@ public class QuasarVanillaParticle extends Particle {
     @FunctionalInterface
     interface RenderFunction {
 
-        void render(QuasarVanillaParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks);
+        void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks);
     }
 }

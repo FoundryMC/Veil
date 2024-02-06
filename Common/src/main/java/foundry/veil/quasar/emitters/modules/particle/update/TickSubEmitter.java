@@ -5,9 +5,9 @@
 //import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 //import foundry.veil.quasar.data.ParticleEmitterData;
 //import foundry.veil.quasar.emitters.ParticleContext;
-//import foundry.veil.quasar.emitters.ParticleEmitter;
+//import foundry.veil.quasar.ParticleEmitter;
 //import foundry.veil.quasar.emitters.ParticleEmitterRegistry;
-//import foundry.veil.quasar.emitters.ParticleSystemManager;
+//import foundry.veil.quasar.ParticleSystemManager;
 //import foundry.veil.quasar.data.module.ModuleType;
 //import foundry.veil.quasar.emitters.modules.particle.UpdateParticleModule;
 //import net.minecraft.resources.ResourceLocation;

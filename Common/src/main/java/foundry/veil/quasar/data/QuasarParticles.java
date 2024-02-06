@@ -1,5 +1,6 @@
 package foundry.veil.quasar.data;
 
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
@@ -8,6 +9,8 @@ import foundry.veil.mixin.client.quasar.RegistryDataAccessor;
 import foundry.veil.mixin.client.quasar.RegistryDataLoaderAccessor;
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.ParticleModuleData;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
@@ -38,6 +41,7 @@ public final class QuasarParticles {
     public static final ResourceKey<Registry<EmitterShapeSettings>> EMITTER_SHAPE_SETTINGS = createRegistryKey("quasar/modules/emitter/shape");
     public static final ResourceKey<Registry<ParticleEmitterData>> EMITTER = createRegistryKey("quasar/emitters");
 
+    private static final SuggestionProvider<?> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> SharedSuggestionProvider.suggestResource(registryAccess().registryOrThrow(QuasarParticles.EMITTER).keySet(), builder);
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final List<RegistryDataLoader.RegistryData<?>> REGISTRIES = List.of(
             new RegistryDataLoader.RegistryData<>(INIT_MODULES, ParticleModuleData.INIT_DIRECT_CODEC),
@@ -55,6 +59,11 @@ public final class QuasarParticles {
 
     private static <T> ResourceKey<Registry<T>> createRegistryKey(String name) {
         return ResourceKey.createRegistryKey(Veil.veilPath(name));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends SharedSuggestionProvider> SuggestionProvider<T> emitterSuggestionProvider() {
+        return (SuggestionProvider<T>) EMITTER_SUGGESTION_PROVIDER;
     }
 
     public static RegistryAccess registryAccess() {

@@ -94,9 +94,7 @@ public final class VeilRenderSystem {
             throw new IllegalStateException("Client resource manager is " + client.getResourceManager().getClass());
         }
 
-        TextureManager textureManager = client.getTextureManager();
         renderer = new VeilRenderer(resourceManager);
-
         VeilImGuiImpl.init(client.getWindow().getWindow());
     }
 

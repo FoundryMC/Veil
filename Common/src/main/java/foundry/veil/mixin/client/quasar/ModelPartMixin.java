@@ -15,7 +15,7 @@ import java.util.Map;
 public class ModelPartMixin implements ModelPartExtension {
 
     @Unique
-    private String name = "root";
+    private String veil$name = "root";
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void quasar$setChildNames(List<ModelPart.Cube> pCubes, Map<String, ModelPart> pChildren, CallbackInfo ci){
@@ -27,11 +27,11 @@ public class ModelPartMixin implements ModelPartExtension {
 
     @Override
     public void setName(String name) {
-        this.name = name;
+        this.veil$name = name;
     }
 
     @Override
     public String getName() {
-        return this.name == null ? "" : this.name;
+        return this.veil$name == null ? "" : this.veil$name;
     }
 }

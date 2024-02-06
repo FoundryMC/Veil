@@ -3,7 +3,6 @@ package foundry.veil;
 import com.mojang.blaze3d.platform.InputConstants;
 import foundry.veil.api.client.render.RenderTypeStageRegistry;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.shader.RenderTypeRegistry;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
@@ -21,7 +20,6 @@ public class VeilClient {
 
     @ApiStatus.Internal
     public static void init() {
-        RenderTypeRegistry.init();
         VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
         // This fixes moving transparent blocks drawing too early
         VeilEventPlatform.INSTANCE.onVeilRegisterFixedBuffers(registry -> registry.registerFixedBuffer(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucentMovingBlock()));

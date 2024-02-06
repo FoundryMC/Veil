@@ -1,13 +1,14 @@
 package foundry.veil.quasar.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.api.client.render.shader.RenderTypeRegistry;
+import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilRenderType;
 import foundry.veil.quasar.emitters.modules.particle.render.TrailSettings;
 import foundry.veil.quasar.fx.Trail;
 import foundry.veil.quasar.util.MathUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -20,6 +21,9 @@ import java.util.Collection;
 import java.util.List;
 
 public class RenderData {
+
+    @Deprecated
+    private static final ResourceLocation BLANK = Veil.veilPath("textures/special/blank.png");
 
     private final Vector3d prevPosition;
     private final Vector3d renderPosition;
@@ -35,7 +39,6 @@ public class RenderData {
     public float agePercent;
     private SpriteData spriteData;
     private TextureAtlasSprite atlasSprite;
-    private final ParticleRenderType renderType;
     private final List<TrailSettings> trails;
     private final List<Trail> renderTrails;
 
@@ -53,7 +56,6 @@ public class RenderData {
         this.renderAge = 0.0F;
         this.spriteData = null;
         this.atlasSprite = null;
-        this.renderType = new QuasarParticleRenderType();
         this.trails = new ArrayList<>();
         this.renderTrails = new ArrayList<>();
     }
@@ -118,16 +120,22 @@ public class RenderData {
         return this.atlasSprite;
     }
 
-    public ParticleRenderType getRenderType() {
-        return this.renderType;
+    public ResourceLocation getTexture() {
+        if (this.atlasSprite != null) {
+            return this.atlasSprite.atlasLocation();
+        } else if (this.spriteData != null) {
+            return this.spriteData.sprite();
+        } else {
+            return BLANK;
+        }
     }
 
     public List<TrailSettings> getTrails() {
         return this.trails;
     }
 
-    public void renderTrails(Vec3 cameraPos, int packedLight) {
-        this.trails.forEach(trail -> {
+    public void renderTrails(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, int packedLight) {
+        for (TrailSettings trail : this.trails) {
             Trail tr = new Trail(MathUtil.colorFromVec4f(trail.getTrailColor()), (ageScale) -> trail.getTrailWidthModifier().modify(ageScale, 1));
             tr.setBillboard(trail.getBillboard());
             tr.setLength(trail.getTrailLength());
@@ -138,15 +146,15 @@ public class RenderData {
             // TODO change to joml vectors
             tr.pushRotatedPoint(new Vec3(this.prevPosition.x, this.prevPosition.y, this.prevPosition.z), new Vec3(this.prevRotation.x, this.prevRotation.y, this.prevRotation.z));
             this.renderTrails.add(tr);
-        });
+        }
         this.trails.clear();
+        // TODO move to renderer
         this.renderTrails.forEach(trail -> {
             trail.pushRotatedPoint(new Vec3(this.renderPosition.x, this.renderPosition.y, this.renderPosition.z), new Vec3(this.renderRotation.x, this.renderRotation.y, this.renderRotation.z));
-            PoseStack ps = new PoseStack();
-            ps.pushPose();
-            ps.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
-            trail.render(ps, Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypeRegistry.translucentNoCull(trail.getTexture())), packedLight);
-            ps.popPose();
+            poseStack.pushPose();
+            poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
+            trail.render(poseStack, bufferSource.getBuffer(VeilRenderType.quasarTranslucent(trail.getTexture())), packedLight);
+            poseStack.popPose();
         });
     }
 

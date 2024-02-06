@@ -1,31 +1,38 @@
 package foundry.veil.quasar.client.particle;
 
 import com.mojang.logging.LogUtils;
+import foundry.veil.quasar.ParticleEmitter;
 import foundry.veil.quasar.data.ParticleSettings;
 import foundry.veil.quasar.data.QuasarParticleData;
 import foundry.veil.quasar.data.module.ParticleModuleData;
-import foundry.veil.quasar.emitters.ParticleEmitter;
 import foundry.veil.quasar.emitters.modules.particle.*;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class QuasarParticle {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final double MAXIMUM_COLLISION_VELOCITY_SQUARED = Mth.square(100.0D);
     private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
 
     private final ClientLevel level;
@@ -38,16 +45,19 @@ public class QuasarParticle {
     private final Vector3d velocity;
     private final Vector3f rotation;
     private final BlockPos.MutableBlockPos blockPosition;
-    private float scale;
+    private final boolean hasCollision;
+    private float radius;
     private final int lifetime;
     private int age;
+    private AABB boundingBox;
+    private boolean stoppedByCollision;
 
     private final MolangRuntime environment;
     private final RenderData renderData;
 
-    public QuasarParticle(ClientLevel level, QuasarParticleData data, ParticleSettings settings, @Nullable ParticleEmitter parent) {
+    public QuasarParticle(ClientLevel level, RandomSource randomSource, QuasarParticleData data, ParticleSettings settings, ParticleEmitter parent) {
         this.level = level;
-        this.randomSource = RandomSource.create();
+        this.randomSource = randomSource;
         this.data = data;
         this.settings = settings;
         this.parent = parent;
@@ -56,13 +66,13 @@ public class QuasarParticle {
         this.velocity = new Vector3d();
         this.rotation = new Vector3f();
         this.blockPosition = new BlockPos.MutableBlockPos();
-        this.scale = settings.particleSize(this.randomSource);
+        this.hasCollision = this.modules.getCollisionModules().length > 0;
+        this.radius = settings.particleSize(this.randomSource);
         this.lifetime = settings.particleLifetime(this.randomSource);
         this.age = 0;
 
         this.renderData = new RenderData();
         this.environment = MolangRuntime.runtime()
-                .loadLibrary("quasar", new QuasarParticleLibrary(this))
                 .setQuery("x", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().x()))
                 .setQuery("y", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().y()))
                 .setQuery("z", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().z()))
@@ -79,22 +89,6 @@ public class QuasarParticle {
                 .setQuery("agePercent", MolangExpression.of(this.renderData::getAgePercent))
                 .setQuery("lifetime", this.lifetime)
                 .create();
-        if (this.parent != null) {
-            this.parent.particleAdded();
-        }
-    }
-
-    @ApiStatus.Internal
-    public void init() {
-        for (InitParticleModule initModule : this.modules.getInitModules()) {
-            initModule.init(this);
-        }
-        this.renderData.tick(this.position, this.rotation, this.scale);
-    }
-
-    @ApiStatus.Internal
-    public static void clearErrors() {
-        REPORTED_MODULES.clear();
     }
 
     private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
@@ -111,8 +105,88 @@ public class QuasarParticle {
         return builder.build();
     }
 
+    private void move(double dx, double dy, double dz) {
+        if (this.stoppedByCollision || (dx == 0.0D && dy == 0.0D && dz == 0.0D)) {
+            return;
+        }
+
+        AABB box = this.getBoundingBox();
+        double d0 = dx;
+        double d1 = dy;
+        double d2 = dz;
+        if (this.hasCollision && dx * dx + dy * dy + dz * dz < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
+            Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(dx, dy, dz), box, this.level, List.of());
+            dx = vec3.x;
+            dy = vec3.y;
+            dz = vec3.z;
+        }
+
+        if (dx != 0.0D || dy != 0.0D || dz != 0.0D) {
+            this.position.add(dx, dy, dz);
+            this.updateBoundingBox();
+        }
+
+        if (!this.hasCollision) {
+            return;
+        }
+
+        List<Entity> entities = this.level.getEntities(null, box);
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingEntity && livingEntity.isAlive()) {
+                this.stoppedByCollision = true;
+                break;
+            }
+        }
+
+        if (Math.abs(d1) >= (double) 1.0E-5F && Math.abs(dy) < (double) 1.0E-5F) {
+            this.stoppedByCollision = true;
+        }
+
+        if (d0 != dx) {
+            this.velocity.x = 0;
+            this.stoppedByCollision = true;
+        }
+
+        if (d1 != dy) {
+            this.velocity.y = 0;
+            this.stoppedByCollision = true;
+        }
+
+        if (d2 != dz) {
+            this.velocity.z = 0;
+            this.stoppedByCollision = true;
+        }
+
+        // Notify listeners
+        if (this.stoppedByCollision) {
+            for (CollisionParticleModule collisionParticle : this.modules.getCollisionModules()) {
+                collisionParticle.collide(this);
+            }
+        }
+    }
+
+    private void updateBoundingBox() {
+        double r = this.radius / 2.0;
+        this.boundingBox = new AABB(this.position.x - r, this.position.y - r, this.position.z - r, this.position.x + r, this.position.y + r, this.position.z + r);
+    }
+
+    @ApiStatus.Internal
+    public void init() {
+        for (InitParticleModule initModule : this.modules.getInitModules()) {
+            initModule.init(this);
+        }
+        this.renderData.tick(this.position, this.rotation, this.radius);
+        this.updateBoundingBox();
+    }
+
+    @ApiStatus.Internal
+    public static void clearErrors() {
+        REPORTED_MODULES.clear();
+    }
+
+    @ApiStatus.Internal
     public void tick() {
-        this.renderData.tick(this.position, this.rotation, this.scale);
+        this.renderData.tick(this.position, this.rotation, this.radius);
         for (UpdateParticleModule updateModule : this.modules.getUpdateModules()) {
             updateModule.update(this);
         }
@@ -121,21 +195,34 @@ public class QuasarParticle {
             updateModule.applyForce(this);
         }
 
+        // TODO make this a module
+        if (this.data.faceVelocity()) {
+            Vector3d normalizedMotion = this.velocity.normalize(new Vector3d());
+            this.rotation.x = (float) Math.atan2(normalizedMotion.y, Math.sqrt(normalizedMotion.x * normalizedMotion.x + normalizedMotion.z * normalizedMotion.z));
+            this.rotation.y = (float) Math.atan2(normalizedMotion.x, normalizedMotion.z);
+            if (this.data.renderStyle() == QuasarVanillaParticle.RenderStyle.BILLBOARD) {
+                this.rotation.y += (float) (Math.PI / 2.0);
+            }
+        }
+
+        this.move(this.velocity.x, this.velocity.y, this.velocity.z);
+
         this.age++;
         if (this.age >= this.lifetime) {
             this.remove();
         }
     }
 
+    @ApiStatus.Internal
     public void render(float partialTicks) {
         for (RenderParticleModule renderModule : this.modules.getRenderModules()) {
             renderModule.render(this, partialTicks);
         }
-        this.renderData.render(this.position, this.rotation, this.scale, this.age, this.lifetime, partialTicks);
+        this.renderData.render(this.position, this.rotation, this.radius, this.age, this.lifetime, partialTicks);
     }
 
+    @ApiStatus.Internal
     public void onRemove() {
-        this.parent.particleRemoved();
         for (ParticleModule module : this.modules.getAllModules()) {
             module.onRemove();
         }
@@ -198,8 +285,8 @@ public class QuasarParticle {
         return this.rotation;
     }
 
-    public float getScale() {
-        return this.scale;
+    public float getRadius() {
+        return this.radius;
     }
 
     public int getAge() {
@@ -208,6 +295,15 @@ public class QuasarParticle {
 
     public int getLifetime() {
         return this.settings.particleLifetime();
+    }
+
+    public AABB getBoundingBox() {
+        return this.boundingBox;
+    }
+
+    public int getLightColor() {
+        BlockPos pos = this.getBlockPosition();
+        return this.level.hasChunkAt(pos) ? LevelRenderer.getLightColor(this.level, pos) : 0;
     }
 
     public RenderData getRenderData() {
@@ -222,8 +318,9 @@ public class QuasarParticle {
         this.rotation.set((float) Math.asin(y), (float) Math.atan2(x, z), 0);
     }
 
-    public void setScale(float scale) {
-        this.scale = scale;
+    public void setRadius(float radius) {
+        this.radius = radius;
+        this.updateBoundingBox();
     }
 
     public void setAge(int age) {

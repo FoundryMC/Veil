@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * @param loop               Whether the emitter will loop. If <code>true</code>, the emitter will reset after maxLifetime ticks
  * @param rate               The rate at which particles are emitted. Count particles per rate ticks.
  * @param count              The number of particles emitted per rate ticks
+ * @param maxParticles       The maximum number of particles to have alive
  * @param emitterSettings    The settings for how to emit particles
  * @param particleDataHolder The particle to emit
  */
@@ -19,6 +20,7 @@ public record ParticleEmitterData(int maxLifetime,
                                   boolean loop,
                                   int rate,
                                   int count,
+                                  int maxParticles,
                                   EmitterSettings emitterSettings,
                                   Holder<QuasarParticleData> particleDataHolder) {
 
@@ -27,6 +29,7 @@ public record ParticleEmitterData(int maxLifetime,
             Codec.BOOL.optionalFieldOf("loop", false).forGetter(ParticleEmitterData::loop),
             Codec.INT.fieldOf("rate").forGetter(ParticleEmitterData::rate),
             Codec.INT.fieldOf("count").forGetter(ParticleEmitterData::count),
+            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("count", Integer.MAX_VALUE).forGetter(ParticleEmitterData::maxParticles),
             EmitterSettings.CODEC.fieldOf("emitter_settings").forGetter(ParticleEmitterData::emitterSettings),
             QuasarParticleData.CODEC.fieldOf("particle_data").forGetter(ParticleEmitterData::particleDataHolder)
     ).apply(instance, ParticleEmitterData::new));

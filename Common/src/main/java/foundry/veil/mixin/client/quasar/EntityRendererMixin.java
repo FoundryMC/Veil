@@ -1,8 +1,9 @@
 package foundry.veil.mixin.client.quasar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.ParticleSystemManager;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.ParticleSystemManager;
 import foundry.veil.quasar.util.EntityExtension;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -20,8 +21,9 @@ public abstract class EntityRendererMixin<T extends Entity> {
     public void render(T entity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
         EntityExtension extension = (EntityExtension) entity;
         if (entity.isOnFire()) {
-            if (extension.getEmitters().isEmpty()) {
-                ParticleEmitter instance = ParticleSystemManager.getInstance().createEmitter(entity.level(), new ResourceLocation("veil:basic_smoke"));
+            if (extension.veil$getEmitters().isEmpty()) {
+                ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
+                ParticleEmitter instance = particleManager.createEmitter(new ResourceLocation("veil:basic_smoke"));
                 if (instance == null) {
                     return;
                 }
@@ -42,19 +44,19 @@ public abstract class EntityRendererMixin<T extends Entity> {
 //                    }
 //                });
                 // FIXME
-                extension.addEmitter(instance);
-                ParticleSystemManager.getInstance().addParticleSystem(instance);
+                extension.veil$addEmitter(instance);
+                particleManager.addParticleSystem(instance);
             } else {
 //                ((EntityExtension) pEntity).getEmitters().stream().filter(emitter -> emitter.registryName.toString().equals("veil:basic_smoke")).forEach(emitter -> emitter.getEmitterModule().setMaxLifetime(5));
             }
         } else {
 //            ((EntityExtension) pEntity).getEmitters().stream().filter(emitter -> emitter.registryName.toString().equals("veil:basic_smoke")).forEach(p -> p.getEmitterModule().setLoop(false));
-            extension.getEmitters().forEach(emitter -> {
+            extension.veil$getEmitters().forEach(emitter -> {
                 if ("veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName()))) {
                     emitter.remove();
                 }
             });
-            extension.getEmitters().removeIf(emitter -> "veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName())));
+            extension.veil$getEmitters().removeIf(emitter -> "veil:basic_smoke".equals(String.valueOf(emitter.getRegistryName())));
         }
     }
 }

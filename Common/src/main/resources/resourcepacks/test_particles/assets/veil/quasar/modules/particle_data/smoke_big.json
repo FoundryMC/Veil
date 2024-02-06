@@ -1,30 +1,30 @@
 {
-    "sprite_data": {
-        "sprite": "veil:textures/particle/smoke.png",
-        "frame_count": 64,
-        "frame_time": 1.25,
-        "frame_width": 8,
-        "frame_height": 8
-    },
-    "render_style": "BILLBOARD",
-    "init_modules": [
-        "veil:swiftshot_velocity",
-        "veil:smoke_random_init_rotation"
-    ],
-    "update_modules": [],
-    "collision_modules": [
-    ],
-    "forces": [
-        "veil:force/vortex/swiftshot_vortex",
-        "veil:force/vector_field/test_vector_field",
-        "veil:force/drag/smoke_big",
-        "veil:force/gravity/test_gravity",
-        "veil:force/point_force/smoke_point"
-    ],
-    "render_modules": [
-        "veil:color/smoke_color_over_lifetime"
-    ],
-    "face_velocity": false,
-    "velocity_stretch_factor": 0.0,
-    "should_collide": true
+  "sprite_data": {
+    "sprite": "veil:textures/particle/smoke.png",
+    "frame_count": 64,
+    "frame_time": 1.25,
+    "frame_width": 8,
+    "frame_height": 8
+  },
+  "render_style": "BILLBOARD",
+  "init_modules": [
+    "veil:swiftshot_velocity",
+    "veil:smoke_random_init_rotation"
+  ],
+  "update_modules": [],
+  "collision_modules": [
+  ],
+  "forces": [
+    "veil:force/vortex/swiftshot_vortex",
+    "veil:force/vector_field/test_vector_field",
+    "veil:force/drag/smoke_big",
+    "veil:force/gravity/test_gravity",
+    "veil:force/point_force/smoke_point"
+  ],
+  "render_modules": [
+    "veil:color/smoke_color_over_lifetime"
+  ],
+  "face_velocity": false,
+  "velocity_stretch_factor": 0.0,
+  "should_collide": true
 }

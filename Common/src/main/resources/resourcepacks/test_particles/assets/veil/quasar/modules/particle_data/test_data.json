@@ -1,18 +1,15 @@
 {
-    "sprite_data": {
-        "sprite": "veil:textures/special/blank.png"
-    },
-    "render_style": "CUBE",
-    "init_modules": [
-        "veil:firefly_light"
-    ],
-    "update_modules": [],
-    "forces": [
-        "veil:force/vector_field/test_vector_field"
-    ],
-    "render_modules": [
-        "veil:color/firefly_color"
-    ],
-    "face_velocity": true,
-    "should_collide": false
+  "render_style": "CUBE",
+  "init_modules": [
+    "veil:firefly_light"
+  ],
+  "update_modules": [],
+  "forces": [
+    "veil:force/vector_field/test_vector_field"
+  ],
+  "render_modules": [
+    "veil:color/firefly_color"
+  ],
+  "face_velocity": true,
+  "should_collide": false
 }

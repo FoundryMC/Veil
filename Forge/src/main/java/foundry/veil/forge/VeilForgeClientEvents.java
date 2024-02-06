@@ -5,15 +5,16 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.ParticleSystemManager;
 import foundry.veil.quasar.data.QuasarParticles;
-import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.ParticleSystemManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -44,22 +45,25 @@ public class VeilForgeClientEvents {
             VeilRenderSystem.renderer().getEditorManager().toggle();
         }
     }
-    private static final SuggestionProvider<CommandSourceStack> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> {
-        return SharedSuggestionProvider.suggestResource(QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER).keySet(), builder);
-    };
-    @SubscribeEvent
-    public static void registerClientCommands(RegisterClientCommandsEvent event){
-        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("quasar");
-        builder.then(Commands.argument("emitter", ResourceLocationArgument.id()).suggests(EMITTER_SUGGESTION_PROVIDER).then(Commands.argument("position", Vec3Argument.vec3()).executes(context1 -> {
-            ResourceLocation id = ResourceLocationArgument.getId(context1, "emitter");
 
-            ParticleEmitter emitter = ParticleSystemManager.getInstance().createEmitter(context1.getSource().getUnsidedLevel(), id);
-            if(emitter == null) {
-                context1.getSource().sendFailure(Component.literal("Unknown emitter: " + id));
+    @SubscribeEvent
+    public static void registerClientCommands(RegisterClientCommandsEvent event) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("quasar");
+        builder.then(Commands.argument("emitter", ResourceLocationArgument.id()).suggests(QuasarParticles.emitterSuggestionProvider()).then(Commands.argument("position", Vec3Argument.vec3()).executes(ctx -> {
+            ResourceLocation id = ResourceLocationArgument.getId(ctx, "emitter");
+
+            CommandSourceStack source = ctx.getSource();
+            ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
+            ParticleEmitter instance = particleManager.createEmitter(id);
+            if (instance == null) {
+                source.sendFailure(Component.literal("Unknown emitter: " + id));
                 return 0;
             }
-            emitter.setPosition(Vec3Argument.getVec3(context1, "position"));
-            ParticleSystemManager.getInstance().addParticleSystem(emitter);
+
+            WorldCoordinates pos = ctx.getArgument("position", WorldCoordinates.class);
+            instance.setPosition(pos.getPosition(source));
+            particleManager.addParticleSystem(instance);
+            source.sendSuccess(() -> Component.literal("Spawned " + id), true);
             return 1;
         })));
         event.getDispatcher().register(builder);
@@ -68,7 +72,7 @@ public class VeilForgeClientEvents {
     @SubscribeEvent
     public void tick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.START && event.side.isClient()) {
-            ParticleSystemManager.getInstance().tick();
+            VeilRenderSystem.renderer().getParticleManager().tick();
         }
     }
 

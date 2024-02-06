@@ -1,13 +1,14 @@
 package foundry.veil.quasar.data.module.collision;
 
 import com.mojang.serialization.Codec;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.quasar.client.particle.ParticleModuleSet;
 import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.data.QuasarParticles;
 import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.data.module.ParticleModuleData;
-import foundry.veil.quasar.emitters.ParticleEmitter;
-import foundry.veil.quasar.emitters.ParticleSystemManager;
+import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.ParticleSystemManager;
 import foundry.veil.quasar.emitters.modules.particle.CollisionParticleModule;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -19,15 +20,14 @@ public record CollisionSubEmitterData(ResourceLocation subEmitter) implements Pa
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
         builder.addModule((CollisionParticleModule) (particle -> {
-            Registry<ParticleEmitterData> registry = QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER);
-            ParticleEmitterData emitter = registry.get(this.subEmitter);
-            if (emitter == null) {
+            ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
+            ParticleEmitter instance = particleManager.createEmitter(this.subEmitter);
+            if (instance == null) {
                 return;
             }
 
-            ParticleEmitter instance = new ParticleEmitter(particle.getLevel(), emitter);
             instance.setPosition(particle.getPosition());
-            ParticleSystemManager.getInstance().addParticleSystem(instance);
+            particleManager.addParticleSystem(instance);
         }));
     }
 

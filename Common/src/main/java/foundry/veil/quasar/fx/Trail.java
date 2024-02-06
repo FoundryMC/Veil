@@ -75,9 +75,9 @@ public class Trail {
     }
 
     public void setPoints(Vec3[] points) {
-        if (points.length > length) {
-            Vec3[] newPoints = new Vec3[length];
-            System.arraycopy(points, points.length - length, newPoints, 0, length);
+        if (points.length > this.length) {
+            Vec3[] newPoints = new Vec3[this.length];
+            System.arraycopy(points, points.length - this.length, newPoints, 0, this.length);
             points = newPoints;
         }
         this.points = points;
@@ -100,116 +100,118 @@ public class Trail {
     }
 
     public ResourceLocation getTexture() {
-        return texture;
+        return this.texture;
     }
 
     public int getLength() {
-        return length;
+        return this.length;
     }
 
     public void pushPoint(Vec3 point) {
-        if (timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 3 == 0) {
+        if (this.timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && this.timeout % 3 == 0) {
             //remove the last point in the array
-            Vec3[] newPoints = new Vec3[points.length - 1];
-            System.arraycopy(points, 1, newPoints, 0, points.length - 1);
-            points = newPoints;
+            Vec3[] newPoints = new Vec3[this.points.length - 1];
+            System.arraycopy(this.points, 1, newPoints, 0, this.points.length - 1);
+            this.points = newPoints;
             return;
         }
-        if (points.length == 0) {
-            points = new Vec3[]{point};
+        if (this.points.length == 0) {
+            this.points = new Vec3[]{point};
             return;
         }
-        if (points[points.length - 1].distanceTo(point) < minDistance) {
-            timeout++;
+        if (this.points[this.points.length - 1].distanceTo(point) < this.minDistance) {
+            this.timeout++;
             return;
         }
         // test if point is same as last point
-        if (points[points.length - 1].equals(point)) {
-            timeout++;
+        if (this.points[this.points.length - 1].equals(point)) {
+            this.timeout++;
             return;
         }
         // add point to end of array and remove first point if array is longer than length
-        if (points[0] == Vec3.ZERO) {
-            points[0] = point;
+        if (this.points[0] == Vec3.ZERO) {
+            this.points[0] = point;
             return;
         }
-        timeout = 0;
-        Vec3[] newPoints = new Vec3[points.length + 1];
-        System.arraycopy(points, 0, newPoints, 0, points.length);
-        newPoints[points.length] = point;
-        if (newPoints.length > length) {
-            Vec3[] newPoints2 = new Vec3[length];
-            System.arraycopy(newPoints, 1, newPoints2, 0, length);
+        this.timeout = 0;
+        Vec3[] newPoints = new Vec3[this.points.length + 1];
+        System.arraycopy(this.points, 0, newPoints, 0, this.points.length);
+        newPoints[this.points.length] = point;
+        if (newPoints.length > this.length) {
+            Vec3[] newPoints2 = new Vec3[this.length];
+            System.arraycopy(newPoints, 1, newPoints2, 0, this.length);
             newPoints = newPoints2;
         }
-        points = newPoints;
+        this.points = newPoints;
     }
 
     public void pushRotatedPoint(Vec3 point, Vec3 rotation) {
-        if (timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && timeout % 5 == 0 && points.length > 0) {
+        if (this.timeout > Minecraft.getInstance().getWindow().getRefreshRate() * 5 && this.timeout % 5 == 0 && this.points.length > 0) {
             //remove the last point in the array
-            Vec3[] newPoints = new Vec3[points.length - 1];
-            System.arraycopy(points, 1, newPoints, 0, points.length - 1);
-            points = newPoints;
-            Vec3[] newRotations = new Vec3[rotations.length - 1];
-            System.arraycopy(rotations, 1, newRotations, 0, rotations.length - 1);
-            rotations = newRotations;
+            Vec3[] newPoints = new Vec3[this.points.length - 1];
+            System.arraycopy(this.points, 1, newPoints, 0, this.points.length - 1);
+            this.points = newPoints;
+            Vec3[] newRotations = new Vec3[this.rotations.length - 1];
+            System.arraycopy(this.rotations, 1, newRotations, 0, this.rotations.length - 1);
+            this.rotations = newRotations;
             return;
         }
-        if (points.length == 0) {
-            points = new Vec3[]{point};
-            rotations = new Vec3[]{rotation};
+        if (this.points.length == 0) {
+            this.points = new Vec3[]{point};
+            this.rotations = new Vec3[]{rotation};
             return;
         }
-        if (points[0] == Vec3.ZERO) {
-            points[0] = point;
-            rotations = new Vec3[]{rotation};
+        if (this.points[0] == Vec3.ZERO) {
+            this.points[0] = point;
+            this.rotations = new Vec3[]{rotation};
             return;
         }
-        if (points[points.length - 1].distanceTo(point) < minDistance) {
-            timeout++;
+        if (this.points[this.points.length - 1].distanceTo(point) < this.minDistance) {
+            this.timeout++;
             return;
         }
         // test if point is same as last point
-        if (points.length > 0 && points[points.length - 1].equals(point)) {
-            timeout++;
+        if (this.points.length > 0 && this.points[this.points.length - 1].equals(point)) {
+            this.timeout++;
             return;
         }
-        if (rotations == null) {
-            rotations = new Vec3[]{rotation};
+        if (this.rotations == null) {
+            this.rotations = new Vec3[]{rotation};
         }
         // add point to end of array and remove first point if array is longer than length
-        Vec3[] newPoints = new Vec3[points.length + 1];
-        Vec3[] newRotations = new Vec3[points.length + 1];
-        System.arraycopy(points, 0, newPoints, 0, points.length);
-        System.arraycopy(rotations, 0, newRotations, 0, rotations.length);
-        newPoints[points.length] = point;
-        newRotations[rotations.length] = rotation;
-        if (newPoints.length > length) {
-            Vec3[] newPoints2 = new Vec3[length];
-            Vec3[] newRotations2 = new Vec3[length];
-            System.arraycopy(newPoints, 1, newPoints2, 0, length);
-            System.arraycopy(newRotations, 1, newRotations2, 0, length);
+        Vec3[] newPoints = new Vec3[this.points.length + 1];
+        Vec3[] newRotations = new Vec3[this.points.length + 1];
+        System.arraycopy(this.points, 0, newPoints, 0, this.points.length);
+        System.arraycopy(this.rotations, 0, newRotations, 0, this.rotations.length);
+        newPoints[this.points.length] = point;
+        newRotations[this.rotations.length] = rotation;
+        if (newPoints.length > this.length) {
+            Vec3[] newPoints2 = new Vec3[this.length];
+            Vec3[] newRotations2 = new Vec3[this.length];
+            System.arraycopy(newPoints, 1, newPoints2, 0, this.length);
+            System.arraycopy(newRotations, 1, newRotations2, 0, this.length);
             newPoints = newPoints2;
             newRotations = newRotations2;
         }
-        points = newPoints;
-        rotations = newRotations;
+        this.points = newPoints;
+        this.rotations = newRotations;
     }
 
     public void render(PoseStack stack, VertexConsumer consumer, int light) {
         stack.pushPose();
         RenderSystem.disableCull();
-        Vector3f[][] corners = new Vector3f[points.length][2];
-        for (int i = 0; i < points.length; i++) {
-            if (i % frequency != 0) continue;
-            float width = widthFunction.apply((float) i / (points.length - 1));
+        Vector3f[][] corners = new Vector3f[this.points.length][2];
+        for (int i = 0; i < this.points.length; i++) {
+            if (i % this.frequency != 0) {
+                continue;
+            }
+            float width = this.widthFunction.apply((float) i / (this.points.length - 1));
             Vector3f topOffset = new Vector3f(0, (width / 2f), 0);
             Vector3f bottomOffset = new Vector3f(0, -(width / 2f), 0);
-            if (billboard) {
-                Vec3 a = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().subtract(points[i]).normalize();
+            if (this.billboard) {
+                Vec3 a = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().subtract(this.points[i]).normalize();
                 Vector3f cameraDirection = new Vector3f((float) a.x, (float) a.y, (float) a.z);
-                Vec3 b = points[Math.min(i + frequency, points.length - 1)].subtract(points[i]).normalize();
+                Vec3 b = this.points[Math.min(i + this.frequency, this.points.length - 1)].subtract(this.points[i]).normalize();
                 Vector3f dirToNextPoint = new Vector3f((float) b.x(), (float) b.y(), (float) b.z());
                 Vector3f axis = new Vector3f(cameraDirection);
                 // invert the axis
@@ -219,10 +221,10 @@ public class Trail {
                 topOffset.mul(width / 2f);
                 bottomOffset = new Vector3f(axis);
                 bottomOffset.mul(-width / 2f);
-            } else if (rotations[i] != null && parentRotation) {
-                Vec3 a = rotations[Math.min(i + frequency, rotations.length - 1)];
+            } else if (this.rotations[i] != null && this.parentRotation) {
+                Vec3 a = this.rotations[Math.min(i + this.frequency, this.rotations.length - 1)];
                 Vector3f cameraDirection = new Vector3f((float) a.x, (float) a.y, (float) a.z);
-                Vec3 b = points[Math.min(i + frequency, points.length - 1)].subtract(points[i]).normalize();
+                Vec3 b = this.points[Math.min(i + this.frequency, this.points.length - 1)].subtract(this.points[i]).normalize();
                 Vector3f dirToNextPoint = new Vector3f((float) b.x(), (float) b.y(), (float) b.z());
                 Vector3f axis = new Vector3f(cameraDirection);
                 // invert the axis
@@ -233,12 +235,12 @@ public class Trail {
                 bottomOffset = new Vector3f(axis);
                 bottomOffset.mul(-width / 2f);
             }
-            topOffset.add((float) points[i].x, (float) points[i].y, (float) points[i].z);
-            bottomOffset.add((float) points[i].x, (float) points[i].y, (float) points[i].z);
-            corners[i / frequency][0] = topOffset;
-            corners[i / frequency][1] = bottomOffset;
+            topOffset.add((float) this.points[i].x, (float) this.points[i].y, (float) this.points[i].z);
+            bottomOffset.add((float) this.points[i].x, (float) this.points[i].y, (float) this.points[i].z);
+            corners[i / this.frequency][0] = topOffset;
+            corners[i / this.frequency][1] = bottomOffset;
         }
-        renderPoints(stack, consumer, light, corners, color);
+        this.renderPoints(stack, consumer, light, corners, this.color);
         RenderSystem.enableCull();
         stack.popPose();
     }
@@ -254,10 +256,12 @@ public class Trail {
             Vector3f bottom = corners[i][1];
             Vector3f nextTop = corners[i + 1][0];
             Vector3f nextBottom = corners[i + 1][1];
-            if (nextTop == null || nextBottom == null || top == null || bottom == null) continue;
+            if (nextTop == null || nextBottom == null || top == null || bottom == null) {
+                continue;
+            }
             float u = 0;
             float u1 = 1;
-            if (tilingMode == TilingMode.STRETCH) {
+            if (this.tilingMode == TilingMode.STRETCH) {
                 u = (float) i / (corners.length - 1);
                 u1 = (float) (i + 1) / (corners.length - 1);
             }

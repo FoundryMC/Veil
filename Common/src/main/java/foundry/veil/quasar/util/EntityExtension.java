@@ -1,12 +1,12 @@
 package foundry.veil.quasar.util;
 
-import foundry.veil.quasar.emitters.ParticleEmitter;
+import foundry.veil.quasar.ParticleEmitter;
 
 import java.util.List;
 
 public interface EntityExtension {
 
-    void addEmitter(ParticleEmitter emitter);
+    void veil$addEmitter(ParticleEmitter emitter);
 
-    List<ParticleEmitter> getEmitters();
+    List<ParticleEmitter> veil$getEmitters();
 }
