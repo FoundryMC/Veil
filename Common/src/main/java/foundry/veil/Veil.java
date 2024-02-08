@@ -3,6 +3,7 @@ package foundry.veil;
 import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.platform.services.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
+import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
@@ -20,10 +21,15 @@ public class Veil {
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
 
     static {
-        boolean arm = System.getProperty("os.arch").equals("arm") ||
-                System.getProperty("os.arch").startsWith("aarch64");
         DEBUG = System.getProperty("veil.debug") != null;
-        IMGUI = !arm && System.getProperty("veil.disableImgui") == null;
+        IMGUI = System.getProperty("veil.disableImgui") == null && hasImguiNatives();
+    }
+
+    private static boolean hasImguiNatives() {
+        String libName = System.getProperty("os.arch").contains("64") ? "imgui-java64" : "imgui-java";
+        boolean windows = System.getProperty("os.name").toLowerCase().contains("win");
+        String name = System.mapLibraryName(windows ? libName : ("lib" + libName));
+        return ImGui.class.getClassLoader().getResource("io/imgui/java/native-bin/" + name) != null;
     }
 
     @ApiStatus.Internal
