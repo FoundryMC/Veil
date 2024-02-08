@@ -1,12 +1,13 @@
 package foundry.veil;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import foundry.veil.ext.BufferSourceExtension;
+import foundry.veil.api.client.render.RenderTypeStageRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
 import foundry.veil.platform.services.VeilEventPlatform;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -20,10 +21,9 @@ public class VeilClient {
     @ApiStatus.Internal
     public static void init() {
         VeilEventPlatform.INSTANCE.onFreeNativeResources(VeilRenderSystem::close);
-        VeilEventPlatform.INSTANCE.onVeilRendererAvailable(renderer -> {
-            // This fixes moving transparent blocks drawing too early
-            BufferSourceExtension ext = (BufferSourceExtension) Minecraft.getInstance().renderBuffers().bufferSource();
-            ext.veil$addFixedBuffer(RenderType.translucentMovingBlock());
+        // This fixes moving transparent blocks drawing too early
+        VeilEventPlatform.INSTANCE.onVeilRegisterFixedBuffers(registry -> registry.registerFixedBuffer(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucentMovingBlock()));
+        RenderTypeStageRegistry.addGenericStage(renderType -> true, new RenderStateShard(Veil.MODID + ":deferred", () -> VeilRenderSystem.renderer().getDeferredRenderer().setup(), () -> VeilRenderSystem.renderer().getDeferredRenderer().clear()) {
         });
     }
 

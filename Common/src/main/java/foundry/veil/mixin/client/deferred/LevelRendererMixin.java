@@ -4,19 +4,18 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import foundry.veil.ext.LevelRendererExtension;
-import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.impl.client.render.deferred.DeferredShaderStateCache;
 import foundry.veil.api.client.render.VeilRenderBridge;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.ext.LevelRendererExtension;
+import foundry.veil.impl.client.render.deferred.DeferredShaderStateCache;
+import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,10 +31,6 @@ public class LevelRendererMixin implements LevelRendererExtension {
 
     @Shadow
     private Frustum cullingFrustum;
-
-    @Shadow
-    @Final
-    private RenderBuffers renderBuffers;
 
     @Shadow
     @Nullable
@@ -55,12 +50,6 @@ public class LevelRendererMixin implements LevelRendererExtension {
         if (iModelViewMat != null) {
             iModelViewMat.set($$1.last().pose().normal(new Matrix3f()));
         }
-    }
-
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;getModelViewStack()Lcom/mojang/blaze3d/vertex/PoseStack;", shift = At.Shift.AFTER))
-    public void endTranslucent(PoseStack $$0, float $$1, long $$2, boolean $$3, Camera $$4, GameRenderer $$5, LightTexture $$6, Matrix4f $$7, CallbackInfo ci) {
-        MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
-        bufferSource.endBatch(RenderType.translucentMovingBlock());
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V", shift = At.Shift.BEFORE))

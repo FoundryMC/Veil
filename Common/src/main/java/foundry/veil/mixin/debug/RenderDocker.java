@@ -10,8 +10,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,17 +29,17 @@ public class RenderDocker {
             return;
         }
 
-        String pth = System.getProperty("java.library.path");
+        String path = System.getProperty("java.library.path");
         String name = System.mapLibraryName("renderdoc");
-        boolean rdDetected = false;
-        for (String s : pth.split(";")) {
-            if (new File(s + "/" + name).exists()) {
-                rdDetected = true;
+        boolean detected = false;
+        for (String folder : path.split(";")) {
+            if (Files.exists(Path.of(folder + "/" + name))) {
+                detected = true;
                 break;
             }
         }
 
-        if (!rdDetected) {
+        if (!detected) {
             return;
         }
 

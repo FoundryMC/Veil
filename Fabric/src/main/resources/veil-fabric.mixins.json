@@ -12,7 +12,8 @@
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
     "client.deferred.ModelBlockRendererMixin",
-    "client.deferred.ParticleEngineMixin"
+    "client.deferred.ParticleEngineMixin",
+    "client.stage.LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
