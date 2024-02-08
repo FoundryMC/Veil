@@ -69,7 +69,7 @@ public class QuasarVanillaParticle extends Particle {
         this.yd = motionY;
         this.zd = motionZ;
 
-        this.particle=null;
+        this.particle = null;
 //        this.particle = new QuasarParticle(world, data, particleSettings, parentEmitter);
 //        this.particle.getPosition().set(x, y, z);
 //        this.particle.init();
@@ -271,7 +271,7 @@ public class QuasarVanillaParticle extends Particle {
                 (float) (renderPosition.y() - projectedView.y()),
                 (float) (renderPosition.z() - projectedView.z()));
         Vector3dc motionDirection = this.particle.getVelocity().normalize(new Vector3d());
-        this.particle.getData().renderStyle().render(new PoseStack(), this.particle, renderData, renderOffset, motionDirection, this.getLightColor(partialTicks), builder, 1, partialTicks);
+        this.particle.getData().renderStyle().render(new PoseStack(), this.particle, renderData, renderOffset, motionDirection, builder, 1, partialTicks);
 
 //        renderType.end(tesselator);
     }
@@ -289,7 +289,7 @@ public class QuasarVanillaParticle extends Particle {
     public enum RenderStyle implements RenderFunction {
         CUBE {
             @Override
-            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks) {
                 Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 for (int i = 0; i < 6; i++) {
@@ -312,13 +312,13 @@ public class QuasarVanillaParticle extends Particle {
                         vec.rotateX(rotation.x())
                                 .rotateY(rotation.y())
                                 .rotateZ(rotation.z())
-                                .mul((float) (renderData.getRenderScale() * ageModifier))
+                                .mul((float) (renderData.getRenderRadius() * ageModifier))
                                 .add(renderOffset);
 
                         builder.vertex(matrix4f, vec.x, vec.y, vec.z);
                         builder.uv((float) j / 2, j % 2);
                         builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
-                        builder.uv2(light);
+                        builder.uv2(renderData.getLightColor());
                         builder.endVertex();
                     }
                 }
@@ -327,7 +327,7 @@ public class QuasarVanillaParticle extends Particle {
         // TODO: FIX UVS THEY'RE FUCKED
         BILLBOARD {
             @Override
-            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks) {
                 Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 Vec3[] faceVerts = new Vec3[]{
@@ -356,7 +356,7 @@ public class QuasarVanillaParticle extends Particle {
                                 .rotateZ(rotation.z());
                     }
 //                vec = vec.xRot(lerpedPitch).yRot(lerpedYaw).zRot(lerpedRoll);
-                    faceCameraRotation.transform(vec).mul((float) (renderData.getRenderScale() * ageModifier)).add(renderOffset);
+                    faceCameraRotation.transform(vec).mul((float) (renderData.getRenderRadius() * ageModifier)).add(renderOffset);
 
                     float u, v;
                     if (j == 0) {
@@ -395,7 +395,7 @@ public class QuasarVanillaParticle extends Particle {
                     builder.vertex(matrix4f, vec.x, vec.y, vec.z);
                     builder.uv(u, v);
                     builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
-                    builder.uv2(light);
+                    builder.uv2(renderData.getLightColor());
                     builder.endVertex();
                 }
             }
@@ -405,6 +405,6 @@ public class QuasarVanillaParticle extends Particle {
     @FunctionalInterface
     interface RenderFunction {
 
-        void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, int light, VertexConsumer builder, double ageModifier, float partialTicks);
+        void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks);
     }
 }

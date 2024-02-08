@@ -1,14 +1,16 @@
 package foundry.veil.quasar.fx;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import foundry.veil.quasar.emitters.modules.particle.render.TrailSettings;
+import foundry.veil.quasar.util.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.Locale;
@@ -43,6 +45,16 @@ public class Trail {
     private ResourceLocation texture = null;
     private boolean parentRotation = false;
     private int timeout = 0;
+
+    public Trail(TrailSettings settings) {
+        this(MathUtil.colorFromVec4f(settings.getTrailColor()), (ageScale) -> settings.getTrailWidthModifier().modify(ageScale, 1));
+        this.billboard = settings.getBillboard();
+        this.length = settings.getTrailLength();
+        this.frequency = settings.getTrailFrequency();
+        this.tilingMode = settings.getTilingMode();
+        this.texture = settings.getTrailTexture();
+        this.parentRotation = settings.getParentRotation();
+    }
 
     public Trail(Vec3[] points, int color, Function<Float, Float> widthFunction) {
         this.points = points;
@@ -198,8 +210,6 @@ public class Trail {
     }
 
     public void render(PoseStack stack, VertexConsumer consumer, int light) {
-        stack.pushPose();
-        RenderSystem.disableCull();
         Vector3f[][] corners = new Vector3f[this.points.length][2];
         for (int i = 0; i < this.points.length; i++) {
             if (i % this.frequency != 0) {
@@ -241,35 +251,30 @@ public class Trail {
             corners[i / this.frequency][1] = bottomOffset;
         }
         this.renderPoints(stack, consumer, light, corners, this.color);
-        RenderSystem.enableCull();
-        stack.popPose();
     }
 
     private void renderPoints(PoseStack stack, VertexConsumer consumer, int light, Vector3f[][] corners, int color) {
-        stack.pushPose();
-        float r = (color >> 16 & 255) / 255f;
-        float g = (color >> 8 & 255) / 255f;
-        float b = (color & 255) / 255f;
-        float a = (color >> 24 & 255) / 255f;
-        for (int i = 0; i < corners.length - 1; i++) {
+        int r = color >> 16 & 255;
+        int g = color >> 8 & 255;
+        int b = color & 255;
+        int a = color >> 24 & 255;
+        for (int i = 0; i < corners.length; i++) {
             Vector3f top = corners[i][0];
             Vector3f bottom = corners[i][1];
-            Vector3f nextTop = corners[i + 1][0];
-            Vector3f nextBottom = corners[i + 1][1];
-            if (nextTop == null || nextBottom == null || top == null || bottom == null) {
+//            Vector3f nextTop = corners[i + 1][0];
+//            Vector3f nextBottom = corners[i + 1][1];
+            if (top == null || bottom == null) {
                 continue;
             }
             float u = 0;
-            float u1 = 1;
             if (this.tilingMode == TilingMode.STRETCH) {
                 u = (float) i / (corners.length - 1);
-                u1 = (float) (i + 1) / (corners.length - 1);
             }
-            consumer.vertex(stack.last().pose(), bottom.x(), bottom.y(), bottom.z()).color(r, g, b, a).uv(u, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
-            consumer.vertex(stack.last().pose(), top.x(), top.y(), top.z()).color(r, g, b, a).uv(u, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
-            consumer.vertex(stack.last().pose(), nextTop.x(), nextTop.y(), nextTop.z()).color(r, g, b, a).uv(u1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
-            consumer.vertex(stack.last().pose(), nextBottom.x(), nextBottom.y(), nextBottom.z()).color(r, g, b, a).uv(u1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
+            Matrix4f matrix4f = stack.last().pose();
+            consumer.vertex(matrix4f, bottom.x(), bottom.y(), bottom.z()).color(r, g, b, a).uv(u, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
+            consumer.vertex(matrix4f, top.x(), top.y(), top.z()).color(r, g, b, a).uv(u, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
+//            consumer.vertex(matrix4f, nextTop.x(), nextTop.y(), nextTop.z()).color(r, g, b, a).uv(u1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
+//            consumer.vertex(matrix4f, nextBottom.x(), nextBottom.y(), nextBottom.z()).color(r, g, b, a).uv(u1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0, 1, 0).endVertex();
         }
-        stack.popPose();
     }
 }

@@ -3,9 +3,8 @@ package foundry.veil.quasar.client.particle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderType;
-import foundry.veil.quasar.emitters.modules.particle.render.TrailSettings;
 import foundry.veil.quasar.fx.Trail;
-import foundry.veil.quasar.util.MathUtil;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +16,6 @@ import org.joml.*;
 
 import java.lang.Math;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class RenderData {
@@ -29,8 +27,9 @@ public class RenderData {
     private final Vector3d renderPosition;
     private final Vector3f prevRotation;
     private final Vector3f renderRotation;
-    private float prevScale;
-    private float renderScale;
+    private float prevRadius;
+    private float renderRadius;
+    private int lightColor;
     private float red;
     private float green;
     private float blue;
@@ -39,16 +38,16 @@ public class RenderData {
     public float agePercent;
     private SpriteData spriteData;
     private TextureAtlasSprite atlasSprite;
-    private final List<TrailSettings> trails;
-    private final List<Trail> renderTrails;
+    private final List<Trail> trails;
 
     public RenderData() {
         this.prevPosition = new Vector3d();
         this.renderPosition = new Vector3d();
         this.prevRotation = new Vector3f();
         this.renderRotation = new Vector3f();
-        this.prevScale = 1.0F;
-        this.renderScale = 1.0F;
+        this.prevRadius = 1.0F;
+        this.renderRadius = 1.0F;
+        this.lightColor = LightTexture.FULL_BRIGHT;
         this.red = 1.0F;
         this.green = 1.0F;
         this.blue = 1.0F;
@@ -57,23 +56,23 @@ public class RenderData {
         this.spriteData = null;
         this.atlasSprite = null;
         this.trails = new ArrayList<>();
-        this.renderTrails = new ArrayList<>();
     }
 
     @ApiStatus.Internal
-    public void tick(Vector3dc position, Vector3fc rotation, float scale) {
-        this.prevPosition.set(position);
-        this.prevRotation.set(rotation);
-        this.prevScale = scale;
+    public void tick(QuasarParticle particle, int lightColor) {
+        this.prevPosition.set(particle.getPosition());
+        this.prevRotation.set(particle.getRotation());
+        this.prevRadius = particle.getRadius();
+        this.lightColor = lightColor;
     }
 
     @ApiStatus.Internal
-    public void render(Vector3dc position, Vector3fc rotation, float scale, int age, int lifetime, float partialTicks) {
-        this.prevPosition.lerp(position, partialTicks, this.renderPosition);
-        this.prevRotation.lerp(rotation, partialTicks, this.renderRotation);
-        this.renderScale = Mth.lerp(partialTicks, this.prevScale, scale);
-        this.renderAge = age + partialTicks;
-        this.agePercent = Math.min(this.renderAge / (float) lifetime, 1.0F);
+    public void render(QuasarParticle particle, float partialTicks) {
+        this.prevPosition.lerp(particle.getPosition(), partialTicks, this.renderPosition);
+        this.prevRotation.lerp(particle.getRotation(), partialTicks, this.renderRotation);
+        this.renderRadius = Mth.lerp(partialTicks, this.prevRadius, particle.getRadius());
+        this.renderAge = particle.getAge() + partialTicks;
+        this.agePercent = Math.min(this.renderAge / (float) particle.getLifetime(), 1.0F);
     }
 
     public Vector3dc getRenderPosition() {
@@ -84,8 +83,8 @@ public class RenderData {
         return this.renderRotation;
     }
 
-    public float getRenderScale() {
-        return this.renderScale;
+    public float getRenderRadius() {
+        return this.renderRadius;
     }
 
     public float getRenderAge() {
@@ -94,6 +93,10 @@ public class RenderData {
 
     public float getAgePercent() {
         return this.agePercent;
+    }
+
+    public int getLightColor() {
+        return this.lightColor;
     }
 
     public float getRed() {
@@ -130,36 +133,21 @@ public class RenderData {
         }
     }
 
-    public List<TrailSettings> getTrails() {
+    public List<Trail> getTrails() {
         return this.trails;
     }
 
     public void renderTrails(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, int packedLight) {
-        for (TrailSettings trail : this.trails) {
-            Trail tr = new Trail(MathUtil.colorFromVec4f(trail.getTrailColor()), (ageScale) -> trail.getTrailWidthModifier().modify(ageScale, 1));
-            tr.setBillboard(trail.getBillboard());
-            tr.setLength(trail.getTrailLength());
-            tr.setFrequency(trail.getTrailFrequency());
-            tr.setTilingMode(trail.getTilingMode());
-            tr.setTexture(trail.getTrailTexture());
-            tr.setParentRotation(trail.getParentRotation());
-            // TODO change to joml vectors
-            tr.pushRotatedPoint(new Vec3(this.prevPosition.x, this.prevPosition.y, this.prevPosition.z), new Vec3(this.prevRotation.x, this.prevRotation.y, this.prevRotation.z));
-            this.renderTrails.add(tr);
-        }
-        this.trails.clear();
         // TODO move to renderer
-        this.renderTrails.forEach(trail -> {
-            trail.pushRotatedPoint(new Vec3(this.renderPosition.x, this.renderPosition.y, this.renderPosition.z), new Vec3(this.renderRotation.x, this.renderRotation.y, this.renderRotation.z));
+
+        for (Trail trail : this.trails) {
+            trail.pushRotatedPoint(new Vec3(this.prevPosition.x, this.prevPosition.y, this.prevPosition.z), new Vec3(this.prevRotation.x, this.prevRotation.y, this.prevRotation.z));
+
             poseStack.pushPose();
             poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
-            trail.render(poseStack, bufferSource.getBuffer(VeilRenderType.quasarTranslucent(trail.getTexture())), packedLight);
+            trail.render(poseStack, bufferSource.getBuffer(VeilRenderType.quasarTrail(trail.getTexture())), packedLight);
             poseStack.popPose();
-        });
-    }
-
-    public List<Trail> getRenderTrails() {
-        return this.renderTrails;
+        }
     }
 
     public void setRed(float red) {
@@ -190,14 +178,6 @@ public class RenderData {
         this.green = color.y();
         this.blue = color.z();
         this.alpha = color.w();
-    }
-
-    public void addTrails(TrailSettings... trails) {
-        this.trails.addAll(List.of(trails));
-    }
-
-    public void addTrails(Collection<TrailSettings> trails) {
-        this.trails.addAll(trails);
     }
 
     public void setSpriteData(@Nullable SpriteData spriteData) {

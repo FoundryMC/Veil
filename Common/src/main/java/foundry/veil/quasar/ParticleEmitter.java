@@ -192,7 +192,7 @@ public class ParticleEmitter {
                     (float) (renderPosition.z() - projectedView.z()));
             particle.getVelocity().normalize(motionDirection);
             VertexConsumer builder = bufferSource.getBuffer(VeilRenderType.quasarParticle(renderData.getTexture()));
-            renderStyle.render(poseStack, particle, renderData, renderOffset, motionDirection, particle.getLightColor(), builder, 1, partialTicks);
+            renderStyle.render(poseStack, particle, renderData, renderOffset, motionDirection, builder, 1, partialTicks);
         }
     }
 

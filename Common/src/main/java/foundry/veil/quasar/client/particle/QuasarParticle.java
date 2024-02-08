@@ -1,5 +1,6 @@
 package foundry.veil.quasar.client.particle;
 
+import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
 import foundry.veil.quasar.ParticleEmitter;
 import foundry.veil.quasar.data.ParticleSettings;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class QuasarParticle {
 
@@ -52,7 +54,7 @@ public class QuasarParticle {
     private AABB boundingBox;
     private boolean stoppedByCollision;
 
-    private final MolangRuntime environment;
+    private final Supplier<MolangRuntime> environment;
     private final RenderData renderData;
 
     public QuasarParticle(ClientLevel level, RandomSource randomSource, QuasarParticleData data, ParticleSettings settings, ParticleEmitter parent) {
@@ -72,7 +74,8 @@ public class QuasarParticle {
         this.age = 0;
 
         this.renderData = new RenderData();
-        this.environment = MolangRuntime.runtime()
+        // Don't create the environment if the particle never uses it
+        this.environment = Suppliers.memoize(() -> MolangRuntime.runtime()
                 .setQuery("x", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().x()))
                 .setQuery("y", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().y()))
                 .setQuery("z", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().z()))
@@ -84,11 +87,11 @@ public class QuasarParticle {
                 .setQuery("xRot", MolangExpression.of(() -> (float) Math.toDegrees(this.renderData.getRenderRotation().x())))
                 .setQuery("yRot", MolangExpression.of(() -> (float) Math.toDegrees(this.renderData.getRenderRotation().y())))
                 .setQuery("zRot", MolangExpression.of(() -> (float) Math.toDegrees(this.renderData.getRenderRotation().z())))
-                .setQuery("scale", MolangExpression.of(this.renderData::getRenderScale))
+                .setQuery("scale", MolangExpression.of(this.renderData::getRenderRadius))
                 .setQuery("age", MolangExpression.of(this.renderData::getRenderAge))
                 .setQuery("agePercent", MolangExpression.of(this.renderData::getAgePercent))
                 .setQuery("lifetime", this.lifetime)
-                .create();
+                .create());
     }
 
     private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
@@ -170,12 +173,17 @@ public class QuasarParticle {
         this.boundingBox = new AABB(this.position.x - r, this.position.y - r, this.position.z - r, this.position.x + r, this.position.y + r, this.position.z + r);
     }
 
+    private int getLightColor() {
+        BlockPos pos = this.getBlockPosition();
+        return this.level.hasChunkAt(pos) ? LevelRenderer.getLightColor(this.level, pos) : 0;
+    }
+
     @ApiStatus.Internal
     public void init() {
         for (InitParticleModule initModule : this.modules.getInitModules()) {
             initModule.init(this);
         }
-        this.renderData.tick(this.position, this.rotation, this.radius);
+        this.renderData.tick(this, this.getLightColor());
         this.updateBoundingBox();
     }
 
@@ -186,7 +194,7 @@ public class QuasarParticle {
 
     @ApiStatus.Internal
     public void tick() {
-        this.renderData.tick(this.position, this.rotation, this.radius);
+        this.renderData.tick(this, this.getLightColor());
         for (UpdateParticleModule updateModule : this.modules.getUpdateModules()) {
             updateModule.update(this);
         }
@@ -198,8 +206,8 @@ public class QuasarParticle {
         // TODO make this a module
         if (this.data.faceVelocity()) {
             Vector3d normalizedMotion = this.velocity.normalize(new Vector3d());
-            this.rotation.x = (float) Math.atan2(normalizedMotion.y, Math.sqrt(normalizedMotion.x * normalizedMotion.x + normalizedMotion.z * normalizedMotion.z));
-            this.rotation.y = (float) Math.atan2(normalizedMotion.x, normalizedMotion.z);
+            this.rotation.x = (float) Mth.atan2(normalizedMotion.y, Math.sqrt(normalizedMotion.x * normalizedMotion.x + normalizedMotion.z * normalizedMotion.z));
+            this.rotation.y = (float) Mth.atan2(normalizedMotion.x, normalizedMotion.z);
             if (this.data.renderStyle() == QuasarVanillaParticle.RenderStyle.BILLBOARD) {
                 this.rotation.y += (float) (Math.PI / 2.0);
             }
@@ -218,7 +226,7 @@ public class QuasarParticle {
         for (RenderParticleModule renderModule : this.modules.getRenderModules()) {
             renderModule.render(this, partialTicks);
         }
-        this.renderData.render(this.position, this.rotation, this.radius, this.age, this.lifetime, partialTicks);
+        this.renderData.render(this, partialTicks);
     }
 
     @ApiStatus.Internal
@@ -229,11 +237,11 @@ public class QuasarParticle {
     }
 
     public void remove() {
-        this.age = Integer.MAX_VALUE;
+        this.age = Integer.MIN_VALUE;
     }
 
     public boolean isRemoved() {
-        return this.age == Integer.MAX_VALUE;
+        return this.age < 0;
     }
 
     public ClientLevel getLevel() {
@@ -299,11 +307,6 @@ public class QuasarParticle {
 
     public AABB getBoundingBox() {
         return this.boundingBox;
-    }
-
-    public int getLightColor() {
-        BlockPos pos = this.getBlockPosition();
-        return this.level.hasChunkAt(pos) ? LevelRenderer.getLightColor(this.level, pos) : 0;
     }
 
     public RenderData getRenderData() {

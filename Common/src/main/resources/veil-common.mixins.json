@@ -30,6 +30,7 @@
     "client.imgui.ImGuiImplGlfwMixin",
     "client.imgui.KeyboardHandlerMixin",
     "client.imgui.MouseHandlerMixin",
+    "client.pipeline.BufferBuilderAccessor",
     "client.pipeline.FrustumMixin",
     "client.pipeline.GameRendererMixin",
     "client.pipeline.LevelRendererMixin",

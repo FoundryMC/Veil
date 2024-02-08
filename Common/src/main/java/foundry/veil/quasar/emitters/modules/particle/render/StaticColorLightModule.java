@@ -8,39 +8,42 @@ import foundry.veil.quasar.data.module.init.LightModuleData;
 import foundry.veil.quasar.emitters.modules.particle.RenderParticleModule;
 import org.joml.Vector4f;
 
-public class LightModule implements RenderParticleModule {
+public class StaticColorLightModule implements RenderParticleModule {
 
     private final LightModuleData data;
+    private final Vector4f color;
+    private final float brightness;
     private PointLight light;
 
-    public LightModule(LightModuleData data) {
+    public StaticColorLightModule(LightModuleData data) {
         this.data = data;
+        this.color = data.color().getColor(0.0F);
+        this.brightness = data.brightness() * this.color.w;
         this.light = null;
+    }
+
+    public boolean isVisible() {
+        return this.color.lengthSquared() < 0.1 && this.brightness < 0.1;
     }
 
     @Override
     public void render(QuasarParticle particle, float partialTicks) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
         if (!deferredRenderer.isEnabled()) {
-            return;
-        }
-
-        Vector4f color = this.data.color().getColor((float) particle.getAge() / (float) particle.getLifetime());
-        float brightness = this.data.brightness() * color.w;
-        if (color.lengthSquared() < 0.1 || brightness < 0.1) {
             this.onRemove();
             return;
         }
 
         if (this.light == null) {
             this.light = new PointLight()
+                    .setColor(this.color.x, this.color.y, this.color.z)
+                    .setBrightness(this.brightness)
                     .setRadius(this.data.radius())
                     .setFalloff(this.data.falloff());
             deferredRenderer.getLightRenderer().addLight(this.light);
         }
+
         this.light.setPosition(particle.getRenderData().getRenderPosition());
-        this.light.setColor(color.x, color.y, color.z);
-        this.light.setBrightness(brightness);
     }
 
     @Override

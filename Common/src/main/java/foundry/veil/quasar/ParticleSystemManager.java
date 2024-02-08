@@ -81,11 +81,11 @@ public class ParticleSystemManager {
     }
 
     @ApiStatus.Internal
-    public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, CullFrustum frustum, float partialTicks) {
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, CullFrustum frustum, float partialTicks) {
+        // TODO store emitters per-chunk and fetch them from the renderer
         for (ParticleEmitter emitter : this.particleEmitters) {
             emitter.render(poseStack, bufferSource, camera, partialTicks);
         }
-        bufferSource.endLastBatch();
     }
 
     public int getEmitterCount() {

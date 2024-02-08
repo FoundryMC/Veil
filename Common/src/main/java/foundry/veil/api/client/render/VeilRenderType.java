@@ -19,27 +19,26 @@ public final class VeilRenderType extends RenderType {
                 .setTextureState(new TextureStateShard(texture, false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setLightmapState(LIGHTMAP)
-                .setOverlayState(OVERLAY)
-                .createCompositeState(true);
-        return create(Veil.MODID + ":quasar_particle", DefaultVertexFormat.PARTICLE, VertexFormat.Mode.QUADS, 256, false, true, state);
+                .createCompositeState(false);
+        return create(Veil.MODID + ":quasar_particle", DefaultVertexFormat.PARTICLE, VertexFormat.Mode.QUADS, SMALL_BUFFER_SIZE, false, false, state);
     });
-    private static final Function<ResourceLocation, RenderType> QUASAR_TRANSLUCENT = Util.memoize((texture) -> {
+    private static final Function<ResourceLocation, RenderType> QUASAR_TRAIL = Util.memoize((texture) -> {
         CompositeState state = CompositeState.builder()
                 .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
                 .setTextureState(new TextureStateShard(texture, false, false))
-                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setTransparencyState(ADDITIVE_TRANSPARENCY)
                 .setWriteMaskState(COLOR_WRITE)
                 .setCullState(NO_CULL)
                 .createCompositeState(false);
-        return RenderType.create(Veil.MODID + ":quasar_translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true, state);
+        return RenderType.create(Veil.MODID + ":quasar_trail", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLE_STRIP, TRANSIENT_BUFFER_SIZE, false, true, state);
     });
 
     public static RenderType quasarParticle(ResourceLocation texture) {
         return QUASAR_PARTICLE.apply(texture);
     }
 
-    public static RenderType quasarTranslucent(ResourceLocation texture) {
-        return QUASAR_TRANSLUCENT.apply(texture);
+    public static RenderType quasarTrail(ResourceLocation texture) {
+        return QUASAR_TRAIL.apply(texture);
     }
 
     private VeilRenderType(String $$0, VertexFormat $$1, VertexFormat.Mode $$2, int $$3, boolean $$4, boolean $$5, Runnable $$6, Runnable $$7) {

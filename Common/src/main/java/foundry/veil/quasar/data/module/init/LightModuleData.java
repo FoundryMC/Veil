@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.ParticleModuleSet;
 import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.data.module.ParticleModuleData;
-import foundry.veil.quasar.emitters.modules.particle.render.LightModule;
+import foundry.veil.quasar.emitters.modules.particle.render.DynamicColorLightModule;
+import foundry.veil.quasar.emitters.modules.particle.render.StaticColorLightModule;
 import foundry.veil.quasar.util.ColorGradient;
 
 public record LightModuleData(ColorGradient color,
@@ -22,7 +23,14 @@ public record LightModuleData(ColorGradient color,
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
-        builder.addModule(new LightModule(this));
+        if (this.color.isConstant()) {
+            StaticColorLightModule module = new StaticColorLightModule(this);
+            if (module.isVisible()) {
+                builder.addModule(module);
+            }
+        } else {
+            builder.addModule(new DynamicColorLightModule(this));
+        }
     }
 
     @Override
