@@ -5,11 +5,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.mixin.client.quasar.RegistryDataAccessor;
 import foundry.veil.mixin.client.quasar.RegistryDataLoaderAccessor;
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.ParticleModuleData;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -100,6 +100,12 @@ public final class QuasarParticles {
             QuasarParticle.clearErrors();
             printErrors(preparations.errors);
             LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());
+            VeilRenderSystem.renderer().getParticleManager().clear();
+        }
+
+        @Override
+        public String getName() {
+            return QuasarParticles.class.getSimpleName();
         }
 
         public record Preparations(RegistryAccess registryAccess, Map<ResourceKey<?>, Exception> errors) {
