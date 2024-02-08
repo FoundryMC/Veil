@@ -10,6 +10,7 @@
     "chargable.InstrumentItemMixin",
     "chargable.TridentItemMixin",
     "client.quasar.FireworkRocketEntityMixin",
+    "debug.SimpleReloadInstanceMixin",
     "tooltip.BlockEntityMixin"
   ],
   "client": [

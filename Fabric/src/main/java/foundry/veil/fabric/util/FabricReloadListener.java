@@ -4,29 +4,53 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class FabricReloadListener implements IdentifiableResourceReloadListener {
-    private final ResourceLocation id;
-    private final PreparableReloadListener listener;
-
-    public FabricReloadListener(ResourceLocation id, PreparableReloadListener listener) {
-        this.id = id;
-        this.listener = listener;
-    }
-
+public record FabricReloadListener(ResourceLocation id,
+                                   PreparableReloadListener listener) implements IdentifiableResourceReloadListener {
 
     @Override
     public ResourceLocation getFabricId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, ProfilerFiller profiler, ProfilerFiller profiler2, Executor executor, Executor executor2) {
-        return listener.reload(barrier, manager, profiler, profiler2, executor, executor2);
+        return this.listener.reload(barrier, manager, profiler, profiler2, executor, executor2);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.listener.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        FabricReloadListener that = (FabricReloadListener) o;
+
+        if (!this.id.equals(that.id)) {
+            return false;
+        }
+        return this.listener.equals(that.listener);
+    }
+
+    @Override
+    public String toString() {
+        return this.listener.toString();
+    }
+
+    @Override
+    public String getName() {
+        return this.listener.getName();
     }
 }

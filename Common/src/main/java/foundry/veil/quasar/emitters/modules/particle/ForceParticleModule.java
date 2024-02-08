@@ -6,4 +6,6 @@ public interface ForceParticleModule extends ParticleModule {
 
     void applyForce(QuasarParticle particle);
 
+    void setStrength(float strength);
+
 }

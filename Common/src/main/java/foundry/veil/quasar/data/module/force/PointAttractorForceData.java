@@ -30,19 +30,19 @@ import org.joml.Vector3dc;
  * </p>
  */
 public record PointAttractorForceData(Vector3dc position,
+                                      boolean localPosition,
                                       float range,
                                       float strength,
-                                      float falloff,
                                       boolean strengthByDistance,
                                       boolean invertDistanceModifier) implements ParticleModuleData {
 
     public static final Codec<PointAttractorForceData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CodecUtil.VECTOR3D_CODEC.fieldOf("position").forGetter(PointAttractorForceData::position),
+            Codec.BOOL.optionalFieldOf("localPosition", false).forGetter(PointAttractorForceData::invertDistanceModifier),
             Codec.FLOAT.fieldOf("range").forGetter(PointAttractorForceData::range),
             Codec.FLOAT.fieldOf("strength").forGetter(PointAttractorForceData::strength),
-            Codec.FLOAT.fieldOf("falloff").forGetter(PointAttractorForceData::falloff),
             Codec.BOOL.fieldOf("strengthByDistance").forGetter(PointAttractorForceData::strengthByDistance),
-            Codec.BOOL.fieldOf("invertDistanceModifier").orElse(false).forGetter(PointAttractorForceData::invertDistanceModifier)
+            Codec.BOOL.optionalFieldOf("invertDistanceModifier", false).forGetter(PointAttractorForceData::invertDistanceModifier)
     ).apply(instance, PointAttractorForceData::new));
 
     @Override

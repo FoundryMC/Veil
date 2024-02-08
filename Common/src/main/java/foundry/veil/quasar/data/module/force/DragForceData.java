@@ -5,6 +5,7 @@ import foundry.veil.quasar.client.particle.ParticleModuleSet;
 import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import foundry.veil.quasar.emitters.modules.particle.force.ConstantForceModule;
+import foundry.veil.quasar.emitters.modules.particle.force.ScaleForceModule;
 import org.joml.Vector3d;
 
 /**
@@ -21,7 +22,7 @@ public record DragForceData(double strength) implements ParticleModuleData {
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
-        builder.addModule(new ConstantForceModule(new Vector3d(), new Vector3d(this.strength)));
+        builder.addModule(new ScaleForceModule(this.strength));
     }
 
     @Override

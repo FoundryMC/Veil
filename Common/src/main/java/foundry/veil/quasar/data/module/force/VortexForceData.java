@@ -18,15 +18,18 @@ import org.joml.Vector3dc;
  * The strength of the force is determined by the strength parameter.
  * The falloff parameter determines how quickly the force falls off with distance. (unused)
  */
-public record VortexForceData(Vector3dc vortexAxis, Vector3dc vortexCenter, float range, float strength,
-                              float falloff) implements ParticleModuleData {
+public record VortexForceData(Vector3dc vortexAxis,
+                              Vector3dc vortexCenter,
+                              boolean localPosition,
+                              double range,
+                              float strength) implements ParticleModuleData {
 
     public static final Codec<VortexForceData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CodecUtil.VECTOR3D_CODEC.fieldOf("vortex_axis").forGetter(VortexForceData::vortexAxis),
             CodecUtil.VECTOR3D_CODEC.fieldOf("vortex_center").forGetter(VortexForceData::vortexCenter),
-            Codec.FLOAT.fieldOf("range").forGetter(VortexForceData::range),
-            Codec.FLOAT.fieldOf("strength").forGetter(VortexForceData::strength),
-            Codec.FLOAT.fieldOf("falloff").forGetter(VortexForceData::falloff)
+            Codec.BOOL.optionalFieldOf("local_position", false).forGetter(VortexForceData::localPosition),
+            Codec.DOUBLE.fieldOf("range").forGetter(VortexForceData::range),
+            Codec.FLOAT.fieldOf("strength").forGetter(VortexForceData::strength)
     ).apply(instance, VortexForceData::new));
 
     @Override

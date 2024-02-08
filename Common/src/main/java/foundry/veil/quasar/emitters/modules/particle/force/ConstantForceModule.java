@@ -7,20 +7,29 @@ import org.joml.Vector3dc;
 
 public class ConstantForceModule implements ForceParticleModule {
 
-    private final Vector3dc acceleration;
-    private final Vector3dc scale;
-
-    public ConstantForceModule(Vector3dc acceleration, Vector3dc scale) {
-        this.acceleration = acceleration;
-        this.scale = scale;
-    }
+    private final Vector3d acceleration;
+    private float strength;
 
     public ConstantForceModule(Vector3dc acceleration) {
-        this(acceleration, new Vector3d(1.0));
+        this(new Vector3d(acceleration));
+    }
+
+    public ConstantForceModule(Vector3d acceleration) {
+        this.acceleration = acceleration;
+        this.strength = 1.0F;
     }
 
     @Override
     public void applyForce(QuasarParticle particle) {
-        particle.getVelocity().mul(this.scale).add(this.acceleration);
+        particle.getVelocity().add(this.acceleration.x * this.strength, this.acceleration.y * this.strength, this.acceleration.z * this.strength);
+    }
+
+    @Override
+    public void setStrength(float strength) {
+        this.strength = strength;
+    }
+
+    public Vector3d getAcceleration() {
+        return this.acceleration;
     }
 }

@@ -14,15 +14,15 @@ import org.joml.Vector3dc;
  * A point force is used to apply a force in the direction away from a point.
  */
 public record PointForceData(Vector3dc point,
+                             boolean localPoint,
                              float range,
-                             float strength,
-                             float falloff) implements ParticleModuleData {
+                             float strength) implements ParticleModuleData {
 
     public static final Codec<PointForceData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CodecUtil.VECTOR3D_CODEC.optionalFieldOf("point", new Vector3d(69, 69, 96)).forGetter(PointForceData::point),
+            Codec.BOOL.optionalFieldOf("localPoint", false).forGetter(PointForceData::localPoint),
             Codec.FLOAT.fieldOf("range").forGetter(PointForceData::range),
-            Codec.FLOAT.fieldOf("strength").forGetter(PointForceData::strength),
-            Codec.FLOAT.fieldOf("falloff").forGetter(PointForceData::falloff)
+            Codec.FLOAT.fieldOf("strength").forGetter(PointForceData::strength)
     ).apply(instance, PointForceData::new));
 
     @Override

@@ -8,8 +8,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ParticleSystemManager implements ResourceManagerReloadListener {
+public class ParticleSystemManager {
 
     private static final int MAX_PARTICLES = 10000;
 
@@ -100,10 +98,5 @@ public class ParticleSystemManager implements ResourceManagerReloadListener {
 
     public float getSpawnScale() {
         return (float) (MAX_PARTICLES - this.particleCount) / (float) MAX_PARTICLES;
-    }
-
-    @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
-        this.clear();
     }
 }

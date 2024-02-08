@@ -2,33 +2,48 @@ package foundry.veil.quasar.emitters.modules.particle.force;
 
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.force.PointForceData;
-import foundry.veil.quasar.emitters.modules.particle.ForceParticleModule;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 /**
  * A point force is used to apply a force in the direction away from a point.
  */
-public class PointForceModule implements ForceParticleModule {
+public class PointForceModule extends SimplePositionedForce {
 
-    private final PointForceData data;
-    private final double rangeSq;
-    private final Vector3d temp;
+    private double rangeSq;
+    private float strength;
 
     public PointForceModule(PointForceData data) {
-        this.data = data;
-        this.rangeSq = data.range() * data.range();
-        this.temp = new Vector3d();
+        this(data.point(), data.localPoint(), data.range(), data.strength());
+    }
+
+    public PointForceModule(Vector3dc point,
+                            boolean localPoint,
+                            float range,
+                            float strength) {
+        super(point, localPoint);
+        this.rangeSq = range * range;
+        this.strength = strength;
     }
 
     @Override
     public void applyForce(QuasarParticle particle) {
-        Vector3d diff = this.data.point().sub(particle.getPosition(), this.temp);
+        Vector3d diff = this.getDeltaPosition(particle);
         double distanceSq = diff.lengthSquared();
         if (distanceSq >= this.rangeSq) {
             return;
         }
 
         // apply force to particle to move away from the point
-        particle.getVelocity().add(diff.normalize(this.data.strength()));
+        particle.getVelocity().add(diff.normalize(this.strength));
+    }
+
+    public void setRange(double range) {
+        this.rangeSq = range * range;
+    }
+
+    @Override
+    public void setStrength(float strength) {
+        this.strength = strength;
     }
 }

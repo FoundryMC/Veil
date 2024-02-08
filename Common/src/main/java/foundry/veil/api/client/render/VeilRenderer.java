@@ -60,7 +60,6 @@ public class VeilRenderer implements NativeResource {
         resourceManager.registerReloadListener(this.framebufferManager);
         resourceManager.registerReloadListener(this.postProcessingManager);
         resourceManager.registerReloadListener(this.deferredRenderer);
-        resourceManager.registerReloadListener(this.quasarParticleManager);
     }
 
     /**

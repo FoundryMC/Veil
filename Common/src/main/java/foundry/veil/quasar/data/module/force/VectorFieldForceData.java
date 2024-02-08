@@ -15,13 +15,11 @@ import foundry.veil.quasar.emitters.modules.particle.force.VectorFieldForceModul
  * @see VectorField
  */
 public record VectorFieldForceData(VectorField vectorField,
-                                   float strength,
-                                   float falloff) implements ParticleModuleData {
+                                   float strength) implements ParticleModuleData {
 
     public static final Codec<VectorFieldForceData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             VectorField.CODEC.fieldOf("vector_field").forGetter(VectorFieldForceData::vectorField),
-            Codec.FLOAT.fieldOf("strength").forGetter(VectorFieldForceData::strength),
-            Codec.FLOAT.fieldOf("falloff").forGetter(VectorFieldForceData::falloff)
+            Codec.FLOAT.fieldOf("strength").forGetter(VectorFieldForceData::strength)
     ).apply(instance, VectorFieldForceData::new));
 
     @Override

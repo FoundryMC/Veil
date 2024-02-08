@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +49,8 @@ public class ParticleEmitter {
     private final RandomSource randomSource;
     private final Vector3d position;
     private final List<QuasarParticle> particles;
+    @Nullable
+    private Entity attachedEntity;
 
     private boolean removed;
 
@@ -63,56 +66,6 @@ public class ParticleEmitter {
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
         this.particles = new ArrayList<>(data.maxParticles());
-    }
-
-    /**
-     * Marks this emitter to be removed next tick.
-     */
-    public void remove() {
-        this.removed = true;
-    }
-
-    /**
-     * Resets the emitter to its initial state
-     */
-    public void reset() {
-        this.age = 0;
-        this.removed = false;
-    }
-
-    public @Nullable ResourceLocation getRegistryName() {
-        return this.emitterData.getRegistryId();
-    }
-
-    /**
-     * Whether the emitter has completed its lifetime
-     */
-    public boolean isRemoved() {
-        return this.removed && this.particles.isEmpty();
-    }
-
-    /**
-     * Position of the emitter
-     */
-    public Vector3d getPosition() {
-        return this.position;
-    }
-
-    public ParticleEmitterData getData() {
-        return this.emitterData;
-    }
-
-    public int getParticleCount() {
-        return this.particles.size();
-    }
-
-    @Deprecated
-    public void setPosition(Vec3 position) {
-        this.position.set(position.x, position.y, position.z);
-    }
-
-    public void setPosition(Vector3dc position) {
-        this.position.set(position);
     }
 
     private void run() {
@@ -148,6 +101,15 @@ public class ParticleEmitter {
      * Tick the emitter. This is run to track the basic functionality of the emitter.
      */
     public void tick() {
+        if (this.attachedEntity != null) {
+            if (this.attachedEntity.isAlive()) {
+                Vec3 pos = this.attachedEntity.position();
+                this.position.set(pos.x, pos.y, pos.z);
+            } else {
+                this.attachedEntity = null;
+            }
+        }
+
         Iterator<QuasarParticle> iterator = this.particles.iterator();
         while (iterator.hasNext()) {
             QuasarParticle particle = iterator.next();
@@ -178,6 +140,8 @@ public class ParticleEmitter {
         this.age++;
     }
 
+    // TODO move to renderer
+    @ApiStatus.Internal
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, float partialTicks) {
         Vec3 projectedView = camera.getPosition();
         QuasarParticleData particleData = this.emitterData.particleData();
@@ -233,10 +197,71 @@ public class ParticleEmitter {
     }
 
     @ApiStatus.Internal
-    public void onRemoved() {
+    void onRemoved() {
         for (QuasarParticle particle : this.particles) {
             particle.onRemove();
         }
         this.particles.clear();
+    }
+
+    /**
+     * Marks this emitter to be removed next tick.
+     */
+    public void remove() {
+        this.removed = true;
+    }
+
+    /**
+     * Resets the emitter to its initial state
+     */
+    public void reset() {
+        this.age = 0;
+        this.removed = false;
+    }
+
+    public @Nullable ResourceLocation getRegistryName() {
+        return this.emitterData.getRegistryId();
+    }
+
+    /**
+     * Whether the emitter has completed its lifetime
+     */
+    public boolean isRemoved() {
+        return this.removed && this.particles.isEmpty();
+    }
+
+    /**
+     * Position of the emitter
+     */
+    public Vector3d getPosition() {
+        return this.position;
+    }
+
+    public ParticleEmitterData getData() {
+        return this.emitterData;
+    }
+
+    public int getParticleCount() {
+        return this.particles.size();
+    }
+
+    /**
+     * @return The entity this emitter is attached to and will apply
+     */
+    public @Nullable Entity getAttachedEntity() {
+        return this.attachedEntity;
+    }
+
+    @Deprecated
+    public void setPosition(Vec3 position) {
+        this.position.set(position.x, position.y, position.z);
+    }
+
+    public void setPosition(Vector3dc position) {
+        this.position.set(position);
+    }
+
+    public void setAttachedEntity(@Nullable Entity entity) {
+        this.attachedEntity = entity;
     }
 }
