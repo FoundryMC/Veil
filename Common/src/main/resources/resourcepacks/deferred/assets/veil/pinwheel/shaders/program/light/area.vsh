@@ -6,7 +6,7 @@ layout (location = 5) in vec3 Color;
 layout (location = 6) in vec2 Size;
 layout (location = 7) in float Angle;
 layout (location = 8) in float Distance;
-layout (location = 0) in float Falloff;
+layout (location = 9) in float Falloff;
 
 out mat4 lightMat;
 out vec3 lightColor;
