@@ -314,7 +314,7 @@ public class QuasarParticle {
     }
 
     public MolangEnvironment getEnvironment() {
-        return this.environment;
+        return this.environment.get();
     }
 
     public void vectorToRotation(double x, double y, double z) {
