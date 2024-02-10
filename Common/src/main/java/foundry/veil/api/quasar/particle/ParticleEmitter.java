@@ -157,6 +157,7 @@ public class ParticleEmitter {
                 this.position.set(pos.x, pos.y, pos.z);
             } else {
                 this.attachedEntity = null;
+                this.remove();
             }
         }
 
