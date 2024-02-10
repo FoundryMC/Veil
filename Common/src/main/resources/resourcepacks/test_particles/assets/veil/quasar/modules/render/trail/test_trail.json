@@ -5,7 +5,7 @@
             "trailWidthModifier": 0.12,
             "trailTexture": "veil:textures/special/blank.png",
             "trailPointModifier": 1.0,
-            "trailFrequency": 10,
+            "trailFrequency": 1,
             "trailLength": 50,
             "trailColor": [
                 0.75,
