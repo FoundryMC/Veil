@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.fabric.event.FabricVeilRenderLevelStageEvent;
-import foundry.veil.mixin.client.deferred.RenderBuffersAccessor;
+import foundry.veil.mixin.client.deferred.BufferSourceAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -16,7 +16,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class FabricRenderTypeStageHandler {
@@ -24,7 +27,7 @@ public class FabricRenderTypeStageHandler {
     private static final Map<VeilRenderLevelStageEvent.Stage, Set<RenderType>> STAGE_RENDER_TYPES = new HashMap<>();
 
     public static void register(@Nullable VeilRenderLevelStageEvent.Stage stage, RenderType renderType) {
-        SortedMap<RenderType, BufferBuilder> fixedBuffers = ((RenderBuffersAccessor) Minecraft.getInstance().renderBuffers()).getFixedBuffers();
+        Map<RenderType, BufferBuilder> fixedBuffers = ((BufferSourceAccessor) Minecraft.getInstance().renderBuffers().bufferSource()).getFixedBuffers();
         fixedBuffers.put(renderType, new BufferBuilder(renderType.bufferSize()));
 
         if (stage != null) {

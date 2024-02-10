@@ -2,10 +2,12 @@ package foundry.veil.neoforge;
 
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.impl.client.render.VeilUITooltipRenderer;
+import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
+import foundry.veil.neoforge.event.NeoForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.neoforge.event.NeoForgeVeilRendererEvent;
-import foundry.veil.render.VeilVanillaShaders;
-import foundry.veil.render.deferred.VeilDeferredRenderer;
-import foundry.veil.render.pipeline.VeilRenderSystem;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -44,6 +46,7 @@ public class VeilNeoForgeClient {
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
         NeoForge.EVENT_BUS.post(new NeoForgeVeilRendererEvent(VeilRenderSystem.renderer()));
+        NeoForge.EVENT_BUS.post(new NeoForgeVeilRegisterFixedBuffersEvent(NeoForgeRenderTypeStageHandler::register));
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
@@ -51,7 +54,7 @@ public class VeilNeoForgeClient {
     }
 
     private static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), Veil.veilPath("uitooltip"), VeilForgeClientEvents.OVERLAY);
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), Veil.veilPath("uitooltip"), VeilUITooltipRenderer::renderOverlay);
     }
 
     private static void registerShaders(RegisterShadersEvent event) {

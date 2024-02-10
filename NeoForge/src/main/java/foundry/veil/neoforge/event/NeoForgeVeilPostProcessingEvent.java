@@ -1,6 +1,7 @@
 package foundry.veil.neoforge.event;
 
 import foundry.veil.api.client.render.post.PostPipeline;
+import foundry.veil.api.client.render.post.PostProcessingManager;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.Event;
 

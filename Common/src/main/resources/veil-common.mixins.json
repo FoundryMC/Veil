@@ -17,6 +17,7 @@
     "client.anim.ItemInHandRendererMixin",
     "client.anim.ModelPartMixin",
     "client.deferred.AmbientOcclusionFaceMixin",
+    "client.deferred.BufferSourceAccessor",
     "client.deferred.BufferSourceMixin",
     "client.deferred.DebugScreenOverlayMixin",
     "client.deferred.LevelRendererMixin",

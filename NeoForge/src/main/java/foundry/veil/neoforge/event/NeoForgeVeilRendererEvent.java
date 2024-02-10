@@ -1,6 +1,6 @@
 package foundry.veil.neoforge.event;
 
-import foundry.veil.render.pipeline.VeilRenderer;
+import foundry.veil.api.client.render.VeilRenderer;
 import net.neoforged.bus.api.Event;
 
 /**
