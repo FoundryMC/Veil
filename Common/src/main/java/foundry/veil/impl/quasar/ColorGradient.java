@@ -82,7 +82,7 @@ public class ColorGradient {
             }
         }
         // if the percentage is outside of the range of the alpha points, return the default alpha
-        return 1;
+        return this.alphaPoints[this.alphaPoints.length - 1].alpha;
     }
 
     private Vec3 getRGB(float percentage) {
@@ -98,7 +98,7 @@ public class ColorGradient {
             }
         }
         // if the percentage is outside of the range of the points, return the default color
-        return this.points[0].color;
+        return this.points[this.points.length - 1].color;
     }
 
     public List<RGBPoint> getPoints() {

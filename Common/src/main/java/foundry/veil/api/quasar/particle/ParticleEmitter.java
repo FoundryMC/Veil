@@ -1,5 +1,6 @@
 package foundry.veil.api.quasar.particle;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
@@ -52,7 +53,7 @@ public class ParticleEmitter {
     private final ParticleSystemManager particleManager;
     private final ClientLevel level;
     private final ParticleEmitterData emitterData;
-    private final ParticleModuleSet modules;
+    private final List<Holder<ParticleModuleData>> modules;
     private final RandomSource randomSource;
     private final Vector3d position;
     private final List<QuasarParticle> particles;
@@ -103,7 +104,15 @@ public class ParticleEmitter {
 //            }
 //        });
 
-            QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.emitterData.particleData(), this.modules.copy(), this.emitterData.emitterSettings().particleSettings(), this);
+            ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
+            for (Holder<ParticleModuleData> module : this.modules) {
+                module.value().addModules(builder);
+            }
+            if (this.emitterData.particleData().faceVelocity()) {
+                builder.addModule(new FaceVelocityModule());
+            }
+
+            QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.emitterData.particleData(), builder.build(), this.emitterData.emitterSettings().particleSettings(), this);
             particle.getPosition().set(particlePos);
             particle.getVelocity().set(particleDirection);
             particle.init();
@@ -111,8 +120,8 @@ public class ParticleEmitter {
         }
     }
 
-    private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
-        ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
+    private static List<Holder<ParticleModuleData>> createModuleSet(QuasarParticleData data) {
+        ImmutableList.Builder<Holder<ParticleModuleData>> builder = ImmutableList.builder();
         data.allModules().forEach(module -> {
             if (!module.isBound()) {
                 if (REPORTED_MODULES.add(module)) {
@@ -120,11 +129,8 @@ public class ParticleEmitter {
                 }
                 return;
             }
-            module.value().addModules(builder);
+            builder.add(module);
         });
-        if (data.faceVelocity()) {
-            builder.addModule(new FaceVelocityModule());
-        }
         return builder.build();
     }
 
