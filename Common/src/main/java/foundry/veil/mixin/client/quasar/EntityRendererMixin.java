@@ -2,9 +2,9 @@ package foundry.veil.mixin.client.quasar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.quasar.client.particle.ParticleEmitter;
-import foundry.veil.quasar.client.particle.ParticleSystemManager;
-import foundry.veil.quasar.util.EntityExtension;
+import foundry.veil.api.quasar.particle.ParticleEmitter;
+import foundry.veil.api.quasar.particle.ParticleSystemManager;
+import foundry.veil.ext.EntityExtension;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +28,7 @@ public abstract class EntityRendererMixin<T extends Entity> {
                     return;
                 }
 
-                instance.setPosition(entity.position());
+                instance.setAttachedEntity(entity);
 //                instance.getEmitterSettingsModule().emissionShapeSettings().setDimensions(
 //                        new Vector3f(
 //                                pEntity.getBbWidth(),
