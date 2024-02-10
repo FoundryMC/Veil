@@ -1,4 +1,4 @@
-import foundry.veil.quasar.TickTaskSchedulerImpl;
+import foundry.veil.impl.TickTaskSchedulerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

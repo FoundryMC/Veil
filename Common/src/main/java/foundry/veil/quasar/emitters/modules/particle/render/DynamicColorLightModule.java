@@ -16,6 +16,7 @@ public class DynamicColorLightModule implements UpdateParticleModule, RenderPart
     private final Vector4f color;
     private final Vector4f renderColor;
     private PointLight light;
+    private boolean enabled;
 
     public DynamicColorLightModule(LightModuleData data) {
         this.data = data;
@@ -28,7 +29,8 @@ public class DynamicColorLightModule implements UpdateParticleModule, RenderPart
     @Override
     public void update(QuasarParticle particle) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
-        if (!deferredRenderer.isEnabled()) {
+        this.enabled = deferredRenderer.isEnabled();
+        if (!this.enabled) {
             this.onRemove();
             return;
         }
@@ -72,5 +74,10 @@ public class DynamicColorLightModule implements UpdateParticleModule, RenderPart
             }
             this.light = null;
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled || VeilRenderSystem.renderer().getDeferredRenderer().isEnabled();
     }
 }

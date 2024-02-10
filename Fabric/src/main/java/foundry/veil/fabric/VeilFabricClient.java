@@ -1,7 +1,6 @@
 package foundry.veil.fabric;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -9,8 +8,8 @@ import foundry.veil.api.client.render.VeilVanillaShaders;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.fabric.util.FabricReloadListener;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
-import foundry.veil.quasar.ParticleEmitter;
-import foundry.veil.quasar.ParticleSystemManager;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleSystemManager;
 import foundry.veil.quasar.data.QuasarParticles;
 import foundry.veil.util.VeilJsonListeners;
 import net.fabricmc.api.ClientModInitializer;
@@ -27,7 +26,6 @@ import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;

@@ -3,14 +3,11 @@ package foundry.veil.quasar.data.module.collision;
 import com.mojang.serialization.Codec;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.quasar.client.particle.ParticleModuleSet;
-import foundry.veil.quasar.data.ParticleEmitterData;
-import foundry.veil.quasar.data.QuasarParticles;
 import foundry.veil.quasar.data.module.ModuleType;
 import foundry.veil.quasar.data.module.ParticleModuleData;
-import foundry.veil.quasar.ParticleEmitter;
-import foundry.veil.quasar.ParticleSystemManager;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleSystemManager;
 import foundry.veil.quasar.emitters.modules.particle.CollisionParticleModule;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
 public record CollisionSubEmitterData(ResourceLocation subEmitter) implements ParticleModuleData {

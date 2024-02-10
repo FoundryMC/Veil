@@ -1,6 +1,6 @@
 package foundry.veil.mixin.client.quasar;
 
-import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
 import foundry.veil.quasar.util.EntityExtension;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;

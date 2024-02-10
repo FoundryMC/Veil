@@ -1,12 +1,9 @@
 package foundry.veil.quasar.client.particle;
 
 import com.google.common.base.Suppliers;
-import com.mojang.logging.LogUtils;
-import foundry.veil.quasar.ParticleEmitter;
-import foundry.veil.quasar.TickTaskScheduler;
+import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.quasar.data.ParticleSettings;
 import foundry.veil.quasar.data.QuasarParticleData;
-import foundry.veil.quasar.data.module.ParticleModuleData;
 import foundry.veil.quasar.emitters.modules.particle.*;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
@@ -14,7 +11,6 @@ import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -25,18 +21,14 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.slf4j.Logger;
 
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class QuasarParticle {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final double MAXIMUM_COLLISION_VELOCITY_SQUARED = Mth.square(100.0D);
-    private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
 
     private final ClientLevel level;
     private final RandomSource randomSource;
@@ -59,14 +51,14 @@ public class QuasarParticle {
     private final Supplier<MolangRuntime> environment;
     private final RenderData renderData;
 
-    public QuasarParticle(ClientLevel level, RandomSource randomSource, TickTaskScheduler scheduler, QuasarParticleData data, ParticleSettings settings, ParticleEmitter parent) {
+    public QuasarParticle(ClientLevel level, RandomSource randomSource, TickTaskScheduler scheduler, QuasarParticleData data, ParticleModuleSet modules, ParticleSettings settings, ParticleEmitter parent) {
         this.level = level;
         this.randomSource = randomSource;
         this.scheduler = scheduler;
         this.data = data;
         this.settings = settings;
         this.parent = parent;
-        this.modules = QuasarParticle.createModuleSet(data);
+        this.modules = modules;
         this.position = new Vector3d();
         this.velocity = new Vector3d();
         this.rotation = new Vector3f();
@@ -95,20 +87,6 @@ public class QuasarParticle {
                 .setQuery("agePercent", MolangExpression.of(this.renderData::getAgePercent))
                 .setQuery("lifetime", this.lifetime)
                 .create());
-    }
-
-    private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
-        ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
-        data.allModules().forEach(module -> {
-            if (!module.isBound()) {
-                if (REPORTED_MODULES.add(module)) {
-                    LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
-                }
-                return;
-            }
-            module.value().addModules(builder);
-        });
-        return builder.build();
     }
 
     private void move(double dx, double dy, double dz) {
@@ -191,13 +169,9 @@ public class QuasarParticle {
     }
 
     @ApiStatus.Internal
-    public static void clearErrors() {
-        REPORTED_MODULES.clear();
-    }
-
-    @ApiStatus.Internal
     public void tick() {
         this.renderData.tick(this, this.getLightColor());
+        this.modules.updateEnabled();
         for (UpdateParticleModule updateModule : this.modules.getUpdateModules()) {
             updateModule.update(this);
         }
@@ -226,8 +200,9 @@ public class QuasarParticle {
 
     @ApiStatus.Internal
     public void render(float partialTicks) {
-        for (RenderParticleModule renderModule : this.modules.getRenderModules()) {
-            renderModule.render(this, partialTicks);
+        Iterator<RenderParticleModule> iterator = this.modules.getEnabledRenderModules();
+        while (iterator.hasNext()) {
+            iterator.next().render(this, partialTicks);
         }
         this.renderData.render(this, partialTicks);
     }

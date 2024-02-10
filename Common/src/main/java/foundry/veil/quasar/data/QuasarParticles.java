@@ -8,7 +8,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.mixin.client.quasar.RegistryDataAccessor;
 import foundry.veil.mixin.client.quasar.RegistryDataLoaderAccessor;
-import foundry.veil.quasar.client.particle.QuasarParticle;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
@@ -97,7 +97,7 @@ public final class QuasarParticles {
         @Override
         protected void apply(Preparations preparations, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
             registryAccess = preparations.registryAccess;
-            QuasarParticle.clearErrors();
+            ParticleEmitter.clearErrors();
             printErrors(preparations.errors);
             LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());
             VeilRenderSystem.renderer().getParticleManager().clear();

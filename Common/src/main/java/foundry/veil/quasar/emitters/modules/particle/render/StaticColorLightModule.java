@@ -14,6 +14,7 @@ public class StaticColorLightModule implements RenderParticleModule {
     private final Vector4f color;
     private final float brightness;
     private PointLight light;
+    private boolean enabled;
 
     public StaticColorLightModule(LightModuleData data) {
         this.data = data;
@@ -29,7 +30,8 @@ public class StaticColorLightModule implements RenderParticleModule {
     @Override
     public void render(QuasarParticle particle, float partialTicks) {
         VeilDeferredRenderer deferredRenderer = VeilRenderSystem.renderer().getDeferredRenderer();
-        if (!deferredRenderer.isEnabled()) {
+        this.enabled = deferredRenderer.isEnabled();
+        if (!this.enabled) {
             this.onRemove();
             return;
         }
@@ -55,5 +57,10 @@ public class StaticColorLightModule implements RenderParticleModule {
             }
             this.light = null;
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled || VeilRenderSystem.renderer().getDeferredRenderer().isEnabled();
     }
 }

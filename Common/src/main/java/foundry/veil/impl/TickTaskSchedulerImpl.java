@@ -1,6 +1,7 @@
-package foundry.veil.quasar;
+package foundry.veil.impl;
 
 import com.mojang.logging.LogUtils;
+import foundry.veil.api.TickTaskScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

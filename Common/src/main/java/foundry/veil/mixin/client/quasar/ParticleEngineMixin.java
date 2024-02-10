@@ -1,7 +1,7 @@
 package foundry.veil.mixin.client.quasar;
 
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.quasar.ParticleSystemManager;
+import foundry.veil.quasar.client.particle.ParticleSystemManager;
 import net.minecraft.client.particle.ParticleEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

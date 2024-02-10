@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.mixin.client.pipeline.BufferBuilderAccessor;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.lwjgl.system.MemoryUtil;
@@ -13,7 +14,7 @@ import java.util.*;
 
 public class CachedBufferSource implements MultiBufferSource, NativeResource {
 
-    private final Map<RenderType, BufferBuilder> buffers = new HashMap<>();
+    private final Map<RenderType, BufferBuilder> buffers = new Object2ObjectArrayMap<>();
     private final Set<BufferBuilder> startedBuffers = new HashSet<>();
     private Optional<RenderType> lastState = Optional.empty();
 

@@ -1,17 +1,20 @@
-package foundry.veil.quasar;
+package foundry.veil.quasar.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import foundry.veil.api.client.render.VeilRenderType;
-import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.client.particle.RenderData;
+import com.mojang.logging.LogUtils;
+import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.quasar.data.EmitterSettings;
 import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.data.QuasarParticleData;
+import foundry.veil.quasar.data.module.ParticleModuleData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -22,10 +25,9 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.slf4j.Logger;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /*
@@ -43,9 +45,13 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ParticleEmitter {
 
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
+
     private final ParticleSystemManager particleManager;
     private final ClientLevel level;
     private final ParticleEmitterData emitterData;
+    private final ParticleModuleSet modules;
     private final RandomSource randomSource;
     private final Vector3d position;
     private final List<QuasarParticle> particles;
@@ -60,13 +66,19 @@ public class ParticleEmitter {
         this.particleManager = particleManager;
         this.level = level;
         this.emitterData = data;
+        this.modules = createModuleSet(data.particleData());
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
-        this.particles = new LinkedList<>();
+        this.particles = new ArrayList<>();
 
-        TickTaskSchedulerImpl scheduler = particleManager.getScheduler();
+        TickTaskScheduler scheduler = particleManager.getScheduler();
         this.spawnTask = scheduler.scheduleAtFixedRate(this::spawn, 0, data.rate());
         this.reset();
+    }
+
+    @ApiStatus.Internal
+    public static void clearErrors() {
+        REPORTED_MODULES.clear();
     }
 
     private void spawn() {
@@ -90,12 +102,26 @@ public class ParticleEmitter {
 //            }
 //        });
 
-            QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.emitterData.particleData(), this.emitterData.emitterSettings().particleSettings(), this);
+            QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.emitterData.particleData(), this.modules.copy(), this.emitterData.emitterSettings().particleSettings(), this);
             particle.getPosition().set(particlePos);
             particle.getVelocity().set(particleDirection);
             particle.init();
             this.particles.add(particle);
         }
+    }
+
+    private static ParticleModuleSet createModuleSet(QuasarParticleData data) {
+        ParticleModuleSet.Builder builder = ParticleModuleSet.builder();
+        data.allModules().forEach(module -> {
+            if (!module.isBound()) {
+                if (REPORTED_MODULES.add(module)) {
+                    LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
+                }
+                return;
+            }
+            module.value().addModules(builder);
+        });
+        return builder.build();
     }
 
     private void expire() {
@@ -163,7 +189,8 @@ public class ParticleEmitter {
         RenderData.RenderStyle renderStyle = particleData.renderStyle();
 
         Vector3f renderOffset = new Vector3f();
-        Vector3d motionDirection = new Vector3d();
+        RenderType lastRenderType = null;
+        VertexConsumer builder = null;
         for (QuasarParticle particle : this.particles) {
             RenderData renderData = particle.getRenderData();
 
@@ -205,9 +232,19 @@ public class ParticleEmitter {
                     (float) (renderPosition.x() - projectedView.x()),
                     (float) (renderPosition.y() - projectedView.y()),
                     (float) (renderPosition.z() - projectedView.z()));
-            particle.getVelocity().normalize(motionDirection);
-            VertexConsumer builder = bufferSource.getBuffer(VeilRenderType.quasarParticle(renderData.getTexture()));
-            renderStyle.render(poseStack, particle, renderData, renderOffset, motionDirection, builder, 1, partialTicks);
+
+            RenderType renderType = renderData.getRenderType();
+            if (!renderType.equals(lastRenderType)) {
+                lastRenderType = renderType;
+                builder = bufferSource.getBuffer(renderType);
+
+                TextureAtlasSprite sprite = renderData.getAtlasSprite();
+                if (sprite != null) {
+                    builder = sprite.wrap(builder);
+                }
+            }
+
+            renderStyle.render(poseStack, particle, renderData, renderOffset, builder, 1, partialTicks);
         }
     }
 

@@ -11,6 +11,7 @@ import foundry.veil.quasar.fx.Trail;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -66,6 +67,7 @@ public class RenderData {
     public float agePercent;
     private SpriteData spriteData;
     private TextureAtlasSprite atlasSprite;
+    private RenderType renderType;
     private final List<Trail> trails;
 
     public RenderData() {
@@ -83,7 +85,18 @@ public class RenderData {
         this.renderAge = 0.0F;
         this.spriteData = null;
         this.atlasSprite = null;
+        this.updateRenderType();
         this.trails = new ArrayList<>();
+    }
+
+    private void updateRenderType() {
+        if (this.atlasSprite != null) {
+            this.renderType = VeilRenderType.quasarParticle(this.atlasSprite.atlasLocation());
+        } else if (this.spriteData != null) {
+            this.renderType = VeilRenderType.quasarParticle(this.spriteData.sprite());
+        } else {
+            this.renderType = VeilRenderType.quasarParticle(BLANK);
+        }
     }
 
     @ApiStatus.Internal
@@ -151,31 +164,27 @@ public class RenderData {
         return this.atlasSprite;
     }
 
-    public ResourceLocation getTexture() {
-        if (this.atlasSprite != null) {
-            return this.atlasSprite.atlasLocation();
-        } else if (this.spriteData != null) {
-            return this.spriteData.sprite();
-        } else {
-            return BLANK;
-        }
+    public RenderType getRenderType() {
+        return this.renderType;
     }
 
     public List<Trail> getTrails() {
         return this.trails;
     }
 
+    // TODO move to renderer
     public void renderTrails(PoseStack poseStack, MultiBufferSource bufferSource, Vec3 cameraPos, int packedLight) {
-        // TODO move to renderer
+        if (this.trails.isEmpty()) {
+            return;
+        }
 
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
         for (Trail trail : this.trails) {
             trail.pushRotatedPoint(new Vec3(this.prevPosition.x, this.prevPosition.y, this.prevPosition.z), new Vec3(this.prevRotation.x, this.prevRotation.y, this.prevRotation.z));
-
-            poseStack.pushPose();
-            poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
             trail.render(poseStack, bufferSource.getBuffer(VeilRenderType.quasarTrail(trail.getTexture())), packedLight);
-            poseStack.popPose();
         }
+        poseStack.popPose();
     }
 
     public void setRed(float red) {
@@ -210,23 +219,21 @@ public class RenderData {
 
     public void setSpriteData(@Nullable SpriteData spriteData) {
         this.spriteData = spriteData;
+        this.updateRenderType();
     }
 
     public void setAtlasSprite(@Nullable TextureAtlasSprite atlasSprite) {
         this.atlasSprite = atlasSprite;
+        this.updateRenderType();
     }
 
     public enum RenderStyle {
         CUBE {
             @Override
-            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
                 Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 Vector3f vec = new Vector3f();
-                TextureAtlasSprite sprite = renderData.getAtlasSprite();
-                if (sprite != null) {
-                    builder = sprite.wrap(builder); // This makes chaining not work properly
-                }
 
                 for (int i = 0; i < 6; i++) {
                     for (int j = 0; j < 4; j++) {
@@ -253,16 +260,17 @@ public class RenderData {
         // TODO: FIX UVS THEY'RE FUCKED
         BILLBOARD {
             @Override
-            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks) {
+            public void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
                 Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
 
                 Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
                 SpriteData spriteData = renderData.getSpriteData();
-                TextureAtlasSprite sprite = renderData.getAtlasSprite();
-                if (sprite != null) {
-                    builder = sprite.wrap(builder); // This makes chaining not work properly
-                }
+
+                int red = (int) (renderData.getRed() * 255.0F) & 0xFF;
+                int green = (int) (renderData.getGreen() * 255.0F) & 0xFF;
+                int blue = (int) (renderData.getBlue() * 255.0F) & 0xFF;
+                int alpha = (int) (renderData.getAlpha() * 255.0F) & 0xFF;
 
                 // turn quat into pitch and yaw
                 Vector3f vec = new Vector3f();
@@ -315,7 +323,7 @@ public class RenderData {
 //                    }
                     builder.vertex(matrix4f, vec.x, vec.y, vec.z);
                     builder.uv(u, v);
-                    builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
+                    builder.color(red, green, blue, alpha);
                     builder.uv2(renderData.getLightColor());
                     builder.endVertex();
                 }
@@ -332,6 +340,6 @@ public class RenderData {
             return DataResult.success(renderStyle);
         }, style -> DataResult.success(style.name().toLowerCase(Locale.ROOT)));
 
-        public abstract void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, Vector3dc motionDirection, VertexConsumer builder, double ageModifier, float partialTicks);
+        public abstract void render(PoseStack poseStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks);
     }
 }

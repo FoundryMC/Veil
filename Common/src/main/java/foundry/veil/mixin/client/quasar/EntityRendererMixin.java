@@ -2,8 +2,8 @@ package foundry.veil.mixin.client.quasar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.quasar.ParticleEmitter;
-import foundry.veil.quasar.ParticleSystemManager;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleSystemManager;
 import foundry.veil.quasar.util.EntityExtension;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;

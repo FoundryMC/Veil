@@ -1,8 +1,8 @@
 package foundry.veil.quasar.emitters.modules.particle.update;
 
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.quasar.ParticleEmitter;
-import foundry.veil.quasar.ParticleSystemManager;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleSystemManager;
 import foundry.veil.quasar.client.particle.QuasarParticle;
 import foundry.veil.quasar.data.module.update.TickSubEmitterModuleData;
 import foundry.veil.quasar.emitters.modules.particle.UpdateParticleModule;

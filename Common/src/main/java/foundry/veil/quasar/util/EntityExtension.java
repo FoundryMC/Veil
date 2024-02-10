@@ -1,6 +1,6 @@
 package foundry.veil.quasar.util;
 
-import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.client.particle.ParticleEmitter;
 
 import java.util.List;
 

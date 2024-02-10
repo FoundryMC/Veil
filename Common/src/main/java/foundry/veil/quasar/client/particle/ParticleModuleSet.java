@@ -1,9 +1,9 @@
 package foundry.veil.quasar.client.particle;
 
-import foundry.veil.quasar.emitters.modules.particle.ParticleModule;
 import foundry.veil.quasar.emitters.modules.particle.*;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -17,6 +17,8 @@ public class ParticleModuleSet {
     private final ForceParticleModule[] forceModules;
     private final CollisionParticleModule[] collisionModules;
     private final RenderParticleModule[] renderModules;
+    private final RenderParticleModule[] enabledRenderModules;
+    private int enabledRenderModulesSize;
 
     private ParticleModuleSet(ParticleModule[] modules, InitParticleModule[] initModules, UpdateParticleModule[] updateModules, ForceParticleModule[] forceModules, CollisionParticleModule[] collisionModules, RenderParticleModule[] renderModules) {
         this.modules = modules;
@@ -25,6 +27,21 @@ public class ParticleModuleSet {
         this.forceModules = forceModules;
         this.collisionModules = collisionModules;
         this.renderModules = renderModules;
+        this.enabledRenderModules = new RenderParticleModule[this.renderModules.length];
+        this.enabledRenderModulesSize = 0;
+    }
+
+    public ParticleModuleSet copy() {
+        return new ParticleModuleSet(this.modules, this.initModules, this.updateModules, this.forceModules, this.collisionModules, this.renderModules);
+    }
+
+    public void updateEnabled() {
+        this.enabledRenderModulesSize = 0;
+        for (RenderParticleModule renderModule : this.renderModules) {
+            if (renderModule.isEnabled()) {
+                this.enabledRenderModules[this.enabledRenderModulesSize++] = renderModule;
+            }
+        }
     }
 
     public ParticleModule[] getAllModules() {
@@ -49,6 +66,22 @@ public class ParticleModuleSet {
 
     public RenderParticleModule[] getRenderModules() {
         return this.renderModules;
+    }
+
+    public Iterator<RenderParticleModule> getEnabledRenderModules() {
+        return new Iterator<>() {
+            private int cursor;
+
+            @Override
+            public boolean hasNext() {
+                return this.cursor < ParticleModuleSet.this.enabledRenderModulesSize;
+            }
+
+            @Override
+            public RenderParticleModule next() {
+                return ParticleModuleSet.this.enabledRenderModules[this.cursor++];
+            }
+        };
     }
 
     public static Builder builder() {

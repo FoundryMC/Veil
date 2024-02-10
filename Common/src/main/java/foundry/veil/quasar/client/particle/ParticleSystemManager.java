@@ -1,8 +1,10 @@
-package foundry.veil.quasar;
+package foundry.veil.quasar.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
+import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.impl.TickTaskSchedulerImpl;
 import foundry.veil.quasar.data.ParticleEmitterData;
 import foundry.veil.quasar.data.QuasarParticles;
 import net.minecraft.client.Camera;
@@ -14,6 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.slf4j.Logger;
 
@@ -116,8 +119,8 @@ public class ParticleSystemManager {
         particles -= freeSpace;
         Entity cameraEntity = Minecraft.getInstance().cameraEntity;
         for (ParticleEmitter emitter : this.particleEmitters) {
-            Vector3dc pos = emitter.getPosition();
-            double scaleFactor = Math.min(cameraEntity != null ? (cameraEntity.distanceToSqr(pos.x(), pos.y(), pos.z()) - PERSISTENT_DISTANCE_SQ) / REMOVAL_DISTANCE_SQ : 1.0, 1.0);
+            Vector3d pos = emitter.getPosition();
+            double scaleFactor = Math.min(cameraEntity != null ? (cameraEntity.distanceToSqr(pos.x, pos.y, pos.z) - PERSISTENT_DISTANCE_SQ) / REMOVAL_DISTANCE_SQ : 1.0, 1.0);
             if (scaleFactor > 0) {
                 particles -= emitter.trim(Math.min(particles, Mth.ceil(emitter.getParticleCount() * scaleFactor)));
                 if (particles <= 0) {
@@ -131,7 +134,7 @@ public class ParticleSystemManager {
         return this.level;
     }
 
-    public TickTaskSchedulerImpl getScheduler() {
+    public TickTaskScheduler getScheduler() {
         return this.scheduler;
     }
 

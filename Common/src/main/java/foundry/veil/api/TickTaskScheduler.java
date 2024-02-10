@@ -1,7 +1,15 @@
-package foundry.veil.quasar;
+package foundry.veil.api;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * Schedules tasks to be run on future ticks.
+ *
+ * @author Ocelot
+ */
 public interface TickTaskScheduler extends Executor {
 
     /**
