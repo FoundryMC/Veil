@@ -217,6 +217,11 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             this.postProcessingManager.runPipeline(postPipeline);
         }
 
+        // Copy depth
+        if (deferred != null) {
+            deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        }
+
         light.bind(true);
         light.clear();
         this.lightRenderer.render(frustum, deferred);
