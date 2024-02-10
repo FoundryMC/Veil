@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -56,36 +57,36 @@ public class LevelRendererMixin {
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderSky(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderSky(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_SKY, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch(Lnet/minecraft/client/renderer/RenderType;)V", ordinal = 3, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderEntities(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderEntities(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;long2ObjectEntrySet()Lit/unimi/dsi/fastutil/objects/ObjectSet;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderBlockEntities(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderBlockEntities(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderParticles(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderParticles(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSnowAndRain(Lnet/minecraft/client/renderer/LightTexture;FDDD)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderWeather(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderWeather(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_WEATHER, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
     @Inject(method = "renderLevel", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void postRenderLevel(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
+    public void postRenderLevel(PoseStack poseStack, float partialTicks, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projection, CallbackInfo ci, TickRateManager tickRateManager, float f, ProfilerFiller profiler, Vec3 cameraPos, double x, double y, double z, Matrix4f matrix4f2, boolean flag, Frustum frustum) {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_LEVEL, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
-    @Inject(method = "renderChunkLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;clearRenderState()V", shift = At.Shift.BEFORE))
+    @Inject(method = "renderSectionLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;clearRenderState()V", shift = At.Shift.BEFORE))
     public void postRenderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f projection, CallbackInfo ci) {
         VeilRenderLevelStageEvent.Stage stage;
         if (renderType == RenderType.solid()) {
