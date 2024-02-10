@@ -3,17 +3,16 @@ package foundry.veil.api.client.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
-import foundry.veil.api.client.render.CullFrustum;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -217,11 +216,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             this.postProcessingManager.runPipeline(postPipeline);
         }
 
-        // Copy depth
-        if (deferred != null) {
-            deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        }
-
         light.bind(true);
         light.clear();
         this.lightRenderer.render(frustum, deferred);
@@ -260,7 +254,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         }
 
         CullFrustum frustum = VeilRenderer.getCullingFrustum();
+        deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
+        deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
 
         // Draws the final opaque image and transparent onto the background

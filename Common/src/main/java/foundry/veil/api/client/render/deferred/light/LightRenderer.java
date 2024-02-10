@@ -79,6 +79,7 @@ public class LightRenderer implements NativeResource {
                 GlStateManager.DestFactor.ONE,
                 GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ZERO);
+        RenderSystem.depthMask(false);
 
         this.lights.values().forEach(data -> data.render(this, frustum));
         if (this.vanillaLightEnabled) {
@@ -91,6 +92,7 @@ public class LightRenderer implements NativeResource {
             }
         }
 
+        RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
         this.framebuffer = null;
     }
