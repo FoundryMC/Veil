@@ -3,6 +3,7 @@ package foundry.veil.quasar.client.particle;
 import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
 import foundry.veil.quasar.ParticleEmitter;
+import foundry.veil.quasar.TickTaskScheduler;
 import foundry.veil.quasar.data.ParticleSettings;
 import foundry.veil.quasar.data.QuasarParticleData;
 import foundry.veil.quasar.data.module.ParticleModuleData;
@@ -39,6 +40,7 @@ public class QuasarParticle {
 
     private final ClientLevel level;
     private final RandomSource randomSource;
+    private final TickTaskScheduler scheduler;
     private final QuasarParticleData data;
     private final ParticleSettings settings;
     private final ParticleEmitter parent;
@@ -57,9 +59,10 @@ public class QuasarParticle {
     private final Supplier<MolangRuntime> environment;
     private final RenderData renderData;
 
-    public QuasarParticle(ClientLevel level, RandomSource randomSource, QuasarParticleData data, ParticleSettings settings, ParticleEmitter parent) {
+    public QuasarParticle(ClientLevel level, RandomSource randomSource, TickTaskScheduler scheduler, QuasarParticleData data, ParticleSettings settings, ParticleEmitter parent) {
         this.level = level;
         this.randomSource = randomSource;
+        this.scheduler = scheduler;
         this.data = data;
         this.settings = settings;
         this.parent = parent;
@@ -208,7 +211,7 @@ public class QuasarParticle {
             Vector3d normalizedMotion = this.velocity.normalize(new Vector3d());
             this.rotation.x = (float) Mth.atan2(normalizedMotion.y, Math.sqrt(normalizedMotion.x * normalizedMotion.x + normalizedMotion.z * normalizedMotion.z));
             this.rotation.y = (float) Mth.atan2(normalizedMotion.x, normalizedMotion.z);
-            if (this.data.renderStyle() == QuasarVanillaParticle.RenderStyle.BILLBOARD) {
+            if (this.data.renderStyle() == RenderData.RenderStyle.BILLBOARD) {
                 this.rotation.y += (float) (Math.PI / 2.0);
             }
         }
@@ -250,6 +253,10 @@ public class QuasarParticle {
 
     public RandomSource getRandomSource() {
         return this.randomSource;
+    }
+
+    public TickTaskScheduler getScheduler() {
+        return this.scheduler;
     }
 
     public QuasarParticleData getData() {

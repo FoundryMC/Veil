@@ -30,9 +30,4 @@ public class TickSubEmitterModule implements UpdateParticleModule {
         instance.setPosition(particle.getPosition());
         particleManager.addParticleSystem(instance);
     }
-
-    @Override
-    public int getTickRate() {
-        return this.data.frequency();
-    }
 }

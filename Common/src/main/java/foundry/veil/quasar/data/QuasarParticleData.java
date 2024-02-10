@@ -3,7 +3,7 @@ package foundry.veil.quasar.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
+import foundry.veil.quasar.client.particle.RenderData;
 import foundry.veil.quasar.client.particle.SpriteData;
 import foundry.veil.quasar.data.module.ParticleModuleData;
 import net.minecraft.core.Holder;
@@ -46,7 +46,7 @@ public record QuasarParticleData(boolean shouldCollide,
                                  List<Holder<ParticleModuleData>> forceModules,
                                  List<Holder<ParticleModuleData>> renderModules,
                                  @Nullable SpriteData spriteData,
-                                 QuasarVanillaParticle.RenderStyle renderStyle) {
+                                 RenderData.RenderStyle renderStyle) {
 
     public static final Codec<QuasarParticleData> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.BOOL.optionalFieldOf("should_collide", true).forGetter(QuasarParticleData::shouldCollide),
@@ -58,10 +58,7 @@ public record QuasarParticleData(boolean shouldCollide,
             ParticleModuleData.UPDATE_CODEC.listOf().optionalFieldOf("forces", Collections.emptyList()).forGetter(QuasarParticleData::forceModules),
             ParticleModuleData.RENDER_CODEC.listOf().optionalFieldOf("render_modules", Collections.emptyList()).forGetter(QuasarParticleData::renderModules),
             SpriteData.CODEC.optionalFieldOf("sprite_data").forGetter(data -> Optional.ofNullable(data.spriteData())),
-            Codec.STRING.fieldOf("render_style")
-                    .xmap(QuasarVanillaParticle.RenderStyle::valueOf, QuasarVanillaParticle.RenderStyle::name)
-                    .orElse(QuasarVanillaParticle.RenderStyle.BILLBOARD)
-                    .forGetter(QuasarParticleData::renderStyle)
+            RenderData.RenderStyle.CODEC.optionalFieldOf("render_style", RenderData.RenderStyle.BILLBOARD).forGetter(QuasarParticleData::renderStyle)
     ).apply(instance, (shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData, renderStyle) -> new QuasarParticleData(shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData.orElse(null), renderStyle)));
     public static final Codec<Holder<QuasarParticleData>> CODEC = RegistryFileCodec.create(QuasarParticles.PARTICLE_DATA, DIRECT_CODEC);
 
