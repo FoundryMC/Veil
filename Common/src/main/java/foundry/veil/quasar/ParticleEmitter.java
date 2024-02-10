@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.VeilRenderType;
 import foundry.veil.quasar.client.particle.QuasarParticle;
-import foundry.veil.quasar.client.particle.QuasarVanillaParticle;
 import foundry.veil.quasar.client.particle.RenderData;
 import foundry.veil.quasar.data.EmitterSettings;
 import foundry.veil.quasar.data.ParticleEmitterData;
@@ -24,9 +23,10 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /*
  *  TODO:
@@ -49,15 +49,12 @@ public class ParticleEmitter {
     private final RandomSource randomSource;
     private final Vector3d position;
     private final List<QuasarParticle> particles;
+
     @Nullable
     private Entity attachedEntity;
-
+    private CompletableFuture<?> spawnTask;
+    private CompletableFuture<?> removeTask;
     private boolean removed;
-
-    /**
-     * Current number of ticks the emitter has been active for
-     */
-    private int age;
 
     ParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
         this.particleManager = particleManager;
@@ -65,19 +62,23 @@ public class ParticleEmitter {
         this.emitterData = data;
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
-        this.particles = new ArrayList<>(data.maxParticles());
+        this.particles = new LinkedList<>();
+
+        TickTaskSchedulerImpl scheduler = particleManager.getScheduler();
+        this.spawnTask = scheduler.scheduleAtFixedRate(this::spawn, 0, data.rate());
+        this.reset();
     }
 
-    private void run() {
-        // apply spread
+    private void spawn() {
+        int count = Math.min(this.emitterData.maxParticles(), this.emitterData.count());
+        this.particleManager.reserve(count);
 
-//        if (emitterModule.getCurrentLifetime() == 0) {
-//            this.active = true;
-//        }
-        EmitterSettings emitterSettings = this.emitterData.emitterSettings();
-        Vector3dc particlePos = emitterSettings.emitterShapeSettings().getPos(this.randomSource, this.position);
-        Vector3fc particleDirection = emitterSettings.particleSettings().particleDirection(this.randomSource);
-        // TODO
+        for (int i = 0; i < count; i++) {
+            EmitterSettings emitterSettings = this.emitterData.emitterSettings();
+            Vector3dc particlePos = emitterSettings.emitterShapeSettings().getPos(this.randomSource, this.position);
+            Vector3fc particleDirection = emitterSettings.particleSettings().particleDirection(this.randomSource);
+
+            // TODO
 //        this.getParticleData().getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
 //            InitialVelocityForce force = (InitialVelocityForce) f;
 //            if (force.takesParentRotation()) {
@@ -89,12 +90,31 @@ public class ParticleEmitter {
 //            }
 //        });
 
-        QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.emitterData.particleData(), this.emitterData.emitterSettings().particleSettings(), this);
-        particle.getPosition().set(particlePos);
-        particle.getVelocity().set(particleDirection);
-        particle.init();
-        this.particles.add(particle);
-//        Minecraft.getInstance().particleEngine.add(new QuasarVanillaParticle(this.emitterData.particleData(), this.emitterData.emitterSettings().particleSettings(), this, this.level, particlePos.x(), particlePos.y(), particlePos.z(), particleDirection.x(), particleDirection.y(), particleDirection.z()));
+            QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.emitterData.particleData(), this.emitterData.emitterSettings().particleSettings(), this);
+            particle.getPosition().set(particlePos);
+            particle.getVelocity().set(particleDirection);
+            particle.init();
+            this.particles.add(particle);
+        }
+    }
+
+    private void expire() {
+        if (this.emitterData.loop()) {
+            this.reset();
+        } else {
+            this.remove();
+        }
+    }
+
+    private void cancelTasks() {
+        if (this.spawnTask != null) {
+            this.spawnTask.cancel(false);
+            this.spawnTask = null;
+        }
+        if (this.removeTask != null) {
+            this.removeTask.cancel(false);
+            this.removeTask = null;
+        }
     }
 
     /**
@@ -114,30 +134,25 @@ public class ParticleEmitter {
         while (iterator.hasNext()) {
             QuasarParticle particle = iterator.next();
             particle.tick();
+
             if (particle.isRemoved()) {
                 iterator.remove();
                 particle.onRemove();
             }
         }
 
-        // Let particles finish before removing the emitter
-        if (!this.removed) {
-            if (this.age % this.emitterData.rate() == 0) {
-                int count = Math.min(this.emitterData.maxParticles(), (int) Math.ceil(this.emitterData.count() * this.particleManager.getSpawnScale()));
-                for (int i = 0; i < count; i++) {
-                    this.run();
-                }
-            }
-
-            if (this.age > this.emitterData.maxLifetime()) {
-                if (this.emitterData.loop()) {
-                    this.age = 0;
-                } else {
-                    this.remove();
-                }
-            }
-        }
-        this.age++;
+//        if (this.removed) {
+//            this.cancelTasks();
+//        } else {
+//            // Let particles finish before removing the emitter
+//            if (this.age > this.emitterData.maxLifetime()) {
+//                if (this.emitterData.loop()) {
+//                    this.reset();
+//                } else {
+//                    this.remove();
+//                }
+//            }
+//        }
     }
 
     // TODO move to renderer
@@ -145,7 +160,7 @@ public class ParticleEmitter {
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, float partialTicks) {
         Vec3 projectedView = camera.getPosition();
         QuasarParticleData particleData = this.emitterData.particleData();
-        QuasarVanillaParticle.RenderStyle renderStyle = particleData.renderStyle();
+        RenderData.RenderStyle renderStyle = particleData.renderStyle();
 
         Vector3f renderOffset = new Vector3f();
         Vector3d motionDirection = new Vector3d();
@@ -198,6 +213,7 @@ public class ParticleEmitter {
 
     @ApiStatus.Internal
     void onRemoved() {
+        this.cancelTasks();
         for (QuasarParticle particle : this.particles) {
             particle.onRemove();
         }
@@ -205,18 +221,37 @@ public class ParticleEmitter {
     }
 
     /**
+     * Attempts to remove the oldest specified number of particles.
+     *
+     * @param count The number of particles to attempt to remove
+     * @return The number of particles removed
+     */
+    public int trim(int count) {
+        int i;
+        int removeCount = Math.min(count, this.particles.size());
+        for (i = 0; i < removeCount; i++) {
+            this.particles.get(i).remove();
+        }
+        return i;
+    }
+
+    /**
      * Marks this emitter to be removed next tick.
      */
     public void remove() {
         this.removed = true;
+        this.cancelTasks();
     }
 
     /**
      * Resets the emitter to its initial state
      */
     public void reset() {
-        this.age = 0;
         this.removed = false;
+        if (this.removeTask != null) {
+            this.removeTask.cancel(false);
+        }
+        this.removeTask = this.particleManager.getScheduler().schedule(this::expire, this.emitterData.maxLifetime());
     }
 
     public @Nullable ResourceLocation getRegistryName() {
