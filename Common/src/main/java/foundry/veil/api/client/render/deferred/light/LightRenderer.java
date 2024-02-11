@@ -2,12 +2,12 @@ package foundry.veil.api.client.render.deferred.light;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.api.client.render.VeilRenderer;
-import foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.ApiStatus;
@@ -81,7 +81,9 @@ public class LightRenderer implements NativeResource {
                 GlStateManager.DestFactor.ZERO);
         RenderSystem.depthMask(false);
 
-        this.lights.values().forEach(data -> data.render(this, frustum));
+        for (LightData<?> value : this.lights.values()) {
+            value.render(this, frustum);
+        }
         if (this.vanillaLightEnabled) {
             ClientLevel level = Minecraft.getInstance().level;
             if (level != null) {
@@ -141,7 +143,7 @@ public class LightRenderer implements NativeResource {
             return Collections.emptyList();
         }
 
-        return (List<T>) data.lightsView();
+        return (List<T>) data.lightsView;
     }
 
     /**
@@ -216,35 +218,35 @@ public class LightRenderer implements NativeResource {
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
         CullFrustum frustum = VeilRenderer.getCullingFrustum();
-        int visible = this.lights.values().stream().mapToInt(data -> (int) data.lights().stream().filter(light -> light.isVisible(frustum)).count()).sum();
-        int all = this.lights.values().stream().mapToInt(data -> data.lights().size()).sum();
+        int visible = this.lights.values().stream().mapToInt(data -> (int) data.lights.stream().filter(light -> light.isVisible(frustum)).count()).sum();
+        int all = this.lights.values().stream().mapToInt(data -> data.lights.size()).sum();
         consumer.accept("Lights: " + visible + " / " + all);
     }
 
     @ApiStatus.Internal
-    private record LightData<T extends Light>(LightTypeRenderer<T> renderer,
-                                              List<T> lights,
-                                              List<T> lightsView) implements NativeResource {
+    private static class LightData<T extends Light> implements NativeResource {
 
-        private LightData {
-            Objects.requireNonNull(renderer, "renderer");
-            Objects.requireNonNull(lights, "lights");
-            Objects.requireNonNull(lightsView, "lightsView");
-        }
+        private final LightTypeRenderer<T> renderer;
+        private final List<T> lights;
+        private final List<T> lightsView;
+        private final Set<T> removedLights;
 
-        private LightData(LightTypeRenderer<T> renderer, List<T> lights) {
-            this(Objects.requireNonNull(renderer, "renderer"),
-                    Objects.requireNonNull(lights, "lights"),
-                    Collections.unmodifiableList(lights));
+        private LightData(LightTypeRenderer<T> renderer) {
+            this.renderer = renderer;
+            this.lights = new ArrayList<>();
+            this.lightsView = Collections.unmodifiableList(this.lights);
+            this.removedLights = new HashSet<>();
         }
 
         @SuppressWarnings("unchecked")
         public LightData(Light.Type type) {
-            this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").createRenderer(), new LinkedList<>());
+            this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").createRenderer());
         }
 
         private void render(LightRenderer lightRenderer, CullFrustum frustum) {
-            this.renderer.renderLights(lightRenderer, this.lights, frustum);
+            this.lights.removeAll(this.removedLights);
+            this.renderer.renderLights(lightRenderer, this.lights, this.removedLights, frustum);
+            this.removedLights.clear();
         }
 
         @SuppressWarnings("unchecked")

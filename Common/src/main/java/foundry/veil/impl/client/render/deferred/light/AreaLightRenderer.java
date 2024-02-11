@@ -1,15 +1,11 @@
 package foundry.veil.impl.client.render.deferred.light;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.AreaLight;
 import foundry.veil.api.client.render.deferred.light.InstancedLightRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
-import foundry.veil.api.client.render.deferred.light.PointLight;
+import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -17,38 +13,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11C.GL_FLOAT;
-import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 
 @ApiStatus.Internal
 public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
+
     public AreaLightRenderer() {
-        super(100, Float.BYTES * 24);
+        super(Float.BYTES * 24);
     }
 
     @Override
     protected @NotNull BufferBuilder.RenderedBuffer createMesh() {
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
-
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(1, -1, 1).endVertex(); // Front-bottom-right
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(-1, -1, -1).endVertex(); // Back-bottom-left
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
-
-        return bufferBuilder.end();
+        return LightTypeRenderer.createInvertedCube();
     }
 
     @Override
@@ -63,10 +41,10 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
         glEnableVertexAttribArray(8);
         glEnableVertexAttribArray(9);
 
-        glVertexAttribPointer(1,4, GL_FLOAT, false, this.lightSize, 0);
-        glVertexAttribPointer(2,4, GL_FLOAT, false, this.lightSize, Float.BYTES * 4);
-        glVertexAttribPointer(3,4, GL_FLOAT, false, this.lightSize, Float.BYTES * 8);
-        glVertexAttribPointer(4,4, GL_FLOAT, false, this.lightSize, Float.BYTES * 12); // matrix !
+        glVertexAttribPointer(1, 4, GL_FLOAT, false, this.lightSize, 0);
+        glVertexAttribPointer(2, 4, GL_FLOAT, false, this.lightSize, Float.BYTES * 4);
+        glVertexAttribPointer(3, 4, GL_FLOAT, false, this.lightSize, Float.BYTES * 8);
+        glVertexAttribPointer(4, 4, GL_FLOAT, false, this.lightSize, Float.BYTES * 12); // matrix !
 
         glVertexAttribPointer(5, 3, GL_FLOAT, false, this.lightSize, Float.BYTES * 16); // color
         glVertexAttribPointer(6, 2, GL_FLOAT, false, this.lightSize, Float.BYTES * 19); // size

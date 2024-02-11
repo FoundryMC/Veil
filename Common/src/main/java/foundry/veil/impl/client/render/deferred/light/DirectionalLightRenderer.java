@@ -1,18 +1,18 @@
 package foundry.veil.impl.client.render.deferred.light;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
-import foundry.veil.api.client.render.deferred.light.DirectionalLight;
-import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.light.DirectionalLight;
+import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.client.render.CullFrustum;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLight> {
@@ -27,7 +27,7 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
     }
 
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, CullFrustum frustum) {
+    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, Set<DirectionalLight> removedLights, CullFrustum frustum) {
         if (lights.isEmpty()) {
             return;
         }
