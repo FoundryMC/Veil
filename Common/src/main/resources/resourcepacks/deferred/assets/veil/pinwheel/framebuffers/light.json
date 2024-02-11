@@ -2,7 +2,7 @@
   "depth": false,
   "color_buffers": [
     {
-      "format": "RGBA16F"
+      "format": "RGB16F"
     }
   ]
 }

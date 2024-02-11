@@ -1,14 +1,16 @@
 {
   "stages": [
     {
-      "type": "veil:mask",
-      "depth": true
-    },
-    {
       "type": "veil:blit",
       "shader": "veil:core/mix_transparent",
-	  "in": "veil:light",
       "out": "veil:transparent_final"
+    },
+    {
+      "type": "veil:copy",
+      "in": "veil:transparent",
+      "out": "veil:transparent_final",
+      "color": false,
+      "depth": true
     }
   ]
 }
