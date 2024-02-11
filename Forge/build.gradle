@@ -121,7 +121,7 @@ dependencies {
     }
 
     library "io.github.spair:imgui-java-natives-linux:$imgui_version"
-    library "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    library "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     library "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
     shade "io.github.spair:imgui-java-binding:$imgui_version"
@@ -131,7 +131,7 @@ dependencies {
     }
 
     shade "io.github.spair:imgui-java-natives-linux:$imgui_version"
-    shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
     minecraftLibrary ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {

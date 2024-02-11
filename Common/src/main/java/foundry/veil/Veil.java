@@ -26,9 +26,19 @@ public class Veil {
     }
 
     private static boolean hasImguiNatives() {
-        String libName = System.getProperty("os.arch").contains("64") ? "imgui-java64" : "imgui-java";
-        boolean windows = System.getProperty("os.name").toLowerCase().contains("win");
-        String name = System.mapLibraryName(windows ? libName : ("lib" + libName));
+        String arch = System.getProperty("os.arch");
+        boolean is64Bit = arch.contains("64") || arch.startsWith("armv8");
+        boolean isARM = arch.equals("arm") || arch.startsWith("aarch64");
+
+        String libName = "imgui-java";
+        if (isARM) {
+            libName += "arm";
+        }
+        if (is64Bit) {
+            libName += "64";
+        }
+
+        String name = System.mapLibraryName(libName);
         return ImGui.class.getClassLoader().getResource("io/imgui/java/native-bin/" + name) != null;
     }
 
