@@ -32,7 +32,7 @@ public interface LightTypeRenderer<T extends Light> extends NativeResource {
     void renderLights(LightRenderer lightRenderer, List<T> lights, CullFrustum frustum);
 
     /**
-     * @return A full screen unit quad for drawing a light
+     * @return A full-screen unit quad for drawing a light
      */
     static BufferBuilder.RenderedBuffer createQuad() {
         Tesselator tesselator = RenderSystem.renderThreadTesselator();

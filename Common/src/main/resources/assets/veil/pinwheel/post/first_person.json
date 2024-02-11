@@ -1,6 +1,10 @@
 {
   "stages": [
     {
+      "type": "veil:mask",
+      "depth": true
+    },
+    {
       "type": "veil:blit",
       "shader": "veil:blit_first_person",
       "in": "minecraft:main",

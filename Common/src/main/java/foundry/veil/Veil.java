@@ -14,7 +14,7 @@ import java.util.ServiceLoader;
 public class Veil {
 
     public static final String MODID = "veil";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+    public static final Logger LOGGER = LoggerFactory.getLogger("Veil");
     public static final boolean DEBUG;
     public static final boolean IMGUI;
 

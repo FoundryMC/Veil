@@ -1,6 +1,10 @@
 {
   "stages": [
     {
+      "type": "veil:mask",
+      "depth": true
+    },
+    {
       "type": "veil:blit",
       "shader": "veil:core/mix_transparent",
 	  "in": "veil:light",

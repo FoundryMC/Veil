@@ -27,8 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11C.GL_NEAREST;
+import static org.lwjgl.opengl.GL11C.*;
 
 /**
  * <p>Handles mixing the regular deferred pipeline and the forward-rendered transparency pipeline.</p>
@@ -254,9 +253,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         }
 
         CullFrustum frustum = VeilRenderer.getCullingFrustum();
-        deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
-        deferred.resolveToAdvancedFbo(light, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
 
         // Draws the final opaque image and transparent onto the background
