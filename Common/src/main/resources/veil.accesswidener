@@ -62,3 +62,4 @@ mutable field net/minecraft/client/renderer/RenderType$CompositeState states Lco
 
 # Quasar
 accessible class net/minecraft/resources/RegistryDataLoader$Loader
+accessible method net/minecraft/resources/RegistryDataLoader createContext (Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/resources/RegistryOps$RegistryInfoLookup;

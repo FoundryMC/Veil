@@ -6,10 +6,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
+import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.mixin.client.quasar.RegistryDataAccessor;
-import foundry.veil.mixin.client.quasar.RegistryDataLoaderAccessor;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -78,7 +77,7 @@ public final class QuasarParticles {
             Map<ResourceKey<?>, Exception> errors = new HashMap<>();
 
             List<Pair<WritableRegistry<?>, RegistryDataLoader.Loader>> loaders = QuasarParticles.REGISTRIES.stream().map(data -> ((RegistryDataAccessor) (Object) data).invokeCreate(Lifecycle.stable(), errors)).toList();
-            RegistryOps.RegistryInfoLookup lookup = RegistryDataLoaderAccessor.invokeCreateContext(RegistryAccess.EMPTY, loaders);
+            RegistryOps.RegistryInfoLookup lookup = RegistryDataLoader.createContext(RegistryAccess.EMPTY, loaders);
             loaders.forEach(pair -> pair.getSecond().load(resourceManager, lookup));
             loaders.forEach(pair -> {
                 Registry<?> registry = pair.getFirst();
