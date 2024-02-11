@@ -1,0 +1,5 @@
+{
+  "module": "tick_sub_emitter",
+  "subemitter": "veil:basic_smoke",
+  "frequency": 1
+}

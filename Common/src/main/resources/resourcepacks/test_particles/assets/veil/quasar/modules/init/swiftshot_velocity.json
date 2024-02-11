@@ -1,0 +1,10 @@
+{
+  "module": "initial_velocity",
+  "direction": [
+    0.0,
+    1.0,
+    0.0
+  ],
+  "strength": 0.05,
+  "falloff": 0.0
+}

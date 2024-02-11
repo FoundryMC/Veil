@@ -1,0 +1,6 @@
+{
+    "range": 1.0,
+    "strength": 0.25,
+    "falloff": 1.0,
+    "module": "point_force"
+}

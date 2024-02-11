@@ -34,7 +34,7 @@ public final class MolangExpressionCodec {
             try {
                 return DataResult.success(ops.createFloat(ENCODE_ENVIRONMENT.resolve(input)));
             } catch (MolangException ignored) {
-                // The value cannot be encoded
+                // The value cannot be encoded as a float
             }
             return DataResult.success(ops.createString(input.toString()));
         }

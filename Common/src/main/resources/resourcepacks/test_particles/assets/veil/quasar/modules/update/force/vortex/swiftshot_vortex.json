@@ -1,0 +1,14 @@
+{
+    "range": 1.0,
+    "strength": 1.0,
+    "falloff": 1.0,
+    "vortex_axis": [
+        0.0,
+        1.0,
+        0.0
+    ],
+    "vortex_center": [
+        67.5, -58, 111.58
+    ],
+    "module": "vortex"
+}

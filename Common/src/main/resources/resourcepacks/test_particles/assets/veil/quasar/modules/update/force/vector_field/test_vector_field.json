@@ -1,0 +1,22 @@
+{
+    "vector_field": {
+        "noise": {
+            "rotation_type_3d": "None",
+            "domain_warp_type": "OpenSimplex2",
+            "domain_warp_amp": 1.0,
+            "cellular_distance_function": "EuclideanSq",
+            "cellular_return_type": "Distance",
+            "noise_type": "OpenSimplex2",
+            "octaves": 2,
+            "lacunarity": 2.0,
+            "gain": 1.5,
+            "frequency": 0.5,
+            "seed": 1337,
+            "fractal_type": "FBm"
+        },
+        "strength": 0.25
+    },
+    "strength": 0.35,
+    "falloff": 1.0,
+    "module": "vector_field"
+}

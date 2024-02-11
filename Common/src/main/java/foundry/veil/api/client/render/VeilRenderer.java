@@ -1,18 +1,16 @@
 package foundry.veil.api.client.render;
 
 import foundry.veil.api.client.editor.EditorManager;
-import foundry.veil.api.client.render.CameraMatrices;
-import foundry.veil.api.client.render.GuiInfo;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.ShaderModificationManager;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
-import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.quasar.particle.ParticleSystemManager;
 import foundry.veil.ext.LevelRendererExtension;
 import foundry.veil.mixin.client.pipeline.ReloadableResourceManagerAccessor;
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -34,6 +32,7 @@ public class VeilRenderer implements NativeResource {
     private final FramebufferManager framebufferManager;
     private final PostProcessingManager postProcessingManager;
     private final VeilDeferredRenderer deferredRenderer;
+    private final ParticleSystemManager quasarParticleManager;
     private final EditorManager editorManager;
     private final CameraMatrices cameraMatrices;
     private final GuiInfo guiInfo;
@@ -47,6 +46,7 @@ public class VeilRenderer implements NativeResource {
         this.postProcessingManager = new PostProcessingManager();
         ShaderManager deferredShaderManager = new ShaderManager(ShaderManager.DEFERRED_SET, this.shaderModificationManager, this.shaderPreDefinitions);
         this.deferredRenderer = new VeilDeferredRenderer(deferredShaderManager, this.shaderPreDefinitions, this.framebufferManager, this.postProcessingManager);
+        this.quasarParticleManager = new ParticleSystemManager();
         this.editorManager = new EditorManager(resourceManager);
         this.cameraMatrices = new CameraMatrices();
         this.guiInfo = new GuiInfo();
@@ -105,6 +105,13 @@ public class VeilRenderer implements NativeResource {
     }
 
     /**
+     * @return The manager for all quasar particles
+     */
+    public ParticleSystemManager getParticleManager() {
+        return this.quasarParticleManager;
+    }
+
+    /**
      * @return The manager for all editors
      */
     public EditorManager getEditorManager() {
@@ -138,6 +145,7 @@ public class VeilRenderer implements NativeResource {
         this.framebufferManager.free();
         this.postProcessingManager.free();
         this.deferredRenderer.free();
+        this.quasarParticleManager.clear();
         this.cameraMatrices.free();
         this.guiInfo.free();
     }
