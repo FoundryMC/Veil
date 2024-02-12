@@ -6,7 +6,8 @@
   "refmap": "veil.refmap.json",
   "client": [
     "MinecraftMixin",
-    "client.deferred.ParticleEngineMixin"
+    "client.deferred.ParticleEngineMixin",
+    "client.quasar.LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

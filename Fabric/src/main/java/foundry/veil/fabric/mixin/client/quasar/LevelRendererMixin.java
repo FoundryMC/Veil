@@ -1,4 +1,4 @@
-package foundry.veil.mixin.client.quasar;
+package foundry.veil.fabric.mixin.client.quasar;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.CachedBufferSource;
