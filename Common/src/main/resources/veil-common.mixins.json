@@ -54,6 +54,7 @@
     "client.stage.RenderStateShardAccessor",
     "client.stage.RenderTypeMixin",
     "debug.DebugKeyboardHandlerMixin",
+    "debug.GlDebugMixin",
     "debug.MinecraftMixin",
     "debug.RenderDocker"
   ],
