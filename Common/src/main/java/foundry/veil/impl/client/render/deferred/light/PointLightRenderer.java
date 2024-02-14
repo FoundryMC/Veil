@@ -2,7 +2,7 @@ package foundry.veil.impl.client.render.deferred.light;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.deferred.light.InstancedLightRenderer;
+import foundry.veil.api.client.render.deferred.light.IndirectLightRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
@@ -20,7 +20,7 @@ import static org.lwjgl.opengl.GL30C.glVertexAttribIPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 
 @ApiStatus.Internal
-public class PointLightRenderer extends InstancedLightRenderer<PointLight> {
+public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
 
     public PointLightRenderer() {
         super(Float.BYTES * 7);

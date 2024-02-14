@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.ext.VertexBufferExtension;
+import org.lwjgl.opengl.GL42C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -105,7 +106,6 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
         VertexBufferExtension ext = (VertexBufferExtension) this.vbo;
         this.vbo.bind();
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
-        // glDrawElementsIndirect doesn't support the index buffer being in client memory
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
 
         // If there is no space, then resize
@@ -145,6 +145,7 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
         }
 
         // Fill indirect buffer draw calls
+        // TODO move to compute if supported
         int count = 0;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer buffer = stack.malloc(Integer.BYTES);

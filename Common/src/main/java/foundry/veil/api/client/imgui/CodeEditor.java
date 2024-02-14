@@ -50,16 +50,14 @@ public class CodeEditor implements NativeResource {
      * Fires the save callback if the text has changed.
      */
     public void save() {
-        if (this.hasTextChanged()) {
-            Map<Integer, String> errors = new HashMap<>();
-            if (this.saveCallback != null) {
-                this.saveCallback.save(this.editor.getText(), errors::put);
-            }
-            if (errors.isEmpty()) {
-                this.oldSource = this.editor.getText();
-            }
-            this.editor.setErrorMarkers(errors);
+        Map<Integer, String> errors = new HashMap<>();
+        if (this.saveCallback != null) {
+            this.saveCallback.save(this.editor.getText(), errors::put);
         }
+        if (errors.isEmpty()) {
+            this.oldSource = this.editor.getText();
+        }
+        this.editor.setErrorMarkers(errors);
     }
 
     /**
@@ -137,11 +135,9 @@ public class CodeEditor implements NativeResource {
                 }
 
                 if (this.saveText != null) {
-                    ImGui.beginDisabled(!this.hasTextChanged());
                     if (ImGui.menuItem(this.saveText)) {
                         this.save();
                     }
-                    ImGui.endDisabled();
                 }
 
                 ImGui.separator();
