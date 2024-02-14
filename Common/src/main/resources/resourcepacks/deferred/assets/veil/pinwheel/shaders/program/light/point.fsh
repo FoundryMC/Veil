@@ -27,16 +27,11 @@ void main() {
     // lighting calculation
     vec3 offset = lightPos - pos;
 
-    float attenuation = attenuate_no_cusp(length(offset), radius);
-    if (attenuation <= 0) {
-        discard;
-    }
-
     vec3 normalVS = texture(NormalSampler, screenUv).xyz;
     vec3 lightDirection = (VeilCamera.ViewMat * vec4(normalize(offset), 0.0)).xyz;
     float diffuse = dot(normalVS, lightDirection);
     diffuse = max(MINECRAFT_AMBIENT_LIGHT, diffuse);
-    diffuse *= attenuation;
+    diffuse *= attenuate_no_cusp(length(offset), radius);
 
     fragColor = vec4(diffuse * lightColor, 1.0);
 }

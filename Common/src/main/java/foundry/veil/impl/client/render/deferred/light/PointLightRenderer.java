@@ -1,10 +1,14 @@
 package foundry.veil.impl.client.render.deferred.light;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.IndirectLightRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
-import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import org.jetbrains.annotations.ApiStatus;
@@ -13,22 +17,47 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11C.GL_FLOAT;
-import static org.lwjgl.opengl.GL11C.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30C.glVertexAttribIPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 
 @ApiStatus.Internal
 public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
 
     public PointLightRenderer() {
-        super(Float.BYTES * 7);
+        super(Float.BYTES * 7, 4);
     }
 
     @Override
     protected BufferBuilder.RenderedBuffer createMesh() {
-        return LightTypeRenderer.createInvertedCube();
+        Tesselator tesselator = RenderSystem.renderThreadTesselator();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+
+        // High-res mesh
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
+        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
+        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
+        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
+        bufferBuilder.vertex(1, -1, 1).endVertex(); // Front-bottom-right
+        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
+        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
+        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
+        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
+        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
+        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
+        bufferBuilder.vertex(-1, -1, -1).endVertex(); // Back-bottom-left
+        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
+        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
+        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
+
+        // Low-res mesh
+        float sqrt2 = (float) Math.sqrt(2.0);
+        bufferBuilder.vertex(-sqrt2, -sqrt2, 0).endVertex();
+        bufferBuilder.vertex(sqrt2, -sqrt2, 0).endVertex();
+        bufferBuilder.vertex(-sqrt2, sqrt2, 0).endVertex();
+        bufferBuilder.vertex(sqrt2, sqrt2, 0).endVertex();
+
+        return bufferBuilder.end();
     }
 
     @Override
@@ -53,5 +82,11 @@ public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
 
     @Override
     protected void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<PointLight> lights) {
+    }
+
+    @Override
+    protected boolean shouldDrawHighResolution(PointLight light, CullFrustum frustum) {
+        float radius = light.getRadius();
+        return frustum.getPosition().distanceSquared(light.getPosition()) <= radius * radius;
     }
 }

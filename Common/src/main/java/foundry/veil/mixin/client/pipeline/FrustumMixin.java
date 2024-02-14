@@ -4,9 +4,12 @@ import foundry.veil.api.client.render.CullFrustum;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 import org.joml.FrustumIntersection;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(Frustum.class)
 public abstract class FrustumMixin implements CullFrustum {
@@ -29,6 +32,9 @@ public abstract class FrustumMixin implements CullFrustum {
 
     @Shadow
     protected abstract boolean cubeInFrustum(double d, double e, double f, double g, double h, double i);
+
+    @Unique
+    private final Vector3d veil$position = new Vector3d();
 
     @Override
     public boolean testPoint(double x, double y, double z) {
@@ -63,5 +69,10 @@ public abstract class FrustumMixin implements CullFrustum {
     @Override
     public boolean testLineSegment(double aX, double aY, double aZ, double bX, double bY, double bZ) {
         return this.intersection.testLineSegment((float) (aX - this.camX), (float) (aY - this.camY), (float) (aZ - this.camZ), (float) (bX - this.camX), (float) (bY - this.camY), (float) (bZ - this.camZ));
+    }
+
+    @Override
+    public Vector3dc getPosition() {
+        return this.veil$position.set(this.camX, this.camY, this.camZ);
     }
 }

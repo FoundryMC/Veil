@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.ext.VertexBufferExtension;
-import org.lwjgl.opengl.GL42C;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -24,6 +23,8 @@ import static org.lwjgl.opengl.GL40C.GL_DRAW_INDIRECT_BUFFER;
 public abstract class IndirectLightRenderer<T extends Light & InstancedLight> implements LightTypeRenderer<T> {
 
     protected final int lightSize;
+    protected final int highResSize;
+    protected final int lowResSize;
     protected int maxLights;
 
     private final VertexBuffer vbo;
@@ -33,9 +34,10 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
     /**
      * Creates a new instanced light renderer with a resizeable light buffer.
      *
-     * @param lightSize The size of each light in bytes
+     * @param lightSize  The size of each light in bytes
+     * @param lowResSize The size of the low-resolution mesh or <code>0</code> to only use the high-detail mesh
      */
-    public IndirectLightRenderer(int lightSize) {
+    public IndirectLightRenderer(int lightSize, int lowResSize) {
         this.lightSize = lightSize;
         this.maxLights = 100;
         this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
@@ -44,6 +46,10 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
 
         this.vbo.bind();
         this.vbo.upload(this.createMesh());
+
+        VertexBufferExtension ext = (VertexBufferExtension) this.vbo;
+        this.highResSize = ext.veil$getIndexCount() - lowResSize;
+        this.lowResSize = lowResSize;
 
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
         glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_DYNAMIC_DRAW);
@@ -84,6 +90,10 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
      * @param lights        All lights in the order they are in the instanced buffer
      */
     protected abstract void clearRenderState(LightRenderer lightRenderer, List<T> lights);
+
+    protected boolean shouldDrawHighResolution(T light, CullFrustum frustum) {
+        return true;
+    }
 
     private void updateAllLights(List<T> lights) {
         ByteBuffer dataBuffer = MemoryUtil.memAlloc(lights.size() * this.lightSize);
@@ -148,13 +158,23 @@ public abstract class IndirectLightRenderer<T extends Light & InstancedLight> im
         // TODO move to compute if supported
         int count = 0;
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer buffer = stack.malloc(Integer.BYTES);
+            ByteBuffer buffer = stack.malloc(this.lowResSize > 0 ? Integer.BYTES * 5 : Integer.BYTES);
 
             int index = 0;
             for (T light : lights) {
                 if (light.isVisible(frustum)) {
-                    buffer.putInt(0, index);
-                    glBufferSubData(GL_DRAW_INDIRECT_BUFFER, count * Integer.BYTES * 5L + 16, buffer);
+                    if (this.lowResSize > 0) {
+                        boolean highRes = this.shouldDrawHighResolution(light, frustum);
+                        buffer.putInt(0, highRes ? this.highResSize : this.lowResSize);
+                        buffer.putInt(4, 1);
+                        buffer.putInt(8, !highRes ? this.highResSize : 0);
+                        buffer.putInt(12, 0);
+                        buffer.putInt(16, index);
+                        glBufferSubData(GL_DRAW_INDIRECT_BUFFER, count * Integer.BYTES * 5L, buffer);
+                    } else {
+                        buffer.putInt(0, index);
+                        glBufferSubData(GL_DRAW_INDIRECT_BUFFER, count * Integer.BYTES * 5L + 16, buffer);
+                    }
                     count++;
                 }
                 index++;

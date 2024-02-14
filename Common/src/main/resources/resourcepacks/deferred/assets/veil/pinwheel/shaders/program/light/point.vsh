@@ -10,7 +10,7 @@ out vec3 lightColor;
 out float radius;
 
 void main() {
-    gl_Position = VeilCamera.ProjMat * VeilCamera.ViewMat * vec4(LightPosition - VeilCamera.CameraPosition + Position * Distance, 1.0);
+    gl_Position = VeilCamera.ProjMat * (VeilCamera.ViewMat * vec4(LightPosition - VeilCamera.CameraPosition, 1.0) + vec4(Position * Distance, 0.0));
     lightPos = LightPosition;
     lightColor = Color;
     radius = Distance;
