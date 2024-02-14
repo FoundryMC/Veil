@@ -5,6 +5,7 @@ import foundry.veil.api.opencl.CLException;
 import foundry.veil.api.opencl.VeilOpenCL;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
 import org.slf4j.Logger;
 
@@ -63,6 +64,7 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
 
                     if (status.get(0) <= event.eventStatus) {
                         event.callback.run();
+                        clReleaseEvent(event.event);
                         continue;
                     }
 

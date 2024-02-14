@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  *
  * @author Ocelot
  */
-public class PointLight extends Light implements InstancedLight, PositionedLight<PointLight> {
+public class PointLight extends Light implements IndirectLight<PointLight> {
 
     protected final Vector3d position;
     protected float radius;
@@ -47,9 +47,7 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
         return this.position;
     }
 
-    /**
-     * @return The maximum distance the light can travel
-     */
+    @Override
     public float getRadius() {
         return this.radius;
     }
@@ -76,11 +74,7 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
         return this;
     }
 
-    /**
-     * Sets the maximum radius the light can influence.
-     *
-     * @param radius The maximum area of influence for the light
-     */
+    @Override
     public PointLight setRadius(float radius) {
         this.radius = radius;
         this.markDirty();

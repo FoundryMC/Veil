@@ -120,13 +120,8 @@ public class LightRenderer implements NativeResource {
         RenderSystem.assertOnRenderThreadOrInit();
 
         LightData<?> data = this.lights.get(light.getType());
-        if (data == null) {
-            return;
-        }
-
-        if (data.lights.remove(light) && data.lights.isEmpty()) {
-            data.free();
-            this.lights.remove(light.getType());
+        if (data != null) {
+            data.lights.remove(light);
         }
     }
 

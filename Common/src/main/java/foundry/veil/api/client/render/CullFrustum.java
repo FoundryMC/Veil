@@ -269,6 +269,11 @@ public interface CullFrustum {
     boolean testLineSegment(double aX, double aY, double aZ, double bX, double bY, double bZ);
 
     /**
+     * @return The data for each plane in the frustum
+     */
+    Vector4fc[] getPlanes();
+
+    /**
      * @return The position of the camera
      */
     Vector3dc getPosition();

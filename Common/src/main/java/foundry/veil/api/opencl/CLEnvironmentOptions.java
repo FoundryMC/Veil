@@ -38,11 +38,17 @@ public record CLEnvironmentOptions(CLVersion version,
         if (this.requireCompiler && !deviceInfo.compilerAvailable()) {
             return false;
         }
-        if (this.requireOpenGL && !this.version.testGL(deviceInfo.capabilities())) {
-            return false;
+        CLCapabilities caps = deviceInfo.capabilities();
+        if (this.requireOpenGL) {
+            if (!this.version.testGL(caps)) {
+                return false;
+            }
+            if (!caps.cl_khr_gl_sharing && !caps.cl_APPLE_gl_sharing) {
+                return false;
+            }
         }
 
-        return this.version.test(deviceInfo.capabilities());
+        return this.version.test(caps);
     }
 
     /**
@@ -126,8 +132,9 @@ public record CLEnvironmentOptions(CLVersion version,
          *
          * @param requireCompiler Whether the device needs to have a compiler
          */
-        public void setRequireCompiler(boolean requireCompiler) {
+        public Builder setRequireCompiler(boolean requireCompiler) {
             this.requireCompiler = requireCompiler;
+            return this;
         }
 
         /**
@@ -135,8 +142,9 @@ public record CLEnvironmentOptions(CLVersion version,
          *
          * @param requireOpenGL Whether the device needs to have a compiler
          */
-        public void setRequireGL(boolean requireOpenGL) {
+        public Builder setRequireGL(boolean requireOpenGL) {
             this.requireOpenGL = requireOpenGL;
+            return this;
         }
 
         /**

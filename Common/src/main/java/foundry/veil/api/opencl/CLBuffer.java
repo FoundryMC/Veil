@@ -36,9 +36,9 @@ import static org.lwjgl.opencl.CL10.clEnqueueWriteBuffer;
  */
 public class CLBuffer implements CLMemObject {
 
-    private final CLKernel kernel;
-    private final CLEnvironment environment;
-    private final long pointer;
+    protected final CLKernel kernel;
+    protected final CLEnvironment environment;
+    protected final long pointer;
 
     CLBuffer(CLKernel kernel, long pointer) {
         this.kernel = kernel;

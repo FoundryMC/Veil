@@ -6,6 +6,7 @@ import net.minecraft.world.phys.AABB;
 import org.joml.FrustumIntersection;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.joml.Vector4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,6 +70,11 @@ public abstract class FrustumMixin implements CullFrustum {
     @Override
     public boolean testLineSegment(double aX, double aY, double aZ, double bX, double bY, double bZ) {
         return this.intersection.testLineSegment((float) (aX - this.camX), (float) (aY - this.camY), (float) (aZ - this.camZ), (float) (bX - this.camX), (float) (bY - this.camY), (float) (bZ - this.camZ));
+    }
+
+    @Override
+    public Vector4fc[] getPlanes() {
+        return ((FrustumIntersectionAccessor) this.intersection).getPlanes();
     }
 
     @Override

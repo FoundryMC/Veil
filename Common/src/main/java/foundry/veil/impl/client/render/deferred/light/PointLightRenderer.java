@@ -25,7 +25,7 @@ import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
 
     public PointLightRenderer() {
-        super(Float.BYTES * 7, 4);
+        super(Float.BYTES * 7, 4, 0, 6);
     }
 
     @Override
@@ -82,11 +82,5 @@ public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
 
     @Override
     protected void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<PointLight> lights) {
-    }
-
-    @Override
-    protected boolean shouldDrawHighResolution(PointLight light, CullFrustum frustum) {
-        float radius = light.getRadius();
-        return frustum.getPosition().distanceSquared(light.getPosition()) <= radius * radius;
     }
 }

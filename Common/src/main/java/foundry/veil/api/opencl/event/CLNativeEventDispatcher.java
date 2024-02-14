@@ -9,6 +9,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.util.Objects;
 
 import static org.lwjgl.opencl.CL10.CL_COMPLETE;
+import static org.lwjgl.opencl.CL10.clReleaseEvent;
 import static org.lwjgl.opencl.CL11.clSetEventCallback;
 
 /**
@@ -23,6 +24,7 @@ public class CLNativeEventDispatcher implements CLEventDispatcher {
         VeilOpenCL.checkCLError(clSetEventCallback(event, CL_COMPLETE, (e, event_command_exec_status, user_data) -> {
             if (event_command_exec_status == eventStatus) {
                 callback.run();
+                clReleaseEvent(event);
             }
         }, MemoryUtil.NULL));
     }

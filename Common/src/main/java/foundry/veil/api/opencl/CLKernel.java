@@ -5,8 +5,12 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2fc;
+import org.joml.Vector3fc;
+import org.joml.Vector4fc;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
+import org.lwjgl.opencl.CL10GL;
 import org.lwjgl.opencl.CL12;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.NativeResource;
@@ -14,6 +18,7 @@ import org.lwjgl.system.NativeResource;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opencl.CL10.*;
+import static org.lwjgl.opencl.CL10GL.clCreateFromGLBuffer;
 
 /**
  * Manages the OpenCL kernel object. Buffers can be created with {@link #createBuffer(int, long)} and {@link #createBufferUnsafe(int, long)}
@@ -156,7 +161,7 @@ public class CLKernel implements NativeResource {
     }
 
     /**
-     * Creates a new CL memory buffer. The creation
+     * Creates a new CL memory buffer.
      *
      * @param flags a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
      *              how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
@@ -188,6 +193,60 @@ public class CLKernel implements NativeResource {
             VeilOpenCL.checkCLError(error_ret.get(0));
             this.pointers.add(pointer);
             return new CLBuffer(this, pointer);
+        }
+    }
+
+    /**
+     * Creates a new CL memory buffer that reflects the data in an OpenGL buffer. Any errors are consumed and printed to console.
+     *
+     * @param flags  a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
+     *               how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
+     *               <table>
+     *                   <caption>OpenCL memory buffer flags</caption>
+     *                   <tr>
+     *                       <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
+     *                       <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
+     *                       <td>{@link CL10#CL_MEM_READ_ONLY MEM_READ_ONLY}</td>
+     *                   </tr>
+     *               </table>
+     * @param buffer The OpenGL buffer to attach to
+     * @return A data buffer that can be used with {@link #setPointers(int, long...)} or {@link #setPointers(int, CLMemObject...)} or <code>null</code> if an error occurred
+     * @see CL10GL#clCreateFromGLBuffer(long, long, int, IntBuffer)
+     */
+    public @Nullable CLBuffer createBufferFromGLUnsafe(int flags, int buffer) {
+        try {
+            return this.createBufferFromGL(flags, buffer);
+        } catch (CLException e) {
+            VeilOpenCL.LOGGER.error("Failed to create CL buffer", e);
+            return null;
+        }
+    }
+
+    /**
+     * Creates a new CL memory buffer that reflects the data in an OpenGL buffer.
+     *
+     * @param flags  a bit-field that is used to specify allocation and usage information such as the memory area that should be used to allocate the buffer object and
+     *               how it will be used. If value specified for flags is 0, the default is used which is {@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}. One of:<br>
+     *               <table>
+     *                   <caption>OpenCL memory buffer flags</caption>
+     *                   <tr>
+     *                       <td>{@link CL10#CL_MEM_READ_WRITE MEM_READ_WRITE}</td>
+     *                       <td>{@link CL10#CL_MEM_WRITE_ONLY MEM_WRITE_ONLY}</td>
+     *                       <td>{@link CL10#CL_MEM_READ_ONLY MEM_READ_ONLY}</td>
+     *                   </tr>
+     *               </table>
+     * @param buffer The OpenGL buffer to attach to
+     * @return A data buffer that can be used with {@link #setPointers(int, long...)} or {@link #setPointers(int, CLMemObject...)}
+     * @throws CLException If there is any problem creating the buffer
+     * @see CL10GL#clCreateFromGLBuffer(long, long, int, IntBuffer)
+     */
+    public CLGLBuffer createBufferFromGL(int flags, int buffer) throws CLException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer error_ret = stack.mallocInt(1);
+            long pointer = clCreateFromGLBuffer(this.environment.getContext(), flags, buffer, error_ret);
+            VeilOpenCL.checkCLError(error_ret.get(0));
+            this.pointers.add(pointer);
+            return new CLGLBuffer(this, pointer);
         }
     }
 
@@ -244,6 +303,65 @@ public class CLKernel implements NativeResource {
      */
     public void setFloat(int index, float value) throws CLException {
         VeilOpenCL.checkCLError(clSetKernelArg1f(this.handle, index, value));
+    }
+
+    /**
+     * Sets a single float2 parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws CLException If there is any problem setting the kernel argument
+     */
+    public void setVector2f(int index, Vector2fc value) throws CLException {
+        this.setVector2f(index, value.x(), value.y());
+    }
+
+    /**
+     * Sets a single float2 parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param x     The X value of the parameter
+     * @param y     The Y value of the parameter
+     * @throws CLException If there is any problem setting the kernel argument
+     */
+    public void setVector2f(int index, float x, float y) throws CLException {
+        VeilOpenCL.checkCLError(clSetKernelArg2f(this.handle, index, x, y));
+    }
+
+    /**
+     * Sets a single float4 parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws CLException If there is any problem setting the kernel argument
+     */
+    public void setVector3f(int index, Vector3fc value) throws CLException {
+        this.setVector4f(index, value.x(), value.y(), value.z(), 0);
+    }
+
+    /**
+     * Sets a single float4 parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param value The value of the parameter
+     * @throws CLException If there is any problem setting the kernel argument
+     */
+    public void setVector4f(int index, Vector4fc value) throws CLException {
+        this.setVector4f(index, value.x(), value.y(), value.z(), value.z());
+    }
+
+    /**
+     * Sets a single float4 parameter.
+     *
+     * @param index The index to set the parameter for
+     * @param x     The X value of the parameter
+     * @param y     The Y value of the parameter
+     * @param z     The Z value of the parameter
+     * @param w     The W value of the parameter
+     * @throws CLException If there is any problem setting the kernel argument
+     */
+    public void setVector4f(int index, float x, float y, float z, float w) throws CLException {
+        VeilOpenCL.checkCLError(clSetKernelArg4f(this.handle, index, x, y, z, w));
     }
 
     /**
