@@ -111,6 +111,10 @@ public final class QuasarParticles {
         }
 
         private static void printErrors(Map<ResourceKey<?>, Exception> errors) {
+            if (errors.isEmpty()) {
+                return;
+            }
+
             StringWriter stringWriter = new StringWriter();
             PrintWriter printWriter = new PrintWriter(stringWriter);
             Map<ResourceLocation, Map<ResourceLocation, Exception>> sortedErrors = errors.entrySet().stream().collect(Collectors.groupingBy(entry -> entry.getKey().registry(), Collectors.toMap(entry -> entry.getKey().location(), Map.Entry::getValue)));
