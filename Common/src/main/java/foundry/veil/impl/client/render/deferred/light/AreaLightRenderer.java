@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11C.GL_FLOAT;
+import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
@@ -21,7 +21,7 @@ import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
 
     public AreaLightRenderer() {
-        super(Float.BYTES * 24);
+        super(Float.BYTES * 22 + 2);
     }
 
     @Override
@@ -39,7 +39,6 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
         glEnableVertexAttribArray(6);
         glEnableVertexAttribArray(7);
         glEnableVertexAttribArray(8);
-        glEnableVertexAttribArray(9);
 
         glVertexAttribPointer(1, 4, GL_FLOAT, false, this.lightSize, 0);
         glVertexAttribPointer(2, 4, GL_FLOAT, false, this.lightSize, Float.BYTES * 4);
@@ -48,9 +47,8 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
 
         glVertexAttribPointer(5, 3, GL_FLOAT, false, this.lightSize, Float.BYTES * 16); // color
         glVertexAttribPointer(6, 2, GL_FLOAT, false, this.lightSize, Float.BYTES * 19); // size
-        glVertexAttribPointer(7, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 21); // angle
-        glVertexAttribPointer(8, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 22); // distance
-        glVertexAttribPointer(9, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 23); // falloff
+        glVertexAttribPointer(7, 1, GL_UNSIGNED_SHORT, true, this.lightSize, Float.BYTES * 21); // angle
+        glVertexAttribPointer(8, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 21 + 2); // distance
 
         glVertexAttribDivisor(1, 1);
         glVertexAttribDivisor(2, 1);
@@ -60,7 +58,6 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
         glVertexAttribDivisor(6, 1);
         glVertexAttribDivisor(7, 1);
         glVertexAttribDivisor(8, 1);
-        glVertexAttribDivisor(9, 1);
     }
 
     @Override

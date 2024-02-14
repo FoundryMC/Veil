@@ -13,15 +13,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11C.GL_FLOAT;
+import static org.lwjgl.opengl.GL11C.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30C.glVertexAttribIPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
 
 @ApiStatus.Internal
 public class PointLightRenderer extends InstancedLightRenderer<PointLight> {
 
     public PointLightRenderer() {
-        super(Float.BYTES * 8);
+        super(Float.BYTES * 7);
     }
 
     @Override
@@ -34,17 +36,14 @@ public class PointLightRenderer extends InstancedLightRenderer<PointLight> {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
         glEnableVertexAttribArray(3);
-        glEnableVertexAttribArray(4);
 
         glVertexAttribPointer(1, 3, GL_FLOAT, false, this.lightSize, 0);
         glVertexAttribPointer(2, 3, GL_FLOAT, false, this.lightSize, Float.BYTES * 3);
         glVertexAttribPointer(3, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 6);
-        glVertexAttribPointer(4, 1, GL_FLOAT, false, this.lightSize, Float.BYTES * 7);
 
         glVertexAttribDivisor(1, 1);
         glVertexAttribDivisor(2, 1);
         glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
     }
 
     @Override

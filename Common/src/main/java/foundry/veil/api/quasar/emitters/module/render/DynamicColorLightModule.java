@@ -3,10 +3,10 @@ package foundry.veil.api.quasar.emitters.module.render;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
-import foundry.veil.api.quasar.emitters.module.RenderParticleModule;
-import foundry.veil.api.quasar.particle.QuasarParticle;
 import foundry.veil.api.quasar.data.module.init.LightModuleData;
+import foundry.veil.api.quasar.emitters.module.RenderParticleModule;
 import foundry.veil.api.quasar.emitters.module.UpdateParticleModule;
+import foundry.veil.api.quasar.particle.QuasarParticle;
 import org.joml.Vector4f;
 
 public class DynamicColorLightModule implements UpdateParticleModule, RenderParticleModule {
@@ -43,9 +43,7 @@ public class DynamicColorLightModule implements UpdateParticleModule, RenderPart
             this.onRemove();
         } else {
             if (this.light == null) {
-                this.light = new PointLight()
-                        .setRadius(this.data.radius())
-                        .setFalloff(this.data.falloff());
+                this.light = new PointLight().setRadius(this.data.radius());
                 deferredRenderer.getLightRenderer().addLight(this.light);
             }
             this.light.setColor(this.color.x, this.color.y, this.color.z);

@@ -40,8 +40,7 @@ public class StaticColorLightModule implements RenderParticleModule {
             this.light = new PointLight()
                     .setColor(this.color.x, this.color.y, this.color.z)
                     .setBrightness(this.brightness)
-                    .setRadius(this.data.radius())
-                    .setFalloff(this.data.falloff());
+                    .setRadius(this.data.radius());
             deferredRenderer.getLightRenderer().addLight(this.light);
         }
 

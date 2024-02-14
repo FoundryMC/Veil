@@ -11,13 +11,11 @@ import foundry.veil.impl.quasar.ColorGradient;
 
 public record LightModuleData(ColorGradient color,
                               float brightness,
-                              float falloff,
                               float radius) implements ParticleModuleData {
 
     public static final Codec<LightModuleData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ColorGradient.CODEC.fieldOf("gradient").forGetter(LightModuleData::color),
             Codec.FLOAT.fieldOf("brightness").forGetter(LightModuleData::brightness),
-            Codec.FLOAT.fieldOf("falloff").forGetter(LightModuleData::falloff),
             Codec.FLOAT.fieldOf("radius").forGetter(LightModuleData::radius)
     ).apply(instance, LightModuleData::new));
 

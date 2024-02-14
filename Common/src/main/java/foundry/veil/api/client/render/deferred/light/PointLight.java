@@ -15,12 +15,10 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
 
     protected final Vector3d position;
     protected float radius;
-    protected float falloff;
 
     public PointLight() {
         this.position = new Vector3d();
         this.radius = 1.0F;
-        this.falloff = 0.0F;
     }
 
     @Override
@@ -31,7 +29,6 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
         buffer.putFloat(this.color.y() * this.brightness);
         buffer.putFloat(this.color.z() * this.brightness);
         buffer.putFloat(this.radius);
-        buffer.putFloat(this.falloff);
     }
 
     @Override
@@ -55,13 +52,6 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
      */
     public float getRadius() {
         return this.radius;
-    }
-
-    /**
-     * @return The additional linear falloff applied to the light
-     */
-    public float getFalloff() {
-        return this.falloff;
     }
 
     @Override
@@ -93,17 +83,6 @@ public class PointLight extends Light implements InstancedLight, PositionedLight
      */
     public PointLight setRadius(float radius) {
         this.radius = radius;
-        this.markDirty();
-        return this;
-    }
-
-    /**
-     * Sets the additional linear falloff factor for attenuation.
-     *
-     * @param falloff The linear falloff factor
-     */
-    public PointLight setFalloff(float falloff) {
-        this.falloff = falloff;
         this.markDirty();
         return this;
     }

@@ -99,11 +99,11 @@ public class LightEditor extends SingleWindowEditor {
                         case DIRECTIONAL -> new DirectionalLight().setDirection(0, -1, 0);
                     };
 
-                    if (light instanceof PositionedLight positionedLight) {
+                    if (light instanceof PositionedLight<?> positionedLight) {
                         Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
                         positionedLight.setPosition(cameraPos.x(), cameraPos.y(), cameraPos.z());
                     }
-                    lightRenderer.addLight(light.setColor(new Vector3f(1.0F, 1.0F, 1.0F)).setBrightness(1.0F));
+                    lightRenderer.addLight(light.setColor(1.0F, 1.0F, 1.0F).setBrightness(1.0F));
                 }
             }
             ImGui.endPopup();
@@ -161,7 +161,6 @@ public class LightEditor extends SingleWindowEditor {
         ImDouble editZ = new ImDouble(position.z());
 
         ImFloat editRadius = new ImFloat(light.getRadius());
-        ImFloat editFalloff = new ImFloat(light.getFalloff());
 
         float totalWidth = ImGui.calcItemWidth();
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
@@ -187,9 +186,6 @@ public class LightEditor extends SingleWindowEditor {
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("radius");
 
-        if (ImGui.dragScalar("##falloff" + index, ImGuiDataType.Float, editFalloff, 0.01F, 0.0F)) {
-            light.setFalloff(editFalloff.get());
-        }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("falloff");
     }
@@ -211,7 +207,6 @@ public class LightEditor extends SingleWindowEditor {
 
         ImFloat editAngle = new ImFloat(light.getAngle() * Mth.RAD_TO_DEG);
         ImFloat editDistance = new ImFloat(light.getDistance());
-        ImFloat editFalloff = new ImFloat(light.getFalloff());
 
         if (ImGui.dragFloat2("##size" + index, editSize, 0.02F, 0.0001F)) {
             light.setSize(editSize[0], editSize[1]);
@@ -268,9 +263,6 @@ public class LightEditor extends SingleWindowEditor {
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("distance");
 
-        if (ImGui.dragScalar("##falloff" + index, ImGuiDataType.Float, editFalloff, 0.01F, 0.0F)) {
-            light.setFalloff(editFalloff.get());
-        }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("falloff");
     }

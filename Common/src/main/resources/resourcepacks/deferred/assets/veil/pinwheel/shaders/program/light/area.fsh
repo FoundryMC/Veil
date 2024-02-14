@@ -8,7 +8,6 @@ in vec3 lightColor;
 in vec2 size;
 in float maxAngle;
 in float maxDistance;
-in float falloff;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
@@ -19,18 +18,6 @@ uniform sampler2D DiffuseDepthSampler;
 uniform vec2 ScreenSize;
 
 out vec4 fragColor;
-
-float attenuate_no_cusp(float distanceIn, float radiusIn, float falloffIn)
-{
-    float s = distanceIn / radiusIn;
-
-    if (s >= 1.0){
-        return 0.0;
-    }
-
-    float s2 = s * s;
-    return (1 - s2) * (1 - s2) / (1 + falloffIn * s2);
-}
 
 // acos approximation
 // faster and also doesn't flicker weirdly
@@ -78,7 +65,7 @@ void main() {
     float diffuse = (dot(normalVS, lightDirection) + 1.0) * 0.5;
 
     diffuse = max(MINECRAFT_AMBIENT_LIGHT, diffuse);
-    diffuse *= attenuate_no_cusp(length(offset), maxDistance, falloff);
+    diffuse *= attenuate_no_cusp(length(offset), maxDistance);
     // angle falloff
     float angleFalloff = mapClamped(angle, 0.0, maxAngle, 1.0, 0.0);
     diffuse *= smoothstep(0.0, 1.0, angleFalloff);
