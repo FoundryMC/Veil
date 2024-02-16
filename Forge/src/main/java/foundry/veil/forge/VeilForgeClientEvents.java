@@ -38,6 +38,13 @@ public class VeilForgeClientEvents {
     }
 
     @SubscribeEvent
+    public static void tick(TickEvent.LevelTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && event.side.isClient()) {
+            VeilRenderSystem.renderer().getParticleManager().tick();
+        }
+    }
+
+    @SubscribeEvent
     public static void keyPressed(InputEvent.Key event) {
         if (event.getAction() == GLFW_PRESS && VeilClient.EDITOR_KEY.matches(event.getKey(), event.getScanCode())) {
             VeilRenderSystem.renderer().getEditorManager().toggle();
@@ -68,14 +75,7 @@ public class VeilForgeClientEvents {
     }
 
     @SubscribeEvent
-    public void tick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && event.side.isClient()) {
-            VeilRenderSystem.renderer().getParticleManager().tick();
-        }
-    }
-
-    @SubscribeEvent
-    public static void mousePressed(InputEvent.MouseButton event) {
+    public static void mousePressed(InputEvent.MouseButton.Pre event) {
         if (event.getAction() == GLFW_PRESS && VeilClient.EDITOR_KEY.matchesMouse(event.getButton())) {
             VeilRenderSystem.renderer().getEditorManager().toggle();
         }
