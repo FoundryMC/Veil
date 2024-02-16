@@ -8,8 +8,7 @@
     "MinecraftMixin",
     "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleEngineMixin",
-    "MinecraftMixin",
-    "client.deferred.ParticleEngineMixin"
+    "client.quasar.LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

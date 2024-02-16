@@ -1,9 +1,11 @@
 package foundry.veil.api.opencl;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import foundry.veil.api.opencl.event.CLEventDispatcher;
 import foundry.veil.api.opencl.event.CLLegacyEventDispatcher;
 import foundry.veil.api.opencl.event.CLNativeEventDispatcher;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -11,10 +13,13 @@ import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opencl.APPLEGLSharing;
+import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.opencl.CLContextCallback;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
+import org.lwjgl.system.Platform;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -26,8 +31,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.lwjgl.glfw.GLFWNativeGLX.glfwGetGLXContext;
+import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
+import static org.lwjgl.glfw.GLFWNativeX11.glfwGetX11Display;
+import static org.lwjgl.opencl.APPLEGLSharing.CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
 import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opencl.CL20.clCreateCommandQueueWithProperties;
+import static org.lwjgl.opencl.KHRGLSharing.*;
+import static org.lwjgl.opengl.CGL.CGLGetCurrentContext;
+import static org.lwjgl.opengl.CGL.CGLGetShareGroup;
+import static org.lwjgl.opengl.WGL.wglGetCurrentDC;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  * An OpenCL runtime environment on a specific device.
@@ -49,14 +63,39 @@ public class CLEnvironment implements NativeResource {
     public CLEnvironment(VeilOpenCL.DeviceInfo deviceInfo) throws CLException {
         this.device = deviceInfo;
 
+        CLCapabilities caps = deviceInfo.capabilities();
+        boolean enableGL = caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing;
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            PointerBuffer ctxProps = stack.mallocPointer(3);
+            PointerBuffer ctxProps = stack.mallocPointer(enableGL ? 7 : 3);
+            if (enableGL) {
+                RenderSystem.assertOnRenderThread();
+                long window = Minecraft.getInstance().getWindow().getWindow();
+                switch (Platform.get()) {
+                    case WINDOWS:
+                        ctxProps
+                                .put(CL_GL_CONTEXT_KHR)
+                                .put(glfwGetWGLContext(window))
+                                .put(CL_WGL_HDC_KHR)
+                                .put(wglGetCurrentDC());
+                        break;
+                    case LINUX:
+                        ctxProps
+                                .put(CL_GL_CONTEXT_KHR)
+                                .put(glfwGetGLXContext(window))
+                                .put(CL_GLX_DISPLAY_KHR)
+                                .put(glfwGetX11Display());
+                        break;
+                    case MACOSX:
+                        ctxProps
+                                .put(CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE)
+                                .put(CGLGetShareGroup(CGLGetCurrentContext()));
+                }
+            }
             ctxProps
-                    .put(0, CL_CONTEXT_PLATFORM)
-                    .put(1, deviceInfo.platform())
-                    .put(2, 0);
-
-            long device = deviceInfo.id();
+                    .put(CL_CONTEXT_PLATFORM)
+                    .put(deviceInfo.platform())
+                    .put(NULL)
+                    .flip();
 
             this.errorCallback = CLContextCallback.create((errinfo, private_info, cb, user_data) -> {
                 VeilOpenCL.LOGGER.error("[LWJGL] cl_context_callback");
@@ -65,13 +104,14 @@ public class CLEnvironment implements NativeResource {
             IntBuffer errcode_ret = stack.callocInt(1);
 
             try {
-                this.context = clCreateContext(ctxProps, device, this.errorCallback, MemoryUtil.NULL, errcode_ret);
+                long device = deviceInfo.id();
+                this.context = clCreateContext(ctxProps, device, this.errorCallback, NULL, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
                 this.commandQueue = clCreateCommandQueueWithProperties(this.context, device, null, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
-                if (this.commandQueue == MemoryUtil.NULL) {
+                if (this.commandQueue == NULL) {
                     throw new IllegalStateException("Failed to create OpenCL queue");
                 }
             } catch (Exception e) {
@@ -81,7 +121,7 @@ public class CLEnvironment implements NativeResource {
         }
 
         this.programs = new HashMap<>();
-        this.eventDispatcher = deviceInfo.capabilities().clSetEventCallback != 0 ? new CLNativeEventDispatcher() : new CLLegacyEventDispatcher();
+        this.eventDispatcher = caps.clSetEventCallback != 0 ? new CLNativeEventDispatcher() : new CLLegacyEventDispatcher();
     }
 
     /**
@@ -187,9 +227,11 @@ public class CLEnvironment implements NativeResource {
     @ApiStatus.Internal
     @Override
     public void free() {
-        try {
-            this.finish();
-        } catch (CLException ignored) {
+        if (this.commandQueue != 0L) {
+            try {
+                this.finish();
+            } catch (CLException ignored) {
+            }
         }
         if (this.errorCallback != null) {
             this.errorCallback.free();
@@ -200,8 +242,10 @@ public class CLEnvironment implements NativeResource {
         if (this.context != 0) {
             clReleaseContext(this.context);
         }
-        this.programs.values().forEach(NativeResource::free);
-        this.programs.clear();
+        if (this.programs != null) {
+            this.programs.values().forEach(NativeResource::free);
+            this.programs.clear();
+        }
 
         if (this.eventDispatcher instanceof CLLegacyEventDispatcher legacyEventDispatcher) {
             try {

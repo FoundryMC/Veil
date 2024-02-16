@@ -1,0 +1,11 @@
+{
+  "max_lifetime": 640,
+  "loop": false,
+  "rate": 2,
+  "count": 2,
+  "emitter_settings": {
+    "shape": "veil:test_shape",
+    "particle_settings": "veil:test_particle"
+  },
+  "particle_data": "veil:test_data"
+}

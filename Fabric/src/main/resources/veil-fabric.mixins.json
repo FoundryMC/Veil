@@ -7,12 +7,12 @@
   "mixins": [
   ],
   "client": [
-    "client.EffectInstanceMixin",
     "client.KeyboardHandlerMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
     "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleEngineMixin",
+    "client.quasar.LevelRendererMixin",
     "client.stage.LevelRendererMixin"
   ],
   "injectors": {

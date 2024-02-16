@@ -1,12 +1,16 @@
 package foundry.veil.api.client.render.deferred.light;
 
 import foundry.veil.api.client.render.CullFrustum;
+import net.minecraft.util.Mth;
 import org.joml.*;
 
 import java.lang.Math;
 import java.nio.ByteBuffer;
 
 public class AreaLight extends Light implements InstancedLight, PositionedLight<AreaLight> {
+
+    private static final float MAX_ANGLE_SIZE = (float) (65535 / 2 / Math.PI);
+
     protected final Vector3d position;
     protected final Quaternionf orientation;
     private final Matrix4d matrix;
@@ -15,7 +19,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
 
     protected float angle;
     protected float distance;
-    protected float falloff;
 
     public AreaLight() {
         this.matrix = new Matrix4d();
@@ -24,9 +27,8 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
 
         this.size = new Vector2f(1.0F, 1.0F);
 
-        this.angle = 0.7854F;
+        this.angle = (float) Math.toRadians(45);
         this.distance = 1.0F;
-        this.falloff = 0.0F;
     }
 
     @Override
@@ -41,22 +43,8 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         this.size.get(buffer.position(), buffer);
         buffer.position(buffer.position() + Float.BYTES * 2);
 
-        buffer.putFloat(this.angle);
+        buffer.putShort((short) Mth.clamp((int) (this.angle * MAX_ANGLE_SIZE), 0, 65535));
         buffer.putFloat(this.distance);
-        buffer.putFloat(this.falloff);
-    }
-
-    // the bounding box here isn't particularly tight, but it should always encapsulate the light's area.
-    @Override
-    public boolean isVisible(CullFrustum frustum) {
-        float radius = Math.max(this.size.x, this.size.y) + this.distance;
-        double minX = this.position.x() - radius;
-        double minY = this.position.y() - radius;
-        double minZ = this.position.z() - radius;
-        double maxX = this.position.x() + radius;
-        double maxY = this.position.y() + radius;
-        double maxZ = this.position.z() + radius;
-        return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Override
@@ -89,7 +77,7 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     public float getAngle() {
         return this.angle;
     }
-    
+
     /**
      * @return The maximum distance the light can travel
      */
@@ -97,14 +85,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         return this.distance;
     }
 
-    /**
-     * @return The additional linear falloff applied to the light
-     */
-    public float getFalloff() {
-        return this.falloff;
-    }
-
-    
     @Override
     public AreaLight setColor(float red, float green, float blue) {
         return (AreaLight) super.setColor(red, green, blue);
@@ -119,7 +99,7 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     public AreaLight setBrightness(float brightness) {
         return (AreaLight) super.setBrightness(brightness);
     }
-    
+
     @Override
     public AreaLight setPosition(double x, double y, double z) {
         this.position.set(x, y, z);
@@ -132,7 +112,7 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
      *
      * @param orientation The orientation of the light's surface.
      */
-    public AreaLight setOrientation(Quaternionf orientation) {
+    public AreaLight setOrientation(Quaternionfc orientation) {
         this.orientation.set(orientation).normalize();
         this.updateMatrix();
         return this;
@@ -153,14 +133,14 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     /**
      * Sets the maximum angle the light can influence.
      *
-     * @param angle The maximum angle of the light's influence
+     * @param angle The maximum angle of the light's influence in radians
      */
     public AreaLight setAngle(float angle) {
         this.angle = angle;
         this.markDirty();
         return this;
     }
-    
+
     /**
      * Sets the maximum distance the light can influence.
      *
@@ -168,17 +148,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
      */
     public AreaLight setDistance(float distance) {
         this.distance = distance;
-        this.markDirty();
-        return this;
-    }
-
-    /**
-     * Sets the additional linear falloff factor for attenuation.
-     *
-     * @param falloff The linear falloff factor
-     */
-    public AreaLight setFalloff(float falloff) {
-        this.falloff = falloff;
         this.markDirty();
         return this;
     }
@@ -197,7 +166,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         light.size.set(this.size);
         light.angle = this.angle;
         light.distance = this.distance;
-        light.falloff = this.falloff;
         light.markDirty();
         return light;
     }

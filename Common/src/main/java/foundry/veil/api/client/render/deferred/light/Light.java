@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.impl.client.render.deferred.light.AreaLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
 import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
@@ -25,14 +24,6 @@ public abstract class Light implements Cloneable {
         this.brightness = 1.0F;
         this.markDirty();
     }
-
-    /**
-     * Checks whether this light can be seen in the specified frustum.
-     *
-     * @param frustum The frustum to check visibility with
-     * @return Whether that light is visible
-     */
-    public abstract boolean isVisible(CullFrustum frustum);
 
     /**
      * Marks the data in this light as dirty and needing re-uploading.

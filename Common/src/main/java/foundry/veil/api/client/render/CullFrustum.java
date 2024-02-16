@@ -2,10 +2,7 @@ package foundry.veil.api.client.render;
 
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector2dc;
-import org.joml.Vector2fc;
-import org.joml.Vector3dc;
-import org.joml.Vector3fc;
+import org.joml.*;
 
 public interface CullFrustum {
 
@@ -270,4 +267,14 @@ public interface CullFrustum {
      * <code>false</code> otherwise
      */
     boolean testLineSegment(double aX, double aY, double aZ, double bX, double bY, double bZ);
+
+    /**
+     * @return The data for each plane in the frustum
+     */
+    Vector4fc[] getPlanes();
+
+    /**
+     * @return The position of the camera
+     */
+    Vector3dc getPosition();
 }

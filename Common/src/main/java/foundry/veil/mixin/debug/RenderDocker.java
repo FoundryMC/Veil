@@ -74,8 +74,10 @@ public class RenderDocker {
 
             if (enable.get()) {
                 System.loadLibrary("renderdoc");
+                Veil.LOGGER.info("Renderdoc Loaded");
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            Veil.LOGGER.info("Failed to load Renderdoc", e);
         }
     }
 }

@@ -3,11 +3,12 @@ package foundry.veil.forge;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.VeilVanillaShaders;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.forge.event.ForgeVeilRegisterFixedBuffersEvent;
-import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
-import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
+import foundry.veil.impl.client.render.VeilUITooltipRenderer;
+import foundry.veil.util.VeilJsonListeners;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,6 +49,7 @@ public class VeilForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
+        VeilJsonListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
         MinecraftForge.EVENT_BUS.post(new ForgeVeilRendererEvent(VeilRenderSystem.renderer()));
         MinecraftForge.EVENT_BUS.post(new ForgeVeilRegisterFixedBuffersEvent(ForgeRenderTypeStageHandler::register));
     }
@@ -74,6 +76,7 @@ public class VeilForgeClient {
             // Register test resource pack
             if (Veil.DEBUG && !FMLLoader.isProduction()) {
                 registerBuiltinPack(event, Veil.veilPath("test_shaders"));
+                registerBuiltinPack(event, Veil.veilPath("test_particles"));
             }
 
             // TODO make this pack enabled by default

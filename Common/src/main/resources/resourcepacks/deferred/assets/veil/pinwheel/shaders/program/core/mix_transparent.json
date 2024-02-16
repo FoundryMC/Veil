@@ -24,10 +24,6 @@
       "type": "framebuffer",
       "name": "veil:light",
       "sampler": 0
-    },
-    "DepthSampler": {
-      "type": "framebuffer",
-      "name": "veil:transparent:depth"
     }
   }
 }

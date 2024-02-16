@@ -1,33 +1,44 @@
 package foundry.veil.impl.client.render.deferred.light;
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
-import foundry.veil.api.client.render.deferred.light.DirectionalLight;
-import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.light.DirectionalLight;
+import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.client.render.CullFrustum;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLight> {
 
     private final VertexBuffer vbo;
+    private int visibleLights;
 
     public DirectionalLightRenderer() {
         this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.vbo.bind();
-        this.vbo.upload(LightTypeRenderer.createQuad());
+        this.vbo.upload(createMesh());
         VertexBuffer.unbind();
     }
 
+    private static BufferBuilder.RenderedBuffer createMesh() {
+        Tesselator tesselator = RenderSystem.renderThreadTesselator();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
+        LightTypeRenderer.createQuad(bufferBuilder);
+        return bufferBuilder.end();
+    }
+
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, CullFrustum frustum) {
+    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, Set<DirectionalLight> removedLights, CullFrustum frustum) {
+        this.visibleLights = lights.size();
         if (lights.isEmpty()) {
             return;
         }
@@ -50,6 +61,11 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
         }
 
         VertexBuffer.unbind();
+    }
+
+    @Override
+    public int getVisibleLights() {
+        return this.visibleLights;
     }
 
     @Override

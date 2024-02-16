@@ -1,0 +1,14 @@
+{
+    "shape": "CUBE",
+    "dimensions": [
+        20.0,
+        20.0,
+        20.0
+    ],
+    "rotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "from_surface": false
+}

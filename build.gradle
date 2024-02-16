@@ -16,7 +16,6 @@ subprojects {
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
-
     jar {
         from(rootProject.file("LICENSE")) {
             rename { "${it}_${mod_name}" }
@@ -45,7 +44,6 @@ subprojects {
 
     repositories {
         mavenLocal()
-        mavenCentral()
         maven {
             name = 'Sponge / Mixin'
             url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -55,11 +53,16 @@ subprojects {
             url = 'https://maven.blamejared.com'
         }
         maven {
+            name "realrobotixImguiJava"
+            url "https://maven.realrobotix.me/imgui-java"
+        }
+        maven {
             url "https://jitpack.io"
             content {
                 includeGroupByRegex "com\\.github.*"
             }
         }
+        mavenCentral()
     }
 
     tasks.withType(JavaCompile).configureEach {

@@ -1,0 +1,9 @@
+{
+    "point": [
+        67.5, -58, 111.58
+    ],
+    "range": 1.5,
+    "strength": 5.0,
+    "falloff": 1.0,
+    "module": "point_force"
+}

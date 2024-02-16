@@ -1,0 +1,11 @@
+{
+  "max_lifetime": 1,
+  "loop": false,
+  "rate": 1,
+  "count": 1,
+  "emitter_settings": {
+    "shape": "veil:cannon",
+    "particle_settings": "veil:cannon"
+  },
+  "particle_data": "veil:cannon_data"
+}

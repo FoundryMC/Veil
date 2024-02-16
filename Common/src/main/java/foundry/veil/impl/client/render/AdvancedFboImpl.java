@@ -5,9 +5,9 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.AdvancedFboAttachment;
-import foundry.veil.api.client.render.VeilRenderBridge;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
@@ -149,7 +149,7 @@ public class AdvancedFboImpl implements AdvancedFbo {
 
     @Override
     public void bindDraw(boolean setViewport) {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this.id);
         if (setViewport) {
             RenderSystem.viewport(0, 0, this.width, this.height);
         }

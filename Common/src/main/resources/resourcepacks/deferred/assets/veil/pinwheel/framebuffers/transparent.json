@@ -15,7 +15,7 @@
     },
     {
       "name": "MaterialSampler",
-      "format": "RGB8UI"
+      "format": "RG8UI"
     },
     {
       "name": "VanillaLightSampler",

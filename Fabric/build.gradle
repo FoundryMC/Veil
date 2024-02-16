@@ -59,7 +59,7 @@ dependencies {
     }
 
     implementation "io.github.spair:imgui-java-natives-linux:$imgui_version"
-    implementation "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    implementation "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     implementation "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
     shade "io.github.spair:imgui-java-binding:$imgui_version"
@@ -69,7 +69,7 @@ dependencies {
     }
 
     shade "io.github.spair:imgui-java-natives-linux:$imgui_version"
-    shade "io.github.spair:imgui-java-natives-macos:$imgui_version"
+    shade "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
     implementation ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
@@ -117,7 +117,7 @@ processResources {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId base.archivesName.get()
+            artifactId (base.archivesName.get() + "-quasar")
             from components.java
         }
     }

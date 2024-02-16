@@ -26,3 +26,14 @@ vec2 minecraft_sample_lightmap_coords(ivec2 uv) {
 vec4 minecraft_sample_lightmap(sampler2D lightMap, ivec2 uv) {
     return texture(lightMap, minecraft_sample_lightmap_coords(uv));
 }
+
+float attenuate_no_cusp(float distance, float radius) {
+    float s = distance / radius;
+
+    if (s >= 1.0) {
+        return 0.0;
+    }
+
+    float s2 = s * s;
+    return (1 - s2) * (1 - s2) / s2;
+}
