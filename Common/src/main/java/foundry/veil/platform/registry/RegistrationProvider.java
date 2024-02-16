@@ -1,11 +1,10 @@
 package foundry.veil.platform.registry;
+
 import foundry.veil.platform.Services;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
 import java.util.Collection;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 /**

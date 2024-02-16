@@ -1,13 +1,11 @@
 package foundry.veil.api.opencl.event;
 
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.opencl.CLException;
 import foundry.veil.api.opencl.VeilOpenCL;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opencl.CL10;
 import org.lwjgl.system.MemoryStack;
-import org.slf4j.Logger;
 
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -23,7 +21,6 @@ import static org.lwjgl.opencl.CL10.*;
 @ApiStatus.Internal
 public class CLLegacyEventDispatcher implements CLEventDispatcher {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 
     private final Queue<EventListener> eventListeners;
@@ -54,7 +51,7 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
                             this.eventNotifier.wait();
                         }
                     } catch (InterruptedException e) {
-                        LOGGER.warn("Error while waiting for events", e);
+                        VeilOpenCL.LOGGER.warn("Error while waiting for events", e);
                     }
                     continue;
                 }
@@ -70,7 +67,7 @@ public class CLLegacyEventDispatcher implements CLEventDispatcher {
 
                     this.eventListeners.add(event);
                 } catch (CLException e) {
-                    LOGGER.error("Error while querying event", e);
+                    VeilOpenCL.LOGGER.error("Error while querying event", e);
                 }
             }
         }

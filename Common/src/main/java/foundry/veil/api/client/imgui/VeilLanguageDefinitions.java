@@ -1,6 +1,5 @@
 package foundry.veil.api.client.imgui;
 
-import foundry.veil.api.client.imgui.CodeEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.extension.texteditor.flag.TextEditorPaletteIndex;
 

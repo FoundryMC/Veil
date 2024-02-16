@@ -1,7 +1,7 @@
 package foundry.veil.api.quasar.emitters.module.force;
 
-import foundry.veil.api.quasar.particle.QuasarParticle;
 import foundry.veil.api.quasar.data.module.force.PointAttractorForceData;
+import foundry.veil.api.quasar.particle.QuasarParticle;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 

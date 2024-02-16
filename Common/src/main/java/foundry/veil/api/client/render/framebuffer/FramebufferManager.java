@@ -2,9 +2,9 @@ package foundry.veil.api.client.render.framebuffer;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import foundry.veil.Veil;
 import foundry.veil.api.CodecReloadListener;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.ResourceLocationException;
@@ -17,7 +17,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
-import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
  */
 public class FramebufferManager extends CodecReloadListener<FramebufferDefinition> implements NativeResource {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation MAIN = new ResourceLocation("main");
 
     public static final Codec<ResourceLocation> FRAMEBUFFER_CODEC = Codec.STRING.comapFlatMap(name -> {
@@ -81,7 +79,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
                 fbo.clear();
                 this.framebuffers.put(name, fbo);
             } catch (Exception e) {
-                LOGGER.error("Failed to initialize framebuffer: {}", name, e);
+                Veil.LOGGER.error("Failed to initialize framebuffer: {}", name, e);
             }
         });
         AdvancedFbo.unbind();
@@ -130,7 +128,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
         this.framebufferDefinitions.putAll(data);
         Window window = Minecraft.getInstance().getWindow();
         this.resizeFramebuffers(window.getWidth(), window.getHeight());
-        LOGGER.info("Loaded {} framebuffers", this.framebufferDefinitions.size());
+        Veil.LOGGER.info("Loaded {} framebuffers", this.framebufferDefinitions.size());
     }
 
     @Override

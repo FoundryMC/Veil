@@ -1,5 +1,6 @@
 package foundry.veil.api.opencl;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +47,7 @@ public class CLKernel implements NativeResource {
         this.handle = handle;
         this.pointers = new LongArraySet();
         this.legacySyncGLtoCL = !environment.getDevice().capabilities().cl_khr_gl_event;
-        this.legacySyncCLtoGL = !GL.getCapabilities().GL_ARB_cl_event;
+        this.legacySyncCLtoGL = !RenderSystem.isOnRenderThread() || !GL.getCapabilities().GL_ARB_cl_event;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer work_group_loc = stack.mallocPointer(1);

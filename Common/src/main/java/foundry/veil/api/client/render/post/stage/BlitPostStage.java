@@ -1,18 +1,17 @@
 package foundry.veil.api.client.render.post.stage;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.post.PostPipeline;
+import foundry.veil.Veil;
 import foundry.veil.api.client.registry.PostPipelineStageRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.framebuffer.FramebufferManager;
+import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 
@@ -22,8 +21,6 @@ import java.util.Optional;
  * @author Ocelot
  */
 public class BlitPostStage extends FramebufferPostStage {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Codec<BlitPostStage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("shader").forGetter(BlitPostStage::getShaderId),
@@ -55,7 +52,7 @@ public class BlitPostStage extends FramebufferPostStage {
         if (shader == null) {
             if (!this.printedError) {
                 this.printedError = true;
-                LOGGER.warn("Failed to find post shader: " + this.shader);
+                Veil.LOGGER.warn("Failed to find post shader: " + this.shader);
             }
             return;
         }

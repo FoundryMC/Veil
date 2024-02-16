@@ -1,11 +1,10 @@
 package foundry.veil.impl;
 
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.TickTaskScheduler;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -15,8 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @ApiStatus.Internal
 public class TickTaskSchedulerImpl implements TickTaskScheduler {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final Queue<Task> pendingTasks;
     private long tick;
@@ -47,7 +44,7 @@ public class TickTaskSchedulerImpl implements TickTaskScheduler {
                 task.runnable.run();
                 task.finish(null);
             } catch (Throwable t) {
-                LOGGER.error("Failed to execute task", t);
+                Veil.LOGGER.error("Failed to execute task", t);
                 task.finish(t);
             }
             iterator.remove();
@@ -73,7 +70,7 @@ public class TickTaskSchedulerImpl implements TickTaskScheduler {
                 task.runnable.run();
                 task.finish(null);
             } catch (Throwable t) {
-                LOGGER.error("Failed to execute task", t);
+                Veil.LOGGER.error("Failed to execute task", t);
                 task.finish(t);
             }
             iterator.remove();

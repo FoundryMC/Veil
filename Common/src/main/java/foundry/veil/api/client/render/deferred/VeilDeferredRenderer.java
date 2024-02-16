@@ -1,7 +1,6 @@
 package foundry.veil.api.client.render.deferred;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderer;
@@ -21,13 +20,13 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
-import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11C.GL_NEAREST;
 
 /**
  * <p>Handles mixing the regular deferred pipeline and the forward-rendered transparency pipeline.</p>
@@ -60,8 +59,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     public static final ResourceLocation TRANSPARENT_POST = Veil.veilPath("core/transparent");
     public static final ResourceLocation SCREEN_POST = Veil.veilPath("core/screen");
 
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private final ShaderManager deferredShaderManager;
     private final ShaderPreDefinitions shaderPreDefinitions;
     private final FramebufferManager framebufferManager;
@@ -85,15 +82,14 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
         return CompletableFuture.<CompletableFuture<Void>>supplyAsync(() -> {
-            boolean active = resourceManager.listPacks().anyMatch(r -> r.packId().equals(PACK_ID.toString()));
+            boolean active = Minecraft.getInstance().getResourcePackRepository().getSelectedIds().contains(PACK_ID.toString());
             if (this.enabled != active) {
                 this.enabled = active;
                 if (active) {
-                    LOGGER.info("Deferred Renderer Enabled");
-//                    this.lightRenderer.addLight(new DirectionalLight());
+                    Veil.LOGGER.info("Deferred Renderer Enabled");
                     this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
                 } else {
-                    LOGGER.info("Deferred Renderer Disabled");
+                    Veil.LOGGER.info("Deferred Renderer Disabled");
                     return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
                 }
             }

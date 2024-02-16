@@ -6,16 +6,16 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.api.CodecReloadListener;
+import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.post.stage.CompositePostPipeline;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
 import foundry.veil.platform.services.VeilClientPlatform;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.CodecReloadListener;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -24,7 +24,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -42,7 +41,6 @@ import static org.lwjgl.opengl.GL11C.GL_LEQUAL;
  */
 public class PostProcessingManager extends CodecReloadListener<CompositePostPipeline> implements NativeResource {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Comparator<ProfileEntry> PIPELINE_SORTER = Comparator.comparingInt(ProfileEntry::getPriority).reversed();
 
     private final PostPipelineContext context;
@@ -160,7 +158,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
                     pipeline.apply(this.context);
                     this.clearPipeline();
                 } catch (Exception e) {
-                    LOGGER.error("Error running pipeline {}", id, e);
+                    Veil.LOGGER.error("Error running pipeline {}", id, e);
                 }
                 platform.postVeilPostProcessing(id, pipeline, this.context);
             }
@@ -185,7 +183,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
             pipeline.apply(this.context);
             this.clearPipeline();
         } catch (Exception e) {
-            LOGGER.error("Error running pipeline {}", pipeline, e);
+            Veil.LOGGER.error("Error running pipeline {}", pipeline, e);
         }
 
         RenderSystem.activeTexture(activeTexture);
@@ -262,7 +260,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.pipelines.values().forEach(PostPipeline::free);
         this.pipelines.clear();
         this.pipelines.putAll(data);
-        LOGGER.info("Loaded {} post pipelines", this.pipelines.size());
+        Veil.LOGGER.info("Loaded {} post pipelines", this.pipelines.size());
     }
 
     @Override

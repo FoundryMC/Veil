@@ -1,8 +1,8 @@
 package foundry.veil.fabric.platform;
 
+import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.fabric.event.FabricVeilPostProcessingEvent;
 import foundry.veil.platform.services.VeilClientPlatform;
-import foundry.veil.api.client.render.post.PostPipeline;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 

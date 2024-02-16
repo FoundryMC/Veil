@@ -1,10 +1,10 @@
 package foundry.veil.api.quasar.data.module.force;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.ScaleForceModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 
 /**
  * A force that applies a drag force to a particle.

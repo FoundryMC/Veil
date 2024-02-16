@@ -1,8 +1,8 @@
 package foundry.veil.api.quasar.emitters.module.render;
 
-import foundry.veil.api.quasar.particle.QuasarParticle;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
 import foundry.veil.api.quasar.fx.Trail;
+import foundry.veil.api.quasar.particle.QuasarParticle;
 
 import java.util.List;
 

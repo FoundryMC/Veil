@@ -2,10 +2,10 @@ package foundry.veil.api.quasar.data.module.force;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.VortexForceModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.impl.quasar.CodecUtil;
 import org.joml.Vector3dc;
 

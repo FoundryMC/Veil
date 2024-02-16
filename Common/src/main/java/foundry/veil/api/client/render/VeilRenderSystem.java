@@ -4,9 +4,7 @@ import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.logging.LogUtils;
-import foundry.veil.impl.client.VeilImGuiImpl;
-import foundry.veil.api.opencl.VeilOpenCL;
+import foundry.veil.Veil;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
@@ -14,11 +12,12 @@ import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.definition.ShaderBlock;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.opencl.VeilOpenCL;
+import foundry.veil.impl.client.VeilImGuiImpl;
 import foundry.veil.impl.client.render.pipeline.VeilUniformBlockState;
 import foundry.veil.impl.client.render.shader.ShaderProgramImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -26,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.lwjgl.opengl.GL;
-import org.slf4j.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +43,6 @@ import static org.lwjgl.opengl.GL43C.GL_MAX_FRAMEBUFFER_WIDTH;
  */
 public final class VeilRenderSystem {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Executor RENDER_THREAD_EXECUTOR = task -> {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(task::run);
@@ -145,7 +142,7 @@ public final class VeilRenderSystem {
      */
     public static void throwShaderError() {
         if (VeilRenderSystem.shaderLocation != null && ERRORED_SHADERS.add(VeilRenderSystem.shaderLocation)) {
-            LOGGER.error("Failed to apply shader: " + VeilRenderSystem.shaderLocation);
+            Veil.LOGGER.error("Failed to apply shader: " + VeilRenderSystem.shaderLocation);
         }
     }
 

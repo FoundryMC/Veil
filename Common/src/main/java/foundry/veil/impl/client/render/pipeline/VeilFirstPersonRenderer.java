@@ -1,15 +1,13 @@
 package foundry.veil.impl.client.render.pipeline;
 
-import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.slf4j.Logger;
 
 /**
  * Handles drawing to and copying from the first person framebuffer.
@@ -19,7 +17,6 @@ import org.slf4j.Logger;
 @ApiStatus.Internal
 public final class VeilFirstPersonRenderer {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation FIRST_PERSON = new ResourceLocation(Veil.MODID, "first_person");
 
     private static PostPipeline pipeline;
@@ -35,7 +32,7 @@ public final class VeilFirstPersonRenderer {
 
         if (pipeline == null || buffer == null) {
             if (!printedError) {
-                LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
+                Veil.LOGGER.warn("Failed to render first person with pipeline: {}, {}", FIRST_PERSON, VeilFramebuffers.FIRST_PERSON);
                 printedError = true;
             }
             return;

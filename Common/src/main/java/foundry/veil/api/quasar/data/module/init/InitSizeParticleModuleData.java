@@ -2,10 +2,10 @@ package foundry.veil.api.quasar.data.module.init;
 
 import com.mojang.serialization.Codec;
 import foundry.veil.api.molang.MolangExpressionCodec;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.exception.MolangRuntimeException;
 

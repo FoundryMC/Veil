@@ -1,8 +1,8 @@
 package foundry.veil.impl.client.render.deferred;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;

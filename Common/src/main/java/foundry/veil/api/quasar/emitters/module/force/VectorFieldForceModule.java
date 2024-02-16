@@ -1,9 +1,9 @@
 package foundry.veil.api.quasar.emitters.module.force;
 
-import foundry.veil.api.quasar.emitters.module.update.VectorField;
-import foundry.veil.api.quasar.particle.QuasarParticle;
 import foundry.veil.api.quasar.data.module.force.VectorFieldForceData;
 import foundry.veil.api.quasar.emitters.module.ForceParticleModule;
+import foundry.veil.api.quasar.emitters.module.update.VectorField;
+import foundry.veil.api.quasar.particle.QuasarParticle;
 import org.joml.Vector3d;
 
 public class VectorFieldForceModule implements ForceParticleModule {

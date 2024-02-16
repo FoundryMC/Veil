@@ -1,9 +1,9 @@
 package foundry.veil.api.quasar.data.module;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.QuasarParticles;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFileCodec;
 
