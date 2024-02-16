@@ -10,6 +10,7 @@
   "client": [
     "MinecraftMixin",
     "client.deferred.ModelBlockRendererMixin",
-    "client.deferred.ParticleEngineMixin"
+    "client.deferred.ParticleEngineMixin",
+    "client.quasar.LevelRendererMixin"
   ]
 }
