@@ -2,7 +2,7 @@
   "depth": true,
   "color_buffers": [
     {
-      "format": "RGB8"
+      "format": "RGBA8"
     }
   ]
 }
