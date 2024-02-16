@@ -8,6 +8,7 @@ import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.neoforge.event.NeoForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.neoforge.event.NeoForgeVeilRendererEvent;
+import foundry.veil.util.VeilJsonListeners;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +46,7 @@ public class VeilNeoForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
+        VeilJsonListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
         NeoForge.EVENT_BUS.post(new NeoForgeVeilRendererEvent(VeilRenderSystem.renderer()));
         NeoForge.EVENT_BUS.post(new NeoForgeVeilRegisterFixedBuffersEvent(NeoForgeRenderTypeStageHandler::register));
     }
@@ -71,6 +73,7 @@ public class VeilNeoForgeClient {
             // Register test resource pack
             if (Veil.DEBUG && !FMLLoader.isProduction()) {
                 registerBuiltinPack(event, Veil.veilPath("test_shaders"));
+                registerBuiltinPack(event, Veil.veilPath("test_particles"));
             }
 
             // TODO make this pack enabled by default

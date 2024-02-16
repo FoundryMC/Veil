@@ -28,12 +28,19 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 @ApiStatus.Internal
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Veil.MODID, value = Dist.CLIENT)
-public class VeilForgeClientEvents {
+public class VeilNeoForgeClientEvents {
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             VeilClient.tickClient(Minecraft.getInstance().getFrameTime());
+        }
+    }
+
+    @SubscribeEvent
+    public static void tick(TickEvent.LevelTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && event.side.isClient()) {
+            VeilRenderSystem.renderer().getParticleManager().tick();
         }
     }
 
@@ -65,13 +72,6 @@ public class VeilForgeClientEvents {
             return 1;
         })));
         event.getDispatcher().register(builder);
-    }
-
-    @SubscribeEvent
-    public void tick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && event.side.isClient()) {
-            VeilRenderSystem.renderer().getParticleManager().tick();
-        }
     }
 
     @SubscribeEvent
