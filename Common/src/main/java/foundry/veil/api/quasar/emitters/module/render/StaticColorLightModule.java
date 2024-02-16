@@ -3,9 +3,9 @@ package foundry.veil.api.quasar.emitters.module.render;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
+import foundry.veil.api.quasar.data.module.init.LightModuleData;
 import foundry.veil.api.quasar.emitters.module.RenderParticleModule;
 import foundry.veil.api.quasar.particle.QuasarParticle;
-import foundry.veil.api.quasar.data.module.init.LightModuleData;
 import org.joml.Vector4f;
 
 public class StaticColorLightModule implements RenderParticleModule {

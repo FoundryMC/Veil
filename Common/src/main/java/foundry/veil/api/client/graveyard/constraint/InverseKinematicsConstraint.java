@@ -2,10 +2,10 @@ package foundry.veil.api.client.graveyard.constraint;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import foundry.veil.api.client.graveyard.skeleton.InterpolatedSkeletonParent;
-import foundry.veil.api.client.util.DebugRenderHelper;
 import foundry.veil.api.client.graveyard.skeleton.InterpolatedBone;
 import foundry.veil.api.client.graveyard.skeleton.InterpolatedSkeleton;
+import foundry.veil.api.client.graveyard.skeleton.InterpolatedSkeletonParent;
+import foundry.veil.api.client.util.DebugRenderHelper;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.renderer.MultiBufferSource;

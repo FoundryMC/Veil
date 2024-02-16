@@ -2,11 +2,11 @@ package foundry.veil.api.quasar.data.module.init;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.render.DynamicColorLightModule;
 import foundry.veil.api.quasar.emitters.module.render.StaticColorLightModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.impl.quasar.ColorGradient;
 
 public record LightModuleData(ColorGradient color,

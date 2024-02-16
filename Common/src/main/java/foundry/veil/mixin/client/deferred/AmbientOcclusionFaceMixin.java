@@ -1,7 +1,7 @@
 package foundry.veil.mixin.client.deferred;
 
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;

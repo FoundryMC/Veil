@@ -3,7 +3,7 @@ package foundry.veil.api.quasar.particle;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.api.quasar.data.EmitterSettings;
 import foundry.veil.api.quasar.data.ParticleEmitterData;
@@ -27,7 +27,6 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -47,7 +46,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ParticleEmitter {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
 
     private final ParticleSystemManager particleManager;
@@ -125,7 +123,7 @@ public class ParticleEmitter {
         data.allModules().forEach(module -> {
             if (!module.isBound()) {
                 if (REPORTED_MODULES.add(module)) {
-                    LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
+                    Veil.LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
                 }
                 return;
             }

@@ -1,10 +1,9 @@
 package foundry.veil.api.client.render.shader;
 
-import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
-import foundry.veil.impl.client.render.shader.modifier.ShaderModification;
 import foundry.veil.impl.client.render.shader.modifier.InputShaderModification;
 import foundry.veil.impl.client.render.shader.modifier.ReplaceShaderModification;
+import foundry.veil.impl.client.render.shader.modifier.ShaderModification;
 import foundry.veil.impl.client.render.shader.modifier.SimpleShaderModification;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +17,6 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.io.Reader;
 import java.util.*;
@@ -30,8 +28,6 @@ import java.util.regex.Pattern;
  * @author Ocelot
  */
 public class ShaderModificationManager extends SimplePreparableReloadListener<ShaderModificationManager.Preparations> {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final FileToIdConverter MODIFIER_LISTER = new FileToIdConverter("pinwheel/shader_modifiers", ".txt");
     private static final Map<String, String> NEXT_STAGES = Map.of(
@@ -104,7 +100,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
             try {
                 String[] parts = id.getPath().split("/", 2);
                 if (parts.length < 2) {
-                    LOGGER.warn("Ignoring shader modifier {}. Expected format to be located in shader_modifiers/domain/shader_path.vsh.txt", file);
+                    Veil.LOGGER.warn("Ignoring shader modifier {}. Expected format to be located in shader_modifiers/domain/shader_path.vsh.txt", file);
                     continue;
                 }
 
@@ -123,7 +119,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
                     names.put(modification, id);
                 }
             } catch (Exception e) {
-                LOGGER.error("Couldn't parse data file {} from {}", id, file, e);
+                Veil.LOGGER.error("Couldn't parse data file {} from {}", id, file, e);
             }
         }
 
@@ -163,7 +159,7 @@ public class ShaderModificationManager extends SimplePreparableReloadListener<Sh
     protected void apply(@NotNull Preparations preparations, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
         this.shaders = Collections.unmodifiableMap(preparations.shaders);
         this.names = Collections.unmodifiableMap(preparations.names);
-        LOGGER.info("Loaded {} shader modifications", this.names.size());
+        Veil.LOGGER.info("Loaded {} shader modifications", this.names.size());
     }
 
     @ApiStatus.Internal

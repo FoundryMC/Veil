@@ -1,5 +1,6 @@
 package foundry.veil.api.opencl;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.ApiStatus;
@@ -12,6 +13,7 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -29,7 +31,7 @@ import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
  */
 public final class VeilOpenCL implements NativeResource {
 
-    public static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LoggerFactory.getLogger("Veil OpenCL");
 
     // Prefer platforms that support GPU devices
     private static final Comparator<DeviceInfo> COMPUTE_ORDER = (p1, p2) -> {
@@ -82,9 +84,17 @@ public final class VeilOpenCL implements NativeResource {
      * @return The environment for a device with those properties or <code>null</code> if no device was found
      */
     public @Nullable CLEnvironment getEnvironment(CLEnvironmentOptions options) {
+        if (options.requireOpenGL()) {
+            RenderSystem.assertOnRenderThread();
+        }
+
         for (DeviceInfo deviceInfo : this.getPriorityDevices()) {
             if (options.testDevice(deviceInfo)) {
-                return this.getEnvironment(deviceInfo);
+                CLEnvironment environment = this.getEnvironment(deviceInfo);
+                if (environment == null) {
+                    continue;
+                }
+                return environment;
             }
         }
         return null;

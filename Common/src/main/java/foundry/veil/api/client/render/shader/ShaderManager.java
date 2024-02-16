@@ -4,15 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.logging.LogUtils;
-import foundry.veil.api.client.render.shader.program.ProgramDefinition;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
+import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.processor.ShaderModifyProcessor;
+import foundry.veil.api.client.render.shader.program.ProgramDefinition;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
@@ -25,7 +25,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.*;
@@ -51,7 +50,6 @@ import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
  */
 public class ShaderManager implements PreparableReloadListener, Closeable {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .registerTypeAdapter(ProgramDefinition.class, new ProgramDefinition.Deserializer())
@@ -101,7 +99,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     private void onDefinitionChanged(String definition) {
         this.shaders.values().forEach(shader -> {
             if (shader.getDefinitionDependencies().contains(definition)) {
-                LOGGER.debug("{} changed, recompiling {}", definition, shader.getId());
+                Veil.LOGGER.debug("{} changed, recompiling {}", definition, shader.getId());
                 this.scheduleRecompile(shader.getId());
             }
         });
@@ -150,7 +148,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 }
             }
         } catch (IOException | IllegalArgumentException | JsonParseException e) {
-            LOGGER.error("Couldn't parse shader {} from {}", id, set.getShaderDefinitionLister().idToFile(id), e);
+            Veil.LOGGER.error("Couldn't parse shader {} from {}", id, set.getShaderDefinitionLister().idToFile(id), e);
         }
     }
 
@@ -174,7 +172,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                     shaderSources.put(location, fileResource);
                 }
             } catch (IOException | IllegalArgumentException | JsonParseException e) {
-                LOGGER.error("Couldn't parse shader import {} from {}", id, location, e);
+                Veil.LOGGER.error("Couldn't parse shader import {} from {}", id, location, e);
             }
         }
 
@@ -186,10 +184,10 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         try {
             program.compile(new ShaderCompiler.Context(this.definitions, set, definition), compiler);
         } catch (ShaderException e) {
-            LOGGER.error("Failed to create shader {}: {}", id, e.getMessage());
-            LOGGER.warn(e.getGlError());
+            Veil.LOGGER.error("Failed to create shader {}: {}", id, e.getMessage());
+            Veil.LOGGER.warn(e.getGlError());
         } catch (Exception e) {
-            LOGGER.error("Failed to create shader: {}", id, e);
+            Veil.LOGGER.error("Failed to create shader: {}", id, e);
         }
     }
 
@@ -221,14 +219,14 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
     public void recompile(ResourceLocation id, ResourceProvider provider, ShaderCompiler compiler) {
         ShaderProgram program = this.shaders.get(id);
         if (program == null) {
-            LOGGER.error("Failed to recompile unknown shader: {}", id);
+            Veil.LOGGER.error("Failed to recompile unknown shader: {}", id);
             return;
         }
 
         try {
             this.compile(this.sourceSet, program, this.parseDefinition(this.sourceSet, id, provider), compiler);
         } catch (Exception e) {
-            LOGGER.error("Failed to read shader definition: {}", id, e);
+            Veil.LOGGER.error("Failed to read shader definition: {}", id, e);
         }
     }
 
@@ -293,7 +291,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
 
         VeilRenderSystem.finalizeShaderCompilation();
 
-        LOGGER.info("Loaded {} shaders from: {}", this.shaders.size(), this.sourceSet.getFolder());
+        Veil.LOGGER.info("Loaded {} shaders from: {}", this.shaders.size(), this.sourceSet.getFolder());
     }
 
     private void applyRecompile(ShaderManager.ReloadState reloadState, Collection<ResourceLocation> shaders) {
@@ -303,7 +301,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 ResourceLocation id = entry.getKey();
                 ShaderProgram program = this.getShader(id);
                 if (program == null) {
-                    LOGGER.warn("Failed to recompile shader: {}", id);
+                    Veil.LOGGER.warn("Failed to recompile shader: {}", id);
                     continue;
                 }
                 this.compile(this.sourceSet, program, entry.getValue(), compiler);
@@ -312,7 +310,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
 
         VeilRenderSystem.finalizeShaderCompilation();
 
-        LOGGER.info("Recompiled {} shaders from: {}", shaders.size(), this.sourceSet.getFolder());
+        Veil.LOGGER.info("Recompiled {} shaders from: {}", shaders.size(), this.sourceSet.getFolder());
     }
 
     private void scheduleRecompile(int attempt) {
@@ -331,7 +329,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                     .thenAcceptAsync(state -> this.applyRecompile(state, shaders), client)
                     .handle((value, e) -> {
                         if (e != null) {
-                            LOGGER.error("Error recompiling shaders", e);
+                            Veil.LOGGER.error("Error recompiling shaders", e);
                         }
 
                         synchronized (this.dirtyShaders) {
@@ -341,7 +339,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                         }
 
                         if (attempt >= 3) {
-                            LOGGER.error("Failed to recompile shaders after " + attempt + " attempts");
+                            Veil.LOGGER.error("Failed to recompile shaders after " + attempt + " attempts");
                             return value;
                         }
 

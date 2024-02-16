@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import foundry.veil.api.client.render.CullFrustum;
 import net.minecraft.util.Mth;
 import org.joml.*;
 

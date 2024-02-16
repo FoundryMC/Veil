@@ -1,7 +1,7 @@
 package foundry.veil.impl.client.editor;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.imgui.CodeEditor;
 import foundry.veil.api.opencl.*;
@@ -11,7 +11,6 @@ import imgui.type.ImInt;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.MemoryUtil;
-import org.slf4j.Logger;
 
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -22,8 +21,6 @@ import static org.lwjgl.opencl.CL10.CL_MEM_WRITE_ONLY;
 
 @ApiStatus.Internal
 public class OpenCLEditor extends SingleWindowEditor {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final CodeEditor codeEditor;
     private String source;
@@ -97,7 +94,7 @@ public class OpenCLEditor extends SingleWindowEditor {
 
         CLEnvironment environment = VeilOpenCL.get().getEnvironment();
         if (environment == null) {
-            LOGGER.error("Failed to change CL device");
+            Veil.LOGGER.error("Failed to change CL device");
             return;
         }
 
@@ -120,7 +117,7 @@ public class OpenCLEditor extends SingleWindowEditor {
         try {
             this.kernel = this.environment.createKernel(name, "example");
         } catch (CLException e) {
-            LOGGER.error("Failed to compile program");
+            Veil.LOGGER.error("Failed to compile program");
             this.kernel = null;
             return;
         }
@@ -172,34 +169,32 @@ public class OpenCLEditor extends SingleWindowEditor {
                 upload.stop();
 
                 Stopwatch execute = Stopwatch.createStarted();
-                try {
-                    this.initBuffers(itemCount);
+                this.initBuffers(itemCount);
 
-                    this.bufferA.writeAsync(0, A, null);
-                    this.bufferB.writeAsync(0, B, null);
-                    this.bufferC.writeAsync(0, C, null);
+                this.bufferA.writeAsync(0, A, null);
+                this.bufferB.writeAsync(0, B, null);
+                this.bufferC.writeAsync(0, C, null);
 
-                    this.kernel.setPointers(0, this.bufferA);
-                    this.kernel.setPointers(1, this.bufferB);
-                    this.kernel.setPointers(2, this.bufferC);
-                    this.kernel.setPointers(3, this.bufferD);
+                this.kernel.setPointers(0, this.bufferA);
+                this.kernel.setPointers(1, this.bufferB);
+                this.kernel.setPointers(2, this.bufferC);
+                this.kernel.setPointers(3, this.bufferD);
 
-                    this.kernel.execute(itemCount, this.workGroups.get());
+                this.kernel.execute(itemCount, this.workGroups.get());
 
-                    this.bufferD.readAsync(0, D, null);
+                this.bufferD.readAsync(0, D, null);
 
-                    this.environment.finish();
+                this.environment.finish();
 
-                    execute.stop();
-                    System.out.printf("Done in " + (upload.elapsed(TimeUnit.NANOSECONDS) + execute.elapsed(TimeUnit.NANOSECONDS)) / 1_000_000 + "ms (%s upload, %s execute, %sns/item)\n", upload, execute, execute.elapsed(TimeUnit.NANOSECONDS) / itemCount);
-                } finally {
-                    MemoryUtil.memFree(A);
-                    MemoryUtil.memFree(B);
-                    MemoryUtil.memFree(C);
-                    MemoryUtil.memFree(D);
-                }
+                execute.stop();
+                System.out.printf("Done in " + (upload.elapsed(TimeUnit.NANOSECONDS) + execute.elapsed(TimeUnit.NANOSECONDS)) / 1_000_000 + "ms (%s upload, %s execute, %sns/item)\n", upload, execute, execute.elapsed(TimeUnit.NANOSECONDS) / itemCount);
             } catch (Throwable t) {
-                LOGGER.error("Failed to run OpenCL", t);
+                Veil.LOGGER.error("Failed to run OpenCL", t);
+            } finally {
+                MemoryUtil.memFree(A);
+                MemoryUtil.memFree(B);
+                MemoryUtil.memFree(C);
+                MemoryUtil.memFree(D);
             }
         }
         ImGui.endDisabled();

@@ -1,7 +1,7 @@
 package foundry.veil.fabric.event;
 
-import foundry.veil.api.event.VeilPostProcessingEvent;
 import foundry.veil.api.client.render.post.PostProcessingManager;
+import foundry.veil.api.event.VeilPostProcessingEvent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 

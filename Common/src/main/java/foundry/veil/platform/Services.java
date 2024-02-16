@@ -1,6 +1,6 @@
 package foundry.veil.platform;
+
 import foundry.veil.Veil;
-import foundry.veil.platform.services.VeilPlatform;
 
 import java.util.ServiceLoader;
 

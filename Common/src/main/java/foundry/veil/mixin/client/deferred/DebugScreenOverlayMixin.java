@@ -1,7 +1,7 @@
 package foundry.veil.mixin.client.deferred;
 
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import org.spongepowered.asm.mixin.Mixin;

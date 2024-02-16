@@ -2,11 +2,11 @@ package foundry.veil.api.quasar.data.module.force;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.VectorFieldForceModule;
 import foundry.veil.api.quasar.emitters.module.update.VectorField;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 
 /**
  * <p>A force that applies the force created in a vector field to a particle.</p>

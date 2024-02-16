@@ -2,10 +2,10 @@ package foundry.veil.api.quasar.data.module.update;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.update.TickSubEmitterModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import net.minecraft.resources.ResourceLocation;
 
 public record TickSubEmitterModuleData(ResourceLocation subEmitter, int frequency) implements ParticleModuleData {

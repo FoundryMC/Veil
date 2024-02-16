@@ -1,7 +1,7 @@
 package foundry.veil.api.quasar.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.quasar.data.ParticleEmitterData;
@@ -17,7 +17,6 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,7 +27,6 @@ public class ParticleSystemManager {
     private static final int MAX_PARTICLES = 10000;
     private static final double PERSISTENT_DISTANCE_SQ = 32.0 * 32.0;
     private static final double REMOVAL_DISTANCE_SQ = 128.0 * 128.0;
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private final List<ParticleEmitter> particleEmitters = new ArrayList<>();
     private int particleCount = 0;
@@ -57,7 +55,7 @@ public class ParticleSystemManager {
         }
         ParticleEmitterData data = QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER).get(name);
         if (data == null) {
-            LOGGER.error("Unknown Quasar Particle Emitter: {}", name);
+            Veil.LOGGER.error("Unknown Quasar Particle Emitter: {}", name);
             return null;
         }
         return new ParticleEmitter(this, this.level, data);

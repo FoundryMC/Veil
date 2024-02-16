@@ -1,7 +1,7 @@
 package foundry.veil.api.opencl;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
+import foundry.veil.Veil;
 import foundry.veil.api.opencl.event.CLEventDispatcher;
 import foundry.veil.api.opencl.event.CLLegacyEventDispatcher;
 import foundry.veil.api.opencl.event.CLNativeEventDispatcher;
@@ -13,14 +13,12 @@ import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.opencl.APPLEGLSharing;
 import org.lwjgl.opencl.CLCapabilities;
 import org.lwjgl.opencl.CLContextCallback;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.NativeResource;
 import org.lwjgl.system.Platform;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,13 +48,13 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  */
 public class CLEnvironment implements NativeResource {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final FileToIdConverter SHADERS = new FileToIdConverter("pinwheel/compute", ".cl");
 
     private final VeilOpenCL.DeviceInfo device;
     private final CLContextCallback errorCallback;
     private final long context;
     private final long commandQueue;
+    private final boolean openGLSupported;
     private final Map<ResourceLocation, ProgramData> programs;
     private final CLEventDispatcher eventDispatcher;
 
@@ -64,10 +62,13 @@ public class CLEnvironment implements NativeResource {
         this.device = deviceInfo;
 
         CLCapabilities caps = deviceInfo.capabilities();
-        boolean enableGL = caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing;
+        this.openGLSupported = RenderSystem.isOnRenderThread() && (caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing);
+        if (!this.openGLSupported && (caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing)) {
+            VeilOpenCL.LOGGER.warn("Disabled OpenGL sharing because environment was created off-thread");
+        }
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            PointerBuffer ctxProps = stack.mallocPointer(enableGL ? 7 : 3);
-            if (enableGL) {
+            PointerBuffer ctxProps = stack.mallocPointer(this.openGLSupported ? 7 : 3);
+            if (this.openGLSupported) {
                 RenderSystem.assertOnRenderThread();
                 long window = Minecraft.getInstance().getWindow().getWindow();
                 switch (Platform.get()) {
@@ -147,11 +148,11 @@ public class CLEnvironment implements NativeResource {
 
                 ProgramData oldProgram = this.programs.put(name, new ProgramData(program));
                 if (oldProgram != null) {
-                    LOGGER.info("Deleting old program: {}", name);
+                    VeilOpenCL.LOGGER.info("Deleting old program: {}", name);
                     oldProgram.free();
                 }
             } catch (Exception e) {
-                LOGGER.error("Failed to load program from source: {}", name, e);
+                VeilOpenCL.LOGGER.error("Failed to load program from source: {}", name, e);
                 if (program != 0) {
                     clReleaseProgram(program);
                 }
@@ -219,9 +220,16 @@ public class CLEnvironment implements NativeResource {
     public void freeProgram(ResourceLocation program) {
         ProgramData programData = this.programs.remove(program);
         if (programData != null) {
-            LOGGER.info("Deleting kernel program: {}", program);
+            VeilOpenCL.LOGGER.info("Deleting kernel program: {}", program);
             programData.free();
         }
+    }
+
+    /**
+     * @return Whether this environment supports OpenGL interoperability
+     */
+    public boolean isOpenGLSupported() {
+        return this.openGLSupported;
     }
 
     @ApiStatus.Internal
@@ -251,7 +259,7 @@ public class CLEnvironment implements NativeResource {
             try {
                 legacyEventDispatcher.close();
             } catch (InterruptedException e) {
-                LOGGER.error("Failed to stop event dispatcher", e);
+                VeilOpenCL.LOGGER.error("Failed to stop event dispatcher", e);
             }
         }
     }

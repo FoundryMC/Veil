@@ -1,11 +1,11 @@
 package foundry.veil.impl.client;
 
-import foundry.veil.api.client.graveyard.skeleton.SkeletonFactory;
+import foundry.veil.api.client.graveyard.AnimationProperties;
 import foundry.veil.api.client.graveyard.render.mesh.ModelMesh;
 import foundry.veil.api.client.graveyard.render.mesh.StaticMesh;
-import foundry.veil.api.client.graveyard.AnimationProperties;
 import foundry.veil.api.client.graveyard.skeleton.InterpolatedBone;
 import foundry.veil.api.client.graveyard.skeleton.InterpolatedSkeleton;
+import foundry.veil.api.client.graveyard.skeleton.SkeletonFactory;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Quaternionf;
 

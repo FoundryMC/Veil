@@ -2,11 +2,11 @@ package foundry.veil.mixin.client.anim;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.ChargableItem;
+import foundry.veil.api.client.pose.PoseData;
+import foundry.veil.api.client.pose.VeilPoseable;
+import foundry.veil.api.client.registry.PoseRegistry;
 import foundry.veil.ext.AgeableListModelExtension;
 import foundry.veil.ext.ModelPartExtension;
-import foundry.veil.api.client.pose.PoseData;
-import foundry.veil.api.client.registry.PoseRegistry;
-import foundry.veil.api.client.pose.VeilPoseable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;

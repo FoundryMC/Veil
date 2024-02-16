@@ -1,10 +1,10 @@
 package foundry.veil.impl.client.render.shader;
 
-import foundry.veil.api.client.render.shader.program.ProgramDefinition;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.processor.ShaderImportProcessor;
 import foundry.veil.api.client.render.shader.processor.ShaderPreProcessor;
+import foundry.veil.api.client.render.shader.program.ProgramDefinition;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;

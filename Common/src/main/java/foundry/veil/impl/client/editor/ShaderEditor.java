@@ -1,14 +1,13 @@
 package foundry.veil.impl.client.editor;
 
-import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.imgui.CodeEditor;
 import foundry.veil.api.client.imgui.VeilLanguageDefinitions;
-import foundry.veil.mixin.client.shader.GameRendererAccessor;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.mixin.client.shader.GameRendererAccessor;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;

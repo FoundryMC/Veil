@@ -1,11 +1,11 @@
 package foundry.veil.api.quasar.data.module.collision;
 
 import com.mojang.serialization.Codec;
-import foundry.veil.api.quasar.particle.ParticleModuleSet;
-import foundry.veil.api.quasar.particle.QuasarParticle;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.CollisionParticleModule;
+import foundry.veil.api.quasar.particle.ParticleModuleSet;
+import foundry.veil.api.quasar.particle.QuasarParticle;
 
 public class DieOnCollisionModuleData implements ParticleModuleData {
 

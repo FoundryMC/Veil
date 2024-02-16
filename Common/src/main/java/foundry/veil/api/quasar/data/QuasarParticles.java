@@ -2,7 +2,6 @@ package foundry.veil.api.quasar.data;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -21,7 +20,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
-import org.slf4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -41,7 +39,6 @@ public final class QuasarParticles {
     public static final ResourceKey<Registry<ParticleEmitterData>> EMITTER = createRegistryKey("quasar/emitters");
 
     private static final SuggestionProvider<?> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> SharedSuggestionProvider.suggestResource(registryAccess().registryOrThrow(QuasarParticles.EMITTER).keySet(), builder);
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final List<RegistryDataLoader.RegistryData<?>> REGISTRIES = List.of(
             new RegistryDataLoader.RegistryData<>(INIT_MODULES, ParticleModuleData.INIT_DIRECT_CODEC),
             new RegistryDataLoader.RegistryData<>(UPDATE_MODULES, ParticleModuleData.UPDATE_DIRECT_CODEC),
@@ -98,7 +95,7 @@ public final class QuasarParticles {
             registryAccess = preparations.registryAccess;
             ParticleEmitter.clearErrors();
             printErrors(preparations.errors);
-            LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());
+            Veil.LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());
             VeilRenderSystem.renderer().getParticleManager().clear();
         }
 
@@ -129,7 +126,7 @@ public final class QuasarParticles {
                 });
             });
             printWriter.flush();
-            LOGGER.error("Quasar registry loading errors:{}", stringWriter);
+            Veil.LOGGER.error("Quasar registry loading errors:{}", stringWriter);
         }
     }
 }
