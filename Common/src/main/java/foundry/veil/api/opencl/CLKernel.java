@@ -12,13 +12,18 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.opencl.CL10;
 import org.lwjgl.opencl.CL10GL;
 import org.lwjgl.opencl.CL12;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.NativeResource;
 
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opencl.CL10.*;
-import static org.lwjgl.opencl.CL10GL.clCreateFromGLBuffer;
+import static org.lwjgl.opencl.CL10GL.*;
+import static org.lwjgl.opengl.ARBCLEvent.glCreateSyncFromCLeventARB;
+import static org.lwjgl.opengl.GL11C.glFinish;
+import static org.lwjgl.opengl.GL32C.glDeleteSync;
+import static org.lwjgl.opengl.GL32C.glWaitSync;
 
 /**
  * Manages the OpenCL kernel object. Buffers can be created with {@link #createBuffer(int, long)} and {@link #createBufferUnsafe(int, long)}
@@ -32,12 +37,16 @@ public class CLKernel implements NativeResource {
     private final long handle;
     private final int maxWorkGroupSize;
     private final LongSet pointers;
+    private final boolean legacySyncGLtoCL;
+    private final boolean legacySyncCLtoGL;
 
     CLKernel(CLEnvironment environment, ResourceLocation program, long handle) throws CLException {
         this.environment = environment;
         this.program = program;
         this.handle = handle;
         this.pointers = new LongArraySet();
+        this.legacySyncGLtoCL = !environment.getDevice().capabilities().cl_khr_gl_event;
+        this.legacySyncCLtoGL = !GL.getCapabilities().GL_ARB_cl_event;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer work_group_loc = stack.mallocPointer(1);
@@ -123,6 +132,66 @@ public class CLKernel implements NativeResource {
                 local_work_size.put(i, localWorkSizes[i]);
             }
             VeilOpenCL.checkCLError(clEnqueueNDRangeKernel(this.environment.getCommandQueue(), this.handle, globalWorkSizes.length, null, global_work_size, local_work_size, null, null));
+        }
+    }
+
+    /**
+     * Acquires the data referenced by this object from OpenGL to allow OpenCL to safely modify it.
+     *
+     * @param objects The objects to acquire from OpenGL
+     * @throws CLException If any error occurs while trying to sync data
+     */
+    public void acquireFromGL(CLMemObject... objects) throws CLException {
+        if (objects.length == 0) {
+            return;
+        }
+
+        if (this.legacySyncGLtoCL) {
+            glFinish();
+        }
+
+        long queue = this.environment.getCommandQueue();
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer pointers = stack.mallocPointer(objects.length);
+            for (int i = 0; i < objects.length; i++) {
+                pointers.put(i, objects[i].pointer());
+            }
+            VeilOpenCL.checkCLError(clEnqueueAcquireGLObjects(queue, pointers, null, null));
+        }
+    }
+
+    /**
+     * Releases the data referenced by this object from OpenCL to allow OpenGL to safely modify it again.
+     *
+     * @param objects The objects to acquire from OpenGL
+     * @throws CLException If any error occurs while trying to sync data
+     */
+    public void releaseToGL(CLMemObject... objects) throws CLException {
+        if (objects.length == 0) {
+            return;
+        }
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            PointerBuffer pointers = stack.mallocPointer(objects.length);
+            for (int i = 0; i < objects.length; i++) {
+                pointers.put(i, objects[i].pointer());
+            }
+
+            if (this.legacySyncCLtoGL) {
+                VeilOpenCL.checkCLError(clEnqueueReleaseGLObjects(this.environment.getCommandQueue(), pointers, null, null));
+                this.environment.finish();
+                return;
+            }
+
+            PointerBuffer syncBuffer = stack.mallocPointer(1);
+            VeilOpenCL.checkCLError(clEnqueueReleaseGLObjects(this.environment.getCommandQueue(), pointers, null, syncBuffer));
+
+            long event = syncBuffer.get(0);
+            long glFenceFromCLEvent = glCreateSyncFromCLeventARB(this.environment.getContext(), event, 0);
+            glWaitSync(glFenceFromCLEvent, 0, 0);
+            glDeleteSync(glFenceFromCLEvent);
+
+            VeilOpenCL.checkCLError(clReleaseEvent(event));
         }
     }
 
@@ -240,13 +309,13 @@ public class CLKernel implements NativeResource {
      * @throws CLException If there is any problem creating the buffer
      * @see CL10GL#clCreateFromGLBuffer(long, long, int, IntBuffer)
      */
-    public CLGLBuffer createBufferFromGL(int flags, int buffer) throws CLException {
+    public CLBuffer createBufferFromGL(int flags, int buffer) throws CLException {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer error_ret = stack.mallocInt(1);
             long pointer = clCreateFromGLBuffer(this.environment.getContext(), flags, buffer, error_ret);
             VeilOpenCL.checkCLError(error_ret.get(0));
             this.pointers.add(pointer);
-            return new CLGLBuffer(this, pointer);
+            return new CLBuffer(this, pointer);
         }
     }
 

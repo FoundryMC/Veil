@@ -1,12 +1,13 @@
 package foundry.veil.impl.client.render.deferred.light;
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
-import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
-import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
+import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
+import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -22,8 +23,16 @@ public class VanillaLightRenderer implements NativeResource {
     public VanillaLightRenderer() {
         this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
         this.vbo.bind();
-        this.vbo.upload(LightTypeRenderer.createQuad());
+        this.vbo.upload(createMesh());
         VertexBuffer.unbind();
+    }
+
+    private static BufferBuilder.RenderedBuffer createMesh() {
+        Tesselator tesselator = RenderSystem.renderThreadTesselator();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
+        LightTypeRenderer.createQuad(bufferBuilder);
+        return bufferBuilder.end();
     }
 
     public void render(LightRenderer lightRenderer, ClientLevel level) {

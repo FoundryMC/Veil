@@ -34,6 +34,7 @@ import java.util.Set;
 import static org.lwjgl.glfw.GLFWNativeGLX.glfwGetGLXContext;
 import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
 import static org.lwjgl.glfw.GLFWNativeX11.glfwGetX11Display;
+import static org.lwjgl.opencl.APPLEGLSharing.CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
 import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opencl.CL20.clCreateCommandQueueWithProperties;
 import static org.lwjgl.opencl.KHRGLSharing.*;
@@ -86,7 +87,7 @@ public class CLEnvironment implements NativeResource {
                         break;
                     case MACOSX:
                         ctxProps
-                                .put(APPLEGLSharing.CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE)
+                                .put(CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE)
                                 .put(CGLGetShareGroup(CGLGetCurrentContext()));
                 }
             }

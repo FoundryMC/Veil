@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer;
@@ -212,8 +211,7 @@ public class LightRenderer implements NativeResource {
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
-        CullFrustum frustum = VeilRenderer.getCullingFrustum();
-        int visible = this.lights.values().stream().mapToInt(data -> (int) data.lights.stream().filter(light -> light.isVisible(frustum)).count()).sum();
+        int visible = this.lights.values().stream().mapToInt(data -> data.renderer.getVisibleLights()).sum();
         int all = this.lights.values().stream().mapToInt(data -> data.lights.size()).sum();
         consumer.accept("Lights: " + visible + " / " + all);
     }

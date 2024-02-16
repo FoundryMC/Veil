@@ -47,19 +47,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         buffer.putFloat(this.distance);
     }
 
-    // the bounding box here isn't particularly tight, but it should always encapsulate the light's area.
-    @Override
-    public boolean isVisible(CullFrustum frustum) {
-        float radius = Math.max(this.size.x, this.size.y) + this.distance;
-        double minX = this.position.x() - radius;
-        double minY = this.position.y() - radius;
-        double minZ = this.position.z() - radius;
-        double maxX = this.position.x() + radius;
-        double maxY = this.position.y() + radius;
-        double maxZ = this.position.z() + radius;
-        return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-
     @Override
     public Type getType() {
         return Type.AREA;

@@ -1,10 +1,6 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.CullFrustum;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
@@ -32,44 +28,41 @@ public interface LightTypeRenderer<T extends Light> extends NativeResource {
     void renderLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum);
 
     /**
-     * @return A full-screen unit quad for drawing a light
+     * @return The number of lights visible last frame
      */
-    static BufferBuilder.RenderedBuffer createQuad() {
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+    int getVisibleLights();
 
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(-1, -1, 0).endVertex();
-        bufferBuilder.vertex(1, -1, 0).endVertex();
-        bufferBuilder.vertex(-1, 1, 0).endVertex();
-        bufferBuilder.vertex(1, 1, 0).endVertex();
-
-        return bufferBuilder.end();
+    /**
+     * Draws a unit quad into the specified buffer
+     *
+     * @param builder The builder to draw into
+     */
+    static void createQuad(VertexConsumer builder) {
+        builder.vertex(-1, -1, 0).endVertex();
+        builder.vertex(1, -1, 0).endVertex();
+        builder.vertex(-1, 1, 0).endVertex();
+        builder.vertex(1, 1, 0).endVertex();
     }
 
     /**
-     * @return A full-screen unit quad for drawing a light
+     * Draws a unit inverted cube into the specified buffer
+     *
+     * @param builder The builder to draw into
      */
-    static BufferBuilder.RenderedBuffer createInvertedCube() {
-        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(1, -1, 1).endVertex(); // Front-bottom-right
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(-1, -1, -1).endVertex(); // Back-bottom-left
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
-
-        return bufferBuilder.end();
+    static void createInvertedCube(VertexConsumer builder) {
+        builder.vertex(-1, 1, 1).endVertex(); // Front-top-left
+        builder.vertex(1, 1, 1).endVertex(); // Front-top-right
+        builder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
+        builder.vertex(1, -1, 1).endVertex(); // Front-bottom-right
+        builder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
+        builder.vertex(1, 1, 1).endVertex(); // Front-top-right
+        builder.vertex(1, 1, -1).endVertex(); // Back-top-right
+        builder.vertex(-1, 1, 1).endVertex(); // Front-top-left
+        builder.vertex(-1, 1, -1).endVertex(); // Back-top-left
+        builder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
+        builder.vertex(-1, -1, -1).endVertex(); // Back-bottom-left
+        builder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
+        builder.vertex(-1, 1, -1).endVertex(); // Back-top-left
+        builder.vertex(1, 1, -1).endVertex(); // Back-top-right
     }
 }

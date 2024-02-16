@@ -5,10 +5,10 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.IndirectLightRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import org.jetbrains.annotations.ApiStatus;
@@ -32,23 +32,10 @@ public class PointLightRenderer extends IndirectLightRenderer<PointLight> {
     protected BufferBuilder.RenderedBuffer createMesh() {
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
 
         // High-res mesh
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(1, -1, 1).endVertex(); // Front-bottom-right
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(1, 1, 1).endVertex(); // Front-top-right
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
-        bufferBuilder.vertex(-1, 1, 1).endVertex(); // Front-top-left
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(-1, -1, 1).endVertex(); // Front-bottom-left
-        bufferBuilder.vertex(-1, -1, -1).endVertex(); // Back-bottom-left
-        bufferBuilder.vertex(1, -1, -1).endVertex(); // Back-bottom-right
-        bufferBuilder.vertex(-1, 1, -1).endVertex(); // Back-top-left
-        bufferBuilder.vertex(1, 1, -1).endVertex(); // Back-top-right
+        LightTypeRenderer.createInvertedCube(bufferBuilder);
 
         // Low-res mesh
         float sqrt2 = (float) Math.sqrt(2.0);

@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import foundry.veil.api.client.render.CullFrustum;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -13,11 +12,6 @@ public class DirectionalLight extends Light {
 
     public DirectionalLight() {
         this.direction = new Vector3f(0.0F, -1.0F, 0.0F);
-    }
-
-    @Override
-    public boolean isVisible(CullFrustum frustum) {
-        return true;
     }
 
     /**

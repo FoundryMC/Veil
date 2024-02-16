@@ -1,6 +1,11 @@
 package foundry.veil.impl.client.render.deferred.light;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.AreaLight;
 import foundry.veil.api.client.render.deferred.light.InstancedLightRenderer;
@@ -9,10 +14,13 @@ import foundry.veil.api.client.render.deferred.light.LightTypeRenderer;
 import foundry.veil.api.client.render.shader.VeilShaders;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
+import org.joml.Vector3d;
 
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11C.GL_FLOAT;
+import static org.lwjgl.opengl.GL11C.GL_UNSIGNED_SHORT;
 import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL33C.glVertexAttribDivisor;
@@ -25,8 +33,12 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
     }
 
     @Override
-    protected @NotNull BufferBuilder.RenderedBuffer createMesh() {
-        return LightTypeRenderer.createInvertedCube();
+    protected BufferBuilder.RenderedBuffer createMesh() {
+        Tesselator tesselator = RenderSystem.renderThreadTesselator();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION);
+        LightTypeRenderer.createInvertedCube(bufferBuilder);
+        return bufferBuilder.end();
     }
 
     @Override
@@ -67,5 +79,21 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
 
     @Override
     protected void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<AreaLight> lights) {
+    }
+
+    // the bounding box here isn't particularly tight, but it should always encapsulate the light's area.
+    @Override
+    protected boolean isVisible(AreaLight light, CullFrustum frustum) {
+        Vector2f size = light.getSize();
+        float distance = light.getDistance();
+        Vector3d position = light.getPosition();
+        float radius = Math.max(size.x, size.y) + distance;
+        double minX = position.x - radius;
+        double minY = position.y - radius;
+        double minZ = position.z - radius;
+        double maxX = position.x + radius;
+        double maxY = position.y + radius;
+        double maxZ = position.z + radius;
+        return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
     }
 }

@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import foundry.veil.api.client.render.CullFrustum;
 import org.joml.Vector3d;
 import org.joml.Vector3fc;
 
@@ -29,17 +28,6 @@ public class PointLight extends Light implements IndirectLight<PointLight> {
         buffer.putFloat(this.color.y() * this.brightness);
         buffer.putFloat(this.color.z() * this.brightness);
         buffer.putFloat(this.radius);
-    }
-
-    @Override
-    public boolean isVisible(CullFrustum frustum) {
-        double minX = this.position.x() - this.radius;
-        double minY = this.position.y() - this.radius;
-        double minZ = this.position.z() - this.radius;
-        double maxX = this.position.x() + this.radius;
-        double maxY = this.position.y() + this.radius;
-        double maxZ = this.position.z() + this.radius;
-        return frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     @Override

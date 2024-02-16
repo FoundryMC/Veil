@@ -57,9 +57,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     /**
      * @return The mesh data each instanced light will be rendered with use
      */
-    protected BufferBuilder.RenderedBuffer createMesh() {
-        return LightTypeRenderer.createQuad();
-    }
+    protected abstract BufferBuilder.RenderedBuffer createMesh();
 
     /**
      * Sets up the instanced buffer state.
@@ -81,6 +79,15 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
      * @param lights        All lights in the order they are in the instanced buffer
      */
     protected abstract void clearRenderState(LightRenderer lightRenderer, List<T> lights);
+
+    /**
+     * Checks whether the specified light can be seen in the specified frustum.
+     *
+     * @param light   The light to check
+     * @param frustum The frustum to check visibility with
+     * @return Whether that light is visible
+     */
+    protected abstract boolean isVisible(T light, CullFrustum frustum);
 
     private void updateAllLights(List<T> lights) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -110,7 +117,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     public void renderLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
         this.visibleLights.clear();
         for (T light : lights) {
-            if (light.isVisible(frustum)) {
+            if (this.isVisible(light, frustum)) {
                 this.visibleLights.add(light);
             }
         }
@@ -156,6 +163,11 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         VertexBuffer.unbind();
+    }
+
+    @Override
+    public int getVisibleLights() {
+        return this.visibleLights.size();
     }
 
     @Override
