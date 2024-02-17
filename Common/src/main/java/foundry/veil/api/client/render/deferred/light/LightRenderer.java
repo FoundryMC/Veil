@@ -9,6 +9,7 @@ import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
@@ -65,14 +66,8 @@ public class LightRenderer implements NativeResource {
         shader.applyShaderSamplers(0);
     }
 
-    /**
-     * Renders all lights into the light framebuffer.
-     *
-     * @param frustum     The frustum to cull lights with
-     * @param framebuffer The framebuffer to sample from
-     */
-    public void render(CullFrustum frustum, AdvancedFbo framebuffer) {
-        this.framebuffer = framebuffer;
+    @ApiStatus.Internal
+    public void setup(CullFrustum frustum, ProfilerFiller profiler) {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE,
@@ -80,8 +75,25 @@ public class LightRenderer implements NativeResource {
                 GlStateManager.DestFactor.ZERO);
         RenderSystem.depthMask(false);
 
+        for (Map.Entry<Light.Type, LightData<?>> entry : this.lights.entrySet()) {
+            profiler.push(entry.getKey().name().toLowerCase(Locale.ROOT));
+            entry.getValue().prepare(this, frustum);
+            profiler.pop();
+        }
+    }
+
+    @ApiStatus.Internal
+    public void clear() {
+        RenderSystem.depthMask(true);
+        RenderSystem.disableBlend();
+    }
+
+    @ApiStatus.Internal
+    public void render(AdvancedFbo framebuffer) {
+        this.framebuffer = framebuffer;
+
         for (LightData<?> value : this.lights.values()) {
-            value.render(this, frustum);
+            value.render(this);
         }
         if (this.vanillaLightEnabled) {
             ClientLevel level = Minecraft.getInstance().level;
@@ -93,8 +105,6 @@ public class LightRenderer implements NativeResource {
             }
         }
 
-        RenderSystem.depthMask(true);
-        RenderSystem.disableBlend();
         this.framebuffer = null;
     }
 
@@ -236,10 +246,14 @@ public class LightRenderer implements NativeResource {
             this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").createRenderer());
         }
 
-        private void render(LightRenderer lightRenderer, CullFrustum frustum) {
+        private void prepare(LightRenderer lightRenderer, CullFrustum frustum) {
             this.lights.removeAll(this.removedLights);
-            this.renderer.renderLights(lightRenderer, this.lights, this.removedLights, frustum);
+            this.renderer.prepareLights(lightRenderer, this.lights, this.removedLights, frustum);
             this.removedLights.clear();
+        }
+
+        private void render(LightRenderer lightRenderer) {
+            this.renderer.renderLights(lightRenderer, this.lights);
         }
 
         @SuppressWarnings("unchecked")

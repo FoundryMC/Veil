@@ -143,7 +143,7 @@ public class CLKernel implements NativeResource {
      * @throws CLException If any error occurs while trying to sync data
      */
     public void acquireFromGL(CLMemObject... objects) throws CLException {
-        if (objects.length == 0) {
+        if (!this.environment.requireManualInteropSync() || objects.length == 0) {
             return;
         }
 
@@ -168,7 +168,7 @@ public class CLKernel implements NativeResource {
      * @throws CLException If any error occurs while trying to sync data
      */
     public void releaseToGL(CLMemObject... objects) throws CLException {
-        if (objects.length == 0) {
+        if (!this.environment.requireManualInteropSync() || objects.length == 0) {
             return;
         }
 
@@ -311,6 +311,11 @@ public class CLKernel implements NativeResource {
      * @see CL10GL#clCreateFromGLBuffer(long, long, int, IntBuffer)
      */
     public CLBuffer createBufferFromGL(int flags, int buffer) throws CLException {
+        if (this.environment.isOpenGLSupported() && !this.environment.requireManualInteropSync()) {
+            RenderSystem.assertOnRenderThread();
+            glFinish(); // Synchronize the GL data for CL
+        }
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer error_ret = stack.mallocInt(1);
             long pointer = clCreateFromGLBuffer(this.environment.getContext(), flags, buffer, error_ret);

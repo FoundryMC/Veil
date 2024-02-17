@@ -16,8 +16,7 @@ import java.util.Set;
 public interface LightTypeRenderer<T extends Light> extends NativeResource {
 
     /**
-     * <p>Renders all specified lights with this renderer.</p>
-     * <p>Shaders, custom uniforms, and the way lights are rendered is up to the individual renderer.</p>
+     * Prepares the specified lights to be rendered.
      *
      * @param lightRenderer The light renderer instance
      * @param lights        The lights to render
@@ -25,7 +24,17 @@ public interface LightTypeRenderer<T extends Light> extends NativeResource {
      * @param frustum       The culling view frustum
      */
     @ApiStatus.OverrideOnly
-    void renderLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum);
+    void prepareLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum);
+
+    /**
+     * <p>Renders all prepared lights with this renderer.</p>
+     * <p>Shaders, custom uniforms, and the way lights are rendered is up to the individual renderer.</p>
+     *
+     * @param lightRenderer The light renderer instance
+     * @param lights        The lights to render
+     */
+    @ApiStatus.OverrideOnly
+    void renderLights(LightRenderer lightRenderer, List<T> lights);
 
     /**
      * @return The number of lights visible last frame

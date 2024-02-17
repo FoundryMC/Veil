@@ -1,7 +1,6 @@
 package foundry.veil.api.opencl;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -19,9 +18,15 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opencl.CL11.CL_DEVICE_OPENCL_C_VERSION;
+import static org.lwjgl.opencl.CL12.CL_DEVICE_PREFERRED_INTEROP_USER_SYNC;
 import static org.lwjgl.opencl.KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR;
 
 /**
@@ -46,10 +51,11 @@ public final class VeilOpenCL implements NativeResource {
     private final Set<DeviceInfo> invalidDevices;
     private final PlatformInfo[] platforms;
     private final List<DeviceInfo> priorityDevices;
+    private final Lock deviceLock;
 
     private VeilOpenCL() {
         this.environments = new Object2ObjectArrayMap<>();
-        this.invalidDevices = new HashSet<>();
+        this.invalidDevices = ConcurrentHashMap.newKeySet();
 
         PlatformInfo[] platforms;
         List<DeviceInfo> priorityDevices = new ArrayList<>();
@@ -68,6 +74,7 @@ public final class VeilOpenCL implements NativeResource {
 
         this.platforms = platforms;
         this.priorityDevices = Collections.unmodifiableList(priorityDevices);
+        this.deviceLock = new ReentrantLock();
     }
 
     /**
@@ -84,10 +91,6 @@ public final class VeilOpenCL implements NativeResource {
      * @return The environment for a device with those properties or <code>null</code> if no device was found
      */
     public @Nullable CLEnvironment getEnvironment(CLEnvironmentOptions options) {
-        if (options.requireOpenGL()) {
-            RenderSystem.assertOnRenderThread();
-        }
-
         for (DeviceInfo deviceInfo : this.getPriorityDevices()) {
             if (options.testDevice(deviceInfo)) {
                 CLEnvironment environment = this.getEnvironment(deviceInfo);
@@ -112,17 +115,37 @@ public final class VeilOpenCL implements NativeResource {
         }
 
         CLEnvironment environment = this.environments.get(deviceInfo);
-        if (environment == null) {
+        if (environment != null) {
+            return environment;
+        }
+        try {
+            this.deviceLock.lock();
+
+            // Make sure a different thread didn't add an environment
+            environment = this.environments.get(deviceInfo);
+            if (environment != null) {
+                return environment;
+            }
+
             try {
-                environment = new CLEnvironment(deviceInfo);
+                environment = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return new CLEnvironment(deviceInfo);
+                    } catch (CLException e) {
+                        throw new CompletionException(e);
+                    }
+                }, VeilRenderSystem.renderThreadExecutor()).join();
                 this.environments.put(deviceInfo, environment);
-            } catch (CLException e) {
+                return environment;
+            } catch (CompletionException e) {
+                Throwable t = e.getCause() != null ? e.getCause() : e;
                 this.invalidDevices.add(deviceInfo);
-                LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), e);
+                LOGGER.error("Failed to create environment for device: " + deviceInfo.name(), t);
                 return null;
             }
+        } finally {
+            this.deviceLock.unlock();
         }
-        return environment;
     }
 
     /**
@@ -349,25 +372,26 @@ public final class VeilOpenCL implements NativeResource {
     /**
      * Information about a device on an OpenCL platform.
      *
-     * @param platform              The platform this device is on
-     * @param id                    The id of this device
-     * @param capabilities          The capabilities of this device
-     * @param type                  The OpenCL device type
-     * @param vendorId              A unique device vendor identifier
-     * @param maxComputeUnits       The number of parallel compute units on the OpenCL device. A work-group executes on a single compute unit. The minimum value is 1
-     * @param maxWorkItemDimensions Maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model. (Refer to {@link CL10#clEnqueueNDRangeKernel(long, long, int, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer) clEnqueueNDRangeKernel})
-     * @param maxWorkGroupSize      Maximum number of work-items in a work-group that a device is capable of executing on a single compute unit, for any given kernel-instance running on the device
-     * @param maxMemAllocSize       Max size of memory object allocation in bytes
-     * @param maxClockFrequency     Maximum configured clock frequency of the device in MHz
-     * @param addressBits           The default compute device address space size of the global address space specified as an unsigned integer value in bits. Currently supported values are 32 or 64 bits
-     * @param available             If this device is able to execute commands sent to it
-     * @param compilerAvailable     If this device has a compiler available to compile program source
-     * @param name                  Device name string
-     * @param vendor                Vendor name string
-     * @param driverVersion         OpenCL software driver version string. Follows a vendor-specific format
-     * @param profile               The profile name supported by the device
-     * @param version               The OpenCL version supported by the device
-     * @param openclCVersion        OpenCL C version string or <code>null</code> if not supported
+     * @param platform                 The platform this device is on
+     * @param id                       The id of this device
+     * @param capabilities             The capabilities of this device
+     * @param type                     The OpenCL device type
+     * @param vendorId                 A unique device vendor identifier
+     * @param maxComputeUnits          The number of parallel compute units on the OpenCL device. A work-group executes on a single compute unit. The minimum value is 1
+     * @param maxWorkItemDimensions    Maximum dimensions that specify the global and local work-item IDs used by the data parallel execution model. (Refer to {@link CL10#clEnqueueNDRangeKernel(long, long, int, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer, PointerBuffer) clEnqueueNDRangeKernel})
+     * @param maxWorkGroupSize         Maximum number of work-items in a work-group that a device is capable of executing on a single compute unit, for any given kernel-instance running on the device
+     * @param maxMemAllocSize          Max size of memory object allocation in bytes
+     * @param maxClockFrequency        Maximum configured clock frequency of the device in MHz
+     * @param addressBits              The default compute device address space size of the global address space specified as an unsigned integer value in bits. Currently supported values are 32 or 64 bits
+     * @param available                If this device is able to execute commands sent to it
+     * @param compilerAvailable        If this device has a compiler available to compile program source
+     * @param requireManualInteropSync If this requires the user to manually sync data when using CL/GL interoperability
+     * @param name                     Device name string
+     * @param vendor                   Vendor name string
+     * @param driverVersion            OpenCL software driver version string. Follows a vendor-specific format
+     * @param profile                  The profile name supported by the device
+     * @param version                  The OpenCL version supported by the device
+     * @param openclCVersion           OpenCL C version string or <code>null</code> if not supported
      * @author Ocelot
      */
     public record DeviceInfo(long platform,
@@ -383,6 +407,7 @@ public final class VeilOpenCL implements NativeResource {
                              int addressBits,
                              boolean available,
                              boolean compilerAvailable,
+                             boolean requireManualInteropSync,
                              String name,
                              String vendor,
                              String driverVersion,
@@ -404,13 +429,15 @@ public final class VeilOpenCL implements NativeResource {
             int addressBits = getDeviceInfoInt(device, CL_DEVICE_ADDRESS_BITS);
             boolean available = getDeviceInfoInt(device, CL_DEVICE_AVAILABLE) == CL_TRUE;
             boolean compilerAvailable = getDeviceInfoInt(device, CL_DEVICE_COMPILER_AVAILABLE) == CL_TRUE;
+            boolean requireManualInteropSync = !caps.OpenCL12 || getDeviceInfoInt(device, CL_DEVICE_PREFERRED_INTEROP_USER_SYNC) == CL_TRUE;
+
             String name = getDeviceInfoString(device, CL_DEVICE_NAME);
             String vendor = getDeviceInfoString(device, CL_DEVICE_VENDOR);
             String driverVersion = getDeviceInfoString(device, CL_DRIVER_VERSION);
             String profile = getDeviceInfoString(device, CL_DEVICE_PROFILE);
             String version = getDeviceInfoString(device, CL_DEVICE_VERSION);
             String openclCVersion = caps.OpenCL11 ? getDeviceInfoString(device, CL_DEVICE_OPENCL_C_VERSION) : null;
-            return new DeviceInfo(platform, device, caps, deviceType, vendorId, maxComputeUnits, maxWorkItemDimensions, maxWorkGroupSize, maxMemAllocSize, maxClockFrequency, addressBits, available, compilerAvailable, name, vendor, driverVersion, profile, version, openclCVersion);
+            return new DeviceInfo(platform, device, caps, deviceType, vendorId, maxComputeUnits, maxWorkItemDimensions, maxWorkGroupSize, maxMemAllocSize, maxClockFrequency, addressBits, available, compilerAvailable, requireManualInteropSync, name, vendor, driverVersion, profile, version, openclCVersion);
         }
 
         /**

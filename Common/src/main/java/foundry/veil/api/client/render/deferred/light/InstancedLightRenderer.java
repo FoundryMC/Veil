@@ -114,7 +114,7 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     }
 
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
+    public void prepareLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
         this.visibleLights.clear();
         for (T light : lights) {
             if (this.isVisible(light, frustum)) {
@@ -126,7 +126,6 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
             return;
         }
 
-        this.vbo.bind();
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
         // If there is no space, then resize
@@ -154,14 +153,20 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
             }
         }
 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    @Override
+    public void renderLights(LightRenderer lightRenderer, List<T> lights) {
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        this.vbo.bind();
         this.setupRenderState(lightRenderer, this.visibleLights);
         lightRenderer.applyShader();
-
         ((VertexBufferExtension) this.vbo).veil$drawInstanced(this.visibleLights.size());
-
         this.clearRenderState(lightRenderer, this.visibleLights);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         VertexBuffer.unbind();
     }
 
