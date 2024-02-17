@@ -5,13 +5,13 @@ import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilVanillaShaders;
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
 import foundry.veil.fabric.util.FabricReloadListener;
+import foundry.veil.impl.VeilBuiltinPacks;
+import foundry.veil.impl.VeilReloadListeners;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
-import foundry.veil.util.VeilJsonListeners;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -52,16 +52,11 @@ public class VeilFabricClient implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 
         // Register test resource pack
-        FabricLoader loader = FabricLoader.getInstance();
-        ModContainer container = loader.getModContainer(Veil.MODID).orElseThrow();
-        if (Veil.DEBUG && loader.isDevelopmentEnvironment()) {
-            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_shaders"), container, ResourcePackActivationType.NORMAL);
-            ResourceManagerHelper.registerBuiltinResourcePack(Veil.veilPath("test_particles"), container, ResourcePackActivationType.NORMAL);
-        }
-        ResourceManagerHelper.registerBuiltinResourcePack(VeilDeferredRenderer.PACK_ID, container, ResourcePackActivationType.DEFAULT_ENABLED);
+        ModContainer container = FabricLoader.getInstance().getModContainer(Veil.MODID).orElseThrow();
+        VeilBuiltinPacks.registerPacks((id, defaultEnabled) -> ResourceManagerHelper.registerBuiltinResourcePack(id, container, defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL));
 
         CoreShaderRegistrationCallback.EVENT.register(context -> VeilVanillaShaders.registerShaders(context::register));
-        VeilJsonListeners.registerListeners((type, id, listener) -> ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FabricReloadListener(Veil.veilPath(id), listener)));
+        VeilReloadListeners.registerListeners((type, id, listener) -> ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FabricReloadListener(Veil.veilPath(id), listener)));
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             LiteralArgumentBuilder<FabricClientCommandSource> builder = LiteralArgumentBuilder.literal("quasar");
             builder.then(ClientCommandManager.argument("emitter", ResourceLocationArgument.id()).suggests(QuasarParticles.emitterSuggestionProvider()).then(ClientCommandManager.argument("position", Vec3Argument.vec3()).executes(ctx -> {

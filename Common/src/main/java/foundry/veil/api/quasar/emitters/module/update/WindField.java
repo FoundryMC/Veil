@@ -1,6 +1,6 @@
 package foundry.veil.api.quasar.emitters.module.update;
 
-import foundry.veil.util.FastNoiseLite;
+import foundry.veil.api.util.FastNoiseLite;
 import net.minecraft.world.phys.Vec3;
 
 /**

@@ -2,7 +2,7 @@ package foundry.veil.api.quasar.emitters.module.update;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.util.FastNoiseLite;
+import foundry.veil.api.util.FastNoiseLite;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
