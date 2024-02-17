@@ -2,19 +2,15 @@ package foundry.veil.api.quasar.data;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Lifecycle;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
-import foundry.veil.mixin.client.quasar.RegistryDataAccessor;
+import foundry.veil.api.resource.VeilDynamicRegistry;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -22,11 +18,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class QuasarParticles {
@@ -68,34 +60,23 @@ public final class QuasarParticles {
     }
 
     @ApiStatus.Internal
-    public static class Reloader extends SimplePreparableReloadListener<Reloader.Preparations> {
+    public static class Reloader extends SimplePreparableReloadListener<VeilDynamicRegistry.Data> {
 
         @Override
-        protected Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-            Map<ResourceKey<?>, Exception> errors = new HashMap<>();
-
-            List<Pair<WritableRegistry<?>, RegistryDataLoader.Loader>> loaders = QuasarParticles.REGISTRIES.stream().map(data -> ((RegistryDataAccessor) (Object) data).invokeCreate(Lifecycle.stable(), errors)).toList();
-            RegistryOps.RegistryInfoLookup lookup = RegistryDataLoader.createContext(RegistryAccess.EMPTY, loaders);
-            loaders.forEach(pair -> pair.getSecond().load(resourceManager, lookup));
-            loaders.forEach(pair -> {
-                Registry<?> registry = pair.getFirst();
-
-                try {
-                    registry.freeze();
-                } catch (Exception e) {
-                    errors.put(registry.key(), e);
-                }
-            });
-
-            RegistryAccess.Frozen registryAccess = new RegistryAccess.ImmutableRegistryAccess(loaders.stream().map(Pair::getFirst).toList()).freeze();
-            return new Preparations(registryAccess, errors);
+        protected VeilDynamicRegistry.Data prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+            return VeilDynamicRegistry.loadRegistries(resourceManager, REGISTRIES);
         }
 
         @Override
-        protected void apply(Preparations preparations, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-            registryAccess = preparations.registryAccess;
+        protected void apply(VeilDynamicRegistry.Data preparations, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+            registryAccess = preparations.registryAccess();
             ParticleEmitter.clearErrors();
-            printErrors(preparations.errors);
+
+            String msg = VeilDynamicRegistry.printErrors(preparations.errors());
+            if (msg != null) {
+                Veil.LOGGER.error("Quasar registry loading errors:{}", msg);
+            }
+
             Veil.LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());
             VeilRenderSystem.renderer().getParticleManager().clear();
         }
@@ -103,31 +84,6 @@ public final class QuasarParticles {
         @Override
         public String getName() {
             return QuasarParticles.class.getSimpleName();
-        }
-
-        public record Preparations(RegistryAccess registryAccess, Map<ResourceKey<?>, Exception> errors) {
-        }
-
-        private static void printErrors(Map<ResourceKey<?>, Exception> errors) {
-            if (errors.isEmpty()) {
-                return;
-            }
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(stringWriter);
-            Map<ResourceLocation, Map<ResourceLocation, Exception>> sortedErrors = errors.entrySet().stream().collect(Collectors.groupingBy(entry -> entry.getKey().registry(), Collectors.toMap(entry -> entry.getKey().location(), Map.Entry::getValue)));
-            sortedErrors.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(registryError -> {
-                printWriter.printf("%n> %d Errors in registry %s:", registryError.getValue().size(), registryError.getKey());
-                registryError.getValue().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(elementError -> {
-                    Throwable error = elementError.getValue();
-                    while (error.getCause() != null) {
-                        error = error.getCause();
-                    }
-                    printWriter.printf("%n>> Error in element %s: %s", elementError.getKey(), error.getMessage());
-                });
-            });
-            printWriter.flush();
-            Veil.LOGGER.error("Quasar registry loading errors:{}", stringWriter);
         }
     }
 }

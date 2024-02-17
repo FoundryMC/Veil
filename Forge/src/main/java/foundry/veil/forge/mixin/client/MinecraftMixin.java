@@ -1,4 +1,4 @@
-package foundry.veil.forge.mixin;
+package foundry.veil.forge.mixin.client;
 
 import foundry.veil.forge.event.ForgeFreeNativeResourcesEvent;
 import net.minecraft.client.Minecraft;
