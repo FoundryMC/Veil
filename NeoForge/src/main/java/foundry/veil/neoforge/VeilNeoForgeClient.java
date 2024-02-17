@@ -4,11 +4,11 @@ import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilVanillaShaders;
-import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
+import foundry.veil.impl.VeilBuiltinPacks;
+import foundry.veil.impl.VeilReloadListeners;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.neoforge.event.NeoForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.neoforge.event.NeoForgeVeilRendererEvent;
-import foundry.veil.util.VeilJsonListeners;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +19,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -46,7 +45,7 @@ public class VeilNeoForgeClient {
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
         VeilClient.initRenderer();
-        VeilJsonListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
+        VeilReloadListeners.registerListeners((type, id, listener) -> event.registerReloadListener(listener));
         NeoForge.EVENT_BUS.post(new NeoForgeVeilRendererEvent(VeilRenderSystem.renderer()));
         NeoForge.EVENT_BUS.post(new NeoForgeVeilRegisterFixedBuffersEvent(NeoForgeRenderTypeStageHandler::register));
     }
@@ -67,17 +66,10 @@ public class VeilNeoForgeClient {
         }
     }
 
+    // TODO allow pack enabled by default
     private static void addPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() == PackType.CLIENT_RESOURCES) {
-
-            // Register test resource pack
-            if (Veil.DEBUG && !FMLLoader.isProduction()) {
-                registerBuiltinPack(event, Veil.veilPath("test_shaders"));
-                registerBuiltinPack(event, Veil.veilPath("test_particles"));
-            }
-
-            // TODO make this pack enabled by default
-            registerBuiltinPack(event, VeilDeferredRenderer.PACK_ID);
+            VeilBuiltinPacks.registerPacks((id, defaultEnabled) -> registerBuiltinPack(event, id));
         }
     }
 
