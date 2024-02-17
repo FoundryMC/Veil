@@ -3,14 +3,13 @@ package foundry.veil.mixin.client.pipeline;
 import foundry.veil.api.client.render.CullFrustum;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
-import org.joml.FrustumIntersection;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector4fc;
+import org.joml.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+
+import java.lang.reflect.Field;
 
 @Mixin(Frustum.class)
 public abstract class FrustumMixin implements CullFrustum {
@@ -36,6 +35,8 @@ public abstract class FrustumMixin implements CullFrustum {
 
     @Unique
     private final Vector3d veil$position = new Vector3d();
+    @Unique
+    private Vector4f[] veil$frustumPlanes = null;
 
     @Override
     public boolean testPoint(double x, double y, double z) {
@@ -74,7 +75,16 @@ public abstract class FrustumMixin implements CullFrustum {
 
     @Override
     public Vector4fc[] getPlanes() {
-        return ((FrustumIntersectionAccessor) this.intersection).getPlanes();
+        if (this.veil$frustumPlanes == null) {
+            try {
+                Field field = FrustumIntersection.class.getDeclaredField("planes");
+                field.setAccessible(true);
+                this.veil$frustumPlanes = (Vector4f[]) field.get(this.intersection);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to get frustum planes", e);
+            }
+        }
+        return this.veil$frustumPlanes;
     }
 
     @Override
