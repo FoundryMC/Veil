@@ -85,8 +85,8 @@ public record QuasarParticleData(boolean shouldCollide,
         return builder.build();
     }
 
-    public ResourceLocation getRegistryId() {
-        return QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.PARTICLE_DATA).getKey(this);
+    public @Nullable ResourceLocation getRegistryId() {
+        return QuasarParticles.registryAccess().registry(QuasarParticles.PARTICLE_DATA).map(registry -> registry.getKey(this)).orElse(null);
     }
 
 //

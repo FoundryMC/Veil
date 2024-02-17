@@ -48,6 +48,6 @@ public record EmitterShapeSettings(EmitterShape shape,
     }
 
     public @Nullable ResourceLocation getRegistryId() {
-        return QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER_SHAPE_SETTINGS).getKey(this);
+        return QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER_SHAPE_SETTINGS).map(registry -> registry.getKey(this)).orElse(null);
     }
 }
