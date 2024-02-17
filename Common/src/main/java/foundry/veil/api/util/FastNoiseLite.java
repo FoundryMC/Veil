@@ -1,4 +1,4 @@
-package foundry.veil.util;
+package foundry.veil.api.util;
 
 // MIT License
 //

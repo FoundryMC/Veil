@@ -38,7 +38,7 @@ public final class QuasarParticles {
     public static final ResourceKey<Registry<EmitterShapeSettings>> EMITTER_SHAPE_SETTINGS = createRegistryKey("quasar/modules/emitter/shape");
     public static final ResourceKey<Registry<ParticleEmitterData>> EMITTER = createRegistryKey("quasar/emitters");
 
-    private static final SuggestionProvider<?> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> SharedSuggestionProvider.suggestResource(registryAccess().registryOrThrow(QuasarParticles.EMITTER).keySet(), builder);
+    private static final SuggestionProvider<?> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> SharedSuggestionProvider.suggestResource(registryAccess().registryOrThrow(EMITTER).keySet(), builder);
     private static final List<RegistryDataLoader.RegistryData<?>> REGISTRIES = List.of(
             new RegistryDataLoader.RegistryData<>(INIT_MODULES, ParticleModuleData.INIT_DIRECT_CODEC),
             new RegistryDataLoader.RegistryData<>(UPDATE_MODULES, ParticleModuleData.UPDATE_DIRECT_CODEC),
