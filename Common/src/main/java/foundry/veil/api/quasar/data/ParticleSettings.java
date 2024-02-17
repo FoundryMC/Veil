@@ -59,6 +59,6 @@ public record ParticleSettings(float particleSpeed,
     }
 
     public @Nullable ResourceLocation getRegistryId() {
-        return QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.PARTICLE_SETTINGS).getKey(this);
+        return QuasarParticles.registryAccess().registry(QuasarParticles.PARTICLE_SETTINGS).map(registry -> registry.getKey(this)).orElse(null);
     }
 }

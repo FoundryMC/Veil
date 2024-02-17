@@ -53,7 +53,7 @@ public class ParticleSystemManager {
         if (this.level == null) {
             return null;
         }
-        ParticleEmitterData data = QuasarParticles.registryAccess().registryOrThrow(QuasarParticles.EMITTER).get(name);
+        ParticleEmitterData data = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(name)).orElse(null);
         if (data == null) {
             Veil.LOGGER.error("Unknown Quasar Particle Emitter: {}", name);
             return null;
