@@ -107,7 +107,7 @@ public interface RegistrationProvider<T> {
          * @return the provider
          */
         default <T> RegistrationProvider<T> create(Registry<T> registry, String modId) {
-            return create(registry.key(), modId);
+            return this.create(registry.key(), modId);
         }
     }
 }

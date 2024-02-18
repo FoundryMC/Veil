@@ -296,7 +296,7 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
 
         // If there is no space, then resize
         boolean rebuild = false;
-        if (lights.size() > this.maxLights || (this.maxLights > MIN_LIGHTS && this.maxLights > lights.size() * 2)) {
+        if (lights.size() > this.maxLights) {
             rebuild = true;
             this.maxLights = (int) Math.max(Math.max(Math.ceil(this.maxLights / 2.0), MIN_LIGHTS), lights.size() * 1.5);
             glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);

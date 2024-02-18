@@ -6,12 +6,14 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -19,25 +21,27 @@ public class ForgeRegistrationFactory implements RegistrationProvider.Factory {
 
     @Override
     public <T> RegistrationProvider<T> create(ResourceKey<? extends Registry<T>> resourceKey, String modId) {
-        final var containerOpt = ModList.get().getModContainerById(modId);
-        if (containerOpt.isEmpty())
+        Optional<? extends ModContainer> containerOpt = ModList.get().getModContainerById(modId);
+        if (containerOpt.isEmpty()) {
             throw new NullPointerException("Cannot find mod container for id " + modId);
-        final var cont = containerOpt.get();
-        if (cont instanceof FMLModContainer fmlModContainer) {
-            final var register = DeferredRegister.create(resourceKey, modId);
-            register.register(fmlModContainer.getEventBus());
-            return new Provider<>(modId, register);
-        } else {
+        }
+
+        if (!(containerOpt.get() instanceof FMLModContainer fmlModContainer)) {
             throw new ClassCastException("The container of the mod " + modId + " is not a FML one!");
         }
+
+        DeferredRegister<T> register = DeferredRegister.create(resourceKey, modId);
+        register.register(fmlModContainer.getEventBus());
+        return new Provider<>(modId, register);
     }
 
     private static class Provider<T> implements RegistrationProvider<T> {
+
         private final String modId;
         private final DeferredRegister<T> registry;
 
         private final Set<RegistryObject<T>> entries = new HashSet<>();
-        private final Set<RegistryObject<T>> entriesView = Collections.unmodifiableSet(entries);
+        private final Set<RegistryObject<T>> entriesView = Collections.unmodifiableSet(this.entries);
 
         private Provider(String modId, DeferredRegister<T> registry) {
             this.modId = modId;
@@ -46,15 +50,14 @@ public class ForgeRegistrationFactory implements RegistrationProvider.Factory {
 
         @Override
         public String getModId() {
-            return modId;
+            return this.modId;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public <I extends T> RegistryObject<I> register(String name, Supplier<? extends I> supplier) {
-            final var obj = registry.<I>register(name, supplier);
-            final var ro = new RegistryObject<I>() {
-
+            net.minecraftforge.registries.RegistryObject<I> obj = this.registry.register(name, supplier);
+            RegistryObject<I> ro = new RegistryObject<>() {
                 @Override
                 public ResourceKey<I> getResourceKey() {
                     return obj.getKey();
@@ -75,13 +78,13 @@ public class ForgeRegistrationFactory implements RegistrationProvider.Factory {
                     return obj.getHolder().orElseThrow();
                 }
             };
-            entries.add((RegistryObject<T>) ro);
+            this.entries.add((RegistryObject<T>) ro);
             return ro;
         }
 
         @Override
         public Set<RegistryObject<T>> getEntries() {
-            return entriesView;
+            return this.entriesView;
         }
     }
 }
