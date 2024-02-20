@@ -1,4 +1,4 @@
-package foundry.veil.neoforge.mixin;
+package foundry.veil.neoforge.mixin.client;
 
 import foundry.veil.neoforge.event.NeoForgeFreeNativeResourcesEvent;
 import net.minecraft.client.Minecraft;

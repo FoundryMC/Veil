@@ -1,4 +1,4 @@
-package foundry.veil.forge.mixin.client.deferred.vanilla;
+package foundry.veil.neoforge.mixin.client.deferred.vanilla;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;

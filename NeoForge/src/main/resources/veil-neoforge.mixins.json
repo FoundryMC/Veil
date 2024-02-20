@@ -8,9 +8,13 @@
     "defaultRequire": 1
   },
   "client": [
-    "MinecraftMixin",
+    "client.MinecraftMixin",
     "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleEngineMixin",
+    "client.deferred.vanilla.LevelRendererMixin",
     "client.quasar.LevelRendererMixin"
+  ],
+  "mixins": [
+    "RegistryDataLoaderMixin"
   ]
 }

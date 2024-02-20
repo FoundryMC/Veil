@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixin {
 
-    @Inject(method = "renderChunkLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;clearRenderState()V", shift = At.Shift.BEFORE))
-    public void postRenderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f projection, CallbackInfo ci) {
+    @Inject(method = "renderSectionLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;clearRenderState()V", shift = At.Shift.BEFORE))
+    public void postRenderSectionLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f projection, CallbackInfo ci) {
         ((LevelRendererExtension) this).veil$renderStage(renderType, poseStack, projection);
     }
 }
