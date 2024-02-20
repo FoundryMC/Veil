@@ -18,9 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class ParticleSystemManager {
 
@@ -28,14 +26,20 @@ public class ParticleSystemManager {
     private static final double PERSISTENT_DISTANCE_SQ = 32.0 * 32.0;
     private static final double REMOVAL_DISTANCE_SQ = 128.0 * 128.0;
 
-    private final List<ParticleEmitter> particleEmitters = new ArrayList<>();
-    private int particleCount = 0;
+    private final List<ParticleEmitter> particleEmitters;
+    private final Set<ResourceLocation> invalidEmitters;
 
+    private int particleCount;
     private ClientLevel level;
     private TickTaskSchedulerImpl scheduler;
 
     public ParticleSystemManager() {
+        this.particleEmitters = new ArrayList<>();
+        this.invalidEmitters = new HashSet<>();
+
+        this.particleCount = 0;
         this.level = null;
+        this.scheduler = null;
     }
 
     @ApiStatus.Internal
@@ -55,7 +59,9 @@ public class ParticleSystemManager {
         }
         ParticleEmitterData data = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(name)).orElse(null);
         if (data == null) {
-            Veil.LOGGER.error("Unknown Quasar Particle Emitter: {}", name);
+            if (this.invalidEmitters.add(name)) {
+                Veil.LOGGER.error("Unknown Quasar Particle Emitter: {}", name);
+            }
             return null;
         }
         return new ParticleEmitter(this, this.level, data);
@@ -90,7 +96,6 @@ public class ParticleSystemManager {
         }
 
         this.particleCount = this.particleEmitters.stream().mapToInt(ParticleEmitter::getParticleCount).sum();
-        // FIXME
     }
 
     @ApiStatus.Internal
@@ -142,9 +147,4 @@ public class ParticleSystemManager {
     public int getParticleCount() {
         return this.particleCount;
     }
-
-//    @Deprecated
-//    public float getSpawnScale() {
-//        return (float) (MAX_PARTICLES - this.particleCount) / (float) MAX_PARTICLES;
-//    }
 }
