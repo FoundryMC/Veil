@@ -17,7 +17,8 @@
     "client.quasar.LevelRendererMixin",
     "client.stage.LevelRendererMixin",
     "client.stage.sodium.SodiumWorldRendererMixin",
-    "client.stage.vanilla.LevelRendererMixin"
+    "client.stage.vanilla.LevelRendererMixin",
+    "compat.iris.NewWorldRenderingPipelineAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
