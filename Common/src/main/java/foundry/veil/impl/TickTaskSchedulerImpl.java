@@ -74,7 +74,6 @@ public class TickTaskSchedulerImpl implements TickTaskScheduler {
                 task.finish(t);
             }
             iterator.remove();
-            this.tick++;
         }
         if (!this.pendingTasks.isEmpty()) {
             throw new IllegalStateException(this.pendingTasks.size() + " tasks were left over!");
