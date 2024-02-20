@@ -30,7 +30,6 @@
     "client.imgui.KeyboardHandlerMixin",
     "client.imgui.MouseHandlerMixin",
     "client.pipeline.BufferBuilderAccessor",
-    "client.pipeline.FrustumIntersectionAccessor",
     "client.pipeline.FrustumMixin",
     "client.pipeline.GameRendererMixin",
     "client.pipeline.LevelRendererMixin",

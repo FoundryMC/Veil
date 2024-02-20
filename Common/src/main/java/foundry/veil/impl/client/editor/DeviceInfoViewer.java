@@ -59,6 +59,7 @@ public class DeviceInfoViewer extends SingleWindowEditor {
                 ImGui.text("Address Size: " + device.addressBits() + " bits");
                 ImGui.text("Available: " + device.available());
                 ImGui.text("Compiler Available: " + device.compilerAvailable());
+                ImGui.text("Requires Manual CL/GL Sync: " + device.requireManualInteropSync());
                 ImGui.separator();
                 ImGui.text("Vendor: " + device.vendor());
                 ImGui.text("Version: " + device.version());

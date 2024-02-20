@@ -14,6 +14,9 @@ mixin {
     config("${mod_id}-common.mixins.json")
     config("${mod_id}-forge.mixins.json")
 }
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
+}
 
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
@@ -94,23 +97,27 @@ minecraft.runs.configureEach {
 }
 
 repositories {
-    maven {
-        url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        forRepositories(fg.repository) // Only add this if you're using ForgeGradle, otherwise remove this line
+        filter {
+            includeGroup "maven.modrinth"
         }
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:$minecraft_version-$forge_version"
+    compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly project(":Common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
-    compileOnly 'org.jetbrains:annotations:24.0.1'
-
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+    // runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.4+mc1.20.1")
 
     minecraftLibrary "gg.moonflower:molang-compiler:$molang_compiler_version"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
@@ -135,10 +142,10 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
-    minecraftLibrary ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    minecraftLibrary("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
-    shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    shade("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
 
@@ -179,7 +186,7 @@ shadowJar {
     relocate "io.github.spair:imgui-java-natives-linux:$imgui_version", "${project.group}.relocated.imgui-java-natives-linux"
     relocate "io.github.spair:imgui-java-natives-windows:$imgui_version", "${project.group}.relocated.imgui-java-natives-windows"
     relocate "io.github.spair:imgui-java-natives-macos:$imgui_version", "${project.group}.relocated.imgui-java-natives-macos"
-    
+
     finalizedBy 'reobfShadowJar'
 }
 
@@ -192,7 +199,7 @@ reobf {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId (base.archivesName.get() + "-quasar")
+            artifactId base.archivesName.get()
             from components.java
             fg.component(it)
         }
@@ -202,4 +209,10 @@ publishing {
             url "file://" + System.getenv("local_maven")
         }
     }
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }

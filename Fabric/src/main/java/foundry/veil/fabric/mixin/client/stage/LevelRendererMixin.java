@@ -3,6 +3,7 @@ package foundry.veil.fabric.mixin.client.stage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.fabric.FabricRenderTypeStageHandler;
+import foundry.veil.fabric.ext.LevelRendererExtension;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -22,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(LevelRenderer.class)
-public class LevelRendererMixin {
+public class LevelRendererMixin implements LevelRendererExtension {
 
     @Shadow
     private @Nullable ClientLevel level;
@@ -86,18 +87,18 @@ public class LevelRendererMixin {
         FabricRenderTypeStageHandler.renderStage(profiler, VeilRenderLevelStageEvent.Stage.AFTER_LEVEL, (LevelRenderer) (Object) this, this.renderBuffers.bufferSource(), poseStack, projection, this.ticks, partialTicks, camera, frustum);
     }
 
-    @Inject(method = "renderSectionLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;clearRenderState()V", shift = At.Shift.BEFORE))
-    public void postRenderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f projection, CallbackInfo ci) {
+    @Override
+    public void veil$renderStage(RenderType layer, PoseStack poseStack, Matrix4f projection) {
         VeilRenderLevelStageEvent.Stage stage;
-        if (renderType == RenderType.solid()) {
+        if (layer == RenderType.solid()) {
             stage = VeilRenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS;
-        } else if (renderType == RenderType.cutoutMipped()) {
+        } else if (layer == RenderType.cutoutMipped()) {
             stage = VeilRenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS;
-        } else if (renderType == RenderType.cutout()) {
+        } else if (layer == RenderType.cutout()) {
             stage = VeilRenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS;
-        } else if (renderType == RenderType.translucent()) {
+        } else if (layer == RenderType.translucent()) {
             stage = VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS;
-        } else if (renderType == RenderType.tripwire()) {
+        } else if (layer == RenderType.tripwire()) {
             stage = VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS;
         } else {
             stage = null;

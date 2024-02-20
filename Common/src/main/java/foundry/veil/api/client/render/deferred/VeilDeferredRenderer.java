@@ -2,7 +2,6 @@ package foundry.veil.api.client.render.deferred;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
@@ -51,6 +50,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
     public static final String USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY = "USE_BAKED_TRANSPARENT_LIGHTMAPS";
+    public static final boolean SODIUM_LOADED = Veil.platform().isSodiumLoaded();
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
@@ -121,12 +121,11 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
-        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        profiler.push("veil_deferred");
         switch (this.state) {
             case OPAQUE -> {
-                AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+                AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE);
                 if (deferredFramebuffer == null) {
+                    Veil.LOGGER.error("Missing deferred opaque buffer");
                     this.free();
                     return;
                 }
@@ -136,6 +135,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             case TRANSLUCENT -> {
                 AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
                 if (transparent == null) {
+                    Veil.LOGGER.error("Missing deferred transparent buffer");
                     this.free();
                     return;
                 }
@@ -143,7 +143,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
                 transparent.bind(true);
             }
         }
-        profiler.pop();
 
         // Temporary hack until we blit
 //        deferredFramebuffer.bindDraw(false);
@@ -159,12 +158,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             return;
         }
 
-        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        profiler.push("veil_deferred");
         switch (this.state) {
             case OPAQUE, TRANSLUCENT -> AdvancedFbo.unbind();
         }
-        profiler.pop();
     }
 
     @ApiStatus.Internal
@@ -174,8 +170,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         }
 
         this.state = RendererState.OPAQUE;
-        AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+        AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE);
         if (deferred == null) {
+            Veil.LOGGER.error("Missing deferred opaque buffer");
             this.free();
         }
     }
@@ -189,42 +186,45 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         this.state = RendererState.TRANSLUCENT;
         AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
         if (transparent == null) {
+            Veil.LOGGER.error("Missing deferred transparent buffer");
             this.free();
             return;
         }
 
-        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        profiler.push("veil_deferred");
-
         // Copy opaque depth to transparency, so it doesn't draw on top
-        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+        AdvancedFbo deferredFramebuffer = this.framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE);
         if (deferredFramebuffer != null) {
             deferredFramebuffer.resolveToAdvancedFbo(transparent, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         }
-
-        profiler.pop();
     }
 
-    private void run(CullFrustum frustum, AdvancedFbo deferred, AdvancedFbo light, ResourceLocation post, ResourceLocation mix) {
+    private void run(ProfilerFiller profiler, AdvancedFbo deferred, AdvancedFbo light, ResourceLocation post, ResourceLocation mix) {
         PostPipeline postPipeline = this.postProcessingManager.getPipeline(post);
         if (postPipeline != null) {
+            profiler.push("post");
             this.postProcessingManager.runPipeline(postPipeline);
+            profiler.pop();
         }
 
+        profiler.push("draw_lights");
         light.bind(true);
-        light.clear();
-        this.lightRenderer.render(frustum, deferred);
+        this.lightRenderer.render(deferred);
+        profiler.pop();
 
         // Applies effects to the final light image
         PostPipeline lightPipeline = this.postProcessingManager.getPipeline(LIGHT_POST);
         if (lightPipeline != null) {
+            profiler.push("light_post");
             this.postProcessingManager.runPipeline(lightPipeline);
+            profiler.pop();
         }
 
         // Applies light to the image
-        PostPipeline mixOpaquePipeline = this.postProcessingManager.getPipeline(mix);
-        if (mixOpaquePipeline != null) {
-            this.postProcessingManager.runPipeline(mixOpaquePipeline);
+        PostPipeline mixPipeline = this.postProcessingManager.getPipeline(mix);
+        if (mixPipeline != null) {
+            profiler.push("mix");
+            this.postProcessingManager.runPipeline(mixPipeline);
+            profiler.pop();
         }
     }
 
@@ -239,18 +239,27 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
         this.end();
 
-        AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
+        AdvancedFbo deferred = this.framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE);
         AdvancedFbo transparent = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
-        AdvancedFbo light = this.framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
+        AdvancedFbo deferredLight = this.framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE_LIGHT);
+        AdvancedFbo transparentLight = this.framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_LIGHT);
         AdvancedFbo post = this.framebufferManager.getFramebuffer(VeilFramebuffers.POST);
-        if (deferred == null || transparent == null || light == null || post == null) {
+        if (deferred == null || transparent == null || deferredLight == null || transparentLight == null || post == null) {
+            Veil.LOGGER.error("Missing deferred light buffers");
             this.free();
             return;
         }
 
-        CullFrustum frustum = VeilRenderer.getCullingFrustum();
-        this.run(frustum, deferred, light, OPAQUE_POST, OPAQUE_MIX);
-        this.run(frustum, transparent, light, TRANSPARENT_POST, TRANSPARENT_MIX);
+        profiler.push("setup_lights");
+        this.lightRenderer.setup(VeilRenderer.getCullingFrustum(), profiler);
+        profiler.popPush("opaque_light");
+        this.run(profiler, deferred, deferredLight, OPAQUE_POST, OPAQUE_MIX);
+        profiler.popPush("transparent_light");
+        this.run(profiler, transparent, transparentLight, TRANSPARENT_POST, TRANSPARENT_MIX);
+        profiler.pop();
+        this.lightRenderer.clear();
+
+        profiler.push("screen_post");
 
         // Draws the final opaque image and transparent onto the background
         PostPipeline screenPipeline = this.postProcessingManager.getPipeline(SCREEN_POST);
@@ -261,7 +270,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             RenderSystem.disableBlend();
         }
 
+        profiler.popPush("resolve");
         post.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+        profiler.pop();
 
         profiler.pop();
     }
@@ -312,7 +323,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * @return Whether the deferred renderer is initialized and ready to use
      */
     public boolean isEnabled() {
-        return this.enabled && !Minecraft.useShaderTransparency(); // TODO allow fabulous
+        return this.enabled && !Minecraft.useShaderTransparency() && !SODIUM_LOADED; // TODO allow fabulous/sodium
     }
 
     /**

@@ -56,12 +56,12 @@ subprojects {
             name "realrobotixImguiJava"
             url "https://maven.realrobotix.me/imgui-java"
         }
-        maven {
-            url "https://jitpack.io"
-            content {
-                includeGroupByRegex "com\\.github.*"
-            }
-        }
+//        maven {
+//            url "https://jitpack.io"
+//            content {
+//                includeGroupByRegex "com\\.github.*"
+//            }
+//        }
         mavenCentral()
     }
 
@@ -101,7 +101,6 @@ subprojects {
     // metadata includes mapped dependencies which are not reasonably consumable by
     // other mod developers.
     tasks.withType(GenerateModuleMetadata) {
-
         enabled = false
     }
 }

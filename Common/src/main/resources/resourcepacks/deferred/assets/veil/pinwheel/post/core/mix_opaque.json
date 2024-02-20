@@ -3,12 +3,12 @@
     {
       "type": "veil:blit",
       "shader": "veil:core/mix_opaque",
-      "out": "veil:deferred_final"
+      "out": "veil:opaque_final"
     },
     {
       "type": "veil:copy",
-      "in": "veil:deferred",
-      "out": "veil:deferred_final",
+      "in": "veil:opaque",
+      "out": "veil:opaque_final",
       "color": false,
       "depth": true
     }

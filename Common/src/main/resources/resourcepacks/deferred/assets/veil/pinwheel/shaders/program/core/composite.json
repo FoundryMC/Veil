@@ -4,11 +4,11 @@
   "textures": {
     "DeferredSampler": {
       "type": "framebuffer",
-      "name": "veil:deferred_final"
+      "name": "veil:opaque_final"
     },
     "DeferredDepthSampler": {
       "type": "framebuffer",
-      "name": "veil:deferred_final:depth"
+      "name": "veil:opaque_final:depth"
     },
     "MainSampler": {
       "type": "framebuffer",

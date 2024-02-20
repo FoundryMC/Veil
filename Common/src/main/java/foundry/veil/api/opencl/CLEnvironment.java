@@ -1,7 +1,6 @@
 package foundry.veil.api.opencl;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import foundry.veil.Veil;
 import foundry.veil.api.opencl.event.CLEventDispatcher;
 import foundry.veil.api.opencl.event.CLLegacyEventDispatcher;
 import foundry.veil.api.opencl.event.CLNativeEventDispatcher;
@@ -54,6 +53,7 @@ public class CLEnvironment implements NativeResource {
     private final CLContextCallback errorCallback;
     private final long context;
     private final long commandQueue;
+    private final boolean requireManualInteropSync;
     private final boolean openGLSupported;
     private final Map<ResourceLocation, ProgramData> programs;
     private final CLEventDispatcher eventDispatcher;
@@ -62,6 +62,7 @@ public class CLEnvironment implements NativeResource {
         this.device = deviceInfo;
 
         CLCapabilities caps = deviceInfo.capabilities();
+        this.requireManualInteropSync = deviceInfo.requireManualInteropSync();
         this.openGLSupported = RenderSystem.isOnRenderThread() && (caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing);
         if (!this.openGLSupported && (caps.cl_khr_gl_sharing || caps.cl_APPLE_gl_sharing)) {
             VeilOpenCL.LOGGER.warn("Disabled OpenGL sharing because environment was created off-thread");
@@ -103,9 +104,9 @@ public class CLEnvironment implements NativeResource {
                 VeilOpenCL.LOGGER.error("\tInfo: " + MemoryUtil.memUTF8(errinfo));
             });
             IntBuffer errcode_ret = stack.callocInt(1);
+            long device = deviceInfo.id();
 
             try {
-                long device = deviceInfo.id();
                 this.context = clCreateContext(ctxProps, device, this.errorCallback, NULL, errcode_ret);
                 VeilOpenCL.checkCLError(errcode_ret);
 
@@ -230,6 +231,13 @@ public class CLEnvironment implements NativeResource {
      */
     public boolean isOpenGLSupported() {
         return this.openGLSupported;
+    }
+
+    /**
+     * @return Whether the user is expected to sync GL/CL buffers
+     */
+    public boolean requireManualInteropSync() {
+        return this.requireManualInteropSync;
     }
 
     @ApiStatus.Internal

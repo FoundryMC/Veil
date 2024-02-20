@@ -115,17 +115,19 @@ public class DeferredEditor extends SingleWindowEditor {
         ImGui.text("Framebuffers");
         if (ImGui.beginTabBar("Framebuffers")) {
             FramebufferManager framebufferManager = renderer.getFramebufferManager();
-            AdvancedFbo deferredBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED);
-            AdvancedFbo deferredFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.DEFERRED_FINAL);
+            AdvancedFbo opaqueBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE);
+            AdvancedFbo opaqueLightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE_LIGHT);
+            AdvancedFbo opaqueFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.OPAQUE_FINAL);
             AdvancedFbo transparentBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT);
+            AdvancedFbo transparentLightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_LIGHT);
             AdvancedFbo transparentFinalBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.TRANSPARENT_FINAL);
-            AdvancedFbo lightBuffer = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
 
-            this.drawBuffers("Opaque", deferredBuffer);
-            this.drawBuffers("Opaque Final", deferredFinalBuffer);
+            this.drawBuffers("Opaque", opaqueBuffer);
+            this.drawBuffers("Opaque Light", opaqueLightBuffer);
+            this.drawBuffers("Opaque Final", opaqueFinalBuffer);
             this.drawBuffers("Transparent", transparentBuffer);
+            this.drawBuffers("Transparent Light", transparentLightBuffer);
             this.drawBuffers("Transparent Final", transparentFinalBuffer);
-            this.drawBuffers("Light", lightBuffer);
 
             ImGui.endTabBar();
         }

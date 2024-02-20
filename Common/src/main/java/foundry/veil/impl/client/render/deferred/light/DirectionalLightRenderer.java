@@ -37,7 +37,11 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
     }
 
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights, Set<DirectionalLight> removedLights, CullFrustum frustum) {
+    public void prepareLights(LightRenderer lightRenderer, List<DirectionalLight> lights, Set<DirectionalLight> removedLights, CullFrustum frustum) {
+    }
+
+    @Override
+    public void renderLights(LightRenderer lightRenderer, List<DirectionalLight> lights) {
         this.visibleLights = lights.size();
         if (lights.isEmpty()) {
             return;

@@ -45,9 +45,8 @@ public class VeilFabricClient implements ClientModInitializer {
             VeilUITooltipRenderer.renderOverlay(client.gui, matrices, tickDelta, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(() -> {
-            VeilRenderSystem.renderer().getDeferredRenderer().reset();
-        }));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(VeilRenderSystem.renderer().getDeferredRenderer()::reset));
+        FabricQuasarParticleHandler.init();
 
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 

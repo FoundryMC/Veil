@@ -38,7 +38,7 @@ public class CLBuffer implements CLMemObject {
 
     protected final CLKernel kernel;
     protected final CLEnvironment environment;
-    protected final long pointer;
+    protected  long pointer;
 
     CLBuffer(CLKernel kernel, long pointer) {
         this.kernel = kernel;

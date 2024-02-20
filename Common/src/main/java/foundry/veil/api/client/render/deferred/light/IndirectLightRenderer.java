@@ -6,7 +6,9 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.opencl.*;
 import foundry.veil.ext.VertexBufferExtension;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector4fc;
@@ -71,7 +73,13 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
 
         if (ENVIRONMENT != null) { // FIXME this doesn't work properly
             ResourceLocation name = Veil.veilPath("indirect_light");
-            ENVIRONMENT.loadProgram(name, """                
+            ENVIRONMENT.loadProgram(name, """
+                    #define HIGH_RES_SIZE %d
+                    #define LOW_RES_SIZE %d
+                    #define LIGHT_SIZE %d
+                    #define POSITION_OFFSET %d
+                    #define RANGE_OFFSET %d
+                                
                     bool testSphere(global const float* FrustumPlanes, const float x, const float y, const float z, const float r) {
                         return FrustumPlanes[0] * x + FrustumPlanes[1] * y + FrustumPlanes[2] * z + FrustumPlanes[3] >= -r &&
                                FrustumPlanes[4] * x + FrustumPlanes[5] * y + FrustumPlanes[6] * z + FrustumPlanes[7] >= -r &&
@@ -83,23 +91,24 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
                                    
                     void kernel update_draw(const float4 CameraPos, volatile global int* Counter, global const float* FrustumPlanes, global const float* LightData, global uint* DrawData) {
                         const int lightId = get_global_id(0);
-                        const int lightDataIndex = lightId * %d;
-                        float x = LightData[lightDataIndex + %d];
-                        float y = LightData[lightDataIndex + %d];
-                        float z = LightData[lightDataIndex + %d];
-                        float range = LightData[lightDataIndex + %d];
+                        const int lightDataIndex = lightId * LIGHT_SIZE;
+                        float x = LightData[lightDataIndex + POSITION_OFFSET];
+                        float y = LightData[lightDataIndex + POSITION_OFFSET + 1];
+                        float z = LightData[lightDataIndex + POSITION_OFFSET + 2];
+                        float range = LightData[lightDataIndex + RANGE_OFFSET];
                         
                         bool visible = testSphere(FrustumPlanes, x - CameraPos.x, y - CameraPos.y, z - CameraPos.z, range * 1.414);
                         if (visible) {
                             int i = atomic_inc(Counter) * 5;
-                            DrawData[i] = %d;
+                            bool highRes = (x - CameraPos.x) * (x - CameraPos.x) + (y - CameraPos.y) * (y - CameraPos.y) + (z - CameraPos.z) * (z - CameraPos.z) <= range * range;
+                            DrawData[i] = highRes ? HIGH_RES_SIZE : LOW_RES_SIZE;
                             DrawData[i + 1] = 1;
-                            DrawData[i + 2] = %d;
+                            DrawData[i + 2] = !highRes ? HIGH_RES_SIZE : 0;
                             DrawData[i + 3] = 0;
                             DrawData[i + 4] = lightId;
                         }
                     }
-                    """.formatted(lightSize, positionOffset, positionOffset + 1, positionOffset + 2, rangeOffset, this.highResSize, 0));
+                    """.formatted(this.highResSize, this.lowResSize, lightSize, positionOffset, rangeOffset));
 
             try {
                 this.kernel = ENVIRONMENT.createKernel(name, "update_draw");
@@ -215,8 +224,11 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
 
     private int updateVisibility(List<T> lights, CullFrustum frustum) {
         if (this.kernel != null) {
+            ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
             try (MemoryStack stack = MemoryStack.stackPush()) {
+                profiler.push("acquire");
                 this.kernel.acquireFromGL(this.clInstancedBuffer, this.clIndirectBuffer);
+                profiler.popPush("upload");
 
                 this.clCounter.writeAsync(0L, stack.ints(0), null);
 
@@ -228,14 +240,18 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
                 }
                 this.clFrustumPlanes.writeAsync(0L, planes, null);
 
+                profiler.popPush("setup");
                 Vector3dc pos = frustum.getPosition();
                 this.kernel.setVector4f(0, (float) pos.x(), (float) pos.y(), (float) pos.z(), 0);
                 this.kernel.execute(lights.size(), 1);
 
+                profiler.popPush("release");
                 this.kernel.releaseToGL(this.clInstancedBuffer, this.clIndirectBuffer);
 
+                profiler.popPush("read");
                 IntBuffer data = stack.mallocInt(1);
                 this.clCounter.read(0L, data);
+                profiler.pop();
                 return data.get(0);
             } catch (CLException e) {
                 Veil.LOGGER.error("Failed to run indirect compute", e);
@@ -244,6 +260,7 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
         }
 
         int count = 0;
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
         try (MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer buffer = stack.malloc(this.lowResSize > 0 ? Integer.BYTES * 5 : Integer.BYTES);
 
@@ -271,19 +288,22 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
     }
 
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
-        VertexBufferExtension ext = (VertexBufferExtension) this.vbo;
-        this.vbo.bind();
+    public void prepareLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
+
+        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        profiler.push("resize");
 
         // If there is no space, then resize
         boolean rebuild = false;
-        if (lights.size() > this.maxLights || (this.maxLights > MIN_LIGHTS && this.maxLights > lights.size() * 2)) {
+        if (lights.size() > this.maxLights) {
             rebuild = true;
             this.maxLights = (int) Math.max(Math.max(Math.ceil(this.maxLights / 2.0), MIN_LIGHTS), lights.size() * 1.5);
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
             this.initBuffers();
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
         }
+        profiler.popPush("update");
 
         // The instanced buffer needs to be updated
         if (rebuild || !removedLights.isEmpty()) {
@@ -303,16 +323,28 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
             }
         }
 
+        profiler.popPush("visibility");
+
         // Fill indirect buffer draw calls
         this.visibleLights = !lights.isEmpty() ? this.updateVisibility(lights, frustum) : 0;
+
+        profiler.pop();
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    @Override
+    public void renderLights(LightRenderer lightRenderer, List<T> lights) {
+        this.vbo.bind();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
+
         if (this.visibleLights > 0) {
             this.setupRenderState(lightRenderer, lights);
             lightRenderer.applyShader();
-            ext.veil$drawIndirect(0L, this.visibleLights, 0);
+            ((VertexBufferExtension) this.vbo).veil$drawIndirect(0L, this.visibleLights, 0);
             this.clearRenderState(lightRenderer, lights);
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
         VertexBuffer.unbind();
     }
