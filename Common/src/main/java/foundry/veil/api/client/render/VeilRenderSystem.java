@@ -283,8 +283,6 @@ public final class VeilRenderSystem {
         FramebufferManager framebufferManager = renderer.getFramebufferManager();
         PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
 
-        // TODO deferred renderer
-
         if (postProcessingManager.getActivePipelines().isEmpty()) {
             return;
         }

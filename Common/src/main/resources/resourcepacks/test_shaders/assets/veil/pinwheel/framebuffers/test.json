@@ -1,0 +1,10 @@
+{
+  "depth": true,
+  "width": 64,
+  "height": 64,
+  "color_buffers": [
+    {
+      "format": "RGBA8"
+    }
+  ]
+}
