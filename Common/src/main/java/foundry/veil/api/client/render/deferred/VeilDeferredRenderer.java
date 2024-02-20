@@ -82,7 +82,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
         return CompletableFuture.<CompletableFuture<Void>>supplyAsync(() -> {
-            boolean active = Minecraft.getInstance().getResourcePackRepository().getSelectedIds().contains(PACK_ID.toString());
+            boolean active = Minecraft.getInstance().getResourcePackRepository().getSelectedIds().contains(PACK_ID.toString()) && isSupported();
             if (this.enabled != active) {
                 this.enabled = active;
                 if (active) {
@@ -323,7 +323,14 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * @return Whether the deferred renderer is initialized and ready to use
      */
     public boolean isEnabled() {
-        return this.enabled && !Minecraft.useShaderTransparency() && !SODIUM_LOADED; // TODO allow fabulous/sodium
+        return this.enabled && isSupported();
+    }
+
+    /**
+     * @return Whether the deferred rendering pipeline is supported
+     */
+    public static boolean isSupported() {
+        return !Minecraft.useShaderTransparency() && !SODIUM_LOADED; // TODO allow fabulous/sodium
     }
 
     /**
