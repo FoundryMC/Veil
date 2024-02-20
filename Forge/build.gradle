@@ -1,21 +1,21 @@
 plugins {
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle'
-    id 'org.spongepowered.mixin'
-    id 'com.github.johnrengelman.shadow'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
-
-archivesBaseName = "${mod_name}-forge-${minecraft_version}"
-if (System.getenv('BUILD_NUMBER') != null) {
-    version += "." + System.getenv('BUILD_NUMBER')
+base {
+    archivesName = "${mod_name}-forge-${minecraft_version}"
 }
-
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
 
     config("${mod_id}-common.mixins.json")
     config("${mod_id}-forge.mixins.json")
+}
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
 }
 
 jarJar.enable()
@@ -23,13 +23,10 @@ jarJar.enable()
 minecraft {
     mappings channel: 'official', version: minecraft_version
 
-    if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
-        // This location is hardcoded in Forge and can not be changed.
-        // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
-        if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
-            accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-        }
-        project.logger.debug('Forge Access Transformers are enabled for this project.')
+    // This location is hardcoded in Forge and can not be changed.
+    // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
+    if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
+        accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     }
 
     runs {
@@ -93,10 +90,16 @@ minecraft.runs.configureEach {
 }
 
 repositories {
-    maven {
-        url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        forRepositories(fg.repository) // Only add this if you're using ForgeGradle, otherwise remove this line
+        filter {
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -107,9 +110,6 @@ dependencies {
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
-
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
     minecraftLibrary "gg.moonflower:molang-compiler:$molang_compiler_version"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
@@ -134,10 +134,10 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
-    minecraftLibrary ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    minecraftLibrary("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
-    shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    shade("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
 
@@ -178,7 +178,7 @@ shadowJar {
     relocate "io.github.spair:imgui-java-natives-linux:$imgui_version", "${project.group}.relocated.imgui-java-natives-linux"
     relocate "io.github.spair:imgui-java-natives-windows:$imgui_version", "${project.group}.relocated.imgui-java-natives-windows"
     relocate "io.github.spair:imgui-java-natives-macos:$imgui_version", "${project.group}.relocated.imgui-java-natives-macos"
-    
+
     finalizedBy 'reobfShadowJar'
 }
 
@@ -191,7 +191,7 @@ reobf {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId (base.archivesName.get() + "-quasar")
+            artifactId base.archivesName.get()
             from components.java
             fg.component(it)
         }
@@ -201,4 +201,10 @@ publishing {
             url "file://" + System.getenv("local_maven")
         }
     }
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }

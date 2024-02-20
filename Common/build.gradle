@@ -2,30 +2,19 @@ plugins {
     id 'idea'
     id 'java'
     id 'maven-publish'
-    id 'org.spongepowered.gradle.vanilla'
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT'
 }
-
-archivesBaseName = "${mod_name}-common-${minecraft_version}"
-if (System.getenv('BUILD_NUMBER') != null) {
-    version += "." + System.getenv('BUILD_NUMBER')
+base {
+    archivesName = "${mod_name}-common-${minecraft_version}"
 }
-
 minecraft {
     version(minecraft_version)
     if(file("src/main/resources/${mod_id}.accesswidener").exists()){
         accessWideners(file("src/main/resources/${mod_id}.accesswidener"))
     }
-    runs {
-        if (project.hasProperty('common_runs_enabled') ? project.findProperty('common_runs_enabled').toBoolean() : true) {
-
-            server(project.hasProperty('common_server_run_name') ? project.findProperty('common_server_run_name') : 'vanilla_server') {
-                workingDirectory(this.file("run"))
-            }
-            client(project.hasProperty('common_client_run_name') ? project.findProperty('common_client_run_name') : 'vanilla_client') {
-                workingDirectory(this.file("run"))
-            }
-        }
-    }
+}
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "." + System.getenv('BUILD_NUMBER')
 }
 
 test {
@@ -33,11 +22,8 @@ test {
 }
 
 dependencies {
-    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
+    compileOnly 'org.spongepowered:mixin:0.8.5'
     compileOnly 'org.jetbrains:annotations:24.0.1'
-
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
 
     implementation("gg.moonflower:molang-compiler:${molang_compiler_version}")
 
@@ -56,7 +42,7 @@ dependencies {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId (base.archivesName.get() + "-quasar")
+            artifactId base.archivesName.get()
             from components.java
         }
     }

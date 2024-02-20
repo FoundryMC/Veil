@@ -2,12 +2,12 @@ plugins {
     id 'java'
     id 'idea'
     id 'maven-publish'
-    id 'fabric-loom'
-    id 'io.github.juuxel.loom-quiltflower'
-    id 'com.github.johnrengelman.shadow'
+    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
-
-archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
+base {
+    archivesName = "${mod_name}-fabric-${minecraft_version}"
+}
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
@@ -39,6 +39,20 @@ configurations {
     shade
 }
 
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
@@ -47,8 +61,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.0.1'
     implementation project(":Common")
 
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    implementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+    modRuntimeOnly "maven.modrinth:modmenu:7.2.2"
 
     implementation "gg.moonflower:molang-compiler:${molang_compiler_version}"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"
@@ -73,10 +86,10 @@ dependencies {
     shade "io.github.spair:imgui-java-natives-macos-ft:$imgui_version"
     shade "io.github.spair:imgui-java-natives-windows:$imgui_version"
 
-    implementation ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    implementation("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
-    shade ("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
+    shade("org.lwjgl:lwjgl-opencl:$lwjgl_version") {
         transitive false
     }
 }
@@ -118,7 +131,7 @@ processResources {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId (base.archivesName.get() + "-quasar")
+            artifactId base.archivesName.get()
             from components.java
         }
     }

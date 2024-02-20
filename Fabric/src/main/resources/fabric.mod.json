@@ -1,19 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "veil",
+  "id": "${mod_id}",
   "version": "${version}",
-  "name": "Veil",
-  "description": "This is the Veil project. It is a collection of tools and utilities that are designed to make it easier for mod developers to do advanced rendering in their mods.",
+  "name": "${mod_name}",
+  "description": "${description}",
   "authors": [
-    "amo",
-    "Cappin",
-    "Ocelot"
+    "${mod_author}"
   ],
   "contact": {
     "issues": "https://github.com/FoundryMC/Veil/issues",
     "sources": "https://github.com/FoundryMC/Veil"
   },
-  "license": "All Rights Reserved",
+  "license": "${license}",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -31,9 +29,9 @@
     "veil-fabric.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14",
-    "fabric": "*",
-    "minecraft": "1.20.1",
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
     "java": ">=17"
   },
   "accessWidener": "veil.accesswidener"
