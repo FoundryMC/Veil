@@ -20,7 +20,6 @@
     "client.deferred.AmbientOcclusionFaceMixin",
     "client.deferred.DebugScreenOverlayMixin",
     "client.deferred.LevelRendererMixin",
-    "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleRenderTypeMixin",
     "client.deferred.RenderBuffersAccessor",
     "client.deferred.ShaderStateMixin",

@@ -110,8 +110,7 @@ dependencies {
     compileOnly project(":Common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
-    // compileOnly fg.deobf("maven.modrinth:rubidium:0.7.1")
-    runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.4+mc1.20.1")
+    // runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.4+mc1.20.1")
 
     minecraftLibrary "gg.moonflower:molang-compiler:$molang_compiler_version"
     shade "gg.moonflower:molang-compiler:$molang_compiler_version"

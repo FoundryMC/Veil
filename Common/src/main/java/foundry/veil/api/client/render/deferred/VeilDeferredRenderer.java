@@ -270,8 +270,8 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
             RenderSystem.disableBlend();
         }
 
-//        profiler.popPush("resolve");
-//        post.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+        profiler.popPush("resolve");
+        post.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
         profiler.pop();
 
         profiler.pop();

@@ -11,6 +11,7 @@
     "client.KeyboardHandlerMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
+    "client.deferred.ModelBlockRendererMixin",
     "client.deferred.ParticleEngineMixin",
     "client.deferred.vanilla.LevelRendererMixin",
     "client.quasar.LevelRendererMixin",

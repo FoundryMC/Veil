@@ -4,8 +4,8 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "cloud",
-    "fragment": "cloud",
+    "vertex": "clouds",
+    "fragment": "clouds",
     "attributes": [
         "Position",
         "UV0",
