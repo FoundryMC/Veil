@@ -50,6 +50,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
     public static final String USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY = "USE_BAKED_TRANSPARENT_LIGHTMAPS";
+    public static final boolean SODIUM_LOADED = Veil.platform().isSodiumLoaded();
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
@@ -322,7 +323,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * @return Whether the deferred renderer is initialized and ready to use
      */
     public boolean isEnabled() {
-        return this.enabled && !Minecraft.useShaderTransparency(); // TODO allow fabulous
+        return this.enabled && !Minecraft.useShaderTransparency() && !SODIUM_LOADED; // TODO allow fabulous/sodium
     }
 
     /**
