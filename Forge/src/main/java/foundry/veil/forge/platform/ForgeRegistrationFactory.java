@@ -1,4 +1,4 @@
-package foundry.veil.forge;
+package foundry.veil.forge.platform;
 
 import foundry.veil.platform.registry.RegistrationProvider;
 import foundry.veil.platform.registry.RegistryObject;

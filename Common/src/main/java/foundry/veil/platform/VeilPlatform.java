@@ -1,4 +1,4 @@
-package foundry.veil.platform.services;
+package foundry.veil.platform;
 
 import org.jetbrains.annotations.ApiStatus;
 

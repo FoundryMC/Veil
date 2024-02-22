@@ -15,7 +15,7 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.post.stage.CompositePostPipeline;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
-import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.platform.VeilClientPlatform;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;

@@ -2,7 +2,7 @@ package foundry.veil.fabric.platform;
 
 import foundry.veil.api.event.*;
 import foundry.veil.fabric.event.*;
-import foundry.veil.platform.services.VeilEventPlatform;
+import foundry.veil.platform.VeilEventPlatform;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

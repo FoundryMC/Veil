@@ -1,7 +1,7 @@
 package foundry.veil;
 
 import foundry.veil.api.molang.VeilMolang;
-import foundry.veil.platform.services.VeilPlatform;
+import foundry.veil.platform.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;

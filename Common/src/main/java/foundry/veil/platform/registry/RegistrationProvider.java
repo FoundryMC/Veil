@@ -1,10 +1,10 @@
 package foundry.veil.platform.registry;
 
-import foundry.veil.platform.Services;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
 import java.util.Collection;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 /**
@@ -86,7 +86,7 @@ public interface RegistrationProvider<T> {
         /**
          * The singleton instance of the {@link Factory}. This is different on each loader.
          */
-        Factory INSTANCE = Services.load(Factory.class);
+        Factory INSTANCE = ServiceLoader.load(Factory.class).findFirst().orElseThrow(() -> new RuntimeException("Failed to load registration provider"));
 
         /**
          * Creates a {@link RegistrationProvider}.
