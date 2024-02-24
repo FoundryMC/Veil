@@ -11,8 +11,8 @@ base {
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
 
-    config("${mod_id}-common.mixins.json")
-    config("${mod_id}-forge.mixins.json")
+    config("${mod_id}.mixins.json")
+    config("${mod_id}.forge.mixins.json")
 }
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
