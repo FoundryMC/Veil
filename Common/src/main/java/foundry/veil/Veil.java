@@ -20,6 +20,8 @@ public class Veil {
 
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
 
+    public static final boolean SODIUM = PLATFORM.isSodiumLoaded();
+
     static {
         DEBUG = System.getProperty("veil.debug") != null;
         IMGUI = System.getProperty("veil.disableImgui") == null && hasImguiNatives() && !PLATFORM.isModLoaded("axiom");
