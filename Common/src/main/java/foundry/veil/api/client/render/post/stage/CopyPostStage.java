@@ -59,7 +59,7 @@ public class CopyPostStage extends FramebufferPostStage {
 
     @Override
     public PostPipelineStageRegistry.PipelineType<? extends PostPipeline> getType() {
-        return PostPipelineStageRegistry.COPY;
+        return PostPipelineStageRegistry.COPY.get();
     }
 
     @Override

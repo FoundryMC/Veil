@@ -143,7 +143,7 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
     }
 
     /**
-     * @return All custom framebuffers loaded
+     * @return An immutable view of all custom framebuffers loaded
      */
     public Map<ResourceLocation, AdvancedFbo> getFramebuffers() {
         return this.framebuffersView;

@@ -5,7 +5,7 @@ import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
 import foundry.veil.api.client.render.framebuffer.*;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;

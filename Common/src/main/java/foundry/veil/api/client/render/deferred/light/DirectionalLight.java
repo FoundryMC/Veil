@@ -1,12 +1,15 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.editor.EditorAttributeProvider;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import imgui.ImGui;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 /**
  * Represents a light where all rays come from the same direction everywhere. (The sun)
  */
-public class DirectionalLight extends Light {
+public class DirectionalLight extends Light implements EditorAttributeProvider {
 
     protected final Vector3f direction;
 
@@ -59,8 +62,13 @@ public class DirectionalLight extends Light {
     }
 
     @Override
-    public Type getType() {
-        return Type.DIRECTIONAL;
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.DIRECTIONAL.get();
+    }
+
+    @Override
+    public String getEditorName() {
+        return "(%.3f, %.3f, %.3f)".formatted(this.direction.x, this.direction.y, this.direction.z);
     }
 
     @Override
@@ -68,5 +76,19 @@ public class DirectionalLight extends Light {
         return new DirectionalLight()
                 .setColor(this.color)
                 .setDirection(this.direction);
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        float[] editDirection = new float[]{this.direction.x(), this.direction.y(), this.direction.z()};
+
+        if (ImGui.dragFloat3("##direction", editDirection, 0.005F)) {
+            Vector3f vector = new Vector3f(editDirection).normalize();
+            if (!Float.isNaN(vector.x) && !Float.isNaN(vector.y) && !Float.isNaN(vector.z)) {
+                this.setDirection(vector);
+            }
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("direction");
     }
 }

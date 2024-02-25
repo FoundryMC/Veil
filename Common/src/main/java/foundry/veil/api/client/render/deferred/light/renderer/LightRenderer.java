@@ -1,15 +1,16 @@
-package foundry.veil.api.client.render.deferred.light;
+package foundry.veil.api.client.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.deferred.light.Light;
+import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
@@ -30,7 +31,7 @@ import java.util.function.Consumer;
  */
 public class LightRenderer implements NativeResource {
 
-    private final Map<Light.Type, LightData<?>> lights;
+    private final Map<LightTypeRegistry.LightType<?>, LightData<?>> lights;
 
     private VanillaLightRenderer vanillaLightRenderer;
     private boolean vanillaLightEnabled;
@@ -41,7 +42,7 @@ public class LightRenderer implements NativeResource {
      * Creates a new light renderer.
      */
     public LightRenderer() {
-        this.lights = new EnumMap<>(Light.Type.class);
+        this.lights = new HashMap<>();
         this.vanillaLightEnabled = true;
         this.ambientOcclusionEnabled = true;
     }
@@ -67,7 +68,7 @@ public class LightRenderer implements NativeResource {
     }
 
     @ApiStatus.Internal
-    public void setup(CullFrustum frustum, ProfilerFiller profiler) {
+    public void setup(CullFrustum frustum) {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE,
                 GlStateManager.DestFactor.ONE,
@@ -75,10 +76,8 @@ public class LightRenderer implements NativeResource {
                 GlStateManager.DestFactor.ZERO);
         RenderSystem.depthMask(false);
 
-        for (Map.Entry<Light.Type, LightData<?>> entry : this.lights.entrySet()) {
-            profiler.push(entry.getKey().name().toLowerCase(Locale.ROOT));
+        for (Map.Entry<LightTypeRegistry.LightType<?>, LightData<?>> entry : this.lights.entrySet()) {
             entry.getValue().prepare(this, frustum);
-            profiler.pop();
         }
     }
 
@@ -124,13 +123,14 @@ public class LightRenderer implements NativeResource {
      *
      * @param light The light to remove
      */
-    public void removeLight(Light light) {
+    @SuppressWarnings("unchecked")
+    public <T extends Light> void removeLight(T light) {
         Objects.requireNonNull(light, "light");
         RenderSystem.assertOnRenderThreadOrInit();
 
-        LightData<?> data = this.lights.get(light.getType());
+        LightData<T> data = (LightData<T>) this.lights.get(light.getType());
         if (data != null) {
-            data.lights.remove(light);
+            data.removedLights.add(light);
         }
     }
 
@@ -138,10 +138,10 @@ public class LightRenderer implements NativeResource {
      * Retrieves all lights of the specified type.
      *
      * @param type The type of lights to get
-     * @return A list of all lights of the specified type in the scene
+     * @return A list of lights for the specified type in the scene
      */
     @SuppressWarnings("unchecked")
-    public <T extends Light> List<T> getLights(Light.Type type) {
+    public <T extends Light> List<T> getLights(LightTypeRegistry.LightType<? extends T> type) {
         LightData<?> data = this.lights.get(type);
         if (data == null) {
             return Collections.emptyList();
@@ -242,8 +242,8 @@ public class LightRenderer implements NativeResource {
         }
 
         @SuppressWarnings("unchecked")
-        public LightData(Light.Type type) {
-            this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").createRenderer());
+        public LightData(LightTypeRegistry.LightType<?> type) {
+            this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").rendererFactory().createRenderer());
         }
 
         private void prepare(LightRenderer lightRenderer, CullFrustum frustum) {

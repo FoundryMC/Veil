@@ -12,9 +12,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public record LocationSource(ResourceLocation location) implements ShaderTextureSource {
 
-    public static final Codec<LocationSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("location").forGetter(LocationSource::location)
-    ).apply(instance, LocationSource::new));
+    public static final Codec<LocationSource> CODEC = ResourceLocation.CODEC.fieldOf("location").xmap(LocationSource::new, LocationSource::location).codec();
 
     @Override
     public int getId(Context context) {

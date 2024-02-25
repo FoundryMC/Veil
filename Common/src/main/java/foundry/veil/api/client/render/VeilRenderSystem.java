@@ -5,10 +5,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
-import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
-import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.definition.ShaderBlock;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
@@ -278,24 +274,7 @@ public final class VeilRenderSystem {
     }
 
     @ApiStatus.Internal
-    public static void renderPost(float partialTicks) {
-        VeilRenderer renderer = VeilRenderSystem.renderer();
-        FramebufferManager framebufferManager = renderer.getFramebufferManager();
-        PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
-
-        if (postProcessingManager.getActivePipelines().isEmpty()) {
-            return;
-        }
-
-        AdvancedFbo postFramebuffer = framebufferManager.getFramebuffer(VeilFramebuffers.POST);
-
-        if (postFramebuffer != null) {
-            AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(postFramebuffer);
-        }
-
-        postProcessingManager.runPipeline();
-        if (postFramebuffer != null) {
-            postFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
-        }
+    public static void renderPost() {
+        renderer.getPostProcessingManager().runPipeline();
     }
 }

@@ -1,12 +1,9 @@
 package foundry.veil.api.client.render.deferred.light;
 
-import foundry.veil.impl.client.render.deferred.light.AreaLightRenderer;
-import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
-import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-
-import java.util.function.Supplier;
 
 /**
  * A source of luminance in a scene. Drawn using {@link LightRenderer}.
@@ -117,34 +114,14 @@ public abstract class Light implements Cloneable {
     /**
      * @return The type of light this is
      */
-    public abstract Type getType();
+    public abstract LightTypeRegistry.LightType<?> getType();
+
+    /**
+     * @return The individual name of this light in the editor
+     */
+    public abstract String getEditorName();
 
     @Override
     public abstract Light clone();
 
-    // FIXME Use a proper registry
-
-    /**
-     * Types of lights that can exist.
-     *
-     * @author Ocelot
-     */
-    public enum Type {
-        DIRECTIONAL(DirectionalLightRenderer::new),
-        POINT(PointLightRenderer::new),
-        AREA(AreaLightRenderer::new);
-
-        private final Supplier<LightTypeRenderer<?>> rendererFactory;
-
-        Type(Supplier<LightTypeRenderer<?>> rendererFactory) {
-            this.rendererFactory = rendererFactory;
-        }
-
-        /**
-         * @return A new light renderer for this type of light
-         */
-        public LightTypeRenderer<?> createRenderer() {
-            return this.rendererFactory.get();
-        }
-    }
 }

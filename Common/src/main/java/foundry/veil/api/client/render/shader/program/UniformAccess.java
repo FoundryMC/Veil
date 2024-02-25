@@ -1,5 +1,6 @@
 package foundry.veil.api.client.render.shader.program;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import org.joml.*;
 
 /**
@@ -8,6 +9,17 @@ import org.joml.*;
  * @author Ocelot
  */
 public interface UniformAccess {
+
+    /**
+     * Sets default uniforms based on what {@link RenderSystem} provides.
+     */
+    default void applyRenderSystem() {
+        this.setMatrix("RenderModelViewMat", RenderSystem.getModelViewMatrix());
+        this.setMatrix("RenderProjMat", RenderSystem.getProjectionMatrix());
+        float[] color = RenderSystem.getShaderColor();
+        this.setVector("ColorModulator", color[0], color[1], color[2], color[3]);
+        this.setFloat("GameTime", RenderSystem.getShaderGameTime());
+    }
 
     /**
      * Sets the binding to use for the specified uniform block.

@@ -38,6 +38,6 @@ public record MaskPostStage(boolean red,
 
     @Override
     public PostPipelineStageRegistry.PipelineType<? extends PostPipeline> getType() {
-        return PostPipelineStageRegistry.MASK;
+        return PostPipelineStageRegistry.MASK.get();
     }
 }

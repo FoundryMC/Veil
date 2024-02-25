@@ -23,7 +23,7 @@ import org.lwjgl.system.NativeResource;
  */
 public interface PostPipeline extends UniformAccess, NativeResource {
 
-    Codec<PostPipeline> CODEC = PostPipelineStageRegistry.CODEC.dispatch(PostPipeline::getType, PostPipelineStageRegistry.PipelineType::codec);
+    Codec<PostPipeline> CODEC = PostPipelineStageRegistry.REGISTRY.byNameCodec().dispatch(PostPipeline::getType, PostPipelineStageRegistry.PipelineType::codec);
 
     /**
      * Applies this post effect.
@@ -96,10 +96,5 @@ public interface PostPipeline extends UniformAccess, NativeResource {
          * @return The main framebuffer to draw into. This is later copied onto the main framebuffer
          */
         AdvancedFbo getDrawFramebuffer();
-
-        @Override
-        default AbstractTexture getTexture(ResourceLocation name) {
-            return Minecraft.getInstance().getTextureManager().getTexture(name);
-        }
     }
 }

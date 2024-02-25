@@ -1,5 +1,11 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.editor.EditorAttributeProvider;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import imgui.ImGui;
+import imgui.flag.ImGuiDataType;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
 import org.joml.Vector3d;
 import org.joml.Vector3fc;
 
@@ -10,7 +16,7 @@ import java.nio.ByteBuffer;
  *
  * @author Ocelot
  */
-public class PointLight extends Light implements IndirectLight<PointLight> {
+public class PointLight extends Light implements IndirectLight<PointLight>, EditorAttributeProvider {
 
     protected final Vector3d position;
     protected float radius;
@@ -70,8 +76,13 @@ public class PointLight extends Light implements IndirectLight<PointLight> {
     }
 
     @Override
-    public Type getType() {
-        return Type.POINT;
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.POINT.get();
+    }
+
+    @Override
+    public String getEditorName() {
+        return "(%.3f, %.3f, %.3f)".formatted(this.position.x, this.position.y, this.position.z);
     }
 
     @Override
@@ -81,5 +92,41 @@ public class PointLight extends Light implements IndirectLight<PointLight> {
                 .setColor(this.color)
                 .setRadius(this.radius)
                 .setBrightness(this.brightness);
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        ImDouble editX = new ImDouble(this.position.x());
+        ImDouble editY = new ImDouble(this.position.y());
+        ImDouble editZ = new ImDouble(this.position.z());
+
+        ImFloat editRadius = new ImFloat(this.radius);
+
+        float totalWidth = ImGui.calcItemWidth();
+        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
+        if (ImGui.dragScalar("##x", ImGuiDataType.Double, editX, 0.02F)) {
+            this.setPosition(editX.get(), this.position.y(), this.position.z());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##y", ImGuiDataType.Double, editY, 0.02F)) {
+            this.setPosition(this.position.x(), editY.get(), this.position.z());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##z", ImGuiDataType.Double, editZ, 0.02F)) {
+            this.setPosition(this.position.x(), this.position.y(), editZ.get());
+        }
+
+        ImGui.popItemWidth();
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("position");
+
+        if (ImGui.dragScalar("##radius", ImGuiDataType.Float, editRadius, 0.02F, 0.0F)) {
+            this.setRadius(editRadius.get());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("radius");
+
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("falloff");
     }
 }

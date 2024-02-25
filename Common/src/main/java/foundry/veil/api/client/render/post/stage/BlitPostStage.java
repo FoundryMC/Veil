@@ -69,7 +69,7 @@ public class BlitPostStage extends FramebufferPostStage {
 
     @Override
     public PostPipelineStageRegistry.PipelineType<? extends PostPipeline> getType() {
-        return PostPipelineStageRegistry.BLIT;
+        return PostPipelineStageRegistry.BLIT.get();
     }
 
     @Override

@@ -24,9 +24,12 @@ import java.util.function.Supplier;
 public interface RegistrationProvider<T> {
 
     /**
-     * Gets a provider for specified {@code modId} and {@code resourceKey}. <br>
-     * It is <i>recommended</i> to store the resulted provider in a {@code static final} field to
-     * the {@link Factory#INSTANCE factory} creating multiple providers for the same resource key and mod id.
+     * The singleton instance of the {@link Factory}. This is different on each loader.
+     */
+    Factory FACTORY = ServiceLoader.load(Factory.class).findFirst().orElseThrow(() -> new RuntimeException("Failed to load registration provider"));
+
+    /**
+     * Gets a provider for specified {@code modId} and {@code resourceKey}.
      *
      * @param resourceKey the {@link ResourceKey} of the registry of the provider
      * @param modId       the mod id that the provider will register objects for
@@ -34,13 +37,11 @@ public interface RegistrationProvider<T> {
      * @return the provider
      */
     static <T> RegistrationProvider<T> get(ResourceKey<? extends Registry<T>> resourceKey, String modId) {
-        return Factory.INSTANCE.create(resourceKey, modId);
+        return FACTORY.create(resourceKey, modId);
     }
 
     /**
-     * Gets a provider for specified {@code modId} and {@code registry}. <br>
-     * It is <i>recommended</i> to store the resulted provider in a {@code static final} field to
-     * the {@link Factory#INSTANCE factory} creating multiple providers for the same resource key and mod id.
+     * Gets a provider for specified {@code modId} and {@code registry}.
      *
      * @param registry the {@link Registry} of the provider
      * @param modId    the mod id that the provider will register objects for
@@ -48,7 +49,7 @@ public interface RegistrationProvider<T> {
      * @return the provider
      */
     static <T> RegistrationProvider<T> get(Registry<T> registry, String modId) {
-        return Factory.INSTANCE.create(registry, modId);
+        return FACTORY.create(registry, modId);
     }
 
     /**
@@ -63,16 +64,17 @@ public interface RegistrationProvider<T> {
     <I extends T> RegistryObject<I> register(String name, Supplier<? extends I> supplier);
 
     /**
-     * Gets all the objects currently registered.
-     *
-     * @return an <strong>immutable</strong> view of all the objects currently registered
+     * @return An <strong>immutable</strong> view of all the objects currently registered
      */
     Collection<RegistryObject<T>> getEntries();
 
     /**
-     * Gets the mod id that this provider registers objects for.
-     *
-     * @return the mod id
+     * @return A wrapper of the underlying registry this provider registers into
+     */
+    Registry<T> asVanillaRegistry();
+
+    /**
+     * @return The mod id this provider registers objects for
      */
     String getModId();
 
@@ -82,11 +84,6 @@ public interface RegistrationProvider<T> {
      * should exist per mod loader.
      */
     interface Factory {
-
-        /**
-         * The singleton instance of the {@link Factory}. This is different on each loader.
-         */
-        Factory INSTANCE = ServiceLoader.load(Factory.class).findFirst().orElseThrow(() -> new RuntimeException("Failed to load registration provider"));
 
         /**
          * Creates a {@link RegistrationProvider}.

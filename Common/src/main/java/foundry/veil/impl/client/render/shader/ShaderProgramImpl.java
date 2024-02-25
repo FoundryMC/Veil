@@ -200,13 +200,21 @@ public class ShaderProgramImpl implements ShaderProgram {
         sampler++;
 
         for (Map.Entry<CharSequence, Integer> entry : this.textures.entrySet()) {
-            if (this.getUniform(entry.getKey()) == -1) {
+            CharSequence name = entry.getKey();
+            if (this.getUniform(name) == -1) {
+                continue;
+            }
+
+            // If the texture is "missing", then refer back to the bound missing texture
+            Integer textureId = entry.getValue();
+            if (textureId == 0) {
+                this.setInt(name, 0);
                 continue;
             }
 
             RenderSystem.activeTexture(GL_TEXTURE0 + sampler);
-            RenderSystem.bindTexture(entry.getValue());
-            this.setInt(entry.getKey(), sampler);
+            RenderSystem.bindTexture(textureId);
+            this.setInt(name, sampler);
             sampler++;
         }
         RenderSystem.activeTexture(activeTexture);
@@ -336,7 +344,7 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         public UniformWrapper(Supplier<MutableShaderUniformAccess> access, String name) {
             super(name, UT_INT1, 0, null);
-            this.close(); // Free constructor allocated resources
+            super.close(); // Free constructor allocated resources
             this.access = access;
         }
 
@@ -482,6 +490,10 @@ public class ShaderProgramImpl implements ShaderProgram {
 
         @Override
         public void upload() {
+        }
+
+        @Override
+        public void close() {
         }
 
         @Override

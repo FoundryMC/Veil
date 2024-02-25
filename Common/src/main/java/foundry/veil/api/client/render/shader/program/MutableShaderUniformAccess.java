@@ -22,17 +22,6 @@ import static org.lwjgl.opengl.GL41C.*;
 public interface MutableShaderUniformAccess extends UniformAccess, ShaderUniformAccess {
 
     /**
-     * Sets default uniforms based on what {@link RenderSystem} provides.
-     */
-    default void applyRenderSystem() {
-        this.setMatrix("RenderModelViewMat", RenderSystem.getModelViewMatrix());
-        this.setMatrix("RenderProjMat", RenderSystem.getProjectionMatrix());
-        float[] color = RenderSystem.getShaderColor();
-        this.setVector("ColorModulator", color[0], color[1], color[2], color[3]);
-        this.setFloat("GameTime", RenderSystem.getShaderGameTime());
-    }
-
-    /**
      * Applies the {@link RenderSystem} textures to <code>Sampler0</code>-<code>Sampler11</code>.
      */
     default void addRenderSystemTextures() {

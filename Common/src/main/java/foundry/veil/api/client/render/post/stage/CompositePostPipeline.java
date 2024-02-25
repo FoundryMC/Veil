@@ -59,7 +59,7 @@ public class CompositePostPipeline implements PostPipeline {
      *
      * @param stages                 The pipelines to run in order
      * @param textures               The textures to bind globally
-     * @param framebufferDefinitions The definitions of framebuffers to create in order to use in the stages
+     * @param framebufferDefinitions The definitions of framebuffers to create for use in the stages
      */
     public CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions) {
         this(stages, textures, framebufferDefinitions, 1000, false);
@@ -96,7 +96,6 @@ public class CompositePostPipeline implements PostPipeline {
     public PostPipelineStageRegistry.PipelineType<? extends PostPipeline> getType() {
         throw new UnsupportedOperationException("Composite pipelines cannot be encoded");
     }
-
 
     @Override
     public void setUniformBlock(CharSequence name, int binding) {

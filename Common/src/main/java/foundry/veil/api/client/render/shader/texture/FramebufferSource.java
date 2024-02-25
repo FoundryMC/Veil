@@ -17,20 +17,15 @@ public record FramebufferSource(ResourceLocation name,
                                 int sampler,
                                 boolean depth) implements ShaderTextureSource {
 
-    public static final Codec<FramebufferSource> CODEC =
-            RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.STRING.fieldOf("name").forGetter(source -> source.name.toString()),
-                    Codec.INT.optionalFieldOf("sampler", 0).forGetter(FramebufferSource::sampler)
-            ).apply(instance, (name, sampler) -> {
-                boolean depth = name.endsWith(":depth");
-                String path = depth ? name.substring(0, name.length() - 6) : name;
-                ResourceLocation location = name.contains(":") ? new ResourceLocation(path) : new ResourceLocation("temp", name);
-
-                if (depth) {
-                    return new FramebufferSource(location, 0, true);
-                }
-                return new FramebufferSource(location, sampler, false);
-            }));
+    public static final Codec<FramebufferSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("name").forGetter(source -> source.name.toString()),
+            Codec.INT.optionalFieldOf("sampler", 0).forGetter(FramebufferSource::sampler)
+    ).apply(instance, (name, sampler) -> {
+        boolean depth = name.endsWith(":depth");
+        String path = depth ? name.substring(0, name.length() - 6) : name;
+        ResourceLocation location = name.contains(":") ? new ResourceLocation(path) : new ResourceLocation("temp", name);
+        return new FramebufferSource(location, depth ? 0 : sampler, depth);
+    }));
 
     @Override
     public int getId(Context context) {

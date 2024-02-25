@@ -18,7 +18,7 @@ public class GameRendererMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.BEFORE))
     public void veil$renderPost(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
-        VeilRenderSystem.renderPost(partialTicks);
+        VeilRenderSystem.renderPost();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Lighting;setupFor3DItems()V", shift = At.Shift.AFTER))

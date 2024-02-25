@@ -1,0 +1,77 @@
+package foundry.veil.api.client.registry;
+
+import foundry.veil.Veil;
+import foundry.veil.api.client.render.deferred.light.*;
+import foundry.veil.api.client.render.deferred.light.renderer.LightTypeRenderer;
+import foundry.veil.impl.client.editor.LightEditor;
+import foundry.veil.impl.client.render.deferred.light.AreaLightRenderer;
+import foundry.veil.impl.client.render.deferred.light.DirectionalLightRenderer;
+import foundry.veil.impl.client.render.deferred.light.PointLightRenderer;
+import foundry.veil.platform.registry.RegistrationProvider;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+
+import java.util.function.Supplier;
+
+/**
+ * Registry for all light types.
+ */
+public class LightTypeRegistry {
+
+    public static final ResourceKey<Registry<LightType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(Veil.veilPath("light_type"));
+    private static final RegistrationProvider<LightType<?>> PROVIDER = RegistrationProvider.get(REGISTRY_KEY, Veil.MODID);
+    public static final Registry<LightType<?>> REGISTRY = PROVIDER.asVanillaRegistry();
+
+    public static final Supplier<LightType<DirectionalLight>> DIRECTIONAL = register("directional", DirectionalLightRenderer::new, (level, camera) -> new DirectionalLight().setDirection(0, -1, 0));
+    public static final Supplier<LightType<PointLight>> POINT = register("point", PointLightRenderer::new, (level, camera) -> new PointLight().setRadius(15.0F));
+    public static final Supplier<LightType<AreaLight>> AREA = register("area", AreaLightRenderer::new, (level, camera) -> new AreaLight()
+            .setDistance(15.0F)
+            .setOrientation(new Quaternionf().lookAlong(camera.getLookVector().mul(-1), camera.getUpVector())));
+
+    @ApiStatus.Internal
+    public static void bootstrap() {
+    }
+
+    private static <T extends Light> Supplier<LightType<T>> register(String name, RendererFactory<T> factory, @Nullable DebugLightFactory debugFactory) {
+        return PROVIDER.register(name, () -> new LightType<>(factory, debugFactory));
+    }
+
+    public record LightType<T extends Light>(RendererFactory<T> rendererFactory,
+                                             @Nullable DebugLightFactory debugLightFactory) {
+    }
+
+    /**
+     * Creates the renderer for lights when requested.
+     *
+     * @param <T> The type of light the renderer needs to draw
+     */
+    @FunctionalInterface
+    public interface RendererFactory<T extends Light> {
+
+        /**
+         * @return A new renderer for lights
+         */
+        LightTypeRenderer<T> createRenderer();
+    }
+
+    /**
+     * Creates debug lights for the {@link LightEditor}.
+     */
+    @FunctionalInterface
+    public interface DebugLightFactory {
+
+        /**
+         * Creates a new light in the level. The position is set automatically for {@link PositionedLight}.
+         *
+         * @param level  The level the light is in
+         * @param camera The camera the light is being spawned at
+         * @return The new light created
+         */
+        Light createDebugLight(ClientLevel level, Camera camera);
+    }
+}

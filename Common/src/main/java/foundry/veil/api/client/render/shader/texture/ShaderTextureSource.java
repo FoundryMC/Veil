@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Source for post textures. This allows resource location textures as well as other special types.
+ * Source for shader textures. This allows resource location textures as well as other special types.
  *
  * @author Ocelot
  */
@@ -31,15 +31,6 @@ public interface ShaderTextureSource {
                     source -> source instanceof LocationSource l ? Either.left(l.location()) : Either.right(source));
 
     Context GLOBAL_CONTEXT = new Context() {
-        @Override
-        public @Nullable AdvancedFbo getFramebuffer(ResourceLocation name) {
-            return VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(name);
-        }
-
-        @Override
-        public AbstractTexture getTexture(ResourceLocation name) {
-            return Minecraft.getInstance().getTextureManager().getTexture(name);
-        }
     };
 
     /**
@@ -106,7 +97,9 @@ public interface ShaderTextureSource {
          * @param name The name of the framebuffer to retrieve
          * @return The framebuffer with that id or <code>null</code> if it was not found
          */
-        @Nullable AdvancedFbo getFramebuffer(ResourceLocation name);
+        default @Nullable AdvancedFbo getFramebuffer(ResourceLocation name) {
+            return VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(name);
+        }
 
         /**
          * Retrieves a texture by id.
@@ -114,6 +107,8 @@ public interface ShaderTextureSource {
          * @param name The name of the texture to retrieve
          * @return The texture with that id or the missing texture if it was not found
          */
-        AbstractTexture getTexture(ResourceLocation name);
+        default AbstractTexture getTexture(ResourceLocation name) {
+            return Minecraft.getInstance().getTextureManager().getTexture(name);
+        }
     }
 }

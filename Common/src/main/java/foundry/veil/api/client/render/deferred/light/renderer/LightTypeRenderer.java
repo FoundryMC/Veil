@@ -1,7 +1,8 @@
-package foundry.veil.api.client.render.deferred.light;
+package foundry.veil.api.client.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.deferred.light.Light;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 

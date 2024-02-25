@@ -1,12 +1,18 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.editor.EditorAttributeProvider;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import imgui.ImGui;
+import imgui.flag.ImGuiDataType;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
 import net.minecraft.util.Mth;
 import org.joml.*;
 
 import java.lang.Math;
 import java.nio.ByteBuffer;
 
-public class AreaLight extends Light implements InstancedLight, PositionedLight<AreaLight> {
+public class AreaLight extends Light implements InstancedLight, PositionedLight<AreaLight>, EditorAttributeProvider {
 
     private static final float MAX_ANGLE_SIZE = (float) (65535 / 2 / Math.PI);
 
@@ -47,8 +53,13 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     }
 
     @Override
-    public Type getType() {
-        return Type.AREA;
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.AREA.get();
+    }
+
+    @Override
+    public String getEditorName() {
+        return "(%.3f, %.3f, %.3f)".formatted(this.position.x, this.position.y, this.position.z);
     }
 
     @Override
@@ -167,5 +178,81 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         light.distance = this.distance;
         light.markDirty();
         return light;
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        Vector3f orientationAngles = this.orientation.getEulerAnglesXYZ(new Vector3f());
+
+        float[] editSize = new float[]{this.size.x(), this.size.y()};
+
+        ImDouble editX = new ImDouble(this.position.x());
+        ImDouble editY = new ImDouble(this.position.y());
+        ImDouble editZ = new ImDouble(this.position.z());
+
+        ImFloat editXRot = new ImFloat(orientationAngles.x() * Mth.RAD_TO_DEG);
+        ImFloat editYRot = new ImFloat(orientationAngles.y() * Mth.RAD_TO_DEG);
+        ImFloat editZRot = new ImFloat(orientationAngles.z() * Mth.RAD_TO_DEG);
+
+        ImFloat editAngle = new ImFloat(this.angle * Mth.RAD_TO_DEG);
+        ImFloat editDistance = new ImFloat(this.distance);
+
+        if (ImGui.dragFloat2("##size", editSize, 0.02F, 0.0001F)) {
+            this.setSize(editSize[0], editSize[1]);
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("size");
+
+        float totalWidth = ImGui.calcItemWidth();
+        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
+        if (ImGui.dragScalar("##x", ImGuiDataType.Double, editX, 0.02F)) {
+            this.setPosition(editX.get(), this.position.y(), this.position.z());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##y", ImGuiDataType.Double, editY, 0.02F)) {
+            this.setPosition(this.position.x(), editY.get(), this.position.z());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##z", ImGuiDataType.Double, editZ, 0.02F)) {
+            this.setPosition(this.position.x(), this.position.y(), editZ.get());
+        }
+
+        ImGui.popItemWidth();
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("position");
+
+
+        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
+        if (ImGui.dragScalar("##xrot", ImGuiDataType.Float, editXRot, 0.2F)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(editXRot.get() * Mth.DEG_TO_RAD, orientationAngles.y(), orientationAngles.z()));
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##yrot", ImGuiDataType.Float, editYRot, 0.2F)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), editYRot.get() * Mth.DEG_TO_RAD, orientationAngles.z()));
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        if (ImGui.dragScalar("##zrot", ImGuiDataType.Float, editZRot, 0.2F)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), orientationAngles.y(), editZRot.get() * Mth.DEG_TO_RAD));
+        }
+
+        ImGui.popItemWidth();
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("orientation");
+
+
+        if (ImGui.dragScalar("##angle", ImGuiDataType.Float, editAngle, 0.02F, 0.0F, 180.0F)) {
+            this.setAngle(editAngle.get() * Mth.DEG_TO_RAD);
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("angle");
+
+        if (ImGui.dragScalar("##distance", ImGuiDataType.Float, editDistance, 0.02F, 0.0F)) {
+            this.setDistance(editDistance.get());
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("distance");
+
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("falloff");
     }
 }

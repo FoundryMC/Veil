@@ -3,7 +3,7 @@ package foundry.veil.api.client.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
@@ -250,7 +250,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         }
 
         profiler.push("setup_lights");
-        this.lightRenderer.setup(VeilRenderer.getCullingFrustum(), profiler);
+        this.lightRenderer.setup(VeilRenderer.getCullingFrustum());
         profiler.popPush("opaque_light");
         this.run(profiler, deferred, deferredLight, OPAQUE_POST, OPAQUE_MIX);
         profiler.popPush("transparent_light");
