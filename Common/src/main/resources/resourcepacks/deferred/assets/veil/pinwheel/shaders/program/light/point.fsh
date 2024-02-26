@@ -9,8 +9,6 @@ in float radius;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
-uniform usampler2D MaterialSampler;
-uniform sampler2D VanillaLightSampler;
 uniform sampler2D DiffuseDepthSampler;
 
 uniform vec2 ScreenSize;
@@ -20,7 +18,11 @@ out vec4 fragColor;
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
 
-    // sample buffers
+    vec4 albedoColor = texture(AlbedoSampler, screenUv);
+    if(albedoColor.a == 0) {
+        discard;
+    }
+
     float depth = texture(DiffuseDepthSampler, screenUv).r;
     vec3 pos = viewToWorldSpace(viewPosFromDepth(depth, screenUv));
 
@@ -33,5 +35,7 @@ void main() {
     diffuse = max(MINECRAFT_AMBIENT_LIGHT, diffuse);
     diffuse *= attenuate_no_cusp(length(offset), radius);
 
-    fragColor = vec4(diffuse * lightColor, 1.0);
+    float reflectivity = 0.1;
+    vec3 diffuseColor = diffuse * lightColor;
+    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, albedoColor.a);
 }

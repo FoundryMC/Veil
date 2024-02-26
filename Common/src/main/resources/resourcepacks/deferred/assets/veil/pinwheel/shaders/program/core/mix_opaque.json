@@ -14,8 +14,7 @@
     },
     "LightSampler": {
       "type": "framebuffer",
-      "name": "veil:opaque_light",
-      "sampler": 0
+      "name": "veil:opaque_light"
     }
   }
 }

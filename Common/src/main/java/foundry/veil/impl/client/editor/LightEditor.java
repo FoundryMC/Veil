@@ -102,9 +102,11 @@ public class LightEditor extends SingleWindowEditor {
 
     private static void renderLightComponents(Light light) {
         ImBoolean visible = new ImBoolean(true);
-        if (ImGui.collapsingHeader(light.getEditorName(), visible)) {
+        ImGui.pushID(light.hashCode());
+        if (ImGui.collapsingHeader("0x%X".formatted(light.hashCode()), visible)) {
             renderLightAttributeComponents(light);
         }
+        ImGui.popID();
         if (!visible.get()) {
             VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer().removeLight(light);
         }

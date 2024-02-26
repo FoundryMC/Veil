@@ -3,6 +3,7 @@
 
 in vec2 texCoord;
 
+uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
 uniform usampler2D MaterialSampler;
 uniform sampler2D LightMapSampler;
@@ -30,9 +31,10 @@ float getVanillaBrightness(vec3 Normal) {
 }
 
 void main() {
+    vec4 albedoColor = texture(AlbedoSampler, texCoord);
     vec3 normalVS = texture(NormalSampler, texCoord).xyz;
     uint material = texture(MaterialSampler, texCoord).r;
-    fragColor = vec4(1.0);
+    fragColor = vec4(albedoColor.rgb, 1.0);
     if (isBlock(material)) {
         fragColor.rgb *= vec3(getVanillaBrightness(normalVS));
     }

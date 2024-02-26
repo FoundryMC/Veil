@@ -1,5 +1,6 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.imgui.CodeEditor;
 import foundry.veil.api.client.imgui.VeilLanguageDefinitions;
@@ -98,7 +99,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     }
 
     private void setSelectedProgram(@Nullable ResourceLocation name) {
-        if (name != null) {
+        if (name != null && this.shaders.containsKey(name)) {
             int program = this.shaders.get(name);
             if (glIsProgram(program)) {
                 int[] attachedShaders = new int[glGetProgrami(program, GL_ATTACHED_SHADERS)];
@@ -112,7 +113,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                 this.selectedProgram = new SelectedProgram(name, program, Collections.unmodifiableMap(shaders));
                 return;
             } else {
-                System.out.println("Compiled shader does not exist for selected program.");
+                Veil.LOGGER.error("Compiled shader does not exist for program: {}", name);
             }
         }
 

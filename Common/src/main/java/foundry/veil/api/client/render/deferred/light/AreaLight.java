@@ -246,13 +246,8 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("angle");
 
-        if (ImGui.dragScalar("##distance", ImGuiDataType.Float, editDistance, 0.02F, 0.0F)) {
+        if (ImGui.dragScalar("distance", ImGuiDataType.Float, editDistance, 0.02F, 0.0F)) {
             this.setDistance(editDistance.get());
         }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("distance");
-
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("falloff");
     }
 }

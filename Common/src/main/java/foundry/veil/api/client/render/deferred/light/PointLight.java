@@ -120,13 +120,8 @@ public class PointLight extends Light implements IndirectLight<PointLight>, Edit
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("position");
 
-        if (ImGui.dragScalar("##radius", ImGuiDataType.Float, editRadius, 0.02F, 0.0F)) {
+        if (ImGui.dragScalar("radius", ImGuiDataType.Float, editRadius, 0.02F, 0.0F)) {
             this.setRadius(editRadius.get());
         }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("radius");
-
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("falloff");
     }
 }
