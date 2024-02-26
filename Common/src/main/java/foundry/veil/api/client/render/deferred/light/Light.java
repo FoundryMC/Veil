@@ -2,6 +2,7 @@ package foundry.veil.api.client.render.deferred.light;
 
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
+import net.minecraft.client.Camera;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -98,6 +99,15 @@ public abstract class Light implements Cloneable {
     }
 
     /**
+     * Sets the light position/rotation to be the same as the specified camera.
+     *
+     * @param camera The camera to set relative to
+     */
+    public Light setTo(Camera camera) {
+        return this;
+    }
+
+    /**
      * @return The brightness multiplier of the light.
      */
     public float getBrightness() {
@@ -115,11 +125,6 @@ public abstract class Light implements Cloneable {
      * @return The type of light this is
      */
     public abstract LightTypeRegistry.LightType<?> getType();
-
-    /**
-     * @return The individual name of this light in the editor
-     */
-    public abstract String getEditorName();
 
     @Override
     public abstract Light clone();

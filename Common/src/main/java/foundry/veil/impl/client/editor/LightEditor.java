@@ -5,7 +5,6 @@ import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.Light;
-import foundry.veil.api.client.render.deferred.light.PositionedLight;
 import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
@@ -16,7 +15,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3fc;
 
 import java.util.List;
@@ -50,13 +48,7 @@ public class LightEditor extends SingleWindowEditor {
             LightTypeRegistry.DebugLightFactory factory = lightType.debugLightFactory();
             Minecraft client = Minecraft.getInstance();
             Camera mainCamera = client.gameRenderer.getMainCamera();
-            Light light = factory.createDebugLight(client.level, mainCamera);
-
-            if (light instanceof PositionedLight<?> positionedLight) {
-                Vec3 cameraPos = mainCamera.getPosition();
-                positionedLight.setPosition(cameraPos.x(), cameraPos.y(), cameraPos.z());
-            }
-            lightRenderer.addLight(light.setColor(1.0F, 1.0F, 1.0F).setBrightness(1.0F));
+            lightRenderer.addLight(factory.createDebugLight(client.level, mainCamera));
         }
         ImGui.endDisabled();
         if (ImGui.isItemHovered(ImGuiHoveredFlags.None)) {
@@ -120,19 +112,19 @@ public class LightEditor extends SingleWindowEditor {
         float[] editLightColor = new float[]{lightColor.x(), lightColor.y(), lightColor.z()};
 
         ImGui.indent();
-        if (ImGui.dragScalar("##brightness", ImGuiDataType.Float, editBrightness, 0.02F)) {
+        if (ImGui.dragScalar("brightness", ImGuiDataType.Float, editBrightness, 0.02F)) {
             light.setBrightness(editBrightness.get());
         }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("brightness");
-
-        if (ImGui.colorPicker3("##color", editLightColor)) {
+        if (ImGui.colorEdit3("color", editLightColor)) {
             light.setColor(editLightColor[0], editLightColor[1], editLightColor[2]);
         }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("color");
+        
+        if (ImGui.button("Set Position/Rotation to View")) {
+            light.setTo(Minecraft.getInstance().gameRenderer.getMainCamera());
+        }
 
         ImGui.newLine();
+        ImGui.text("Attributes:");
 
         if (light instanceof EditorAttributeProvider editorAttributeProvider) {
             editorAttributeProvider.renderImGuiAttributes();

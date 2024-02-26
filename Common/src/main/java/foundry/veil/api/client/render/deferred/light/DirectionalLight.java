@@ -3,6 +3,8 @@ package foundry.veil.api.client.render.deferred.light;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import imgui.ImGui;
+import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -62,13 +64,14 @@ public class DirectionalLight extends Light implements EditorAttributeProvider {
     }
 
     @Override
-    public LightTypeRegistry.LightType<?> getType() {
-        return LightTypeRegistry.DIRECTIONAL.get();
+    public DirectionalLight setTo(Camera camera) {
+        Vector3f look = camera.getLookVector();
+        return this.setDirection(look.x, look.y, look.z);
     }
 
     @Override
-    public String getEditorName() {
-        return "(%.3f, %.3f, %.3f)".formatted(this.direction.x, this.direction.y, this.direction.z);
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.DIRECTIONAL.get();
     }
 
     @Override
@@ -82,7 +85,7 @@ public class DirectionalLight extends Light implements EditorAttributeProvider {
     public void renderImGuiAttributes() {
         float[] editDirection = new float[]{this.direction.x(), this.direction.y(), this.direction.z()};
 
-        if (ImGui.dragFloat3("##direction", editDirection, 0.005F)) {
+        if (ImGui.sliderFloat3("##direction", editDirection, -1.0F, 1.0F)) {
             Vector3f vector = new Vector3f(editDirection).normalize();
             if (!Float.isNaN(vector.x) && !Float.isNaN(vector.y) && !Float.isNaN(vector.z)) {
                 this.setDirection(vector);

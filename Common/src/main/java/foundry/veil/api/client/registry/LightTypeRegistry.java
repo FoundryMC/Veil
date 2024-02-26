@@ -14,7 +14,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
 
 import java.util.function.Supplier;
 
@@ -27,11 +26,9 @@ public class LightTypeRegistry {
     private static final RegistrationProvider<LightType<?>> PROVIDER = RegistrationProvider.get(REGISTRY_KEY, Veil.MODID);
     public static final Registry<LightType<?>> REGISTRY = PROVIDER.asVanillaRegistry();
 
-    public static final Supplier<LightType<DirectionalLight>> DIRECTIONAL = register("directional", DirectionalLightRenderer::new, (level, camera) -> new DirectionalLight().setDirection(0, -1, 0));
-    public static final Supplier<LightType<PointLight>> POINT = register("point", PointLightRenderer::new, (level, camera) -> new PointLight().setRadius(15.0F));
-    public static final Supplier<LightType<AreaLight>> AREA = register("area", AreaLightRenderer::new, (level, camera) -> new AreaLight()
-            .setDistance(15.0F)
-            .setOrientation(new Quaternionf().lookAlong(camera.getLookVector().mul(-1), camera.getUpVector())));
+    public static final Supplier<LightType<DirectionalLight>> DIRECTIONAL = register("directional", DirectionalLightRenderer::new, (level, camera) -> new DirectionalLight().setTo(camera).setDirection(0, -1, 0));
+    public static final Supplier<LightType<PointLight>> POINT = register("point", PointLightRenderer::new, (level, camera) -> new PointLight().setTo(camera).setRadius(15.0F));
+    public static final Supplier<LightType<AreaLight>> AREA = register("area", AreaLightRenderer::new, (level, camera) -> new AreaLight().setDistance(15.0F).setTo(camera));
 
     @ApiStatus.Internal
     public static void bootstrap() {

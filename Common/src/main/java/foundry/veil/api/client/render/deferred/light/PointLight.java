@@ -6,6 +6,8 @@ import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
+import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3fc;
 
@@ -76,13 +78,14 @@ public class PointLight extends Light implements IndirectLight<PointLight>, Edit
     }
 
     @Override
-    public LightTypeRegistry.LightType<?> getType() {
-        return LightTypeRegistry.POINT.get();
+    public PointLight setTo(Camera camera) {
+        Vec3 pos = camera.getPosition();
+        return this.setPosition(pos.x, pos.y, pos.z);
     }
 
     @Override
-    public String getEditorName() {
-        return "(%.3f, %.3f, %.3f)".formatted(this.position.x, this.position.y, this.position.z);
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.POINT.get();
     }
 
     @Override

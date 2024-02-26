@@ -6,7 +6,10 @@ import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.lang.Math;
@@ -55,11 +58,6 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
     @Override
     public LightTypeRegistry.LightType<?> getType() {
         return LightTypeRegistry.AREA.get();
-    }
-
-    @Override
-    public String getEditorName() {
-        return "(%.3f, %.3f, %.3f)".formatted(this.position.x, this.position.y, this.position.z);
     }
 
     @Override
@@ -162,6 +160,12 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         return this;
     }
 
+    @Override
+    public Light setTo(Camera camera) {
+        Vec3 pos = camera.getPosition();
+        return this.setPosition(pos.x, pos.y, pos.z).setOrientation(new Quaternionf().lookAlong(camera.getLookVector().mul(-1), camera.getUpVector()));
+    }
+
     protected void updateMatrix() {
         Vector3d position = this.getPosition();
         Quaternionf orientation = this.getOrientation();
@@ -190,18 +194,16 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         ImDouble editY = new ImDouble(this.position.y());
         ImDouble editZ = new ImDouble(this.position.z());
 
-        ImFloat editXRot = new ImFloat(orientationAngles.x() * Mth.RAD_TO_DEG);
-        ImFloat editYRot = new ImFloat(orientationAngles.y() * Mth.RAD_TO_DEG);
-        ImFloat editZRot = new ImFloat(orientationAngles.z() * Mth.RAD_TO_DEG);
+        float[] editXRot = new float[]{orientationAngles.x()};
+        float[] editYRot = new float[]{orientationAngles.y()};
+        float[] editZRot = new float[]{orientationAngles.z()};
 
-        ImFloat editAngle = new ImFloat(this.angle * Mth.RAD_TO_DEG);
+        float[] editAngle = new float[]{this.angle};
         ImFloat editDistance = new ImFloat(this.distance);
 
-        if (ImGui.dragFloat2("##size", editSize, 0.02F, 0.0001F)) {
+        if (ImGui.dragFloat2("size", editSize, 0.02F, 0.0001F)) {
             this.setSize(editSize[0], editSize[1]);
         }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text("size");
 
         float totalWidth = ImGui.calcItemWidth();
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
@@ -221,27 +223,25 @@ public class AreaLight extends Light implements InstancedLight, PositionedLight<
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("position");
 
-
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
-        if (ImGui.dragScalar("##xrot", ImGuiDataType.Float, editXRot, 0.2F)) {
-            this.setOrientation(new Quaternionf().rotationXYZ(editXRot.get() * Mth.DEG_TO_RAD, orientationAngles.y(), orientationAngles.z()));
+        if (ImGui.sliderAngle("##xrot", editXRot)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(editXRot[0], orientationAngles.y(), orientationAngles.z()));
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("##yrot", ImGuiDataType.Float, editYRot, 0.2F)) {
-            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), editYRot.get() * Mth.DEG_TO_RAD, orientationAngles.z()));
+        if (ImGui.sliderAngle("##yrot", editYRot)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), editYRot[0], orientationAngles.z()));
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("##zrot", ImGuiDataType.Float, editZRot, 0.2F)) {
-            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), orientationAngles.y(), editZRot.get() * Mth.DEG_TO_RAD));
+        if (ImGui.sliderAngle("##zrot", editZRot)) {
+            this.setOrientation(new Quaternionf().rotationXYZ(orientationAngles.x(), orientationAngles.y(), editZRot[0]));
         }
 
         ImGui.popItemWidth();
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("orientation");
 
-
-        if (ImGui.dragScalar("##angle", ImGuiDataType.Float, editAngle, 0.02F, 0.0F, 180.0F)) {
-            this.setAngle(editAngle.get() * Mth.DEG_TO_RAD);
+        if (ImGui.sliderAngle("##angle", editAngle, 0.0F, 180.0F, "%.1f")) {
+            this.setAngle(editAngle[0]);
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         ImGui.text("angle");
