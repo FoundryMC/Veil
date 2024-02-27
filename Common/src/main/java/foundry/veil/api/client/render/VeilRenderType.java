@@ -93,43 +93,25 @@ public final class VeilRenderType extends RenderType {
     public static class LayeredRenderType extends RenderType {
 
         private final List<RenderType> layers;
-        private final boolean sortOnUpload;
 
         private LayeredRenderType(RenderType defaultValue, List<RenderType> layers, String name, int bufferSize, boolean sortOnUpload) {
             super(name, defaultValue.format(), defaultValue.mode(), bufferSize, defaultValue.affectsCrumbling(), sortOnUpload, defaultValue::setupRenderState, defaultValue::clearRenderState);
             this.layers = layers;
-            this.sortOnUpload = sortOnUpload;
         }
 
         @Override
         public void end(BufferBuilder builder, VertexSorting sorting) {
-            if (!builder.building()) {
-                return;
-            }
-
-            if (this.sortOnUpload) {
-                builder.setQuadSorting(sorting);
-            }
-
-            BufferBuilder.RenderedBuffer buffer = builder.end();
-            if (buffer.isEmpty()) {
-                buffer.release();
-                return;
-            }
-
-            // Regular draw
-            this.setupRenderState();
-            BufferUploader.drawWithShader(buffer);
-            this.clearRenderState();
-
-            // Redraw buffer for each layer
-            for (RenderType layer : this.layers) {
-                layer.setupRenderState();
-                ShaderInstance shader = RenderSystem.getShader();
-                shader.apply();
-                BufferUploader.lastImmediateBuffer.draw();
-                shader.clear();
-                layer.clearRenderState();
+            BufferUploader.invalidate();
+            super.end(builder, sorting);
+            if (BufferUploader.lastImmediateBuffer != null) {
+                for (RenderType layer : this.layers) {
+                    layer.setupRenderState();
+                    ShaderInstance shader = RenderSystem.getShader();
+                    shader.apply();
+                    BufferUploader.lastImmediateBuffer.draw();
+                    shader.clear();
+                    layer.clearRenderState();
+                }
             }
         }
     }
