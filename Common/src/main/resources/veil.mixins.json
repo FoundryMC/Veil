@@ -36,6 +36,7 @@
     "client.pipeline.ReloadableResourceManagerAccessor",
     "client.pipeline.RenderSystemMixin",
     "client.pipeline.RenderTargetAccessor",
+    "client.pipeline.RenderTypeAccessor",
     "client.pipeline.VertexBufferMixin",
     "client.quasar.EntityMixin",
     "client.quasar.EntityRendererMixin",

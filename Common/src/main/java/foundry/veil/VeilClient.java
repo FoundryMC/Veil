@@ -1,10 +1,10 @@
 package foundry.veil;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import foundry.veil.api.client.registry.PostPipelineStageRegistry;
-import foundry.veil.api.client.render.RenderTypeStageRegistry;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.registry.LightTypeRegistry;
+import foundry.veil.api.client.registry.PostPipelineStageRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.registry.RenderTypeStageRegistry;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.VeilClientPlatform;
 import foundry.veil.platform.VeilEventPlatform;

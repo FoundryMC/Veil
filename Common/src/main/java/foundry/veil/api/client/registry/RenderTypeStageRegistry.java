@@ -1,4 +1,4 @@
-package foundry.veil.api.client.render;
+package foundry.veil.api.client.registry;
 
 import foundry.veil.ext.CompositeStateExtension;
 import foundry.veil.mixin.client.stage.RenderStateShardAccessor;
@@ -16,11 +16,14 @@ import java.util.function.Predicate;
  *
  * @author Ocelot
  */
-public class RenderTypeStageRegistry {
+public final class RenderTypeStageRegistry {
 
     private static final Map<String, List<RenderStateShard>> STAGES = new HashMap<>();
     private static final Set<GenericStage> GENERIC_STAGES = new HashSet<>();
     private static final Set<RenderType.CompositeRenderType> CREATED_RENDER_TYPES = new HashSet<>();
+
+    private RenderTypeStageRegistry() {
+    }
 
     /**
      * Registers a render stage. The specified shards will be added to the specified render type during construction.
