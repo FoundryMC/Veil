@@ -10,6 +10,6 @@ import java.util.Set;
 @Mixin(NewWorldRenderingPipeline.class)
 public interface NewWorldRenderingPipelineAccessor {
 
-    @Accessor
+    @Accessor(remap = false)
     Set<ShaderInstance> getLoadedShaders();
 }
