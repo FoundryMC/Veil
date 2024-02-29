@@ -110,7 +110,12 @@ public class VeilImGuiImpl implements VeilImGui {
     }
 
     public static void init(long window) {
-        instance = Veil.IMGUI ? new VeilImGuiImpl(window) : new InactiveVeilImGuiImpl();
+        try {
+            instance = Veil.IMGUI ? new VeilImGuiImpl(window) : new InactiveVeilImGuiImpl();
+        } catch (Throwable t) {
+            Veil.LOGGER.error("Failed to load ImGui", t);
+            instance = new InactiveVeilImGuiImpl();
+        }
     }
 
     public static VeilImGui get() {

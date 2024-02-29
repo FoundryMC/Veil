@@ -24,7 +24,7 @@ public class Veil {
 
     static {
         DEBUG = System.getProperty("veil.debug") != null;
-        IMGUI = System.getProperty("veil.disableImgui") == null && hasImguiNatives() && !PLATFORM.isModLoaded("axiom");
+        IMGUI = System.getProperty("veil.disableImgui") == null && !PLATFORM.isModLoaded("axiom");
     }
 
     private static boolean hasImguiNatives() {

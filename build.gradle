@@ -47,10 +47,10 @@ subprojects {
             name = 'BlameJared Maven (CrT / Bookshelf)'
             url = 'https://maven.blamejared.com'
         }
-        maven {
-            name "realrobotixImguiJava"
-            url "https://maven.realrobotix.me/imgui-java"
-        }
+//        maven {
+//            name "realrobotixImguiJava"
+//            url "https://maven.realrobotix.me/imgui-java"
+//        }
 //        maven {
 //            url "https://jitpack.io"
 //            content {
