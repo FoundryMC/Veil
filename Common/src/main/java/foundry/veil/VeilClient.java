@@ -30,7 +30,7 @@ public class VeilClient {
                 EditorManager editorManager = renderer.getEditorManager();
 
                 // debug editors
-                editorManager.add(new ExampleEditor());
+                editorManager.add(new DemoEditor());
                 editorManager.add(new PostEditor());
                 editorManager.add(new ShaderEditor());
                 editorManager.add(new TextureEditor());
