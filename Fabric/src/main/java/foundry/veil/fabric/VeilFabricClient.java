@@ -53,13 +53,15 @@ public class VeilFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(VeilRenderSystem.renderer().getDeferredRenderer()::reset));
         FabricQuasarParticleHandler.init();
-        IrisShaderMap.setLoadedShadersSupplier(() -> {
-            WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
-            if (pipeline instanceof NewWorldRenderingPipelineAccessor) {
-                return ((NewWorldRenderingPipelineAccessor) pipeline).getLoadedShaders();
-            }
-            return Collections.emptySet();
-        });
+        if (IrisShaderMap.isEnabled()) {
+            IrisShaderMap.setLoadedShadersSupplier(() -> {
+                WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
+                if (pipeline instanceof NewWorldRenderingPipelineAccessor) {
+                    return ((NewWorldRenderingPipelineAccessor) pipeline).getLoadedShaders();
+                }
+                return Collections.emptySet();
+            });
+        }
 
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 
