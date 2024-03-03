@@ -5,9 +5,6 @@ import foundry.veil.api.client.render.shader.definition.ShaderBlock;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
-
 import static org.lwjgl.opengl.GL15C.glDeleteBuffers;
 
 /**
@@ -19,13 +16,13 @@ import static org.lwjgl.opengl.GL15C.glDeleteBuffers;
 @ApiStatus.Internal
 public abstract class ShaderBlockImpl<T> implements ShaderBlock<T> {
 
-    protected final BiConsumer<T, ByteBuffer> serializer;
+    protected final int binding;
     protected int buffer;
     protected T value;
     protected boolean dirty;
 
-    protected ShaderBlockImpl(BiConsumer<T, ByteBuffer> serializer) {
-        this.serializer = serializer;
+    protected ShaderBlockImpl(int binding) {
+        this.binding = binding;
         this.buffer = 0;
         this.value = null;
         this.dirty = false;

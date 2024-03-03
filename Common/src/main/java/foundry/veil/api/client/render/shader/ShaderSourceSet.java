@@ -33,7 +33,7 @@ public final class ShaderSourceSet {
                 GL_TESS_EVALUATION_SHADER, new FileToIdConverter(folder, ".tesh"),
                 GL_GEOMETRY_SHADER, new FileToIdConverter(folder, ".gsh"),
                 GL_FRAGMENT_SHADER, new FileToIdConverter(folder, ".fsh"),
-                GL_COMPUTE_SHADER, new FileToIdConverter(folder, ".csh")
+                GL_COMPUTE_SHADER, new FileToIdConverter(folder, ".comp")
         );
     }
 

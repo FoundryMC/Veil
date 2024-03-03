@@ -47,6 +47,7 @@ public final class VeilShaders {
     public static final ResourceLocation LIGHT_VANILLA = light("vanilla");
     public static final ResourceLocation LIGHT_VANILLA_LIGHTMAP = light("vanilla_lightmap");
     public static final ResourceLocation LIGHT_SKY = light("sky");
+    public static final ResourceLocation LIGHT_INDIRECT_SPHERE = light("indirect_sphere");
 
     private static ResourceLocation core(String name) {
         return Veil.veilPath("core/" + name);

@@ -105,8 +105,8 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         });
     }
 
-    private ProgramDefinition parseDefinition(ShaderSourceSet set, ResourceLocation id, ResourceProvider provider) throws IOException {
-        try (Reader reader = provider.openAsReader(set.getShaderDefinitionLister().idToFile(id))) {
+    private ProgramDefinition parseDefinition(ResourceLocation id, ResourceProvider provider) throws IOException {
+        try (Reader reader = provider.openAsReader(this.sourceSet.getShaderDefinitionLister().idToFile(id))) {
             ProgramDefinition definition = GsonHelper.fromJson(GSON, reader, ProgramDefinition.class);
             if (definition.vertex() == null &&
                     definition.tesselationControl() == null &&
@@ -123,17 +123,17 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         }
     }
 
-    private void readShader(ShaderSourceSet set, ResourceManager resourceManager, Map<ResourceLocation, ProgramDefinition> definitions, Map<ResourceLocation, Resource> shaderSources, ResourceLocation id) {
+    private void readShader(ResourceManager resourceManager, Map<ResourceLocation, ProgramDefinition> definitions, Map<ResourceLocation, Resource> shaderSources, ResourceLocation id) {
         Set<ResourceLocation> checkedSources = new HashSet<>();
 
         try {
-            ProgramDefinition definition = this.parseDefinition(set, id, resourceManager);
+            ProgramDefinition definition = this.parseDefinition(id, resourceManager);
             if (definitions.put(id, definition) != null) {
                 throw new IllegalStateException("Duplicate shader ignored with ID " + id);
             }
 
             for (Map.Entry<Integer, ResourceLocation> shader : definition.shaders().entrySet()) {
-                FileToIdConverter typeConverter = set.getTypeConverter(shader.getKey());
+                FileToIdConverter typeConverter = this.sourceSet.getTypeConverter(shader.getKey());
                 ResourceLocation location = typeConverter.idToFile(shader.getValue());
 
                 if (!checkedSources.add(location)) {
@@ -148,7 +148,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 }
             }
         } catch (IOException | IllegalArgumentException | JsonParseException e) {
-            Veil.LOGGER.error("Couldn't parse shader {} from {}", id, set.getShaderDefinitionLister().idToFile(id), e);
+            Veil.LOGGER.error("Couldn't parse shader {} from {}", id, this.sourceSet.getShaderDefinitionLister().idToFile(id), e);
         }
     }
 
@@ -179,22 +179,23 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         return shaderSources;
     }
 
-    private void compile(ShaderSourceSet set, ShaderProgram program, ProgramDefinition definition, ShaderCompiler compiler) {
+    private void compile(ShaderProgram program, ProgramDefinition definition, ShaderCompiler compiler) {
         ResourceLocation id = program.getId();
         try {
-            program.compile(new ShaderCompiler.Context(this.definitions, set, definition), compiler);
+            program.compile(new ShaderCompiler.Context(this.definitions, this.sourceSet, definition), compiler);
         } catch (ShaderException e) {
             Veil.LOGGER.error("Failed to create shader {}: {}", id, e.getMessage());
-            Veil.LOGGER.warn(e.getGlError());
+            String error = e.getGlError();
+            if (error != null) {
+                Veil.LOGGER.warn(error);
+            }
         } catch (Exception e) {
             Veil.LOGGER.error("Failed to create shader: {}", id, e);
         }
     }
 
     private ShaderCompiler addProcessors(ShaderCompiler compiler) {
-        compiler.addDefaultProcessors();
-        compiler.addPreprocessor(new ShaderModifyProcessor(this.shaderModificationManager));
-        return compiler;
+        return compiler.addDefaultProcessors().addPreprocessor(new ShaderModifyProcessor(this.shaderModificationManager));
     }
 
     /**
@@ -224,7 +225,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         }
 
         try {
-            this.compile(this.sourceSet, program, this.parseDefinition(this.sourceSet, id, provider), compiler);
+            this.compile(program, this.parseDefinition(id, provider), compiler);
         } catch (Exception e) {
             Veil.LOGGER.error("Failed to read shader definition: {}", id, e);
         }
@@ -268,7 +269,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         Map<ResourceLocation, Resource> shaderSources = new HashMap<>();
 
         for (ResourceLocation key : shaders) {
-            this.readShader(this.sourceSet, resourceManager, definitions, shaderSources, key);
+            this.readShader(resourceManager, definitions, shaderSources, key);
         }
         shaderSources.putAll(this.readIncludes(resourceManager));
 
@@ -284,7 +285,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
             for (Map.Entry<ResourceLocation, ProgramDefinition> entry : reloadState.definitions().entrySet()) {
                 ResourceLocation id = entry.getKey();
                 ShaderProgram program = ShaderProgram.create(id);
-                this.compile(this.sourceSet, program, entry.getValue(), compiler);
+                this.compile(program, entry.getValue(), compiler);
                 this.shaders.put(id, program);
             }
         }
@@ -304,7 +305,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                     Veil.LOGGER.warn("Failed to recompile shader: {}", id);
                     continue;
                 }
-                this.compile(this.sourceSet, program, entry.getValue(), compiler);
+                this.compile(program, entry.getValue(), compiler);
             }
         }
 

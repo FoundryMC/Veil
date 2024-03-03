@@ -2,17 +2,19 @@ package foundry.veil.api.client.render.deferred.light.renderer;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import foundry.veil.Veil;
 import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.deferred.light.Light;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.deferred.light.IndirectLight;
-import foundry.veil.api.opencl.*;
+import foundry.veil.api.client.render.deferred.light.Light;
+import foundry.veil.api.client.render.shader.VeilShaders;
+import foundry.veil.api.client.render.shader.definition.DynamicShaderBlock;
+import foundry.veil.api.client.render.shader.definition.ShaderBlock;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.ext.VertexBufferExtension;
+import foundry.veil.impl.client.render.shader.definition.WrapperShaderBlockImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.joml.Vector3d;
-import org.joml.Vector3dc;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -22,9 +24,11 @@ import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Set;
 
-import static org.lwjgl.opencl.CL10.*;
 import static org.lwjgl.opengl.GL15C.*;
 import static org.lwjgl.opengl.GL40C.GL_DRAW_INDIRECT_BUFFER;
+import static org.lwjgl.opengl.GL42C.*;
+import static org.lwjgl.opengl.GL43C.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL43C.glDispatchCompute;
 
 /**
  * Draws lights as indirect instanced quads in the scene.
@@ -34,24 +38,24 @@ import static org.lwjgl.opengl.GL40C.GL_DRAW_INDIRECT_BUFFER;
  */
 public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> implements LightTypeRenderer<T> {
 
-    private static final CLEnvironment ENVIRONMENT = VeilOpenCL.get().getEnvironment(CLEnvironmentOptions.builder().setRequireGL(true).build());
     private static final int MIN_LIGHTS = 20;
 
     protected final int lightSize;
     protected final int highResSize;
     protected final int lowResSize;
+    protected final int positionOffset;
+    protected final int rangeOffset;
     protected int maxLights;
 
     private final VertexBuffer vbo;
     private final int instancedVbo;
     private final int indirectVbo;
+    private final int sizeVbo;
+    private final DynamicShaderBlock<?> instancedBlock;
+    private final DynamicShaderBlock<?> indirectBlock;
+    private final DynamicShaderBlock<?> sizeBlock;
 
     private int visibleLights;
-    private CLKernel kernel;
-    private CLBuffer clCounter;
-    private CLBuffer clFrustumPlanes;
-    private CLBuffer clInstancedBuffer;
-    private CLBuffer clIndirectBuffer;
 
     /**
      * Creates a new instanced light renderer with a resizeable light buffer.
@@ -66,66 +70,32 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
         this.instancedVbo = glGenBuffers();
         this.indirectVbo = glGenBuffers();
 
+        if (VeilRenderSystem.computeSupported() && VeilRenderSystem.atomicCounterSupported()) {
+            this.sizeVbo = glGenBuffers();
+            this.instancedBlock = ShaderBlock.wrapper(GL_SHADER_STORAGE_BUFFER, this.instancedVbo, 0);
+            this.indirectBlock = ShaderBlock.wrapper(GL_SHADER_STORAGE_BUFFER, this.indirectVbo, 0);
+            this.sizeBlock = ShaderBlock.wrapper(GL_ATOMIC_COUNTER_BUFFER, this.sizeVbo, Integer.BYTES);
+
+            glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, this.sizeVbo);
+            glBufferData(GL_ATOMIC_COUNTER_BUFFER, Integer.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+        } else {
+            this.sizeVbo = 0;
+            this.instancedBlock = null;
+            this.indirectBlock = null;
+            this.sizeBlock = null;
+        }
+
         this.vbo.bind();
         this.vbo.upload(this.createMesh());
 
         VertexBufferExtension ext = (VertexBufferExtension) this.vbo;
         this.highResSize = ext.veil$getIndexCount() - lowResSize;
         this.lowResSize = lowResSize;
-
-        if (ENVIRONMENT != null) { // FIXME this doesn't work properly
-            ResourceLocation name = Veil.veilPath("indirect_light");
-            ENVIRONMENT.loadProgram(name, """
-                    #define HIGH_RES_SIZE %d
-                    #define LOW_RES_SIZE %d
-                    #define LIGHT_SIZE %d
-                    #define POSITION_OFFSET %d
-                    #define RANGE_OFFSET %d
-                                
-                    bool testSphere(global const float* FrustumPlanes, const float x, const float y, const float z, const float r) {
-                        return FrustumPlanes[0] * x + FrustumPlanes[1] * y + FrustumPlanes[2] * z + FrustumPlanes[3] >= -r &&
-                               FrustumPlanes[4] * x + FrustumPlanes[5] * y + FrustumPlanes[6] * z + FrustumPlanes[7] >= -r &&
-                               FrustumPlanes[8] * x + FrustumPlanes[9] * y + FrustumPlanes[10] * z + FrustumPlanes[11] >= -r &&
-                               FrustumPlanes[12] * x + FrustumPlanes[13] * y + FrustumPlanes[14] * z + FrustumPlanes[15] >= -r &&
-                               FrustumPlanes[16] * x + FrustumPlanes[17] * y + FrustumPlanes[18] * z + FrustumPlanes[19] >= -r &&
-                               FrustumPlanes[20] * x + FrustumPlanes[21] * y + FrustumPlanes[22] * z + FrustumPlanes[23] >= -r;
-                    }
-                                   
-                    void kernel update_draw(const float4 CameraPos, volatile global int* Counter, global const float* FrustumPlanes, global const float* LightData, global uint* DrawData) {
-                        const int lightId = get_global_id(0);
-                        const int lightDataIndex = lightId * LIGHT_SIZE;
-                        float x = LightData[lightDataIndex + POSITION_OFFSET];
-                        float y = LightData[lightDataIndex + POSITION_OFFSET + 1];
-                        float z = LightData[lightDataIndex + POSITION_OFFSET + 2];
-                        float range = LightData[lightDataIndex + RANGE_OFFSET];
-                        
-                        bool visible = testSphere(FrustumPlanes, x - CameraPos.x, y - CameraPos.y, z - CameraPos.z, range * 1.414);
-                        if (visible) {
-                            int i = atomic_inc(Counter) * 5;
-                            bool highRes = (x - CameraPos.x) * (x - CameraPos.x) + (y - CameraPos.y) * (y - CameraPos.y) + (z - CameraPos.z) * (z - CameraPos.z) <= range * range;
-                            DrawData[i] = highRes ? HIGH_RES_SIZE : LOW_RES_SIZE;
-                            DrawData[i + 1] = 1;
-                            DrawData[i + 2] = !highRes ? HIGH_RES_SIZE : 0;
-                            DrawData[i + 3] = 0;
-                            DrawData[i + 4] = lightId;
-                        }
-                    }
-                    """.formatted(this.highResSize, this.lowResSize, lightSize, positionOffset, rangeOffset));
-
-            try {
-                this.kernel = ENVIRONMENT.createKernel(name, "update_draw");
-                this.clCounter = this.kernel.createBuffer(CL_MEM_READ_WRITE, Integer.BYTES);
-                this.clFrustumPlanes = this.kernel.createBuffer(CL_MEM_READ_ONLY, 24 * Float.BYTES);
-                this.kernel.setPointers(1, this.clCounter);
-                this.kernel.setPointers(2, this.clFrustumPlanes);
-            } catch (Exception e) {
-                Veil.LOGGER.error("Failed to create indirect kernel", e);
-                this.freeCL();
-            }
-        }
+        this.positionOffset = positionOffset;
+        this.rangeOffset = rangeOffset;
 
         // Initialize data buffers
-
         glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.indirectVbo);
 
@@ -167,34 +137,36 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
     private void initBuffers() {
         glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_DYNAMIC_DRAW);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) this.maxLights * Integer.BYTES * 5, GL_DYNAMIC_DRAW);
+        this.instancedBlock.setSize((long) this.maxLights * this.lightSize);
+        this.indirectBlock.setSize((long) this.maxLights * Integer.BYTES * 5);
 
-        if (this.kernel != null) {
-            try {
-                if (this.clInstancedBuffer != null) {
-                    this.clInstancedBuffer.free();
-                }
-                if (this.clIndirectBuffer != null) {
-                    this.clIndirectBuffer.free();
-                }
-                this.clInstancedBuffer = this.kernel.createBufferFromGL(CL_MEM_READ_ONLY, this.instancedVbo);
-                this.clIndirectBuffer = this.kernel.createBufferFromGL(CL_MEM_WRITE_ONLY, this.indirectVbo);
-                this.kernel.setPointers(3, this.clInstancedBuffer);
-                this.kernel.setPointers(4, this.clIndirectBuffer);
-            } catch (CLException e) {
-                Veil.LOGGER.error("Failed to initialize indirect compute", e);
-                this.freeCL();
-            }
-        } else {
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                ByteBuffer buffer = stack.calloc(Integer.BYTES * 5);
-                buffer.putInt(0, ((VertexBufferExtension) this.vbo).veil$getIndexCount());
-                buffer.putInt(4, 1);
-
-                for (int i = 0; i < this.maxLights; i++) {
-                    glBufferSubData(GL_DRAW_INDIRECT_BUFFER, i * Integer.BYTES * 5L, buffer);
-                }
-            }
-        }
+//        if (this.kernel != null) {
+//            try {
+//                if (this.clInstancedBuffer != null) {
+//                    this.clInstancedBuffer.free();
+//                }
+//                if (this.clIndirectBuffer != null) {
+//                    this.clIndirectBuffer.free();
+//                }
+//                this.clInstancedBuffer = this.kernel.createBufferFromGL(CL_MEM_READ_ONLY, this.instancedVbo);
+//                this.clIndirectBuffer = this.kernel.createBufferFromGL(CL_MEM_WRITE_ONLY, this.indirectVbo);
+//                this.kernel.setPointers(3, this.clInstancedBuffer);
+//                this.kernel.setPointers(4, this.clIndirectBuffer);
+//            } catch (CLException e) {
+//                Veil.LOGGER.error("Failed to initialize indirect compute", e);
+//                this.freeCL();
+//            }
+//        } else {
+//            try (MemoryStack stack = MemoryStack.stackPush()) {
+//                ByteBuffer buffer = stack.calloc(Integer.BYTES * 5);
+//                buffer.putInt(0, ((VertexBufferExtension) this.vbo).veil$getIndexCount());
+//                buffer.putInt(4, 1);
+//
+//                for (int i = 0; i < this.maxLights; i++) {
+//                    glBufferSubData(GL_DRAW_INDIRECT_BUFFER, i * Integer.BYTES * 5L, buffer);
+//                }
+//            }
+//        }
     }
 
     private boolean shouldDrawHighResolution(T light, CullFrustum frustum) {
@@ -225,39 +197,89 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
     }
 
     private int updateVisibility(List<T> lights, CullFrustum frustum) {
-        if (this.kernel != null) {
-            ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                profiler.push("acquire");
-                this.kernel.acquireFromGL(this.clInstancedBuffer, this.clIndirectBuffer);
-                profiler.popPush("upload");
+//        if (this.kernel != null) {
+//            ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+//            try (MemoryStack stack = MemoryStack.stackPush()) {
+//                profiler.push("acquire");
+//                this.kernel.acquireFromGL(this.clInstancedBuffer, this.clIndirectBuffer);
+//                profiler.popPush("upload");
+//
+//                this.clCounter.writeAsync(0L, stack.ints(0), null);
+//
+//                ByteBuffer planes = stack.malloc(6 * 4 * Float.BYTES);
+//                int index = 0;
+//                for (Vector4fc plane : frustum.getPlanes()) {
+//                    plane.get(index, planes);
+//                    index += 4 * Float.BYTES;
+//                }
+//                this.clFrustumPlanes.writeAsync(0L, planes, null);
+//
+//                profiler.popPush("setup");
+//                Vector3dc pos = frustum.getPosition();
+//                this.kernel.setVector4f(0, (float) pos.x(), (float) pos.y(), (float) pos.z(), 0);
+//                this.kernel.execute(lights.size(), 1);
+//
+//                profiler.popPush("release");
+//                this.kernel.releaseToGL(this.clInstancedBuffer, this.clIndirectBuffer);
+//
+//                profiler.popPush("read");
+//                IntBuffer data = stack.mallocInt(1);
+//                this.clCounter.read(0L, data);
+//                profiler.pop();
+//                return data.get(0);
+//            } catch (CLException e) {
+//                Veil.LOGGER.error("Failed to run indirect compute", e);
+//                this.freeCL();
+//            }
+//        }
 
-                this.clCounter.writeAsync(0L, stack.ints(0), null);
+        if (this.sizeVbo != 0) {
+            VeilRenderSystem.setShader(VeilShaders.LIGHT_INDIRECT_SPHERE);
+            ShaderProgram shader = VeilRenderSystem.getShader();
+            if (shader != null) {
+                try (MemoryStack stack = MemoryStack.stackPush()) {
+                    VeilRenderSystem.bind("VeilLightInstanced", this.instancedBlock);
+                    VeilRenderSystem.bind("VeilLightIndirect", this.indirectBlock);
 
-                ByteBuffer planes = stack.malloc(6 * 4 * Float.BYTES);
-                int index = 0;
-                for (Vector4fc plane : frustum.getPlanes()) {
-                    plane.get(index, planes);
-                    index += 4 * Float.BYTES;
+                    ((WrapperShaderBlockImpl) this.sizeBlock).bind(0);
+                    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, stack.callocInt(1));
+
+                    shader.setInt("HighResSize", this.highResSize);
+                    shader.setInt("LowResSize", this.lowResSize);
+                    shader.setInt("LightSize", this.lightSize);
+                    shader.setInt("PositionOffset", this.positionOffset);
+                    shader.setInt("RangeOffset", this.rangeOffset);
+
+                    Vector4fc[] planes = frustum.getPlanes();
+                    float[] values = new float[4 * planes.length];
+                    for (int i = 0; i < planes.length; i++) {
+                        Vector4fc plane = planes[i];
+                        values[i * 4] = plane.x();
+                        values[i * 4 + 1] = plane.y();
+                        values[i * 4 + 2] = plane.z();
+                        values[i * 4 + 3] = plane.w();
+                    }
+                    shader.setFloats("FrustumPlanes", values);
+
+                    shader.bind();
+
+                    glDispatchCompute(Math.min(lights.size(), VeilRenderSystem.maxComputeWorkGroupCountX()), 1, 1);
+                    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+
+                    ShaderProgram.unbind();
+
+                    IntBuffer counter = stack.mallocInt(1);
+                    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, this.sizeVbo);
+                    glGetBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0L, counter);
+                    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+                    return counter.get(0);
+                } finally {
+                    VeilRenderSystem.unbind(this.instancedBlock);
+                    VeilRenderSystem.unbind(this.indirectBlock);
+                    ((WrapperShaderBlockImpl) this.sizeBlock).unbind(0);
                 }
-                this.clFrustumPlanes.writeAsync(0L, planes, null);
-
-                profiler.popPush("setup");
-                Vector3dc pos = frustum.getPosition();
-                this.kernel.setVector4f(0, (float) pos.x(), (float) pos.y(), (float) pos.z(), 0);
-                this.kernel.execute(lights.size(), 1);
-
-                profiler.popPush("release");
-                this.kernel.releaseToGL(this.clInstancedBuffer, this.clIndirectBuffer);
-
-                profiler.popPush("read");
-                IntBuffer data = stack.mallocInt(1);
-                this.clCounter.read(0L, data);
-                profiler.pop();
-                return data.get(0);
-            } catch (CLException e) {
-                Veil.LOGGER.error("Failed to run indirect compute", e);
-                this.freeCL();
+            } else {
+                VeilRenderSystem.throwShaderError();
             }
         }
 
@@ -351,17 +373,6 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
         VertexBuffer.unbind();
     }
 
-    private void freeCL() {
-        if (this.kernel != null) {
-            this.kernel.free();
-            this.kernel = null;
-        }
-        this.clCounter = null;
-        this.clFrustumPlanes = null;
-        this.clInstancedBuffer = null;
-        this.clIndirectBuffer = null;
-    }
-
     @Override
     public int getVisibleLights() {
         return this.visibleLights;
@@ -372,6 +383,11 @@ public abstract class IndirectLightRenderer<T extends Light & IndirectLight<T>> 
         this.vbo.close();
         glDeleteBuffers(this.instancedVbo);
         glDeleteBuffers(this.indirectVbo);
-        this.freeCL();
+        if (this.sizeVbo != 0) {
+            glDeleteBuffers(this.sizeVbo);
+            this.instancedBlock.free();
+            this.indirectBlock.free();
+            this.sizeBlock.free();
+        }
     }
 }

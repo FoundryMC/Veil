@@ -1,6 +1,6 @@
 package foundry.veil.api.client.render.shader;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An exception used to indicate shader compilation and linking issues.
@@ -11,7 +11,7 @@ public class ShaderException extends Exception {
 
     private final String glError;
 
-    public ShaderException(@NotNull String error, @NotNull String glError) {
+    public ShaderException(String error, @Nullable String glError) {
         super(error);
         this.glError = glError;
     }
@@ -19,7 +19,7 @@ public class ShaderException extends Exception {
     /**
      * @return The OpenGL shader error.
      */
-    public @NotNull String getGlError() {
+    public @Nullable String getGlError() {
         return this.glError;
     }
 }

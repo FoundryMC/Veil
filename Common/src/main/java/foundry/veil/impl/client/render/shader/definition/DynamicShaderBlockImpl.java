@@ -24,7 +24,9 @@ import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 @ApiStatus.Internal
 public class DynamicShaderBlockImpl<T> extends ShaderBlockImpl<T> implements DynamicShaderBlock<T> {
 
-    private int size;
+    protected final BiConsumer<T, ByteBuffer> serializer;
+
+    private long size;
     private boolean resized;
 
     /**
@@ -33,21 +35,22 @@ public class DynamicShaderBlockImpl<T> extends ShaderBlockImpl<T> implements Dyn
      * @param size       The initial size of the shader buffer
      * @param serializer The serializer of values
      */
-    public DynamicShaderBlockImpl(int size, @NotNull BiConsumer<T, ByteBuffer> serializer) {
-        super(serializer);
+    public DynamicShaderBlockImpl(int binding, long size, @NotNull BiConsumer<T, ByteBuffer> serializer) {
+        super(binding);
+        this.serializer = serializer;
         this.size = size;
         this.resized = false;
     }
 
     @Override
-    public void setSize(int size) {
+    public void setSize(long size) {
         this.size = size;
         this.resized = true;
     }
 
     @Override
     public void bind(int index) {
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxTargetBindings(this.binding), index);
 
         if (this.buffer == 0) {
             this.buffer = glGenBuffers();
@@ -57,32 +60,32 @@ public class DynamicShaderBlockImpl<T> extends ShaderBlockImpl<T> implements Dyn
         if (this.resized) {
             this.resized = false;
             this.dirty = true;
-            glBindBuffer(GL_UNIFORM_BUFFER, this.buffer);
-            glBufferData(GL_UNIFORM_BUFFER, this.size, GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBuffer(this.binding, this.buffer);
+            glBufferData(this.binding, this.size, GL_DYNAMIC_DRAW);
+            glBindBuffer(this.binding, 0);
         }
 
         if (this.dirty) {
             this.dirty = false;
-            glBindBuffer(GL_UNIFORM_BUFFER, this.buffer);
+            glBindBuffer(this.binding, this.buffer);
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 if (this.value != null) {
-                    ByteBuffer buffer = stack.malloc(this.size);
+                    ByteBuffer buffer = stack.malloc((int) this.size);
                     this.serializer.accept(this.value, buffer);
-                    glBufferSubData(GL_UNIFORM_BUFFER, 0, buffer);
+                    glBufferSubData(this.binding, 0, buffer);
                 } else {
-                    glBufferSubData(GL_UNIFORM_BUFFER, 0, stack.calloc(this.size));
+                    glBufferSubData(this.binding, 0, stack.calloc((int) this.size));
                 }
             }
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBuffer(this.binding, 0);
         }
 
-        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+        glBindBufferRange(this.binding, index, this.buffer, 0, this.size);
     }
 
     @Override
     public void unbind(int index) {
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
-        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxTargetBindings(this.binding), index);
+        glBindBufferRange(this.binding, index, 0, 0, this.size);
     }
 }

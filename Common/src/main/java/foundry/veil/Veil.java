@@ -17,6 +17,7 @@ public class Veil {
     public static final Logger LOGGER = LoggerFactory.getLogger("Veil");
     public static final boolean DEBUG;
     public static final boolean IMGUI;
+    public static final boolean VERBOSE_SHADER_ERRORS;
 
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
 
@@ -25,6 +26,7 @@ public class Veil {
     static {
         DEBUG = System.getProperty("veil.debug") != null;
         IMGUI = System.getProperty("veil.disableImgui") == null && !PLATFORM.isModLoaded("axiom");
+        VERBOSE_SHADER_ERRORS = System.getProperty("veil.verboseShaderErrors") != null;
     }
 
     private static boolean hasImguiNatives() {

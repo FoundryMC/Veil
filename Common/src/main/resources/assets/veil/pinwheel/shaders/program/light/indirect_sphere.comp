@@ -1,0 +1,52 @@
+#extension GL_ARB_compute_shader : require
+#extension GL_ARB_shader_storage_buffer_object : require
+
+#include veil:camera
+
+layout(std430) buffer VeilLightInstanced {
+    float data[];
+} Instanced;
+
+layout(std430) buffer VeilLightIndirect {
+    int commands[];
+} Indirect;
+
+layout(binding = 0) uniform atomic_uint VeilLightCount;
+
+uniform int HighResSize;
+uniform int LowResSize;
+uniform int LightSize;
+uniform int PositionOffset;
+uniform int RangeOffset;
+uniform float FrustumPlanes[24];
+
+bool testSphere(float x, float y, float z, float r) {
+    return FrustumPlanes[0] * x + FrustumPlanes[1] * y + FrustumPlanes[2] * z + FrustumPlanes[3] >= -r &&
+           FrustumPlanes[4] * x + FrustumPlanes[5] * y + FrustumPlanes[6] * z + FrustumPlanes[7] >= -r &&
+           FrustumPlanes[8] * x + FrustumPlanes[9] * y + FrustumPlanes[10] * z + FrustumPlanes[11] >= -r &&
+           FrustumPlanes[12] * x + FrustumPlanes[13] * y + FrustumPlanes[14] * z + FrustumPlanes[15] >= -r &&
+           FrustumPlanes[16] * x + FrustumPlanes[17] * y + FrustumPlanes[18] * z + FrustumPlanes[19] >= -r &&
+           FrustumPlanes[20] * x + FrustumPlanes[21] * y + FrustumPlanes[22] * z + FrustumPlanes[23] >= -r;
+}
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+    uint lightId = gl_GlobalInvocationID.x;
+    uint lightDataIndex = lightId * LightSize;
+
+    float x = Instanced.data[lightDataIndex + PositionOffset];
+    float y = Instanced.data[lightDataIndex + PositionOffset + 1];
+    float z = Instanced.data[lightDataIndex + PositionOffset + 2];
+    float range = Instanced.data[lightDataIndex + RangeOffset];
+
+    bool visible = testSphere(x - VeilCamera.CameraPosition.x, y - VeilCamera.CameraPosition.y, z - VeilCamera.CameraPosition.z, range * 1.414);
+    if (visible) {
+        uint i = atomicCounterIncrement(VeilLightCount) * 5;
+        bool highRes = (x - VeilCamera.CameraPosition.x) * (x - VeilCamera.CameraPosition.x) + (y - VeilCamera.CameraPosition.y) * (y - VeilCamera.CameraPosition.y) + (z - VeilCamera.CameraPosition.z) * (z - VeilCamera.CameraPosition.z) <= range * range;
+        Indirect.commands[i] = highRes ? HighResSize : LowResSize;
+        Indirect.commands[i + 1] = 1;
+        Indirect.commands[i + 2] = !highRes ? HighResSize : 0;
+        Indirect.commands[i + 3] = 0;
+        Indirect.commands[i + 4] = int(lightId);
+    }
+}

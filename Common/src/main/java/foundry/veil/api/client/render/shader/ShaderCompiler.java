@@ -54,15 +54,15 @@ public interface ShaderCompiler extends NativeResource {
      * @param processor     The processor to add
      * @param modifyImports Whether the processor will also be run on imports
      */
-    void addPreprocessor(ShaderPreProcessor processor, boolean modifyImports);
+    ShaderCompiler addPreprocessor(ShaderPreProcessor processor, boolean modifyImports);
 
     /**
      * Adds the specified pre-processor to the end of the stack.
      *
      * @param processor The processor to add
      */
-    default void addPreprocessor(ShaderPreProcessor processor) {
-        this.addPreprocessor(processor, true);
+    default ShaderCompiler addPreprocessor(ShaderPreProcessor processor) {
+     return    this.addPreprocessor(processor, true);
     }
 
     /**

@@ -22,52 +22,48 @@ import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 @ApiStatus.Internal
 public class SizedShaderBlockImpl<T> extends ShaderBlockImpl<T> {
 
+    protected final BiConsumer<T, ByteBuffer> serializer;
     private final int size;
 
-    /**
-     * Creates a new shader block of specified size.
-     *
-     * @param size       The size of the shader buffer
-     * @param serializer The serializer of values
-     */
-    public SizedShaderBlockImpl(int size, BiConsumer<T, ByteBuffer> serializer) {
-        super(serializer);
+    public SizedShaderBlockImpl(int binding, int size, BiConsumer<T, ByteBuffer> serializer) {
+        super(binding);
+        this.serializer = serializer;
         this.size = size;
     }
 
     @Override
     public void bind(int index) {
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxTargetBindings(this.binding), index);
 
         if (this.buffer == 0) {
             this.buffer = glGenBuffers();
-            glBindBuffer(GL_UNIFORM_BUFFER, this.buffer);
-            glBufferData(GL_UNIFORM_BUFFER, this.size, GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBuffer(this.binding, this.buffer);
+            glBufferData(this.binding, this.size, GL_DYNAMIC_DRAW);
+            glBindBuffer(this.binding, 0);
             this.dirty = true;
         }
 
         if (this.dirty) {
             this.dirty = false;
-            glBindBuffer(GL_UNIFORM_BUFFER, this.buffer);
+            glBindBuffer(this.binding, this.buffer);
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 if (this.value != null) {
                     ByteBuffer buffer = stack.malloc(this.size);
                     this.serializer.accept(this.value, buffer);
-                    glBufferSubData(GL_UNIFORM_BUFFER, 0, buffer);
+                    glBufferSubData(this.binding, 0, buffer);
                 } else {
-                    glBufferSubData(GL_UNIFORM_BUFFER, 0, stack.calloc(this.size));
+                    glBufferSubData(this.binding, 0, stack.calloc(this.size));
                 }
             }
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBuffer(this.binding, 0);
         }
 
-        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+        glBindBufferRange(this.binding, index, this.buffer, 0, this.size);
     }
 
     @Override
     public void unbind(int index) {
-        Validate.inclusiveBetween(0, VeilRenderSystem.maxUniformBuffersBindings(), index);
-        glBindBufferRange(GL_UNIFORM_BUFFER, index, this.buffer, 0, this.size);
+        Validate.inclusiveBetween(0, VeilRenderSystem.maxTargetBindings(this.binding), index);
+        glBindBufferRange(this.binding, index, 0, 0, this.size);
     }
 }
