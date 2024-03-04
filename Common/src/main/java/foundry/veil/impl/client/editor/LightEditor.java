@@ -17,11 +17,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3fc;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class LightEditor extends SingleWindowEditor {
 
+    private final List<ResourceKey<LightTypeRegistry.LightType<?>>> lightTypes = new ArrayList<>();
     private ResourceKey<LightTypeRegistry.LightType<?>> selectedTab;
 
     @Override
@@ -39,7 +42,7 @@ public class LightEditor extends SingleWindowEditor {
         LightRenderer lightRenderer = VeilRenderSystem.renderer().getDeferredRenderer().getLightRenderer();
 
         if (this.selectedTab == null || !LightTypeRegistry.REGISTRY.containsKey(this.selectedTab)) {
-            this.selectedTab = LightTypeRegistry.REGISTRY.registryKeySet().iterator().next();
+            this.selectedTab = this.lightTypes.get(0);
         }
 
         LightTypeRegistry.LightType<?> lightType = LightTypeRegistry.REGISTRY.get(this.selectedTab);
@@ -76,11 +79,11 @@ public class LightEditor extends SingleWindowEditor {
         }
 
         ImGui.beginTabBar("lights");
-        for (Map.Entry<ResourceKey<LightTypeRegistry.LightType<?>>, LightTypeRegistry.LightType<?>> entry : LightTypeRegistry.REGISTRY.entrySet()) {
-            ResourceLocation id = entry.getKey().location();
+        for (ResourceKey<LightTypeRegistry.LightType<?>> key : this.lightTypes) {
+            ResourceLocation id = key.location();
             if (ImGui.beginTabItem(id.toString())) {
-                this.selectedTab = entry.getKey();
-                List<Light> lights = lightRenderer.getLights(entry.getValue());
+                this.selectedTab = key;
+                List<Light> lights = lightRenderer.getLights(LightTypeRegistry.REGISTRY.get(key));
                 for (int i = 0; i < lights.size(); i++) {
                     ImGui.pushID("light" + i);
                     renderLightComponents(lights.get(i));
@@ -90,6 +93,13 @@ public class LightEditor extends SingleWindowEditor {
             }
         }
         ImGui.endTabBar();
+    }
+
+    @Override
+    public void onShow() {
+        super.onShow();
+        this.lightTypes.clear();
+        this.lightTypes.addAll(LightTypeRegistry.REGISTRY.registryKeySet().stream().sorted(Comparator.comparing(ResourceKey::location)).toList());
     }
 
     private static void renderLightComponents(Light light) {
@@ -118,7 +128,7 @@ public class LightEditor extends SingleWindowEditor {
         if (ImGui.colorEdit3("color", editLightColor)) {
             light.setColor(editLightColor[0], editLightColor[1], editLightColor[2]);
         }
-        
+
         if (ImGui.button("Set Position/Rotation to View")) {
             light.setTo(Minecraft.getInstance().gameRenderer.getMainCamera());
         }

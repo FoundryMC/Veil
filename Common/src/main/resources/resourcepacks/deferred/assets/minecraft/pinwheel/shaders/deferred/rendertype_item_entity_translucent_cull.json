@@ -2,7 +2,6 @@
   "vertex": "entity",
   "fragment": "rendertype_item_entity_translucent_cull",
   "definitions": [
-    "DISABLE_VANILLA_ENTITY_LIGHT",
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
+    "DISABLE_VANILLA_ENTITY_LIGHT"
   ]
 }

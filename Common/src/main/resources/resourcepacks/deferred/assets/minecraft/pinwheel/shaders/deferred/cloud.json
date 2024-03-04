@@ -1,7 +1,4 @@
 {
   "vertex": "cloud",
-  "fragment": "cloud",
-  "definitions": [
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
-  ]
+  "fragment": "cloud"
 }

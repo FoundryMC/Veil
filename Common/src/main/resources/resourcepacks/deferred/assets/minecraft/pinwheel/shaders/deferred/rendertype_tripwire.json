@@ -1,7 +1,4 @@
 {
   "vertex": "block",
-  "fragment": "rendertype_tripwire",
-  "definitions": [
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
-  ]
+  "fragment": "rendertype_tripwire"
 }

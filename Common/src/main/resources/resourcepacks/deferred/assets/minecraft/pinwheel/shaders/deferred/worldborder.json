@@ -1,7 +1,4 @@
 {
   "vertex": "worldborder",
-  "fragment": "worldborder",
-  "definitions": [
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
-  ]
+  "fragment": "worldborder"
 }

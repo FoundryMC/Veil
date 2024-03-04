@@ -1,5 +1,5 @@
 #include veil:material
-#include veil:translucent_buffers
+#include veil:deferred_buffers
 #include veil:blend
 
 uniform sampler2D Sampler0;
@@ -25,7 +25,4 @@ void main() {
     fragMaterial = ivec4(ENTITY_TRANSLUCENT_EMISSIVE, ADDITIVE_TRANSPARENCY, 0, 1);
     fragLightSampler = vec4(texCoord2, 0.0, 1.0);
     fragLightMap = lightmapColor;
-    #ifdef USE_BAKED_TRANSPARENT_LIGHTMAPS
-    fragAlbedoLightMap = color * lightmapColor;
-    #endif
 }

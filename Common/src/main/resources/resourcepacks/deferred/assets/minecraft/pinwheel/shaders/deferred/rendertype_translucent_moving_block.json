@@ -1,7 +1,4 @@
 {
   "vertex": "block",
-  "fragment": "rendertype_translucent_moving_block",
-  "definitions": [
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
-  ]
+  "fragment": "rendertype_translucent_moving_block"
 }

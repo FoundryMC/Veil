@@ -36,9 +36,7 @@ public class VanillaLightRenderer implements NativeResource {
     }
 
     public void render(LightRenderer lightRenderer, ClientLevel level) {
-        VeilRenderer renderer = VeilRenderSystem.renderer();
-        boolean useBaked = renderer.getShaderDefinitions().getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null && lightRenderer.getFramebuffer() == renderer.getFramebufferManager().getFramebuffer(VeilFramebuffers.TRANSPARENT);
-        VeilRenderSystem.setShader(useBaked ? VeilShaders.LIGHT_VANILLA : VeilShaders.LIGHT_VANILLA_LIGHTMAP);
+        VeilRenderSystem.setShader(VeilShaders.LIGHT_VANILLA_LIGHTMAP);
         lightRenderer.applyShader();
 
         ShaderProgram shader = VeilRenderSystem.getShader();

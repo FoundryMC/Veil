@@ -49,7 +49,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
-    public static final String USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY = "USE_BAKED_TRANSPARENT_LIGHTMAPS";
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
@@ -86,7 +85,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
                 this.enabled = active;
                 if (active) {
                     Veil.LOGGER.info("Deferred Renderer Enabled");
-                    this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
                 } else {
                     Veil.LOGGER.info("Deferred Renderer Disabled");
                     return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
@@ -290,11 +288,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         boolean ambientOcclusion = this.lightRenderer.isAmbientOcclusionEnabled();
         boolean vanillaLights = this.lightRenderer.isVanillaLightEnabled();
         boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
-        boolean bakeTransparencyLightmaps = this.shaderPreDefinitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null;
         consumer.accept("Ambient Occlusion: " + (ambientOcclusion ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Light: " + (vanillaLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Entity Light: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
-        consumer.accept("Bake Transparency Lightmap: " + (bakeTransparencyLightmaps ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         this.lightRenderer.addDebugInfo(consumer);
     }
 
