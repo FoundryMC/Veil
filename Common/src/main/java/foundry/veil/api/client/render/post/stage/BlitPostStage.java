@@ -13,7 +13,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 
+import java.util.Arrays;
 import java.util.Optional;
+
+import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 
 /**
  * A basic stage that draws a quad to the output using a specified shader.
@@ -73,10 +76,36 @@ public class BlitPostStage extends FramebufferPostStage {
     }
 
     @Override
+    public boolean hasUniform(CharSequence name) {
+        ShaderProgram shader = this.getShader();
+        return shader != null && shader.hasUniform(name);
+    }
+
+    @Override
+    public boolean hasUniformBlock(CharSequence name) {
+        ShaderProgram shader = this.getShader();
+        return shader != null && shader.hasUniformBlock(name);
+    }
+
+    @Override
+    public boolean hasStorageBlock(CharSequence name) {
+        ShaderProgram shader = this.getShader();
+        return shader != null && shader.hasStorageBlock(name);
+    }
+
+    @Override
     public void setUniformBlock(CharSequence name, int binding) {
         ShaderProgram shader = this.getShader();
         if (shader != null) {
             shader.setUniformBlock(name, binding);
+        }
+    }
+
+    @Override
+    public void setStorageBlock(CharSequence name, int binding) {
+        ShaderProgram shader = this.getShader();
+        if (shader != null) {
+            shader.setStorageBlock(name, binding);
         }
     }
 

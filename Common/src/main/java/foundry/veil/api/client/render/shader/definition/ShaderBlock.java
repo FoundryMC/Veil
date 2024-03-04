@@ -66,11 +66,10 @@ public interface ShaderBlock<T> extends NativeResource {
      *
      * @param binding The buffer attachment point
      * @param buffer      The buffer to bind as a shader block
-     * @param initialSize The initial size of the buffer
      * @return A new shader block
      */
-    static DynamicShaderBlock<?> wrapper(int binding, int buffer, int initialSize) {
-        return new WrapperShaderBlockImpl(binding , buffer, initialSize);
+    static DynamicShaderBlock<?> wrapper(int binding, int buffer) {
+        return new WrapperShaderBlockImpl(binding , buffer);
     }
 
     /**

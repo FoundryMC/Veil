@@ -1,293 +1,188 @@
 package foundry.veil.api.client.render.shader.program;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import org.joml.*;
+import org.lwjgl.opengl.GL31C;
+
+import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 
 /**
- * Provides write access to all uniform variables in a shader program.
+ * Provides read and write access to all uniform variables in a shader program.
  *
  * @author Ocelot
  */
 public interface UniformAccess {
 
     /**
-     * Sets default uniforms based on what {@link RenderSystem} provides.
+     * Retrieves the location of a uniform.
+     *
+     * @param name The name of the uniform to get
+     * @return The location of that uniform or <code>-1</code> if not found
      */
-    default void applyRenderSystem() {
-        this.setMatrix("RenderModelViewMat", RenderSystem.getModelViewMatrix());
-        this.setMatrix("RenderProjMat", RenderSystem.getProjectionMatrix());
-        float[] color = RenderSystem.getShaderColor();
-        this.setVector("ColorModulator", color[0], color[1], color[2], color[3]);
-        this.setFloat("GameTime", RenderSystem.getShaderGameTime());
+    int getUniform(CharSequence name);
+
+    /**
+     * Checks if the specified uniform exists in the shader.
+     *
+     * @param name The name of the uniform to check
+     * @return Whether that uniform can be set
+     */
+    default boolean hasUniform(CharSequence name) {
+        return this.getUniform(name) != -1;
     }
 
     /**
-     * Sets the binding to use for the specified uniform block.
+     * Retrieves the location of a uniform block.
      *
-     * @param name    The name of the block to set
-     * @param binding The binding to use for that block
+     * @param name The name of the uniform block to get
+     * @return The location of that uniform block or {@value GL31C#GL_INVALID_INDEX} if not found
      */
-    default void setUniformBlock(CharSequence name, int binding) {
+    int getUniformBlock(CharSequence name);
+
+    /**
+     * Checks if the specified uniform block exists in the shader.
+     *
+     * @param name The name of the uniform block to check
+     * @return Whether that uniform block can be set
+     */
+    default boolean hasUniformBlock(CharSequence name) {
+        return this.getUniformBlock(name) != GL_INVALID_INDEX;
     }
 
     /**
-     * Sets a float in the shader.
+     * Retrieves the location of a storage block.
      *
-     * @param name  The name of the uniform to set
+     * @param name The name of the storage block to get
+     * @return The location of that storage block or {@value GL31C#GL_INVALID_INDEX} if not found
+     */
+    int getStorageBlock(CharSequence name);
+
+    /**
+     * Checks if the specified storage block exists in the shader.
+     *
+     * @param name The name of the storage block to check
+     * @return Whether that storage block can be set
+     */
+    default boolean hasStorageBlock(CharSequence name) {
+        return this.getStorageBlock(name) != GL_INVALID_INDEX;
+    }
+
+    /**
+     * Retrieves a single float by the specified name.
+     *
+     * @param name The name of the uniform to get
+     * @return The float value of that uniform
+     */
+    float getFloat(CharSequence name);
+
+    /**
+     * Retrieves a single integer by the specified name.
+     *
+     * @param name The name of the uniform to get
+     * @return The int value of that uniform
+     */
+    int getInt(CharSequence name);
+
+    /**
+     * Retrieves an array of floats by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getFloats(CharSequence name, float[] values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector2f... values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector3f... values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector4f... values);
+
+    /**
+     * Retrieves an array of integers by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getInts(CharSequence name, int[] values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector2i... values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector3i... values);
+
+    /**
+     * Retrieves an array of vectors by the specified name.
+     *
+     * @param name   The name of the uniform to get
+     * @param values The values to set
+     */
+    void getVector(CharSequence name, Vector4i... values);
+
+    /**
+     * Retrieves a matrix2x2 by the specified name
+     *
+     * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void setFloat(CharSequence name, float value) {
-    }
+    void getMatrix(CharSequence name, Matrix2f value);
 
     /**
-     * Sets a vector in the shader.
+     * Retrieves a matrix3x3 by the specified name
      *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     */
-    default void setVector(CharSequence name, float x, float y) {
-    }
-
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     */
-    default void setVector(CharSequence name, float x, float y, float z) {
-    }
-
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     * @param w    The w component of the vector
-     */
-    default void setVector(CharSequence name, float x, float y, float z, float w) {
-    }
-
-    /**
-     * Sets a vector in the shader.
-     *
-     * @param name  The name of the uniform to set
+     * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void setVector(CharSequence name, Vector2fc value) {
-        this.setVector(name, value.x(), value.y());
-    }
+    void getMatrix(CharSequence name, Matrix3f value);
 
     /**
-     * Sets a vector in the shader.
+     * Retrieves a matrix3x2 by the specified name
      *
-     * @param name  The name of the uniform to set
+     * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void setVector(CharSequence name, Vector3fc value) {
-        this.setVector(name, value.x(), value.y(), value.z());
-    }
+    void getMatrix(CharSequence name, Matrix3x2f value);
 
     /**
-     * Sets a vector in the shader.
+     * Retrieves a matrix4x4 by the specified name
      *
-     * @param name  The name of the uniform to set
+     * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void setVector(CharSequence name, Vector4fc value) {
-        this.setVector(name, value.x(), value.y(), value.z(), value.w());
-    }
+    void getMatrix(CharSequence name, Matrix4f value);
 
     /**
-     * Sets an integer in the shader.
+     * Retrieves a matrix4x3 by the specified name
      *
-     * @param name  The name of the uniform to set
+     * @param name  The name of the uniform to get
      * @param value The value to set
      */
-    default void setInt(CharSequence name, int value) {
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     */
-    default void setVectorI(CharSequence name, int x, int y) {
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     */
-    default void setVectorI(CharSequence name, int x, int y, int z) {
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name The name of the uniform to set
-     * @param x    The x component of the vector
-     * @param y    The y component of the vector
-     * @param z    The z component of the vector
-     * @param w    The w component of the vector
-     */
-    default void setVectorI(CharSequence name, int x, int y, int z, int w) {
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector2ic value) {
-        this.setVectorI(name, value.x(), value.y());
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector3ic value) {
-        this.setVectorI(name, value.x(), value.y(), value.z());
-    }
-
-    /**
-     * Sets an integer vector in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setVectorI(CharSequence name, Vector4ic value) {
-        this.setVectorI(name, value.x(), value.y(), value.z(), value.w());
-    }
-
-    /**
-     * Sets an array of floats in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setFloats(CharSequence name, float... values) {
-    }
-
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector2fc... values) {
-    }
-
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector3fc... values) {
-    }
-
-    /**
-     * Sets an array of vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector4fc... values) {
-    }
-
-    /**
-     * Sets an array of integers in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setInts(CharSequence name, int... values) {
-    }
-
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector2ic... values) {
-    }
-
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector3ic... values) {
-    }
-
-    /**
-     * Sets an array of integer vectors in the shader.
-     *
-     * @param name   The name of the uniform to set
-     * @param values The values to set in order
-     */
-    default void setVectors(CharSequence name, Vector4ic... values) {
-    }
-
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setMatrix(CharSequence name, Matrix2fc value) {
-    }
-
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setMatrix(CharSequence name, Matrix3fc value) {
-    }
-
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setMatrix(CharSequence name, Matrix3x2fc value) {
-    }
-
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setMatrix(CharSequence name, Matrix4fc value) {
-    }
-
-    /**
-     * Sets a matrix in the shader.
-     *
-     * @param name  The name of the uniform to set
-     * @param value The value to set
-     */
-    default void setMatrix(CharSequence name, Matrix4x3fc value) {
-    }
+    void getMatrix(CharSequence name, Matrix4x3f value);
 }

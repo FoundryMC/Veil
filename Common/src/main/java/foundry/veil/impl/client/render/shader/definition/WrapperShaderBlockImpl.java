@@ -13,10 +13,9 @@ public class WrapperShaderBlockImpl extends ShaderBlockImpl<Object> implements D
 
     private long size;
 
-    public WrapperShaderBlockImpl(int binding, int buffer, int size) {
+    public WrapperShaderBlockImpl(int binding, int buffer) {
         super(binding);
         this.buffer = buffer;
-        this.setSize(size);
     }
 
     @Override

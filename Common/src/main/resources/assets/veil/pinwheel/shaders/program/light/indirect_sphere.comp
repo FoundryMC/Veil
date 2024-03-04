@@ -3,13 +3,13 @@
 
 #include veil:camera
 
-layout(std430) buffer VeilLightInstanced {
+layout(std430) readonly buffer VeilLightInstanced {
     float data[];
-} Instanced;
+};
 
-layout(std430) buffer VeilLightIndirect {
+layout(std430) writeonly buffer VeilLightIndirect {
     int commands[];
-} Indirect;
+};
 
 layout(binding = 0) uniform atomic_uint VeilLightCount;
 
@@ -34,19 +34,22 @@ void main() {
     uint lightId = gl_GlobalInvocationID.x;
     uint lightDataIndex = lightId * LightSize;
 
-    float x = Instanced.data[lightDataIndex + PositionOffset];
-    float y = Instanced.data[lightDataIndex + PositionOffset + 1];
-    float z = Instanced.data[lightDataIndex + PositionOffset + 2];
-    float range = Instanced.data[lightDataIndex + RangeOffset];
+    float x = data[lightDataIndex + PositionOffset];
+    float y = data[lightDataIndex + PositionOffset + 1];
+    float z = data[lightDataIndex + PositionOffset + 2];
+    float range = data[lightDataIndex + RangeOffset];
+    float dx = x - VeilCamera.CameraPosition.x;
+    float dy = y - VeilCamera.CameraPosition.y;
+    float dz = z - VeilCamera.CameraPosition.z;
 
-    bool visible = testSphere(x - VeilCamera.CameraPosition.x, y - VeilCamera.CameraPosition.y, z - VeilCamera.CameraPosition.z, range * 1.414);
+    bool visible = testSphere(dx, dy, dz, range * 1.414);
     if (visible) {
         uint i = atomicCounterIncrement(VeilLightCount) * 5;
-        bool highRes = (x - VeilCamera.CameraPosition.x) * (x - VeilCamera.CameraPosition.x) + (y - VeilCamera.CameraPosition.y) * (y - VeilCamera.CameraPosition.y) + (z - VeilCamera.CameraPosition.z) * (z - VeilCamera.CameraPosition.z) <= range * range;
-        Indirect.commands[i] = highRes ? HighResSize : LowResSize;
-        Indirect.commands[i + 1] = 1;
-        Indirect.commands[i + 2] = !highRes ? HighResSize : 0;
-        Indirect.commands[i + 3] = 0;
-        Indirect.commands[i + 4] = int(lightId);
+        bool highRes = dx * dx + dy * dy + dz * dz <= range * range;
+        commands[i] = highRes ? HighResSize : LowResSize;
+        commands[i + 1] = 1;
+        commands[i + 2] = !highRes ? HighResSize : 0;
+        commands[i + 3] = 0;
+        commands[i + 4] = int(lightId);
     }
 }

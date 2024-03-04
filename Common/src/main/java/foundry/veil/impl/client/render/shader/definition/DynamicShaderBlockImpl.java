@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
 
 import static org.lwjgl.opengl.GL15C.*;
+import static org.lwjgl.opengl.GL30C.glBindBufferBase;
 import static org.lwjgl.opengl.GL30C.glBindBufferRange;
 import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 
@@ -80,12 +81,12 @@ public class DynamicShaderBlockImpl<T> extends ShaderBlockImpl<T> implements Dyn
             glBindBuffer(this.binding, 0);
         }
 
-        glBindBufferRange(this.binding, index, this.buffer, 0, this.size);
+        glBindBufferBase(this.binding, index, this.buffer);
     }
 
     @Override
     public void unbind(int index) {
         Validate.inclusiveBetween(0, VeilRenderSystem.maxTargetBindings(this.binding), index);
-        glBindBufferRange(this.binding, index, 0, 0, this.size);
+        glBindBufferBase(this.binding, index, 0);
     }
 }

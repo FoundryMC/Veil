@@ -12,6 +12,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
+import static org.lwjgl.opengl.GL43C.*;
+
 /**
  * Manages the state of uniform block bindings and their associated shader names.
  *
@@ -91,11 +94,20 @@ public class VeilUniformBlockState {
      * @param block The block to bind
      */
     public void bind(CharSequence name, ShaderBlock<?> block) {
+        if (!(block instanceof ShaderBlockImpl<?> impl)) {
+            throw new UnsupportedOperationException("Cannot bind " + block.getClass());
+        }
+
         int binding = this.bind(block);
         CharSequence boundName = this.shaderBindings.get(binding);
         if (!Objects.equals(name, boundName)) {
             this.shaderBindings.put(binding, name);
-            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, binding));
+            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> {
+                switch (impl.getBinding()) {
+                    case GL_UNIFORM_BUFFER -> shader.setUniformBlock(name, binding);
+                    case GL_SHADER_STORAGE_BUFFER -> shader.setStorageBlock(name, binding);
+                }
+            });
         }
     }
 
@@ -120,7 +132,12 @@ public class VeilUniformBlockState {
 
         CharSequence name = this.shaderBindings.remove(binding);
         if (name != null) {
-            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> shader.setUniformBlock(name, 0));
+            VeilRenderSystem.renderer().getShaderManager().setGlobal(shader -> {
+                switch (block.getBinding()) {
+                    case GL_UNIFORM_BUFFER -> shader.setUniformBlock(name, 0);
+                    case GL_SHADER_STORAGE_BUFFER -> shader.setStorageBlock(name, 0);
+                }
+            });
         }
 
         // Fill the gap since the spot is open now

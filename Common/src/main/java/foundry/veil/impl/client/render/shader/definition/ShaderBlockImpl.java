@@ -48,6 +48,10 @@ public abstract class ShaderBlockImpl<T> implements ShaderBlock<T> {
      */
     public abstract void unbind(int index);
 
+    public int getBinding() {
+        return this.binding;
+    }
+
     @Override
     public @Nullable T getValue() {
         return this.value;

@@ -401,6 +401,7 @@ public final class VeilRenderSystem {
     public static void endFrame() {
         VeilImGuiImpl.get().end();
         renderer.getFramebufferManager().clear();
+        UNIFORM_BLOCK_STATE.clear();
     }
 
     @ApiStatus.Internal

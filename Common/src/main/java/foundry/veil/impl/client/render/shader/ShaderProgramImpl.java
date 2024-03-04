@@ -8,7 +8,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.api.client.render.shader.CompiledShader;
 import foundry.veil.api.client.render.shader.ShaderCompiler;
 import foundry.veil.api.client.render.shader.ShaderException;
-import foundry.veil.api.client.render.shader.program.MutableShaderUniformAccess;
+import foundry.veil.api.client.render.shader.program.MutableUniformAccess;
+import foundry.veil.api.client.render.shader.program.UniformAccess;
 import foundry.veil.api.client.render.shader.program.ProgramDefinition;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
@@ -39,7 +40,7 @@ import static org.lwjgl.opengl.GL13C.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
+import static org.lwjgl.opengl.GL43C.*;
 
 /**
  * @author Ocelot
@@ -50,7 +51,8 @@ public class ShaderProgramImpl implements ShaderProgram {
     private final ResourceLocation id;
     private final Set<CompiledShader> shaders;
     private final Map<CharSequence, Integer> uniforms;
-    private final Map<CharSequence, Integer> blocks;
+    private final Map<CharSequence, Integer> uniformBlocks;
+    private final Map<CharSequence, Integer> storageBlocks;
     private final Map<CharSequence, Integer> textures;
     private final Map<String, ShaderTextureSource> textureSources;
     private final Set<String> definitionDependencies;
@@ -61,7 +63,8 @@ public class ShaderProgramImpl implements ShaderProgram {
         this.id = id;
         this.shaders = new HashSet<>(2);
         this.uniforms = new Object2IntArrayMap<>();
-        this.blocks = new Object2IntArrayMap<>();
+        this.uniformBlocks = new Object2IntArrayMap<>();
+        this.storageBlocks = new Object2IntArrayMap<>();
         this.textures = new HashMap<>();
         this.textureSources = new HashMap<>();
         this.definitionDependencies = new HashSet<>();
@@ -84,7 +87,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
         this.shaders.clear();
         this.uniforms.clear();
-        this.blocks.clear();
+        this.uniformBlocks.clear();
         this.textures.clear();
         this.textureSources.clear();
         this.definitionDependencies.clear();
@@ -178,7 +181,15 @@ public class ShaderProgramImpl implements ShaderProgram {
         if (this.program == 0) {
             return GL_INVALID_INDEX;
         }
-        return this.blocks.computeIfAbsent(name, k -> glGetUniformBlockIndex(this.program, name));
+        return this.uniformBlocks.computeIfAbsent(name, k -> glGetUniformBlockIndex(this.program, name));
+    }
+
+    @Override
+    public int getStorageBlock(CharSequence name) {
+        if (this.program == 0) {
+            return GL_INVALID_INDEX;
+        }
+        return this.storageBlocks.computeIfAbsent(name, k -> glGetProgramResourceIndex(this.program, GL_SHADER_STORAGE_BLOCK, name));
     }
 
     @Override
@@ -340,9 +351,9 @@ public class ShaderProgramImpl implements ShaderProgram {
      */
     public static class UniformWrapper extends Uniform {
 
-        private final Supplier<MutableShaderUniformAccess> access;
+        private final Supplier<MutableUniformAccess> access;
 
-        public UniformWrapper(Supplier<MutableShaderUniformAccess> access, String name) {
+        public UniformWrapper(Supplier<MutableUniformAccess> access, String name) {
             super(name, UT_INT1, 0, null);
             super.close(); // Free constructor allocated resources
             this.access = access;
