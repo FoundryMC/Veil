@@ -2,9 +2,9 @@
   "sprite_data": {
     "sprite": "veil:textures/particle/smoke.png",
     "frame_count": 64,
-    "frame_time": 1.25,
     "frame_width": 8,
-    "frame_height": 8
+    "frame_height": 8,
+    "stretch_to_lifetime": true
   },
   "render_style": "BILLBOARD",
   "init_modules": [
