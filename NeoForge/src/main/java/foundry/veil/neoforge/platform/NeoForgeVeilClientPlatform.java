@@ -2,7 +2,7 @@ package foundry.veil.neoforge.platform;
 
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.neoforge.event.NeoForgeVeilPostProcessingEvent;
-import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.platform.VeilClientPlatform;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;

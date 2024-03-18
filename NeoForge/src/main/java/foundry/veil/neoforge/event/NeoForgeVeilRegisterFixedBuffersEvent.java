@@ -2,7 +2,7 @@ package foundry.veil.neoforge.event;
 
 import foundry.veil.api.event.VeilRegisterFixedBuffersEvent;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
-import foundry.veil.platform.services.VeilEventPlatform;
+import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
