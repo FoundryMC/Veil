@@ -59,7 +59,7 @@ public class CompositePostPipeline implements PostPipeline {
      *
      * @param stages                 The pipelines to run in order
      * @param textures               The textures to bind globally
-     * @param framebufferDefinitions The definitions of framebuffers to create in order to use in the stages
+     * @param framebufferDefinitions The definitions of framebuffers to create for use in the stages
      */
     public CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions) {
         this(stages, textures, framebufferDefinitions, 1000, false);
@@ -97,11 +97,47 @@ public class CompositePostPipeline implements PostPipeline {
         throw new UnsupportedOperationException("Composite pipelines cannot be encoded");
     }
 
+    @Override
+    public boolean hasUniform(CharSequence name) {
+        for (PostPipeline pipeline : this.stages) {
+            if (pipeline.hasUniform(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasUniformBlock(CharSequence name) {
+        for (PostPipeline pipeline : this.stages) {
+            if (pipeline.hasUniformBlock(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasStorageBlock(CharSequence name) {
+        for (PostPipeline pipeline : this.stages) {
+            if (pipeline.hasStorageBlock(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void setUniformBlock(CharSequence name, int binding) {
         for (PostPipeline pipeline : this.stages) {
             pipeline.setUniformBlock(name, binding);
+        }
+    }
+
+    @Override
+    public void setStorageBlock(CharSequence name, int binding) {
+        for (PostPipeline pipeline : this.stages) {
+            pipeline.setStorageBlock(name, binding);
         }
     }
 

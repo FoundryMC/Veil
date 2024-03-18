@@ -70,7 +70,7 @@ public class RenderData {
     private RenderType renderType;
     private final List<Trail> trails;
 
-    public RenderData() {
+    public RenderData(QuasarParticleData data) {
         this.prevPosition = new Vector3d();
         this.renderPosition = new Vector3d();
         this.prevRotation = new Vector3f();
@@ -83,7 +83,7 @@ public class RenderData {
         this.blue = 1.0F;
         this.alpha = 1.0F;
         this.renderAge = 0.0F;
-        this.spriteData = null;
+        this.spriteData = data.spriteData();
         this.atlasSprite = null;
         this.updateRenderType();
         this.trails = new ArrayList<>();
@@ -234,6 +234,7 @@ public class RenderData {
                 Matrix4f matrix4f = poseStack.last().pose();
                 Vector3fc rotation = renderData.getRenderRotation();
                 Vector3f vec = new Vector3f();
+                SpriteData spriteData = renderData.getSpriteData();
 
                 for (int i = 0; i < 6; i++) {
                     for (int j = 0; j < 4; j++) {
@@ -248,8 +249,16 @@ public class RenderData {
                                 .mul((float) (renderData.getRenderRadius() * ageModifier))
                                 .add(renderOffset);
 
+                        float u = (int) (j / 2.0F);
+                        float v = j % 2;
+
+                        if (spriteData != null) {
+                            u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
+                            v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
+                        }
+
                         builder.vertex(matrix4f, vec.x, vec.y, vec.z);
-                        builder.uv((float) j / 2, j % 2);
+                        builder.uv(u, v);
                         builder.color(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
                         builder.uv2(renderData.getLightColor());
                         builder.endVertex();
@@ -302,20 +311,8 @@ public class RenderData {
                         v = 1;
                     }
                     if (spriteData != null) {
-                        int spritesheetRows = spriteData.frameHeight();
-                        int spritesheetColumns = spriteData.frameWidth();
-                        int spriteCount = spriteData.frameCount();
-                        float animationSpeed = spriteData.frameTime();
-                        // get frame index from age + partial ticks, but it should be an integer.
-                        int frameIndex = (int) (renderData.getRenderAge() / animationSpeed);
-                        // get the frame index in the spritesheet
-                        int frameIndexInSpritesheet = frameIndex % spriteCount;
-                        // get the row and column of the frame in the spritesheet
-                        int frameRow = frameIndexInSpritesheet / spritesheetColumns;
-                        int frameColumn = frameIndexInSpritesheet % spritesheetColumns;
-                        // get the u and v coordinates of the frame, using u and v which are this vertex's u and v
-                        u *= (1f / spritesheetColumns) + frameColumn * (1f / spritesheetColumns);
-                        v *= (1f / spritesheetRows) + frameRow * (1f / spritesheetRows);
+                        u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
+                        v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
                     }
 //                    if (particle.sprite != null) {
 //                        u1 = u;

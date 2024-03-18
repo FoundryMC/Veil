@@ -11,8 +11,6 @@ in float maxDistance;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
-uniform usampler2D MaterialSampler;
-uniform sampler2D VanillaLightSampler;
 uniform sampler2D DiffuseDepthSampler;
 
 uniform vec2 ScreenSize;
@@ -49,7 +47,11 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 p
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
 
-    // sample buffers
+    vec4 albedoColor = texture(AlbedoSampler, screenUv);
+    if(albedoColor.a == 0) {
+        discard;
+    }
+
     vec3 normalVS = texture(NormalSampler, screenUv).xyz;
     float depth = texture(DiffuseDepthSampler, screenUv).r;
     vec3 viewPos = viewPosFromDepth(depth, screenUv);
@@ -70,6 +72,8 @@ void main() {
     float angleFalloff = mapClamped(angle, 0.0, maxAngle, 1.0, 0.0);
     diffuse *= smoothstep(0.0, 1.0, angleFalloff);
 
-    fragColor = vec4(diffuse * lightColor, 1.0);
+    float reflectivity = 0.1;
+    vec3 diffuseColor = diffuse * lightColor;
+    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, albedoColor.a);
 }
 

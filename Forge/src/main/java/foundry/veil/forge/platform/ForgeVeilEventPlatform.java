@@ -8,7 +8,7 @@ import foundry.veil.forge.event.ForgeFreeNativeResourcesEvent;
 import foundry.veil.forge.event.ForgeVeilPostProcessingEvent;
 import foundry.veil.forge.event.ForgeVeilRegisterFixedBuffersEvent;
 import foundry.veil.forge.event.ForgeVeilRendererEvent;
-import foundry.veil.platform.services.VeilEventPlatform;
+import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;

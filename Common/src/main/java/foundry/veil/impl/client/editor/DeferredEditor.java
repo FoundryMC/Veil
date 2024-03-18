@@ -5,8 +5,8 @@ import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.deferred.VeilDeferredRenderer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
 import foundry.veil.api.client.render.deferred.light.PointLight;
+import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.*;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.api.client.util.TextureDownloader;
@@ -37,7 +37,6 @@ public class DeferredEditor extends SingleWindowEditor {
     private final ImBoolean enableAmbientOcclusion = new ImBoolean();
     private final ImBoolean enableVanillaLight = new ImBoolean();
     private final ImBoolean enableEntityLight = new ImBoolean();
-    private final ImBoolean bakeTransparentLight = new ImBoolean();
     private AdvancedFbo downloadBuffer;
 
     @Override
@@ -90,27 +89,6 @@ public class DeferredEditor extends SingleWindowEditor {
                 definitions.define(VeilDeferredRenderer.DISABLE_VANILLA_ENTITY_LIGHT_KEY);
             }
         }
-
-        ImGui.sameLine();
-        this.bakeTransparentLight.set(definitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null);
-        if (ImGui.checkbox("Bake Transparency Lightmaps", this.bakeTransparentLight)) {
-            if (this.bakeTransparentLight.get()) {
-                definitions.define(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
-            } else {
-                definitions.remove(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
-            }
-        }
-
-        LocalPlayer player = Minecraft.getInstance().player;
-        ImGui.sameLine();
-        ImGui.beginDisabled(player == null);
-        if (ImGui.button("Add Test Light")) {
-            if (player != null) {
-                Vec3 pos = player.getEyePosition();
-                lightRenderer.addLight(new PointLight().setPosition(pos.x, pos.y, pos.z).setColor(new Vector3f(1.0F, 1.0F, 1.0F)).setBrightness(5.0F).setRadius(15));
-            }
-        }
-        ImGui.endDisabled();
 
         ImGui.text("Framebuffers");
         if (ImGui.beginTabBar("Framebuffers")) {

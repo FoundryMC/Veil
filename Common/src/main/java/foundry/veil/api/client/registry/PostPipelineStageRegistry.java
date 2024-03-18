@@ -1,50 +1,37 @@
 package foundry.veil.api.client.registry;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.stage.BlitPostStage;
 import foundry.veil.api.client.render.post.stage.CopyPostStage;
 import foundry.veil.api.client.render.post.stage.MaskPostStage;
-import net.minecraft.resources.ResourceLocation;
+import foundry.veil.platform.registry.RegistrationProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import org.jetbrains.annotations.ApiStatus;
 
-// TODO use registry
+import java.util.function.Supplier;
 
 /**
  * Registry for all post pipeline stages.
  */
 public class PostPipelineStageRegistry {
 
-    private static final BiMap<ResourceLocation, PipelineType<?>> EFFECT_TYPES = HashBiMap.create();
-    public static final Codec<PipelineType<?>> CODEC = ResourceLocation.CODEC.flatXmap(location -> {
-        PipelineType<?> pipelineType = EFFECT_TYPES.get(location);
-        if (pipelineType != null) {
-            return DataResult.success(pipelineType);
-        }
-        return DataResult.error(() -> "Unknown post pipeline type " + location);
-    }, pipelineType -> {
-        ResourceLocation location = EFFECT_TYPES.inverse().get(pipelineType);
-        if (pipelineType != null) {
-            return DataResult.success(location);
-        }
-        return DataResult.error(() -> "Unknown post pipeline type " + location);
-    });
+    public static final ResourceKey<Registry<PostPipelineStageRegistry.PipelineType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(Veil.veilPath("post_pipeline_stage"));
+    private static final RegistrationProvider<PostPipelineStageRegistry.PipelineType<?>> PROVIDER = RegistrationProvider.get(REGISTRY_KEY, Veil.MODID);
+    public static final Registry<PostPipelineStageRegistry.PipelineType<?>> REGISTRY = PROVIDER.asVanillaRegistry();
 
-    public static final PipelineType<BlitPostStage> BLIT = register("blit", BlitPostStage.CODEC);
-    public static final PipelineType<CopyPostStage> COPY = register("copy", CopyPostStage.CODEC);
-    public static final PipelineType<MaskPostStage> MASK = register("mask", MaskPostStage.CODEC);
+    public static final Supplier<PipelineType<BlitPostStage>> BLIT = register("blit", BlitPostStage.CODEC);
+    public static final Supplier<PipelineType<CopyPostStage>> COPY = register("copy", CopyPostStage.CODEC);
+    public static final Supplier<PipelineType<MaskPostStage>> MASK = register("mask", MaskPostStage.CODEC);
 
-    private static <T extends PostPipeline> PipelineType<T> register(String name, Codec<T> codec) {
-        PipelineType<T> pipelineType = new PipelineType<>(codec);
-        ResourceLocation location = new ResourceLocation(Veil.MODID, name);
-        if (PostPipelineStageRegistry.EFFECT_TYPES.putIfAbsent(location, pipelineType) != null) {
-            throw new IllegalStateException("Duplicate pipeline type type registration " + location);
-        }
+    @ApiStatus.Internal
+    public static void bootstrap() {
+    }
 
-        return pipelineType;
+    private static <T extends PostPipeline> Supplier<PipelineType<T>> register(String name, Codec<T> codec) {
+        return PROVIDER.register(name, () -> new PipelineType<>(codec));
     }
 
     public record PipelineType<T extends PostPipeline>(Codec<T> codec) {

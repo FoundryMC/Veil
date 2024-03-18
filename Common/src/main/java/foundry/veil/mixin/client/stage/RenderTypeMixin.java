@@ -1,7 +1,7 @@
 package foundry.veil.mixin.client.stage;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import foundry.veil.api.client.render.RenderTypeStageRegistry;
+import foundry.veil.api.client.registry.RenderTypeStageRegistry;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

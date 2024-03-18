@@ -15,6 +15,25 @@ import java.util.regex.Pattern;
 public class ShaderBindingProcessor extends ShaderLineProcessor {
 
     private static final Pattern LAYOUT_PATTERN = Pattern.compile("(?<prefix>.*)layout[(](?<layoutPrefix>.*)binding\\s*=\\s*(?<binding>\\d+)(?<layoutSuffix>.*)[)](?<suffix>.*)");
+    private static final Pattern VERSION_PATTERN = Pattern.compile("#version\\s+(\\d+)");
+
+    @Override
+    public @NotNull String modify(@NotNull Context context) throws IOException {
+        String source = context.getInput();
+        Matcher versionMatcher = VERSION_PATTERN.matcher(source);
+        if (versionMatcher.find()) {
+            try {
+                int version = Integer.parseInt(versionMatcher.group(1));
+                if (version >= 420) {
+                    return source;
+                }
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+
+        return super.modify(context);
+    }
 
     @Override
     public void modify(@NotNull Context context, @NotNull String original, @NotNull List<String> line) throws IOException {
@@ -22,6 +41,7 @@ public class ShaderBindingProcessor extends ShaderLineProcessor {
         if (!matcher.find()) {
             return;
         }
+
         line.clear();
 
         String binding = this.group(matcher, "binding");
@@ -36,7 +56,12 @@ public class ShaderBindingProcessor extends ShaderLineProcessor {
                 return;
             }
 
+            // atomic counters require the binding declaration in the shader
             String type = uniformMatcher.group("type");
+            if ("atomic_uint".equals(type)) {
+                line.add(original);
+                return;
+            }
 
             String name = uniformMatcher.group("name");
             if (name == null && type == null) {

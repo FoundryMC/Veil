@@ -8,10 +8,14 @@ import foundry.veil.api.client.render.VeilVanillaShaders;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
+import foundry.veil.fabric.mixin.compat.iris.NewWorldRenderingPipelineAccessor;
 import foundry.veil.fabric.util.FabricReloadListener;
 import foundry.veil.impl.VeilBuiltinPacks;
 import foundry.veil.impl.VeilReloadListeners;
 import foundry.veil.impl.client.render.VeilUITooltipRenderer;
+import foundry.veil.impl.compat.IrisShaderMap;
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -34,6 +38,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
+
 @ApiStatus.Internal
 public class VeilFabricClient implements ClientModInitializer {
 
@@ -47,6 +53,15 @@ public class VeilFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> VeilClient.tickClient(client.getFrameTime()));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(VeilRenderSystem.renderer().getDeferredRenderer()::reset));
         FabricQuasarParticleHandler.init();
+        if (IrisShaderMap.isEnabled()) {
+            IrisShaderMap.setLoadedShadersSupplier(() -> {
+                WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
+                if (pipeline instanceof NewWorldRenderingPipelineAccessor) {
+                    return ((NewWorldRenderingPipelineAccessor) pipeline).getLoadedShaders();
+                }
+                return Collections.emptySet();
+            });
+        }
 
         KeyBindingHelper.registerKeyBinding(VeilClient.EDITOR_KEY);
 

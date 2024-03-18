@@ -5,10 +5,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
-import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
-import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.definition.ShaderBlock;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
@@ -24,19 +20,24 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLCapabilities;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import static org.lwjgl.opengl.GL11C.glGetInteger;
 import static org.lwjgl.opengl.GL30C.GL_MAX_COLOR_ATTACHMENTS;
 import static org.lwjgl.opengl.GL31C.GL_MAX_UNIFORM_BUFFER_BINDINGS;
-import static org.lwjgl.opengl.GL43C.GL_MAX_FRAMEBUFFER_HEIGHT;
-import static org.lwjgl.opengl.GL43C.GL_MAX_FRAMEBUFFER_WIDTH;
+import static org.lwjgl.opengl.GL43C.*;
 
 /**
  * Additional functionality for {@link RenderSystem}.
@@ -53,20 +54,67 @@ public final class VeilRenderSystem {
     private static final Set<ResourceLocation> ERRORED_SHADERS = new HashSet<>();
     private static final VeilUniformBlockState UNIFORM_BLOCK_STATE = new VeilUniformBlockState();
 
+    private static final BooleanSupplier COMPUTE_SUPPORTED = glCapability(caps -> caps.OpenGL43 || caps.GL_ARB_compute_shader);
+    private static final BooleanSupplier ATOMIC_COUNTER_SUPPORTED = glCapability(caps -> caps.OpenGL42 || caps.GL_ARB_shader_atomic_counters);
     private static final IntSupplier MAX_COLOR_ATTACHMENTS = VeilRenderSystem.glGetter(() -> glGetInteger(GL_MAX_COLOR_ATTACHMENTS));
+    private static final IntSupplier MAX_TRANSFORM_FEEDBACK_BUFFERS = VeilRenderSystem.glGetter(() -> glGetInteger(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS));
     private static final IntSupplier MAX_UNIFORM_BUFFER_BINDINGS = VeilRenderSystem.glGetter(() -> glGetInteger(GL_MAX_UNIFORM_BUFFER_BINDINGS));
+    private static final IntSupplier MAX_ATOMIC_COUNTER_BUFFER_BINDINGS = VeilRenderSystem.glGetter(() -> glGetInteger(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS));
+    private static final IntSupplier MAX_SHADER_STORAGE_BUFFER_BINDINGS = VeilRenderSystem.glGetter(() -> glGetInteger(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS));
     private static final Supplier<Vector2ic> MAX_FRAMEBUFFER_SIZE = Suppliers.memoize(() -> {
         RenderSystem.assertOnRenderThreadOrInit();
-        boolean gl43 = GL.getCapabilities().OpenGL43;
-        int width = gl43 ? glGetInteger(GL_MAX_FRAMEBUFFER_WIDTH) : Integer.MAX_VALUE;
-        int height = gl43 ? glGetInteger(GL_MAX_FRAMEBUFFER_HEIGHT) : Integer.MAX_VALUE;
+        if (!GL.getCapabilities().OpenGL43) {
+            return new Vector2i(Integer.MAX_VALUE);
+        }
+        int width = glGetInteger(GL_MAX_FRAMEBUFFER_WIDTH);
+        int height = glGetInteger(GL_MAX_FRAMEBUFFER_HEIGHT);
         return new Vector2i(width, height);
     });
+    private static final Supplier<Vector3ic> MAX_COMPUTE_WORK_GROUP_COUNT = Suppliers.memoize(() -> {
+        RenderSystem.assertOnRenderThreadOrInit();
+        if (!COMPUTE_SUPPORTED.getAsBoolean()) {
+            return new Vector3i();
+        }
+
+        int width = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0);
+        int height = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1);
+        int depth = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2);
+        return new Vector3i(width, height, depth);
+    });
+    private static final Supplier<Vector3ic> MAX_COMPUTE_WORK_GROUP_SIZE = Suppliers.memoize(() -> {
+        RenderSystem.assertOnRenderThreadOrInit();
+        if (!COMPUTE_SUPPORTED.getAsBoolean()) {
+            return new Vector3i();
+        }
+
+        int width = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0);
+        int height = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1);
+        int depth = glGetIntegeri(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2);
+        return new Vector3i(width, height, depth);
+    });
+    private static final IntSupplier MAX_COMPUTE_WORK_GROUP_INVOCATIONS = VeilRenderSystem.glGetter(() -> COMPUTE_SUPPORTED.getAsBoolean() ? glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS) : 0);
 
     private static VeilRenderer renderer;
     private static ResourceLocation shaderLocation;
 
     private VeilRenderSystem() {
+    }
+
+    private static BooleanSupplier glCapability(Function<GLCapabilities, Boolean> delegate) {
+        return new BooleanSupplier() {
+            private boolean value;
+            private boolean initialized;
+
+            @Override
+            public boolean getAsBoolean() {
+                RenderSystem.assertOnRenderThreadOrInit();
+                if (!this.initialized) {
+                    this.initialized = true;
+                    return this.value = delegate.apply(GL.getCapabilities());
+                }
+                return this.value;
+            }
+        };
     }
 
     private static IntSupplier glGetter(IntSupplier delegate) {
@@ -147,6 +195,20 @@ public final class VeilRenderSystem {
     }
 
     /**
+     * @return Whether compute shaders are supported
+     */
+    public static boolean computeSupported() {
+        return VeilRenderSystem.COMPUTE_SUPPORTED.getAsBoolean();
+    }
+
+    /**
+     * @return Whether atomic counters in shaders are supported
+     */
+    public static boolean atomicCounterSupported() {
+        return VeilRenderSystem.ATOMIC_COUNTER_SUPPORTED.getAsBoolean();
+    }
+
+    /**
      * @return The GL maximum amount of color attachments a framebuffer can have
      */
     public static int maxColorAttachments() {
@@ -154,10 +216,46 @@ public final class VeilRenderSystem {
     }
 
     /**
+     * @param target The target to query the maximum bindings of
+     * @return The GL maximum amount of buffer bindings available
+     */
+    public static int maxTargetBindings(int target) {
+        return switch (target) {
+            case GL_TRANSFORM_FEEDBACK_BUFFER -> maxTransformFeedbackBindings();
+            case GL_UNIFORM_BUFFER -> maxUniformBuffersBindings();
+            case GL_ATOMIC_COUNTER_BUFFER -> maxAtomicCounterBufferBindings();
+            case GL_SHADER_STORAGE_BUFFER -> maxShaderStorageBufferBindings();
+            default ->
+                    throw new IllegalArgumentException("Invalid Target: 0x" + Integer.toHexString(target).toUpperCase(Locale.ROOT));
+        };
+    }
+
+    /**
+     * @return The GL maximum amount of transform feedback buffers bindings available
+     */
+    public static int maxTransformFeedbackBindings() {
+        return VeilRenderSystem.MAX_TRANSFORM_FEEDBACK_BUFFERS.getAsInt();
+    }
+
+    /**
      * @return The GL maximum amount of uniform buffers bindings available
      */
     public static int maxUniformBuffersBindings() {
         return VeilRenderSystem.MAX_UNIFORM_BUFFER_BINDINGS.getAsInt();
+    }
+
+    /**
+     * @return The GL maximum amount of atomic counter buffers bindings available
+     */
+    public static int maxAtomicCounterBufferBindings() {
+        return VeilRenderSystem.MAX_ATOMIC_COUNTER_BUFFER_BINDINGS.getAsInt();
+    }
+
+    /**
+     * @return The GL maximum amount of shader storage buffers bindings available
+     */
+    public static int maxShaderStorageBufferBindings() {
+        return VeilRenderSystem.MAX_SHADER_STORAGE_BUFFER_BINDINGS.getAsInt();
     }
 
     /**
@@ -172,6 +270,55 @@ public final class VeilRenderSystem {
      */
     public static int maxFramebufferHeight() {
         return VeilRenderSystem.MAX_FRAMEBUFFER_SIZE.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of work groups in the X
+     */
+    public static int maxComputeWorkGroupCountX() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_COUNT.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of work groups in the Y
+     */
+    public static int maxComputeWorkGroupCountY() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_COUNT.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of work groups in the Z
+     */
+    public static int maxComputeWorkGroupCountZ() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_COUNT.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of local work groups in the X
+     */
+    public static int maxComputeWorkGroupSizeX() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_SIZE.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of local work groups in the Y
+     */
+    public static int maxComputeWorkGroupSizeY() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_SIZE.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of local work groups in the Z
+     */
+    public static int maxComputeWorkGroupSizeZ() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_SIZE.get().y();
+    }
+
+    /**
+     * @return The GL maximum number of total compute shader invocations
+     */
+    public static int maxComputeWorkGroupInvocations() {
+        return VeilRenderSystem.MAX_COMPUTE_WORK_GROUP_INVOCATIONS.getAsInt();
     }
 
     /**
@@ -254,6 +401,7 @@ public final class VeilRenderSystem {
     public static void endFrame() {
         VeilImGuiImpl.get().end();
         renderer.getFramebufferManager().clear();
+        UNIFORM_BLOCK_STATE.clear();
     }
 
     @ApiStatus.Internal
@@ -278,24 +426,7 @@ public final class VeilRenderSystem {
     }
 
     @ApiStatus.Internal
-    public static void renderPost(float partialTicks) {
-        VeilRenderer renderer = VeilRenderSystem.renderer();
-        FramebufferManager framebufferManager = renderer.getFramebufferManager();
-        PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
-
-        if (postProcessingManager.getActivePipelines().isEmpty()) {
-            return;
-        }
-
-        AdvancedFbo postFramebuffer = framebufferManager.getFramebuffer(VeilFramebuffers.POST);
-
-        if (postFramebuffer != null) {
-            AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(postFramebuffer);
-        }
-
-        postProcessingManager.runPipeline();
-        if (postFramebuffer != null) {
-            postFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
-        }
+    public static void renderPost() {
+        renderer.getPostProcessingManager().runPipeline();
     }
 }

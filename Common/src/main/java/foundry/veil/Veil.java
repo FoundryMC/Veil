@@ -1,7 +1,7 @@
 package foundry.veil;
 
 import foundry.veil.api.molang.VeilMolang;
-import foundry.veil.platform.services.VeilPlatform;
+import foundry.veil.platform.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
 import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;
@@ -17,12 +17,16 @@ public class Veil {
     public static final Logger LOGGER = LoggerFactory.getLogger("Veil");
     public static final boolean DEBUG;
     public static final boolean IMGUI;
+    public static final boolean VERBOSE_SHADER_ERRORS;
 
     private static final VeilPlatform PLATFORM = ServiceLoader.load(VeilPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected platform implementation"));
 
+    public static final boolean SODIUM = PLATFORM.isSodiumLoaded();
+
     static {
         DEBUG = System.getProperty("veil.debug") != null;
-        IMGUI = System.getProperty("veil.disableImgui") == null && hasImguiNatives() && !PLATFORM.isModLoaded("axiom");
+        IMGUI = System.getProperty("veil.disableImgui") == null && !PLATFORM.isModLoaded("axiom");
+        VERBOSE_SHADER_ERRORS = System.getProperty("veil.verboseShaderErrors") != null;
     }
 
     private static boolean hasImguiNatives() {

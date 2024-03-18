@@ -3,26 +3,16 @@
 
 in vec2 texCoord;
 
-uniform sampler2D CompatibilitySampler;
-#ifdef USE_BAKED_TRANSPARENT_LIGHTMAPS
-uniform sampler2D LightMapAlbedoSampler;
-#else
 uniform sampler2D AlbedoSampler;
-#endif
+uniform sampler2D CompatibilitySampler;
 uniform sampler2D LightSampler;
 
 out vec4 fragColor;
 
 void main() {
-    #ifdef USE_BAKED_TRANSPARENT_LIGHTMAPS
-    vec4 albedo = texture(LightMapAlbedoSampler, texCoord);
-    #else
-    vec4 albedo = texture(AlbedoSampler, texCoord);
-    #endif
-
+    float albedoAlpha = texture(AlbedoSampler, texCoord).a;
+    vec4 diffuse = texture(LightSampler, texCoord);
     vec4 compatibility = texture(CompatibilitySampler, texCoord);
-    vec3 light = texture(LightSampler, texCoord).rgb;
-    fragColor = vec4(albedo.rgb * light, albedo.a);
-    fragColor.rgb = blend(fragColor, compatibility);
-    fragColor.a += compatibility.a * (1.0 - fragColor.a);
+    diffuse.rgb /= diffuse.a;
+    fragColor = vec4(blend(vec4(diffuse.rgb, albedoAlpha), compatibility), albedoAlpha + compatibility.a * (1.0 - albedoAlpha));
 }

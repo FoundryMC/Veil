@@ -1,15 +1,11 @@
 package foundry.veil.mixin.client.pipeline;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
-import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
@@ -22,7 +18,7 @@ public class GameRendererMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.BEFORE))
     public void veil$renderPost(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
-        VeilRenderSystem.renderPost(partialTicks);
+        VeilRenderSystem.renderPost();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Lighting;setupFor3DItems()V", shift = At.Shift.AFTER))
@@ -35,20 +31,5 @@ public class GameRendererMixin {
     @Inject(method = "render", at = @At("TAIL"))
     public void veil$unbindGuiCamera(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderer().getGuiInfo().unbind();
-    }
-
-    @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V"))
-    public int clearMask(int mask) {
-        return 0;
-    }
-
-    @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LightTexture;turnOnLightLayer()V", ordinal = 0, shift = At.Shift.BEFORE))
-    public void veil$preDrawFirstPerson(PoseStack $$0, Camera $$1, float $$2, CallbackInfo ci) {
-        VeilFirstPersonRenderer.setup();
-    }
-
-    @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LightTexture;turnOffLightLayer()V", ordinal = 0, shift = At.Shift.AFTER))
-    public void veil$postDrawFirstPerson(PoseStack $$0, Camera $$1, float $$2, CallbackInfo ci) {
-        VeilFirstPersonRenderer.blit();
     }
 }

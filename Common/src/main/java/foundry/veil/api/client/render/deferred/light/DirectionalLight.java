@@ -1,12 +1,17 @@
 package foundry.veil.api.client.render.deferred.light;
 
+import foundry.veil.api.client.editor.EditorAttributeProvider;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import imgui.ImGui;
+import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 /**
  * Represents a light where all rays come from the same direction everywhere. (The sun)
  */
-public class DirectionalLight extends Light {
+public class DirectionalLight extends Light implements EditorAttributeProvider {
 
     protected final Vector3f direction;
 
@@ -59,8 +64,14 @@ public class DirectionalLight extends Light {
     }
 
     @Override
-    public Type getType() {
-        return Type.DIRECTIONAL;
+    public DirectionalLight setTo(Camera camera) {
+        Vector3f look = camera.getLookVector();
+        return this.setDirection(look.x, look.y, look.z);
+    }
+
+    @Override
+    public LightTypeRegistry.LightType<?> getType() {
+        return LightTypeRegistry.DIRECTIONAL.get();
     }
 
     @Override
@@ -68,5 +79,19 @@ public class DirectionalLight extends Light {
         return new DirectionalLight()
                 .setColor(this.color)
                 .setDirection(this.direction);
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        float[] editDirection = new float[]{this.direction.x(), this.direction.y(), this.direction.z()};
+
+        if (ImGui.sliderFloat3("##direction", editDirection, -1.0F, 1.0F)) {
+            Vector3f vector = new Vector3f(editDirection).normalize();
+            if (!Float.isNaN(vector.x) && !Float.isNaN(vector.y) && !Float.isNaN(vector.z)) {
+                this.setDirection(vector);
+            }
+        }
+        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
+        ImGui.text("direction");
     }
 }

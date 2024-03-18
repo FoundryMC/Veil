@@ -11,16 +11,20 @@ import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.CodecReloadListener;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.stage.CompositePostPipeline;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
-import foundry.veil.platform.services.VeilClientPlatform;
+import foundry.veil.platform.VeilClientPlatform;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.NativeResource;
@@ -45,6 +49,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
 
     private final PostPipelineContext context;
     private final List<ProfileEntry> activePipelines;
+    private final List<ProfileEntry> activePipelinesView;
     private final Map<ResourceLocation, PostPipeline> pipelines;
 
     /**
@@ -54,6 +59,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         super(CompositePostPipeline.CODEC, FileToIdConverter.json("pinwheel/post"));
         this.context = new PostPipelineContext();
         this.activePipelines = new LinkedList<>();
+        this.activePipelinesView = Collections.unmodifiableList(this.activePipelines);
         this.pipelines = new HashMap<>();
     }
 
@@ -90,7 +96,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         if (this.activePipelines.stream().anyMatch(entry -> entry.priority == priority && entry.pipeline.equals(pipeline))) {
             return false;
         }
-        this.remove(pipeline);
+        this.activePipelines.removeIf(entry -> entry.pipeline.equals(pipeline));
         this.activePipelines.add(new ProfileEntry(pipeline, priority));
         this.activePipelines.sort(PIPELINE_SORTER);
         return true;
@@ -103,7 +109,11 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @return If the pipeline was previously active
      */
     public boolean remove(ResourceLocation pipeline) {
-        return this.activePipelines.removeIf(entry -> entry.pipeline.equals(pipeline));
+        if (this.activePipelines.removeIf(entry -> entry.pipeline.equals(pipeline))) {
+            this.activePipelines.sort(PIPELINE_SORTER);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -135,12 +145,15 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         RenderSystem.depthMask(false);
     }
 
-    /**
-     * Applies all pipelines in the order they are specified in the current pipeline list.
-     */
+    @ApiStatus.Internal
     public void runPipeline() {
         if (this.activePipelines.isEmpty()) {
             return;
+        }
+
+        AdvancedFbo postFramebuffer = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.POST);
+        if (postFramebuffer != null) {
+            AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(postFramebuffer);
         }
 
         VeilClientPlatform platform = VeilClient.clientPlatform();
@@ -148,7 +161,6 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
-        this.activePipelines.sort(PIPELINE_SORTER);
         for (ProfileEntry entry : this.activePipelines) {
             ResourceLocation id = entry.getPipeline();
             PostPipeline pipeline = this.pipelines.get(id);
@@ -167,6 +179,10 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         RenderSystem.activeTexture(activeTexture);
         this.clear();
         this.context.end();
+
+        if (postFramebuffer != null) {
+            postFramebuffer.resolveToFramebuffer(Minecraft.getInstance().getMainRenderTarget());
+        }
     }
 
     /**
@@ -230,7 +246,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
                 }
             }
 
-            // No pipelines loaded, so just continue
+            // No pipelines loaded, so continue
             if (pipelines.isEmpty()) {
                 continue;
             }
@@ -285,11 +301,10 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
     }
 
     /**
-     * @return A list of all active profiles and their priorities
+     * @return An immutable view of all active profiles and their priorities
      */
     public List<ProfileEntry> getActivePipelines() {
-        this.activePipelines.sort(PIPELINE_SORTER);
-        return this.activePipelines;
+        return this.activePipelinesView;
     }
 
     /**

@@ -1,8 +1,0 @@
-{
-  "depth": true,
-  "color_buffers": [
-    {
-      "format": "RGBA8"
-    }
-  ]
-}

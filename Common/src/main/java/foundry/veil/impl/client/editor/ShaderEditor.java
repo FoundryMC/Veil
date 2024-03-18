@@ -1,5 +1,6 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowEditor;
 import foundry.veil.api.client.imgui.CodeEditor;
 import foundry.veil.api.client.imgui.VeilLanguageDefinitions;
@@ -7,6 +8,7 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.impl.compat.IrisShaderMap;
 import foundry.veil.mixin.client.shader.GameRendererAccessor;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -97,7 +99,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     }
 
     private void setSelectedProgram(@Nullable ResourceLocation name) {
-        if (name != null) {
+        if (name != null && this.shaders.containsKey(name)) {
             int program = this.shaders.get(name);
             if (glIsProgram(program)) {
                 int[] attachedShaders = new int[glGetProgrami(program, GL_ATTACHED_SHADERS)];
@@ -111,7 +113,7 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                 this.selectedProgram = new SelectedProgram(name, program, Collections.unmodifiableMap(shaders));
                 return;
             } else {
-                System.out.println("Compiled shader does not exist for selected program.");
+                Veil.LOGGER.error("Compiled shader does not exist for program: {}", name);
             }
         }
 
@@ -208,6 +210,12 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                     this.shaders.put(shader.getId(), shader.getProgram());
                 }
             }
+            case IRIS -> {
+                for (ShaderInstance shader : IrisShaderMap.getLoadedShaders()) {
+                    String name = shader.getName().isBlank() ? Integer.toString(shader.getId()) : shader.getName();
+                    this.shaders.put(new ResourceLocation(name), shader.getId());
+                }
+            }
             case OTHER -> {
                 for (int i = 0; i < 10000; i++) {
                     if (!glIsProgram(i)) {
@@ -217,10 +225,16 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                     this.shaders.put(new ResourceLocation("unknown", Integer.toString(i)), i);
                 }
 
+                for (ShaderInstance shader : gameRendererAccessor.getShaders().values()) {
+                    this.shaders.values().remove(shader.getId());
+                }
                 for (ShaderProgram shader : veilRenderer.getShaderManager().getShaders().values()) {
                     this.shaders.values().remove(shader.getProgram());
                 }
-                for (ShaderInstance shader : gameRendererAccessor.getShaders().values()) {
+                for (ShaderProgram shader : veilRenderer.getDeferredRenderer().getDeferredShaderManager().getShaders().values()) {
+                    this.shaders.values().remove(shader.getProgram());
+                }
+                for (ShaderInstance shader : IrisShaderMap.getLoadedShaders()) {
                     this.shaders.values().remove(shader.getId());
                 }
             }
@@ -249,6 +263,10 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
                 this.reloadShaders();
             }
             for (TabSource source : sources) {
+                if (!source.visible.getAsBoolean()) {
+                    continue;
+                }
+
                 ImGui.beginDisabled(!source.active.getAsBoolean());
                 if (ImGui.beginTabItem(source.displayName)) {
                     if (this.selectedTab != source.ordinal()) {
@@ -403,19 +421,22 @@ public class ShaderEditor extends SingleWindowEditor implements ResourceManagerR
     private enum TabSource {
         VANILLA("Vanilla"),
         VEIL("Veil"),
-        VEIL_DEFERRED("Veil Deferred", () -> VeilRenderSystem.renderer().getDeferredRenderer().isEnabled()),
+        VEIL_DEFERRED("Veil Deferred", VeilRenderSystem.renderer().getDeferredRenderer()::isEnabled, () -> true),
+        IRIS("Iris", IrisShaderMap::isEnabled, IrisShaderMap::isEnabled),
         OTHER("Unknown");
 
         private final String displayName;
         private final BooleanSupplier active;
+        private final BooleanSupplier visible;
 
         TabSource(String displayName) {
-            this(displayName, () -> true);
+            this(displayName, () -> true, () -> true);
         }
 
-        TabSource(String displayName, BooleanSupplier active) {
+        TabSource(String displayName, BooleanSupplier active, BooleanSupplier visible) {
             this.displayName = displayName;
             this.active = active;
+            this.visible = visible;
         }
     }
 }

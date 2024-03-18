@@ -1,17 +1,18 @@
 package foundry.veil.api.client.editor;
 
-import foundry.veil.impl.client.editor.*;
+import foundry.veil.api.util.CompositeReloadListener;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -28,17 +29,6 @@ public class EditorManager implements PreparableReloadListener {
     @ApiStatus.Internal
     public EditorManager(ReloadableResourceManager resourceManager) {
         this.editors = new TreeMap<>(Comparator.comparing(Editor::getDisplayName));
-
-        // debug editors
-        this.add(new ExampleEditor());
-        this.add(new PostEditor());
-        this.add(new ShaderEditor());
-        this.add(new TextureEditor());
-        this.add(new OpenCLEditor());
-        this.add(new DeviceInfoViewer());
-        this.add(new DeferredEditor());
-        this.add(new LightEditor());
-
         resourceManager.registerReloadListener(this);
     }
 
@@ -164,33 +154,7 @@ public class EditorManager implements PreparableReloadListener {
 
     @Override
     public @NotNull CompletableFuture<Void> reload(@NotNull PreparationBarrier preparationBarrier, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller prepareProfiler, @NotNull ProfilerFiller applyProfiler, @NotNull Executor backgroundExecutor, @NotNull Executor gameExecutor) {
-        PreparableReloadListener[] listeners = this.editors.keySet().stream().filter(editor -> editor instanceof PreparableReloadListener).toArray(PreparableReloadListener[]::new);
-        if (listeners.length == 0) {
-            return preparationBarrier.wait(null);
-        }
-        if (listeners.length == 1) {
-            return listeners[0].reload(preparationBarrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
-        }
-
-        // FIXME This might not work properly
-        CompletableFuture<Unit> allComplete = new CompletableFuture<>();
-        Set<PreparableReloadListener> preparingListeners = new HashSet<>(List.of(listeners));
-
-        List<CompletableFuture<?>> futures = new ArrayList<>(listeners.length);
-        for (PreparableReloadListener listener : listeners) {
-            PreparationBarrier barrier = new PreparationBarrier() {
-                @Override
-                public <T> CompletableFuture<T> wait(T value) {
-                    preparingListeners.remove(listener);
-                    if (preparingListeners.isEmpty()) {
-                        preparationBarrier.wait(null).thenRun(() -> allComplete.complete(Unit.INSTANCE));
-                    }
-                    return allComplete.thenApply(unused -> value);
-                }
-            };
-            futures.add(listener.reload(barrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor));
-        }
-
-        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+        PreparableReloadListener listener = CompositeReloadListener.of(this.editors.keySet().stream().filter(editor -> editor instanceof PreparableReloadListener).toArray(PreparableReloadListener[]::new));
+        return listener.reload(preparationBarrier, resourceManager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
     }
 }

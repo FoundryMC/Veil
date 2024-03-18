@@ -1,7 +1,7 @@
 package foundry.veil.mixin.debug;
 
 import foundry.veil.Veil;
-import foundry.veil.platform.services.VeilPlatform;
+import foundry.veil.platform.VeilPlatform;
 import net.minecraft.client.main.Main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

@@ -68,7 +68,7 @@ public class QuasarParticle {
         this.lifetime = settings.particleLifetime(this.randomSource);
         this.age = 0;
 
-        this.renderData = new RenderData();
+        this.renderData = new RenderData(data);
         // Don't create the environment if the particle never uses it
         this.environment = Suppliers.memoize(() -> MolangRuntime.runtime()
                 .setQuery("x", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().x()))

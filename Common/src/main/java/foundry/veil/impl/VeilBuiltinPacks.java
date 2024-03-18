@@ -14,7 +14,9 @@ public class VeilBuiltinPacks {
             context.register(Veil.veilPath("test_particles"), false);
         }
 
-        context.register(VeilDeferredRenderer.PACK_ID, true);
+        if (!Veil.SODIUM) {
+            context.register(VeilDeferredRenderer.PACK_ID, true);
+        }
     }
 
     @FunctionalInterface

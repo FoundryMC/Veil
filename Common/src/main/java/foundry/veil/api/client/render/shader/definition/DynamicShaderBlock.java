@@ -13,5 +13,5 @@ public interface DynamicShaderBlock<T> extends ShaderBlock<T> {
      *
      * @param newSize The size in bytes
      */
-    void setSize(int newSize);
+    void setSize(long newSize);
 }

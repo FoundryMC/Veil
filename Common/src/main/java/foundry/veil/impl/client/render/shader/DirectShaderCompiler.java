@@ -1,5 +1,7 @@
 package foundry.veil.impl.client.render.shader;
 
+import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.CompiledShader;
 import foundry.veil.api.client.render.shader.ShaderCompiler;
 import foundry.veil.api.client.render.shader.ShaderException;
@@ -21,6 +23,7 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL11C.GL_TRUE;
 import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
 
 /**
  * Creates a new shader and compiles each time {@link #compile(ShaderCompiler.Context, int, String)} is called.
@@ -30,12 +33,6 @@ import static org.lwjgl.opengl.GL20C.*;
  */
 @ApiStatus.Internal
 public class DirectShaderCompiler implements ShaderCompiler {
-
-    private static final boolean VERBOSE_ERRORS;
-
-    static {
-        VERBOSE_ERRORS = System.getProperty("veil.verboseShaderErrors") != null;
-    }
 
     private final ResourceProvider provider;
     private final List<ShaderPreProcessor> preProcessors;
@@ -50,6 +47,12 @@ public class DirectShaderCompiler implements ShaderCompiler {
         this.shaders = new HashSet<>();
     }
 
+    private void validateType(int type) throws ShaderException {
+        if (type == GL_COMPUTE_SHADER && !VeilRenderSystem.computeSupported()) {
+            throw new ShaderException("Compute is not supported", null);
+        }
+    }
+
     private String modifySource(ShaderCompiler.Context context, List<ShaderPreProcessor> preProcessors, Map<String, Integer> uniformBindings, Set<String> dependencies, @Nullable ResourceLocation name, String source, int type, boolean sourceFile) throws IOException {
         for (ShaderPreProcessor preProcessor : preProcessors) {
             source = preProcessor.modify(new PreProcessorContext(this, context, uniformBindings, dependencies, name, source, type, sourceFile));
@@ -62,6 +65,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
         if (this.provider == null) {
             throw new IOException("Failed to read " + ShaderManager.getTypeName(type) + " from " + id + " because no provider was specified");
         }
+        this.validateType(type);
 
         ResourceLocation location = context.sourceSet().getTypeConverter(type).idToFile(id);
         try (Reader reader = this.provider.openAsReader(location)) {
@@ -74,6 +78,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
 
     @Override
     public CompiledShader compile(ShaderCompiler.Context context, int type, String source) throws IOException, ShaderException {
+        this.validateType(type);
         this.preProcessors.forEach(ShaderPreProcessor::prepare);
 
         Map<String, Integer> uniformBindings = new HashMap<>();
@@ -85,7 +90,7 @@ public class DirectShaderCompiler implements ShaderCompiler {
         glCompileShader(shader);
         if (glGetShaderi(shader, GL_COMPILE_STATUS) != GL_TRUE) {
             String log = glGetShaderInfoLog(shader);
-            if (DirectShaderCompiler.VERBOSE_ERRORS) {
+            if (Veil.VERBOSE_SHADER_ERRORS) {
                 log += "\n" + source;
             }
             glDeleteShader(shader); // Delete to prevent leaks
@@ -97,11 +102,12 @@ public class DirectShaderCompiler implements ShaderCompiler {
     }
 
     @Override
-    public void addPreprocessor(ShaderPreProcessor processor, boolean modifyImports) {
+    public ShaderCompiler addPreprocessor(ShaderPreProcessor processor, boolean modifyImports) {
         this.preProcessors.add(processor);
         if (modifyImports) {
             this.importProcessors.add(processor);
         }
+        return this;
     }
 
     @Override

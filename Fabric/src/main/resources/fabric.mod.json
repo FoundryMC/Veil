@@ -26,8 +26,8 @@
     "fabric-renderer-indigo:force_compatibility": true
   },
   "mixins": [
-    "veil-common.mixins.json",
-    "veil-fabric.mixins.json"
+    "veil.mixins.json",
+    "veil.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",

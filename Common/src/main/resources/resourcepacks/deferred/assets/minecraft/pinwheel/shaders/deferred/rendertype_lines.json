@@ -1,7 +1,4 @@
 {
   "vertex": "rendertype_lines",
-  "fragment": "rendertype_lines",
-  "definitions": [
-    "USE_BAKED_TRANSPARENT_LIGHTMAPS"
-  ]
+  "fragment": "rendertype_lines"
 }

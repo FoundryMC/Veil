@@ -1,5 +1,6 @@
 package foundry.veil.mixin.client.pipeline;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.CameraMatrices;
 import foundry.veil.api.client.render.CullFrustum;
@@ -36,7 +37,7 @@ public class LevelRendererMixin implements LevelRendererExtension {
     @Inject(method = "prepareCullFrustum", at = @At("HEAD"))
     public void veil$setupLevelCamera(PoseStack modelViewStack, Vec3 pos, Matrix4f projection, CallbackInfo ci) {
         CameraMatrices matrices = VeilRenderSystem.renderer().getCameraMatrices();
-        matrices.update(projection, modelViewStack.last().pose(), this.veil$tempCameraPos.set(pos.x(), pos.y(), pos.z()), 0.05F, Minecraft.getInstance().gameRenderer.getDepthFar());
+        matrices.update(RenderSystem.getProjectionMatrix(), modelViewStack.last().pose(), this.veil$tempCameraPos.set(pos.x(), pos.y(), pos.z()), 0.05F, Minecraft.getInstance().gameRenderer.getDepthFar());
     }
 
     @Override

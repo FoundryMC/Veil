@@ -7,6 +7,9 @@ import org.lwjgl.system.NativeResource;
 
 import java.nio.ByteBuffer;
 
+import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
+import static org.lwjgl.opengl.GL43C.GL_UNIFORM_BLOCK;
+
 /**
  * Packages all camera matrices and shader uniforms to make shader management easier.
  *
@@ -38,7 +41,7 @@ public class CameraMatrices implements NativeResource {
      * Creates a new set of camera matrices.
      */
     public CameraMatrices() {
-        this.block = ShaderBlock.withSize(CameraMatrices.SIZE, CameraMatrices::write);
+        this.block = ShaderBlock.withSize(GL_UNIFORM_BUFFER, CameraMatrices.SIZE, CameraMatrices::write);
         this.projectionMatrix = new Matrix4f();
         this.inverseProjectionMatrix = new Matrix4f();
         this.viewMatrix = new Matrix4f();

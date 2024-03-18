@@ -1,6 +1,6 @@
 package foundry.veil.fabric.platform;
 
-import foundry.veil.platform.services.VeilPlatform;
+import foundry.veil.platform.VeilPlatform;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
 

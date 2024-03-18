@@ -3,7 +3,7 @@ package foundry.veil.api.client.render.deferred;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderer;
-import foundry.veil.api.client.render.deferred.light.LightRenderer;
+import foundry.veil.api.client.render.deferred.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
@@ -49,8 +49,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
 
     public static final ResourceLocation PACK_ID = Veil.veilPath("deferred");
     public static final String DISABLE_VANILLA_ENTITY_LIGHT_KEY = "DISABLE_VANILLA_ENTITY_LIGHT";
-    public static final String USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY = "USE_BAKED_TRANSPARENT_LIGHTMAPS";
-    public static final boolean SODIUM_LOADED = Veil.platform().isSodiumLoaded();
 
     public static final ResourceLocation OPAQUE_POST = Veil.veilPath("core/opaque");
     public static final ResourceLocation LIGHT_POST = Veil.veilPath("core/light");
@@ -87,7 +85,6 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
                 this.enabled = active;
                 if (active) {
                     Veil.LOGGER.info("Deferred Renderer Enabled");
-                    this.shaderPreDefinitions.define(USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY);
                 } else {
                     Veil.LOGGER.info("Deferred Renderer Disabled");
                     return preparationBarrier.wait(null).thenRunAsync(this::free, gameExecutor);
@@ -251,7 +248,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         }
 
         profiler.push("setup_lights");
-        this.lightRenderer.setup(VeilRenderer.getCullingFrustum(), profiler);
+        this.lightRenderer.setup(VeilRenderer.getCullingFrustum());
         profiler.popPush("opaque_light");
         this.run(profiler, deferred, deferredLight, OPAQUE_POST, OPAQUE_MIX);
         profiler.popPush("transparent_light");
@@ -291,11 +288,9 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
         boolean ambientOcclusion = this.lightRenderer.isAmbientOcclusionEnabled();
         boolean vanillaLights = this.lightRenderer.isVanillaLightEnabled();
         boolean vanillaEntityLights = this.shaderPreDefinitions.getDefinition(DISABLE_VANILLA_ENTITY_LIGHT_KEY) == null;
-        boolean bakeTransparencyLightmaps = this.shaderPreDefinitions.getDefinition(VeilDeferredRenderer.USE_BAKED_TRANSPARENT_LIGHTMAPS_KEY) != null;
         consumer.accept("Ambient Occlusion: " + (ambientOcclusion ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Light: " + (vanillaLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         consumer.accept("Vanilla Entity Light: " + (vanillaEntityLights ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
-        consumer.accept("Bake Transparency Lightmap: " + (bakeTransparencyLightmaps ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         this.lightRenderer.addDebugInfo(consumer);
     }
 
@@ -330,7 +325,7 @@ public class VeilDeferredRenderer implements PreparableReloadListener, NativeRes
      * @return Whether the deferred rendering pipeline is supported
      */
     public static boolean isSupported() {
-        return !Minecraft.useShaderTransparency() && !SODIUM_LOADED; // TODO allow fabulous/sodium
+        return !Minecraft.useShaderTransparency() && !Veil.SODIUM; // TODO allow fabulous/sodium
     }
 
     /**
