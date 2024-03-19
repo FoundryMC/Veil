@@ -13,10 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 
-import java.util.Arrays;
 import java.util.Optional;
-
-import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 
 /**
  * A basic stage that draws a quad to the output using a specified shader.

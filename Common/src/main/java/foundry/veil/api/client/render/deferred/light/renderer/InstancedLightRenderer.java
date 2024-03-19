@@ -3,8 +3,8 @@ package foundry.veil.api.client.render.deferred.light.renderer;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.deferred.light.Light;
 import foundry.veil.api.client.render.deferred.light.InstancedLight;
+import foundry.veil.api.client.render.deferred.light.Light;
 import foundry.veil.ext.VertexBufferExtension;
 import org.lwjgl.system.MemoryStack;
 

@@ -10,13 +10,10 @@ import java.util.Set;
 
 public class VeilMixinPlugin implements IMixinConfigPlugin {
 
-    private static final Set<String> COMPAT = Set.of(
-            "foundry.veil.forge.mixin.client.deferred");
-    private boolean sodium;
+    private static final Set<String> COMPAT = Set.of("foundry.veil.forge.mixin.client.deferred");
 
     @Override
     public void onLoad(String mixinPackage) {
-        this.sodium = Veil.platform().isSodiumLoaded();
     }
 
     @Override
@@ -28,7 +25,7 @@ public class VeilMixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         for (String compat : COMPAT) {
             if (mixinClassName.startsWith(compat)) {
-                return this.sodium ? !mixinClassName.startsWith(compat + ".vanilla") : !mixinClassName.startsWith(compat + ".sodium");
+                return Veil.SODIUM ? !mixinClassName.startsWith(compat + ".vanilla") : !mixinClassName.startsWith(compat + ".sodium");
             }
         }
         return true;

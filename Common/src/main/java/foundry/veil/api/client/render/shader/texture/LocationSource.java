@@ -1,7 +1,6 @@
 package foundry.veil.api.client.render.shader.texture;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 /**

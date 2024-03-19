@@ -20,7 +20,7 @@ public final class VeilVanillaShaders {
     private static ShaderInstance quasarParticleAdditiveMultiply;
 
     public static void registerShaders(Context context) throws IOException {
-        if (!Veil.platform().isSodiumLoaded()) {
+        if (!Veil.SODIUM) {
             context.register(new ResourceLocation("clouds"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL, value -> clouds = value);
         }
         context.register(new ResourceLocation("worldborder"), DefaultVertexFormat.POSITION_TEX, value -> worldborder = value);

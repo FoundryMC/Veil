@@ -4,19 +4,14 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.serialization.Codec;
 import foundry.veil.api.client.registry.PostPipelineStageRegistry;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.shader.program.UniformAccess;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.program.MutableUniformAccess;
+import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.client.render.shader.program.UniformAccess;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
-import org.lwjgl.opengl.GL31C;
 import org.lwjgl.system.NativeResource;
-
-import java.util.Arrays;
-
-import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 
 /**
  * <p>A series of post-processing effects that can be run to change the current framebuffer state.</p>

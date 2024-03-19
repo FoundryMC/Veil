@@ -1,7 +1,5 @@
 package foundry.veil.fabric.platform;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import foundry.veil.platform.registry.RegistrationProvider;
 import foundry.veil.platform.registry.RegistryObject;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -11,14 +9,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class FabricRegistrationFactory implements RegistrationProvider.Factory {

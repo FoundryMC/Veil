@@ -13,8 +13,6 @@ import java.util.function.BiConsumer;
 
 import static org.lwjgl.opengl.GL15C.*;
 import static org.lwjgl.opengl.GL30C.glBindBufferBase;
-import static org.lwjgl.opengl.GL30C.glBindBufferRange;
-import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 
 /**
  * Dynamic-size implementation of {@link ShaderBlock}.

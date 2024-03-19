@@ -7,7 +7,6 @@ import imgui.flag.ImGuiDataType;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;

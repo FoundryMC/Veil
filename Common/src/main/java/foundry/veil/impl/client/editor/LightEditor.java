@@ -20,7 +20,6 @@ import org.joml.Vector3fc;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class LightEditor extends SingleWindowEditor {
 

@@ -3,7 +3,6 @@ package foundry.veil;
 import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.platform.VeilPlatform;
 import gg.moonflower.molangcompiler.api.MolangCompiler;
-import imgui.ImGui;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
@@ -27,23 +26,6 @@ public class Veil {
         DEBUG = System.getProperty("veil.debug") != null;
         IMGUI = System.getProperty("veil.disableImgui") == null && !PLATFORM.isModLoaded("axiom");
         VERBOSE_SHADER_ERRORS = System.getProperty("veil.verboseShaderErrors") != null;
-    }
-
-    private static boolean hasImguiNatives() {
-        String arch = System.getProperty("os.arch");
-        boolean is64Bit = arch.contains("64") || arch.startsWith("armv8");
-        boolean isARM = arch.equals("arm") || arch.startsWith("aarch64");
-
-        String libName = "imgui-java";
-        if (isARM) {
-            libName += "arm";
-        }
-        if (is64Bit) {
-            libName += "64";
-        }
-
-        String name = System.mapLibraryName(libName);
-        return ImGui.class.getClassLoader().getResource("io/imgui/java/native-bin/" + name) != null;
     }
 
     @ApiStatus.Internal

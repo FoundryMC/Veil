@@ -1,6 +1,5 @@
 package foundry.veil.api.opencl.event;
 
-import foundry.veil.Veil;
 import foundry.veil.api.opencl.CLException;
 import foundry.veil.api.opencl.VeilOpenCL;
 import org.jetbrains.annotations.ApiStatus;

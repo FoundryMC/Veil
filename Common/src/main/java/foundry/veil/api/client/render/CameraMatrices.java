@@ -8,7 +8,6 @@ import org.lwjgl.system.NativeResource;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
-import static org.lwjgl.opengl.GL43C.GL_UNIFORM_BLOCK;
 
 /**
  * Packages all camera matrices and shader uniforms to make shader management easier.

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
-import static org.lwjgl.opengl.GL43C.*;
+import static org.lwjgl.opengl.GL43C.GL_SHADER_STORAGE_BUFFER;
 
 /**
  * Manages the state of uniform block bindings and their associated shader names.
