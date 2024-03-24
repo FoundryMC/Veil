@@ -16,7 +16,7 @@ public class GameRendererMixin {
         VeilRenderSystem.resize(pWidth, pHeight);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.BEFORE))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))
     public void veil$renderPost(float partialTicks, long time, boolean renderLevel, CallbackInfo ci) {
         VeilRenderSystem.renderPost();
     }
