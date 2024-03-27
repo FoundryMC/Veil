@@ -15,7 +15,7 @@ public class VeilBuiltinPacks {
         }
 
         if (!Veil.SODIUM) {
-            context.register(VeilDeferredRenderer.PACK_ID, true);
+            context.register(VeilDeferredRenderer.PACK_ID, false);
         }
     }
 
