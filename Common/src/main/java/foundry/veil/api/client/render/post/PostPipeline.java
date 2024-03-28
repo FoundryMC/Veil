@@ -3,6 +3,7 @@ package foundry.veil.api.client.render.post;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.serialization.Codec;
 import foundry.veil.api.client.registry.PostPipelineStageRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.shader.program.MutableUniformAccess;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
@@ -10,6 +11,7 @@ import foundry.veil.api.client.render.shader.program.UniformAccess;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.lwjgl.system.NativeResource;
 
@@ -292,5 +294,25 @@ public interface PostPipeline extends MutableUniformAccess, NativeResource {
          * @return The main framebuffer to draw into. This is later copied onto the main framebuffer
          */
         AdvancedFbo getDrawFramebuffer();
+
+        /**
+         * Retrieves a post pipeline by name.
+         *
+         * @param name The name of the pipeline to get
+         * @return The registered pipeline or <code>null</code> if it couldn't be found
+         */
+        default @Nullable PostPipeline getPipeline(ResourceLocation name) {
+            return VeilRenderSystem.renderer().getPostProcessingManager().getPipeline(name);
+        }
+
+        /**
+         * Retrieves a shader by name.
+         *
+         * @param name The name of the shader to get
+         * @return The registered shader or <code>null</code> if it couldn't be found
+         */
+        default @Nullable ShaderProgram getShader(ResourceLocation name) {
+            return VeilRenderSystem.renderer().getShaderManager().getShader(name);
+        }
     }
 }

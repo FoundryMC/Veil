@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.post.stage;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.Veil;
@@ -59,8 +58,6 @@ public class BlitPostStage extends FramebufferPostStage {
 
         shader.bind();
         shader.applyRenderSystem();
-        float[] color = RenderSystem.getShaderColor();
-        shader.setVector("ColorModulator", color[0], color[1], color[2], color[3]);
         context.applySamplers(shader);
         this.setupFramebuffer(context, shader);
         shader.applyShaderSamplers(context, 0);
