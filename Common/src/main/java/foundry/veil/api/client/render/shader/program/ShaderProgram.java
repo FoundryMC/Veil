@@ -5,6 +5,7 @@ import foundry.veil.api.client.render.shader.CompiledShader;
 import foundry.veil.api.client.render.shader.ShaderCompiler;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.impl.client.render.shader.ShaderProgramImpl;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.*;
@@ -473,7 +474,22 @@ public interface ShaderProgram extends NativeResource, MutableUniformAccess, Tex
     /**
      * @return The shaders attached to this program
      */
-    Set<CompiledShader> getShaders();
+    Int2ObjectMap<CompiledShader> getShaders();
+
+    /**
+     * @return Whether this program has the geometry stage
+     */
+    default boolean hasGeometry() {
+        return this.getShaders().containsKey(GL_GEOMETRY_SHADER);
+    }
+
+    /**
+     * @return Whether this program has the tesselation stage
+     */
+    default boolean hasTesselation() {
+        Int2ObjectMap<CompiledShader> shaders = this.getShaders();
+        return shaders.containsKey(GL_TESS_CONTROL_SHADER) && shaders.containsKey(GL_TESS_EVALUATION_SHADER);
+    }
 
     /**
      * @return All shader definitions this program depends on

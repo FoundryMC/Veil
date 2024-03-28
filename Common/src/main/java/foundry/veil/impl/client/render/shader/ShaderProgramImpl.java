@@ -12,7 +12,10 @@ import foundry.veil.api.client.render.shader.program.MutableUniformAccess;
 import foundry.veil.api.client.render.shader.program.ProgramDefinition;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -33,6 +36,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
 import static org.lwjgl.opengl.GL11C.GL_TRUE;
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE0;
@@ -48,11 +52,11 @@ import static org.lwjgl.opengl.GL43C.*;
 public class ShaderProgramImpl implements ShaderProgram {
 
     private final ResourceLocation id;
-    private final Set<CompiledShader> shaders;
-    private final Map<CharSequence, Integer> uniforms;
-    private final Map<CharSequence, Integer> uniformBlocks;
-    private final Map<CharSequence, Integer> storageBlocks;
-    private final Map<CharSequence, Integer> textures;
+    private final Int2ObjectMap<CompiledShader> shaders;
+    private final Object2IntMap<CharSequence> uniforms;
+    private final Object2IntMap<CharSequence> uniformBlocks;
+    private final Object2IntMap<CharSequence> storageBlocks;
+    private final Object2IntMap<CharSequence> textures;
     private final Map<String, ShaderTextureSource> textureSources;
     private final Set<String> definitionDependencies;
     private final Supplier<Wrapper> wrapper;
@@ -60,11 +64,11 @@ public class ShaderProgramImpl implements ShaderProgram {
 
     public ShaderProgramImpl(ResourceLocation id) {
         this.id = id;
-        this.shaders = new HashSet<>(2);
+        this.shaders = new Int2ObjectArrayMap<>(2);
         this.uniforms = new Object2IntArrayMap<>();
         this.uniformBlocks = new Object2IntArrayMap<>();
         this.storageBlocks = new Object2IntArrayMap<>();
-        this.textures = new HashMap<>();
+        this.textures = new Object2IntArrayMap<>();
         this.textureSources = new HashMap<>();
         this.definitionDependencies = new HashSet<>();
         this.wrapper = Suppliers.memoize(() -> {
@@ -82,7 +86,7 @@ public class ShaderProgramImpl implements ShaderProgram {
     private void clearShader() {
         if (this.program != 0) {
             // The shaders are already marked for deletion, they just have to be unlinked since the program isn't deleted
-            this.shaders.forEach(shader -> glDetachShader(this.program, shader.id()));
+            this.shaders.values().forEach(shader -> glDetachShader(this.program, shader.id()));
         }
         this.shaders.clear();
         this.uniforms.clear();
@@ -104,11 +108,12 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         try {
-            Map<Integer, ResourceLocation> shaders = definition.shaders();
-            for (Map.Entry<Integer, ResourceLocation> entry : shaders.entrySet()) {
-                CompiledShader shader = compiler.compile(context, entry.getKey(), entry.getValue());
+            Int2ObjectMap<ResourceLocation> shaders = definition.shaders();
+            for (Int2ObjectMap.Entry<ResourceLocation> entry : shaders.int2ObjectEntrySet()) {
+                int glType = entry.getIntKey();
+                CompiledShader shader = compiler.compile(context, glType, entry.getValue());
                 glAttachShader(this.program, shader.id());
-                this.shaders.add(shader);
+                this.shaders.put(glType, shader);
             }
 
             // Fragment shaders aren't strictly necessary if the fragment output isn't used,
@@ -117,7 +122,7 @@ public class ShaderProgramImpl implements ShaderProgram {
             if (Minecraft.ON_OSX && !shaders.containsKey(GL_COMPUTE_SHADER) && !shaders.containsKey(GL_FRAGMENT_SHADER)) {
                 CompiledShader shader = compiler.compile(context, GL_FRAGMENT_SHADER, "out vec4 fragColor;void main(){fragColor=vec4(1.0);}");
                 glAttachShader(this.program, shader.id());
-                this.shaders.add(shader);
+                this.shaders.put(GL_FRAGMENT_SHADER, shader);
             }
 
             glLinkProgram(this.program);
@@ -127,7 +132,7 @@ public class ShaderProgramImpl implements ShaderProgram {
             }
 
             this.bind();
-            this.shaders.forEach(shader -> {
+            this.shaders.values().forEach(shader -> {
                 shader.apply(this);
                 this.definitionDependencies.addAll(shader.definitionDependencies());
             });
@@ -148,7 +153,7 @@ public class ShaderProgramImpl implements ShaderProgram {
     }
 
     @Override
-    public Set<CompiledShader> getShaders() {
+    public Int2ObjectMap<CompiledShader> getShaders() {
         return this.shaders;
     }
 
@@ -172,7 +177,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         if (this.program == 0) {
             return -1;
         }
-        return this.uniforms.computeIfAbsent(name, k -> glGetUniformLocation(this.program, k));
+        return this.uniforms.computeIfAbsent(name, (ToIntFunction<? super CharSequence>) k -> glGetUniformLocation(this.program, k));
     }
 
     @Override

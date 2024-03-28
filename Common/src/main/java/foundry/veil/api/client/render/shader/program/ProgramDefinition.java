@@ -5,6 +5,9 @@ import com.google.gson.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +47,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
                                 String[] definitions,
                                 Map<String, String> definitionDefaults,
                                 Map<String, ShaderTextureSource> textures,
-                                Map<Integer, ResourceLocation> shaders) {
+                                Int2ObjectMap<ResourceLocation> shaders) {
 
     /**
      * Deserializer for {@link ProgramDefinition}.
@@ -114,7 +117,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
 
             Map<String, ShaderTextureSource> textures = json.has("textures") ? this.deserializeTextures(json.getAsJsonObject("textures")) : Collections.emptyMap();
 
-            Map<Integer, ResourceLocation> sources = new HashMap<>();
+            Int2ObjectMap<ResourceLocation> sources = new Int2ObjectArrayMap<>();
             if (vertex != null) {
                 sources.put(GL_VERTEX_SHADER, vertex);
             }
@@ -143,7 +146,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
                     definitions,
                     definitionDefaults,
                     textures,
-                    Collections.unmodifiableMap(sources));
+                    Int2ObjectMaps.unmodifiable(sources));
         }
     }
 }
