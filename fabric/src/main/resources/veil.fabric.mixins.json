@@ -28,6 +28,7 @@
     "client.stage.sodium.SodiumWorldRendererMixin",
     "client.stage.vanilla.LevelRendererMixin",
     "compat.cameratweaks.CameraTweaksCameraMixin",
+    "compat.flashback.ExportJobMixin",
     "compat.iris.IrisRenderingPipelineAccessor",
     "compat.iris.IrisRenderTargetMixin",
     "compat.replaymod.PipelineMixin",

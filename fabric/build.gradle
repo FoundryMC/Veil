@@ -41,6 +41,7 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-${sodium_version}-fabric"
     modCompileOnly "maven.modrinth:iris:1.8.8+1.21.1-fabric"
     modCompileOnly "maven.modrinth:replaymod:1.21-2.6.20"
+    modCompileOnly "maven.modrinth:flashback:0.32.0"
     modCompileOnly "maven.modrinth:cameratweaks:1.7.0-1.21.1"
 //    modCompileOnly "maven.modrinth:yacl:3.6.3+1.21.1-fabric"
 
