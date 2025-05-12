@@ -5,6 +5,7 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.compat.FlashbackCompat;
 import foundry.veil.api.compat.SodiumCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.impl.client.render.perspective.IrisPipelineAccess;
@@ -112,8 +113,10 @@ public final class VeilLevelPerspectiveRenderer {
 
         int backupWidth = window.getWidth();
         int backupHeight = window.getHeight();
-        window.setWidth(framebuffer.getWidth());
-        window.setHeight(framebuffer.getHeight());
+        if(!FlashbackCompat.isLoaded()) {
+            window.setWidth(framebuffer.getWidth());
+            window.setHeight(framebuffer.getHeight());
+        }
 
         final Object backupPipeline = IrisPipelineAccess.getPipeline(levelRenderer);
 
@@ -196,8 +199,10 @@ public final class VeilLevelPerspectiveRenderer {
             RenderSystem.setShaderFogEnd(backupFogEnd);
             RenderSystem.setShaderFogShape(backupFogShape);
 
-            window.setWidth(backupWidth);
-            window.setHeight(backupHeight);
+            if(!FlashbackCompat.isLoaded()) {
+                window.setWidth(backupWidth);
+                window.setHeight(backupHeight);
+            }
 
             accessor.setRenderDistance(backupRenderDistance);
 
