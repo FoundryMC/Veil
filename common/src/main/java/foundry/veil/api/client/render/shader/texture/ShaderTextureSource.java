@@ -10,7 +10,7 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.texture.TextureFilter;
 import foundry.veil.api.util.EnumCodec;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +97,7 @@ public sealed interface ShaderTextureSource permits LocationSource, FramebufferS
          */
         default int getTexture(ResourceLocation name) {
             if (Veil.MODID.equals(name.getNamespace()) && name.getPath().startsWith("dynamic_buffer")) {
-                DynamicBufferManger bufferManger = VeilRenderSystem.renderer().getDynamicBufferManger();
+                DynamicBufferManager bufferManger = VeilRenderSystem.renderer().getDynamicBufferManger();
                 if (name.equals(VeilRenderer.ALBEDO_BUFFER_TEXTURE)) {
                     return bufferManger.getBufferTexture(DynamicBufferType.ALBEDO);
                 }

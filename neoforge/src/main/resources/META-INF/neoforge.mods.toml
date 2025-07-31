@@ -45,8 +45,6 @@ description='''${description}'''
 [[mixins]]
     config = "${mod_id}.shader.mixins.json"
 [[mixins]]
-    config = "${mod_id}.tooltip.mixins.json"
-[[mixins]]
     config = "${mod_id}.neoforge.mixins.json"
 [[accessTransformers]]
     file="META-INF/accesstransformer.cfg"
@@ -60,13 +58,12 @@ description='''${description}'''
 [[dependencies.${mod_id}]]
     modId = "rubidium"
     type = "incompatible"
+    reason = "${mod_name} supports Sodium ${sodium_version} and above"
+[[dependencies.${mod_id}]]
+    modId = "embeddium"
+    type = "incompatible"
+    reason = "${mod_name} supports Sodium ${sodium_version} and above"
 [[dependencies.${mod_id}]]
     modId = "sodium"
     type = "incompatible"
     versionRange = "(,${sodium_version})"
-
-# Features are specific properties of the game environment, that you may want to declare you require. This example declares
-# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
-# stop your mod loading on the server for example.
-[features.${mod_id}]
-    openGLVersion = "[3.3,)"

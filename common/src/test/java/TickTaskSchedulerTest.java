@@ -3,7 +3,6 @@ import foundry.veil.impl.TickTaskSchedulerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TickTaskSchedulerTest {

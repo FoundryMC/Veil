@@ -19,10 +19,12 @@ import java.util.Optional;
  * @param filter  The texture filter to use
  * @author Ocelot
  */
-public record FramebufferSource(ResourceLocation name,
-                                int sampler,
-                                boolean depth,
-                                @Nullable TextureFilter filter) implements ShaderTextureSource {
+public record FramebufferSource(
+        ResourceLocation name,
+        int sampler,
+        boolean depth,
+        @Nullable TextureFilter filter
+) implements ShaderTextureSource {
 
     public static final MapCodec<FramebufferSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(source -> source.name.toString()),

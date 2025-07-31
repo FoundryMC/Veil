@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.shader.ShaderFeature;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.compiler.CompiledShader;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
@@ -14,16 +15,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
-import org.lwjgl.system.MemoryStack;
+import org.joml.Matrix4fc;
 import org.lwjgl.system.NativeResource;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Set;
 
-import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL20C.GL_VERTEX_SHADER;
 import static org.lwjgl.opengl.GL31C.GL_INVALID_INDEX;
 import static org.lwjgl.opengl.GL31C.glUniformBlockBinding;
 import static org.lwjgl.opengl.GL41C.*;
@@ -35,6 +34,7 @@ import static org.lwjgl.opengl.GL43C.glShaderStorageBlockBinding;
  *
  * @author Ocelot
  */
+@ApiStatus.NonExtendable
 public interface ShaderProgram extends NativeResource, MutableUniformAccess, TextureUniformAccess {
 
     /**
@@ -118,6 +118,12 @@ public interface ShaderProgram extends NativeResource, MutableUniformAccess, Tex
     Int2ObjectMap<CompiledShader> getShaders();
 
     /**
+     * @return Whether this program has a valid compiled shader
+     * @since 2.0.0
+     */
+    boolean isValid();
+
+    /**
      * @return Whether this program has the vertex stage
      */
     default boolean hasVertex() {
@@ -152,6 +158,12 @@ public interface ShaderProgram extends NativeResource, MutableUniformAccess, Tex
     default boolean isCompute() {
         return this.getShaders().containsKey(GL_COMPUTE_SHADER);
     }
+
+    /**
+     * @return The features this program needs to function
+     * @since 2.0.0
+     */
+    Set<ShaderFeature> getRequiredFeatures();
 
     /**
      * @return A guess at the best vertex format for this program

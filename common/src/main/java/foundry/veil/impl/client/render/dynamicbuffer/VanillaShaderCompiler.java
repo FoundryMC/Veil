@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.lwjgl.opengl.GL20C.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20C.GL_VERTEX_SHADER;
 
+@ApiStatus.Internal
 public class VanillaShaderCompiler {
 
     private static final Set<String> LAST_FRAME_SHADERS = ConcurrentHashMap.newKeySet();

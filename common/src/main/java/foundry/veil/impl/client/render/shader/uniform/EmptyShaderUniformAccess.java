@@ -130,6 +130,14 @@ public enum EmptyShaderUniformAccess implements ShaderUniformAccess {
     }
 
     @Override
+    public void setHandle(long value) {
+    }
+
+    @Override
+    public void setHandles(long... values) {
+    }
+
+    @Override
     public void setMatrix(Matrix2fc value, boolean transpose) {
     }
 

@@ -1,17 +1,17 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.editor.SingleWindowInspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.Light;
+import foundry.veil.api.client.render.light.data.LightData;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.client.render.light.renderer.LightRenderer;
 import imgui.ImGui;
-import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiHoveredFlags;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -19,12 +19,8 @@ import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3fc;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class LightInspector extends SingleWindowInspector {
 
@@ -82,8 +78,8 @@ public class LightInspector extends SingleWindowInspector {
         ImGui.sameLine();
         ImGui.beginDisabled(lightType == null);
         if (ImGui.button(REMOVE.getString()) && lightType != null) {
-            for (Light light : lightRenderer.getLights(lightType)) {
-                lightRenderer.removeLight(light);
+            for (LightRenderHandle<?> handle : lightRenderer.getLights(lightType)) {
+                handle.free();
             }
         }
         ImGui.endDisabled();
@@ -114,11 +110,13 @@ public class LightInspector extends SingleWindowInspector {
             ResourceLocation id = key.location();
             if (ImGui.beginTabItem(id.toString())) {
                 this.selectedTab = key;
-                List<Light> lights = lightRenderer.getLights(LightTypeRegistry.REGISTRY.get(key));
-                for (int i = 0; i < lights.size(); i++) {
+                int i = 0;
+                Collection<? extends LightRenderHandle<?>> lightData = lightRenderer.getLights(LightTypeRegistry.REGISTRY.get(key));
+                for (LightRenderHandle<?> handle : lightData) {
                     ImGui.pushID("light" + i);
-                    renderLightComponents(lights.get(i));
+                    renderLightComponents(handle);
                     ImGui.popID();
+                    i++;
                 }
                 ImGui.endTabItem();
             }
@@ -133,41 +131,44 @@ public class LightInspector extends SingleWindowInspector {
         this.lightTypes.addAll(LightTypeRegistry.REGISTRY.registryKeySet().stream().sorted(Comparator.comparing(ResourceKey::location)).toList());
     }
 
-    private static void renderLightComponents(Light light) {
+    private static void renderLightComponents(LightRenderHandle<?> handle) {
+        LightData data = handle.getLightData();
+
         ImBoolean visible = new ImBoolean(true);
-        ImGui.pushID(light.hashCode());
-        if (ImGui.collapsingHeader(DebugEntityNameGenerator.getEntityName(new UUID(light.hashCode(), 0L)), visible)) {
-            renderLightAttributeComponents(light);
+        ImGui.pushID(data.hashCode());
+        if (ImGui.collapsingHeader(DebugEntityNameGenerator.getEntityName(new UUID(data.hashCode(), 0L)), visible)) {
+            renderLightAttributeComponents(data);
+            handle.markDirty();
         }
         ImGui.popID();
         if (!visible.get()) {
-            VeilRenderSystem.renderer().getLightRenderer().removeLight(light);
+            handle.free();
         }
         ImGui.separator();
     }
 
-    private static void renderLightAttributeComponents(Light light) {
-        Vector3fc lightColor = light.getColor();
+    private static void renderLightAttributeComponents(LightData lightData) {
+        Colorc lightColor = lightData.getColor();
 
-        float[] editBrightness = new float[]{light.getBrightness()};
-        float[] editLightColor = new float[]{lightColor.x(), lightColor.y(), lightColor.z()};
+        float[] editBrightness = new float[]{lightData.getBrightness()};
+        float[] editLightColor = new float[]{lightColor.red(), lightColor.green(), lightColor.blue()};
 
         ImGui.indent();
         if (ImGui.dragScalar("brightness", editBrightness, 0.02F)) {
-            light.setBrightness(editBrightness[0]);
+            lightData.setBrightness(editBrightness[0]);
         }
         if (ImGui.colorEdit3("color", editLightColor)) {
-            light.setColor(editLightColor[0], editLightColor[1], editLightColor[2]);
+            lightData.setColor(editLightColor[0], editLightColor[1], editLightColor[2]);
         }
 
         if (ImGui.button(SET_POSITION.getString())) {
-            light.setTo(Minecraft.getInstance().gameRenderer.getMainCamera());
+            lightData.setTo(Minecraft.getInstance().gameRenderer.getMainCamera());
         }
 
         ImGui.newLine();
         VeilImGuiUtil.component(ATTRIBUTES);
 
-        if (light instanceof EditorAttributeProvider editorAttributeProvider) {
+        if (lightData instanceof EditorAttributeProvider editorAttributeProvider) {
             editorAttributeProvider.renderImGuiAttributes();
         }
         ImGui.unindent();

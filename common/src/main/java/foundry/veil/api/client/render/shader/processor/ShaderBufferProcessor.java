@@ -2,6 +2,7 @@ package foundry.veil.api.client.render.shader.processor;
 
 import foundry.veil.api.client.registry.VeilShaderBufferRegistry;
 import foundry.veil.api.client.render.VeilShaderBufferLayout;
+import foundry.veil.api.client.render.shader.ShaderFeature;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.node.GlslTree;
 import io.github.ocelot.glslprocessor.lib.anarres.cpp.LexerException;
@@ -20,10 +21,8 @@ import java.util.List;
 public class ShaderBufferProcessor implements ShaderPreProcessor {
 
     private static final String BUFFER_KEY = "#veil:buffer ";
-    private final boolean shaderStorageSupported;
 
-    public ShaderBufferProcessor(boolean shaderStorageSupported) {
-        this.shaderStorageSupported = shaderStorageSupported;
+    public ShaderBufferProcessor() {
     }
 
     @Override
@@ -48,7 +47,7 @@ public class ShaderBufferProcessor implements ShaderPreProcessor {
                 }
 
                 GlslTree loadedImport = new GlslTree();
-                loadedImport.getBody().add(layout.createNode(this.shaderStorageSupported, interfaceName));
+                loadedImport.getBody().add(layout.createNode(ctx.hasFeatures(ShaderFeature.SHADER_STORAGE), interfaceName));
                 ctx.include(tree, "#buffer " + name, loadedImport, IncludeOverloadStrategy.INCLUDE);
             } catch (ResourceLocationException e) {
                 throw new IOException("Invalid buffer: " + bufferId, e);

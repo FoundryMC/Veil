@@ -5,15 +5,15 @@
     "rgb_points": [
       {
         "percent": 0,
-        "color": [1,1,1]
+        "color": [1, 1, 1]
       },
       {
         "percent": 0.25,
-        "color": [0.5,0.5,0.5]
+        "color": [0.5, 0.5, 0.5]
       },
       {
         "percent": 1,
-        "color": [0,0,0]
+        "color": [0, 0, 0]
       }
     ],
     "alpha_points": [

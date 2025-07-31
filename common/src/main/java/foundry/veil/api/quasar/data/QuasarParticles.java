@@ -47,6 +47,11 @@ public final class QuasarParticles {
     private QuasarParticles() {
     }
 
+    @ApiStatus.Internal
+    public static void bootstrap() {
+        // This is here to make sure the class is loaded before particles are reloaded, otherwise KubeJS crashes
+    }
+
     private static <T> ResourceKey<Registry<T>> createRegistryKey(String name) {
         return ResourceKey.createRegistryKey(Veil.veilPath(name));
     }

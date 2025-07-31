@@ -21,6 +21,7 @@ public record ARBVertexAttribBindingBuilder(VertexArray vertexArray) implements 
 
     @Override
     public VertexArrayBuilder setVertexAttribute(int index, int bufferIndex, int size, DataType type, boolean normalized, int relativeOffset) {
+        VertexArrayBuilder.validateFloatType(type, size);
         VertexArrayBuilder.validateRelativeOffset(relativeOffset);
         glEnableVertexAttribArray(index);
         glVertexAttribFormat(index, size, type.getGlType(), normalized, relativeOffset);
@@ -30,6 +31,7 @@ public record ARBVertexAttribBindingBuilder(VertexArray vertexArray) implements 
 
     @Override
     public VertexArrayBuilder setVertexIAttribute(int index, int bufferIndex, int size, DataType type, int relativeOffset) {
+        VertexArrayBuilder.validateIntType(type);
         VertexArrayBuilder.validateRelativeOffset(relativeOffset);
         glEnableVertexAttribArray(index);
         glVertexAttribIFormat(index, size, type.getGlType(), relativeOffset);
@@ -39,9 +41,7 @@ public record ARBVertexAttribBindingBuilder(VertexArray vertexArray) implements 
 
     @Override
     public VertexArrayBuilder setVertexLAttribute(int index, int bufferIndex, int size, DataType type, int relativeOffset) {
-        if (!VeilRenderSystem.vertexAttribute64BitSupported()) {
-            throw new UnsupportedOperationException("Long attributes not supported");
-        }
+        VertexArrayBuilder.validateLongType(type);
         VertexArrayBuilder.validateRelativeOffset(relativeOffset);
         glEnableVertexAttribArray(index);
         glVertexAttribLFormat(index, size, type.getGlType(), relativeOffset);

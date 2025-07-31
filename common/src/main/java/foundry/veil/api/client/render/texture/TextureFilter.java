@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
 
-import java.nio.IntBuffer;
 import java.util.Optional;
 
 import static org.lwjgl.opengl.ARBDirectStateAccess.*;

@@ -38,7 +38,7 @@ vec3 rayFromNDC(vec2 ndc, vec3 lookVector, vec3 leftVector, vec3 upVector, float
 struct RSIResult { bool didIntersect; float tNear; vec3 insNear; bool hasFar; float tFar; vec3 insFar; };
 // s: sphere center    r: sphere radius
 RSIResult raySphereIntersection(vec3 ray, vec3 s, float r) {
-    float osd = length(s); // distance between ray origin and sphere center
+    float osd = length(s);// distance between ray origin and sphere center
 
     float t = dot(s, ray);
     vec3 p = ray*t;

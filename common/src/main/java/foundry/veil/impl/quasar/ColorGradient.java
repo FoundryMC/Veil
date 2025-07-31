@@ -3,28 +3,26 @@ package foundry.veil.impl.quasar;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.util.CodecUtil;
+import foundry.veil.api.client.color.Color;
+import foundry.veil.api.client.color.Colorc;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector4f;
-import org.joml.Vector4fc;
 
 import java.util.List;
 
 public class ColorGradient {
 
-    private static final Codec<Vector4fc> SINGLE_COLOR_CODEC = CodecUtil.VECTOR4F_CODEC.fieldOf("color").codec();
+    private static final Codec<Colorc> SINGLE_COLOR_CODEC = Color.ARGB_CODEC.fieldOf("color").codec();
     private static final Codec<ColorGradient> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RGBPoint.CODEC.listOf().fieldOf("rgb_points").forGetter(ColorGradient::getPoints),
             AlphaPoint.CODEC.listOf().fieldOf("alpha_points").forGetter(ColorGradient::getAlphaPoints)
     ).apply(instance, ColorGradient::new));
 
     public static final Codec<ColorGradient> CODEC = Codec.either(SINGLE_COLOR_CODEC, FULL_CODEC)
-            .xmap(either -> either.map(left -> new ColorGradient(left.x(), left.y(), left.z(), left.w()), right -> right),
+            .xmap(either -> either.map(ColorGradient::new, right -> right),
                     gradient -> {
                         if (gradient.isConstant()) {
-                            Vec3 point = gradient.points[0].color;
-                            return Either.left(new Vector4f((float) point.x, (float) point.y, (float) point.z, gradient.alphaPoints[0].alpha));
+                            Colorc point = gradient.points[0].color;
+                            return Either.left(new Color(point.red(), point.green(), point.blue(), gradient.alphaPoints[0].alpha));
                         }
                         return Either.right(gradient);
                     });
@@ -32,8 +30,12 @@ public class ColorGradient {
     private final RGBPoint[] points;
     private final AlphaPoint[] alphaPoints;
 
+    public ColorGradient(Colorc color) {
+        this(color.red(), color.green(), color.blue(), color.alpha());
+    }
+
     public ColorGradient(float red, float green, float blue, float alpha) {
-        this.points = new RGBPoint[]{new RGBPoint(0.0F, new Vec3(red, green, blue))};
+        this.points = new RGBPoint[]{new RGBPoint(0.0F, new Color(red, green, blue))};
         this.alphaPoints = new AlphaPoint[]{new AlphaPoint(0.0F, alpha)};
     }
 
@@ -50,11 +52,11 @@ public class ColorGradient {
         this(points.toArray(new RGBPoint[0]), alphaPoints.toArray(new AlphaPoint[0]));
     }
 
-    public ColorGradient(Vec3 startColor, Vec3 endColor, float startAlpha, float endAlpha) {
+    public ColorGradient(Color startColor, Color endColor, float startAlpha, float endAlpha) {
         this(new RGBPoint[]{new RGBPoint(0, startColor), new RGBPoint(1, endColor)}, new AlphaPoint[]{new AlphaPoint(0, startAlpha), new AlphaPoint(1, endAlpha)});
     }
 
-    public ColorGradient(Vec3 startColor, Vec3 endColor) {
+    public ColorGradient(Color startColor, Color endColor) {
         this(new RGBPoint[]{new RGBPoint(0, startColor), new RGBPoint(1, endColor)});
     }
 
@@ -62,14 +64,14 @@ public class ColorGradient {
         return this.points.length == 1 && this.alphaPoints.length == 1;
     }
 
-    public Vector4f getColor(float percentage) {
-        return this.getColor(percentage, new Vector4f());
+    public Color getColor(float percentage) {
+        return this.getColor(percentage, new Color());
     }
 
-    public Vector4f getColor(float percentage, Vector4f store) {
-        Vec3 rgb = this.getRGB(percentage);
-        float alpha = this.getAlpha(percentage);
-        return store.set(rgb.x, rgb.y, rgb.z, alpha);
+    public Color getColor(float percentage, Color store) {
+        this.getRGB(percentage, store);
+        store.alpha(this.getAlpha(percentage));
+        return store;
     }
 
     private float getAlpha(float percentage) {
@@ -92,20 +94,23 @@ public class ColorGradient {
         return this.alphaPoints[this.alphaPoints.length - 1].alpha;
     }
 
-    private Vec3 getRGB(float percentage) {
+    private void getRGB(float percentage, Color store) {
         // if there is only one point, return that color
         if (this.points.length == 1) {
-            return this.points[0].color;
+            store.set(this.points[0].color);
+            return;
         }
         // loop over the points to find the two points that the percentage is between
         for (int i = 0; i < this.points.length - 1; i++) {
             if (percentage >= this.points[i].percent && percentage <= this.points[i + 1].percent) {
                 // if the percentage is between two points, interpolate between them
-                return this.points[i].color.lerp(this.points[i + 1].color, (percentage - this.points[i].percent) / (this.points[i + 1].percent - this.points[i].percent));
+                store.set( this.points[i].color.lerp(this.points[i + 1].color, (percentage - this.points[i].percent) / (this.points[i + 1].percent - this.points[i].percent), store));
+           return;
             }
         }
         // if the percentage is outside of the range of the points, return the default color
-        return this.points[this.points.length - 1].color;
+        store.set(this.points[this.points.length - 1].color);
+           return;
     }
 
     public List<RGBPoint> getPoints() {
@@ -116,10 +121,10 @@ public class ColorGradient {
         return List.of(this.alphaPoints);
     }
 
-    public record RGBPoint(float percent, Vec3 color) {
+    public record RGBPoint(float percent, Colorc color) {
         public static final Codec<RGBPoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.FLOAT.fieldOf("percent").forGetter(RGBPoint::percent),
-                Vec3.CODEC.fieldOf("color").forGetter(RGBPoint::color)
+                Color.RGB_CODEC.fieldOf("color").forGetter(RGBPoint::color)
         ).apply(instance, RGBPoint::new));
     }
 

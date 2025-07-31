@@ -21,6 +21,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+/**
+ * Defines an editor type that can interact with one or more resources.
+ *
+ * @param <T> The type of resource this editor handles
+ * @author Ocelot
+ * @see VeilEditorEnvironment
+ * @since 1.0.0
+ */
 public interface ResourceFileEditor<T extends VeilResource<?>> extends Closeable {
 
     /**
@@ -53,14 +61,15 @@ public interface ResourceFileEditor<T extends VeilResource<?>> extends Closeable
      * @param element         The json to write to the resource file
      * @param resourceManager The resource manager to write the file to
      * @param resource        The resource to write to
+     * @return A future for when the task is complete
      */
-    default void save(JsonElement element, VeilResourceManager resourceManager, VeilResource<?> resource) throws IOException {
+    default CompletableFuture<?> save(JsonElement element, VeilResourceManager resourceManager, VeilResource<?> resource) throws IOException {
         StringWriter stringWriter = new StringWriter();
         JsonWriter jsonWriter = new JsonWriter(stringWriter);
         jsonWriter.setLenient(true);
         jsonWriter.setIndent("  ");
         Streams.write(element, jsonWriter);
-        this.save(stringWriter.toString().getBytes(StandardCharsets.UTF_8), resourceManager, resource);
+        return this.save(stringWriter.toString().getBytes(StandardCharsets.UTF_8), resourceManager, resource);
     }
 
     /**
@@ -69,10 +78,11 @@ public interface ResourceFileEditor<T extends VeilResource<?>> extends Closeable
      * @param data            The data to write to the resource file
      * @param resourceManager The resource manager to write the file to
      * @param resource        The resource to write to
+     * @return A future for when the task is complete
      */
-    default void save(byte[] data, VeilResourceManager resourceManager, VeilResource<?> resource) {
+    default CompletableFuture<?> save(byte[] data, VeilResourceManager resourceManager, VeilResource<?> resource) {
         VeilResourceInfo info = resource.resourceInfo();
-        CompletableFuture.runAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             try {
                 if (info.isStatic()) {
                     throw new IOException("Read-only resource");

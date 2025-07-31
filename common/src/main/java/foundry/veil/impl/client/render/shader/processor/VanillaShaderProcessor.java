@@ -2,6 +2,7 @@ package foundry.veil.impl.client.render.shader.processor;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.VeilClient;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.shader.processor.ShaderImporter;
 import foundry.veil.api.client.render.shader.processor.ShaderModifyProcessor;
@@ -49,6 +50,7 @@ public class VanillaShaderProcessor {
         processor.getShaderImporter().reset();
         Map<String, String> macros = new HashMap<>();
         DynamicBufferType.addMacros(activeBuffers, macros);
+        VeilRenderSystem.renderer().getShaderManager().addMacros(macros);
         GlslTree tree = GlslParser.preprocessParse(source, macros);
         processor.getProcessor().modify(new Context(customProgramData, processor, shaderInstance, name, activeBuffers, type, vertexFormat, macros), tree);
         GlslTree.stripGLMacros(macros);

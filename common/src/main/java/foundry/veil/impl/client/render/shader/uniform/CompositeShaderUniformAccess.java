@@ -221,6 +221,20 @@ public record CompositeShaderUniformAccess(ShaderUniformAccess... accesses) impl
     }
 
     @Override
+    public void setHandle(long value) {
+        for (ShaderUniformAccess access : this.accesses) {
+            access.setHandle(value);
+        }
+    }
+
+    @Override
+    public void setHandles(long... values) {
+        for (ShaderUniformAccess access : this.accesses) {
+            access.setHandles(values);
+        }
+    }
+
+    @Override
     public void setMatrix(Matrix2fc value, boolean transpose) {
         for (ShaderUniformAccess access : this.accesses) {
             access.setMatrix(value, transpose);

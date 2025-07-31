@@ -1,6 +1,7 @@
 package foundry.veil.impl.client.render.shader.program;
 
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
@@ -26,10 +27,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.lwjgl.opengl.GL20C.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
@@ -88,16 +89,35 @@ public class DynamicShaderProgramImpl extends ShaderProgramImpl {
                     processor.prepare();
                     importProcessor.prepare();
 
+                    Set<String> dependencies = new HashSet<>();
                     Map<String, String> macros = new HashMap<>(definitions.getStaticDefinitions());
                     DynamicBufferType.addMacros(activeBuffers, macros);
+                    VeilRenderSystem.renderer().getShaderManager().addMacros(macros);
                     GlslTree tree = GlslParser.preprocessParse(source, macros);
                     Object2IntMap<String> uniformBindings = new Object2IntArrayMap<>();
-                    PreProcessorContext preProcessorContext = new PreProcessorContext(customProgramData, processorList, activeBuffers, type, uniformBindings, macros, null, true);
+                    PreProcessorContext preProcessorContext = new PreProcessorContext(
+                            customProgramData,
+                            processorList,
+                            activeBuffers,
+                            type,
+                            uniformBindings,
+                            macros,
+                            dependencies,
+                            this.getName(),
+                            true);
                     processor.modify(preProcessorContext, tree);
                     GlslTree.stripGLMacros(macros);
-                    tree.getMacros().putAll(macros);
+                    Map<String, String> treeMacros = tree.getMacros();
+                    treeMacros.putAll(macros);
 
-                    this.processedShaderSources.put(type, new VeilShaderSource(null, tree.toSourceString(), uniformBindings, Collections.emptySet(), new HashSet<>(processorList.getShaderImporter().addedImports())));
+                    for (String dependency : dependencies) {
+                        String value = definitions.getDefinition(dependency);
+                        if (value != null) {
+                            treeMacros.putIfAbsent(dependency, value);
+                        }
+                    }
+
+                    this.processedShaderSources.put(type, new VeilShaderSource(null, tree.toSourceString(), uniformBindings, dependencies, new HashSet<>(processorList.getShaderImporter().addedImports())));
                 } catch (Throwable t) {
                     throw new IOException("Failed to process " + ShaderManager.getTypeName(type) + " shader", t);
                 }
@@ -128,13 +148,14 @@ public class DynamicShaderProgramImpl extends ShaderProgramImpl {
                                        int type,
                                        Object2IntMap<String> uniformBindings,
                                        Map<String, String> macros,
-                                       @Nullable ResourceLocation name,
+                                       Set<String> definitionDependencies,
+                                       ResourceLocation name,
                                        boolean sourceFile) implements ShaderPreProcessor.VeilContext {
 
         @Override
         public GlslTree modifyInclude(@Nullable ResourceLocation name, String source) throws IOException, GlslSyntaxException, LexerException {
             GlslTree tree = GlslParser.preprocessParse(source, this.macros);
-            PreProcessorContext context = new PreProcessorContext(this.customProgramData, this.processor, this.activeBuffers, this.type, this.uniformBindings, this.macros, name, false);
+            PreProcessorContext context = new PreProcessorContext(this.customProgramData, this.processor, this.activeBuffers, this.type, this.uniformBindings, this.macros, this.definitionDependencies, name, false);
             this.processor.getImportProcessor().modify(context, tree);
             return tree;
         }
@@ -142,6 +163,16 @@ public class DynamicShaderProgramImpl extends ShaderProgramImpl {
         @Override
         public void addUniformBinding(String name, int binding) {
             this.uniformBindings.put(name, binding);
+        }
+
+        @Override
+        public void addDefinitionDependency(String name) {
+            this.definitionDependencies.add(name);
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return true;
         }
 
         @Override

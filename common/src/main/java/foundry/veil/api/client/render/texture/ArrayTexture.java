@@ -84,6 +84,6 @@ public abstract class ArrayTexture extends AbstractTexture {
 
     @Override
     public void bind() {
-        VeilRenderSystem.renderThreadExecutor().execute(() -> glBindTexture(GL_TEXTURE_2D_ARRAY, this.getId()));
+        glBindTexture(GL_TEXTURE_2D_ARRAY, this.getId());
     }
 }

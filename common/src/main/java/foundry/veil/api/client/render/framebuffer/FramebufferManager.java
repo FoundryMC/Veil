@@ -111,6 +111,10 @@ public class FramebufferManager extends CodecReloadListener<FramebufferDefinitio
 
     @ApiStatus.Internal
     public void clear() {
+        if (this.framebuffers.size() == this.manualFramebuffers.size()) {
+            return;
+        }
+
         VeilDebug debug = VeilDebug.get();
         debug.pushDebugGroup("Veil Clear Framebuffers");
         this.framebuffers.forEach((name, fbo) -> {

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  *
  * @param <T> The enum type to encode/decode
  * @author Ocelot
+ * @since 1.0.0
  */
 public class EnumCodec<T extends Enum<?>> implements Codec<T> {
 
@@ -116,7 +117,7 @@ public class EnumCodec<T extends Enum<?>> implements Codec<T> {
         private T[] values;
         private Function<T, String> toString;
 
-        public Builder(String name) {
+        private Builder(String name) {
             this.name = name;
             this.values = null;
             this.toString = (Function<T, String>) LOWERCASE;

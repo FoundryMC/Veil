@@ -5,8 +5,9 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.program.TextureUniformAccess;
+import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,14 +20,14 @@ import java.util.Map;
 @ApiStatus.Internal
 public class PostPipelineContext implements PostPipeline.Context {
 
-    private final Map<CharSequence, Pair<Integer, Integer>> samplers;
+    private final Object2LongMap<CharSequence> samplers;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
 
     /**
      * Creates a new context to fit the specified window.
      */
     public PostPipelineContext() {
-        this.samplers = new HashMap<>();
+        this.samplers = new Object2LongArrayMap<>();
         this.framebuffers = new HashMap<>();
     }
 
@@ -47,7 +48,7 @@ public class PostPipelineContext implements PostPipeline.Context {
 
     @Override
     public void setSampler(CharSequence name, int textureId, int samplerId) {
-        this.samplers.put(name, Pair.of(textureId, samplerId));
+        this.samplers.put(name, (long) samplerId << 32 | textureId);
     }
 
     @Override
@@ -57,12 +58,19 @@ public class PostPipelineContext implements PostPipeline.Context {
 
     @Override
     public void applySamplers(TextureUniformAccess shader) {
-        this.samplers.forEach((name, pair) -> shader.setSampler(name, pair.getLeft(), pair.getRight()));
+        for (Object2LongMap.Entry<CharSequence> samplerEntry : this.samplers.object2LongEntrySet()) {
+            long value = samplerEntry.getLongValue();
+            int textureId = (int) (value & 0xFFFFFFFFL);
+            int samplerId = (int) ((value >> 32) & 0xFFFFFFFFL);
+            shader.setSampler(samplerEntry.getKey(), textureId, samplerId);
+        }
     }
 
     @Override
     public void clearSamplers(TextureUniformAccess shader) {
-        this.samplers.keySet().forEach(shader::removeSampler);
+        for (CharSequence name : this.samplers.keySet()) {
+            shader.removeSampler(name);
+        }
     }
 
     @Override

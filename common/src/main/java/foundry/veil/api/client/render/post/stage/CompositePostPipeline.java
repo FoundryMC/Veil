@@ -18,7 +18,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A pipeline that runs all child pipelines in order.
@@ -44,7 +47,7 @@ public final class CompositePostPipeline implements PostPipeline {
 
     private final PostPipeline[] stages;
     private final Map<String, ShaderTextureSource> textureSources;
-    private final Map<String, ShaderProgramImpl.ShaderTexture> textures;
+    private final Map<String, ShaderProgramImpl.ShaderTexture> samplers;
     private final Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions;
     private final VeilRenderLevelStageEvent.Stage renderStage;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
@@ -57,18 +60,18 @@ public final class CompositePostPipeline implements PostPipeline {
     private int screenWidth = -1;
     private int screenHeight = -1;
 
-    private CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, @Nullable VeilRenderLevelStageEvent.Stage renderStage, int dynamicBuffers, int priority, boolean replace) {
+    private CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> samplers, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, @Nullable VeilRenderLevelStageEvent.Stage renderStage, int dynamicBuffers, int priority, boolean replace) {
         this.stages = stages;
-        this.textureSources = Collections.unmodifiableMap(textures);
-        this.textures = new HashMap<>(textures.size());
+        this.textureSources = Collections.unmodifiableMap(samplers);
+        this.samplers = new Object2ObjectArrayMap<>(samplers.size());
         Minecraft.getInstance().execute(() -> {
-            for (Map.Entry<String, ShaderTextureSource> entry : textures.entrySet()) {
-                this.textures.put(entry.getKey(), ShaderProgramImpl.ShaderTexture.create(entry.getValue()));
+            for (Map.Entry<String, ShaderTextureSource> entry : samplers.entrySet()) {
+                this.samplers.put(entry.getKey(), ShaderProgramImpl.ShaderTexture.create(entry.getValue()));
             }
         });
         this.framebufferDefinitions = Collections.unmodifiableMap(framebufferDefinitions);
         this.renderStage = renderStage;
-        this.framebuffers = new HashMap<>();
+        this.framebuffers = new Object2ObjectArrayMap<>();
         this.uniforms = new Object2ObjectArrayMap<>();
         this.dynamicBuffers = DynamicBufferType.decode(dynamicBuffers);
         this.dynamicBuffersMask = dynamicBuffers;
@@ -80,13 +83,13 @@ public final class CompositePostPipeline implements PostPipeline {
      * Creates a new composite post pipeline that runs all child pipelines in order.
      *
      * @param stages                 The pipelines to run in order
-     * @param textures               The textures to bind globally
+     * @param samplers               The textures to bind globally
      * @param framebufferDefinitions The definitions of framebuffers to create for use in the stages
      * @param renderStage            The stage in the renderer the pipeline should be applied at
      * @param dynamicBuffers         A bit field of all enabled dynamic buffers for this pipeline
      */
-    public CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> textures, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, @Nullable VeilRenderLevelStageEvent.Stage renderStage, int dynamicBuffers) {
-        this(stages, textures, framebufferDefinitions, renderStage, dynamicBuffers, 1000, false);
+    public CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> samplers, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, @Nullable VeilRenderLevelStageEvent.Stage renderStage, int dynamicBuffers) {
+        this(stages, samplers, framebufferDefinitions, renderStage, dynamicBuffers, 1000, false);
     }
 
     @Override
@@ -111,7 +114,10 @@ public final class CompositePostPipeline implements PostPipeline {
         for (DynamicBufferType buffer : this.dynamicBuffers) {
             context.setSampler(buffer.getSourceName(), VeilRenderSystem.renderer().getDynamicBufferManger().getBufferTexture(buffer), 0);
         }
-        this.textures.forEach((name, texture) -> context.setSampler(name, texture.textureSource().getId(context), texture.samplerId()));
+        for (Map.Entry<String, ShaderProgramImpl.ShaderTexture> entry : this.samplers.entrySet()) {
+            ShaderProgramImpl.ShaderTexture texture = entry.getValue();
+            context.setSampler(entry.getKey(), texture.textureSource().getId(context), texture.samplerId());
+        }
         for (PostPipeline pipeline : this.stages) {
             pipeline.apply(context);
         }
@@ -155,7 +161,7 @@ public final class CompositePostPipeline implements PostPipeline {
     @Override
     public ShaderUniformAccess getOrCreateUniform(CharSequence name) {
         return this.uniforms.computeIfAbsent(name.toString(), key -> ShaderUniformAccess.of(Arrays.stream(this.stages)
-                .map(pipeline -> pipeline.getOrCreateUniform(name))
+                .map(pipeline -> pipeline.getOrCreateUniform(key))
                 .toArray(ShaderUniformAccess[]::new)));
     }
 

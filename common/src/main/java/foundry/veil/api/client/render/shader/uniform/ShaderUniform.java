@@ -2,6 +2,7 @@ package foundry.veil.api.client.render.shader.uniform;
 
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderUniformCache;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.*;
 
 import java.nio.ByteBuffer;
@@ -283,13 +284,38 @@ public interface ShaderUniform extends ShaderUniformAccess {
      * Possible uniform types that can be used.
      */
     enum Type {
+        /**
+         * @since 2.0.0
+         */
+        SAMPLER(0) {
+            @Override
+            public void upload(int program, int location, ByteBuffer buffer) {
+                if (VeilRenderSystem.separateShaderObjectsSupported()) {
+                    glProgramUniform1iv(program, location, buffer.asIntBuffer());
+                } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
+                    glUniform1iv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
+                }
+            }
+        },
         FLOAT(Float.BYTES) {
             @Override
             public void upload(int program, int location, ByteBuffer buffer) {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1fv(program, location, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1fv(location, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -299,7 +325,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2fv(program, location, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2fv(location, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -309,7 +341,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3fv(program, location, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3fv(location, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -319,7 +357,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4fv(program, location, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4fv(location, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -329,7 +373,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1iv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1iv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -339,7 +389,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2iv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2iv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -349,7 +405,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3iv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3iv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -359,7 +421,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4iv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4iv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -369,7 +437,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1uiv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1uiv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -379,7 +453,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2uiv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2uiv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -389,7 +469,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3uiv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3uiv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -399,7 +485,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4uiv(program, location, buffer.asIntBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4uiv(location, buffer.asIntBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -409,7 +501,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -419,7 +517,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -429,7 +533,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -439,7 +549,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2x3fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2x3fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -449,7 +565,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3x2fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3x2fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -459,7 +581,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2x4fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2x4fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -469,7 +597,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4x2fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4x2fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -479,7 +613,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3x4fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3x4fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -489,7 +629,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4x3fv(program, location, transpose, buffer.asFloatBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4x3fv(location, transpose, buffer.asFloatBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -503,7 +649,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1dv(program, location, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1dv(location, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -516,7 +668,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2dv(program, location, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2dv(location, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -529,7 +687,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3dv(program, location, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3dv(location, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -542,7 +706,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4dv(program, location, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4dv(location, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -555,7 +725,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1i64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1i64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -568,7 +744,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2i64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2i64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -581,7 +763,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3i64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3i64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -594,7 +782,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4i64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4i64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -607,7 +801,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform1ui64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform1ui64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -620,7 +820,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform2ui64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform2ui64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -633,7 +839,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform3ui64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform3ui64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -646,7 +858,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniform4ui64vARB(program, location, buffer.asLongBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniform4ui64vARB(location, buffer.asLongBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -659,7 +877,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -672,7 +896,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -685,7 +915,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -698,7 +934,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2x3dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2x3dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -711,7 +953,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3x2dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3x2dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -724,7 +972,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix2x4dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix2x4dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -737,7 +991,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4x2dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4x2dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -750,7 +1010,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix3x4dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix3x4dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         },
@@ -763,7 +1029,13 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 if (VeilRenderSystem.separateShaderObjectsSupported()) {
                     glProgramUniformMatrix4x3dv(program, location, transpose, buffer.asDoubleBuffer());
                 } else {
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(program);
+                    }
                     glUniformMatrix4x3dv(location, transpose, buffer.asDoubleBuffer());
+                    if (program != ShaderInstance.lastProgramId) {
+                        glUseProgram(ShaderInstance.lastProgramId);
+                    }
                 }
             }
         };
@@ -776,7 +1048,7 @@ public interface ShaderUniform extends ShaderUniformAccess {
 
         public static Type byId(int type) {
             if (ShaderUniformCache.isSampler(type)) {
-                return INT;
+                return SAMPLER;
             }
             return switch (type) {
                 case GL_FLOAT -> FLOAT;
@@ -796,7 +1068,7 @@ public interface ShaderUniform extends ShaderUniformAccess {
                 case GL_FLOAT_MAT4 -> MATRIX4x4;
                 case GL_FLOAT_MAT2x3 -> MATRIX2x3;
                 case GL_FLOAT_MAT3x4 -> MATRIX3x4;
-                
+
                 case GL_DOUBLE -> DOUBLE;
                 case GL_DOUBLE_VEC2 -> DOUBLE_VEC2;
                 case GL_DOUBLE_VEC3 -> DOUBLE_VEC3;
@@ -827,6 +1099,9 @@ public interface ShaderUniform extends ShaderUniformAccess {
         }
 
         public int getBytes() {
+            if (this == SAMPLER) {
+                return VeilRenderSystem.bindlessTextureSupported() ? Long.BYTES : Integer.BYTES;
+            }
             return this.bytes;
         }
     }

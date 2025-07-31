@@ -66,7 +66,7 @@ public class LegacyAdvancedFboImpl extends AdvancedFboImpl {
     }
 
     @Override
-    public void clear(float red, float green, float blue, float alpha, int clearMask, int... buffers) {
+    public void clear(float red, float green, float blue, float alpha, float depth, int clearMask, int... buffers) {
         if (clearMask == 0) {
             return;
         }
@@ -77,20 +77,32 @@ public class LegacyAdvancedFboImpl extends AdvancedFboImpl {
                 this.bind(false);
             }
 
-            boolean color = (clearMask & GL_COLOR_BUFFER_BIT) != 0;
+            boolean hasColor = (clearMask & GL_COLOR_BUFFER_BIT) != 0;
+            boolean hasDepth = (clearMask & GL_DEPTH_BUFFER_BIT) != 0;
             FloatBuffer oldColor = null;
-            if (color) {
+            FloatBuffer oldDepth = null;
+            if (hasColor) {
                 this.drawBuffers(buffers);
                 oldColor = stack.mallocFloat(4);
                 glGetFloatv(GL_COLOR_CLEAR_VALUE, oldColor);
                 glClearColor(red, green, blue, alpha);
             }
 
+            if (hasDepth) {
+                oldDepth = stack.mallocFloat(1);
+                glGetFloatv(GL_DEPTH_CLEAR_VALUE, oldDepth);
+                glClearDepth(depth);
+            }
+
             GlStateManager._clear(clearMask, Minecraft.ON_OSX);
 
-            if (color) {
+            if (hasColor) {
                 glClearColor(oldColor.get(0), oldColor.get(1), oldColor.get(2), oldColor.get(3));
                 this.resetDrawBuffers();
+            }
+
+            if (hasDepth) {
+                glClearDepth(oldDepth.get(0));
             }
 
             if (oldFbo != this.id) {

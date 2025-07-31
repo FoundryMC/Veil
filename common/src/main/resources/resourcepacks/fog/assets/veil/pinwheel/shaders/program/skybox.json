@@ -1,0 +1,14 @@
+{
+  "vertex": "veil:blit_screen",
+  "fragment": "veil:skybox",
+  "textures": {
+    "Skybox": {
+      "type": "location",
+      "location": "veil:textures/special/cubemaps_skybox.png",
+      "filter": {
+        "blur": true,
+        "seamless": true
+      }
+    }
+  }
+}

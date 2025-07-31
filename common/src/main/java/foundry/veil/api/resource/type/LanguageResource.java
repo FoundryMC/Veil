@@ -8,11 +8,13 @@ import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 
+@ApiStatus.Internal
 public record LanguageResource(VeilResourceInfo resourceInfo) implements VeilTextResource<LanguageResource> {
 
     @Override

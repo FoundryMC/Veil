@@ -1,8 +1,8 @@
 package foundry.veil.api.client.render.texture;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
@@ -72,17 +72,23 @@ public class SimpleArrayTexture extends ArrayTexture implements VeilPreloadedTex
             clamp = false;
         }
 
-        VeilRenderSystem.renderThreadExecutor().execute(() -> {
-            try {
-                this.setFilter(blur, clamp);
-                this.init(GL_RGBA, 0, images[0].getWidth(), images[0].getHeight(), images.length);
-                this.upload(images);
-            } finally {
-                for (NativeImage image : images) {
-                    image.close();
-                }
+        this.setFilter(blur, clamp);
+        if (!RenderSystem.isOnRenderThreadOrInit()) {
+            RenderSystem.recordRenderCall(() -> this.loadImages(images));
+        } else {
+            this.loadImages(images);
+        }
+    }
+
+    private void loadImages(NativeImage[] images) {
+        try {
+            this.init(GL_RGBA, 0, images[0].getWidth(), images[0].getHeight(), images.length);
+            this.upload(images);
+        } finally {
+            for (NativeImage image : images) {
+                image.close();
             }
-        });
+        }
     }
 
     @Override

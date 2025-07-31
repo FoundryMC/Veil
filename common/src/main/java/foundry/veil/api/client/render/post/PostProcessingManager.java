@@ -18,6 +18,8 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferStack;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.stage.CompositePostPipeline;
+import foundry.veil.api.client.render.profiler.RenderProfilerCounter;
+import foundry.veil.api.client.render.profiler.VeilRenderProfiler;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
@@ -58,6 +60,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
     private final List<ProfileEntry> activePipelines;
     private final List<ProfileEntry> activePipelinesView;
     private final Map<ResourceLocation, CompositePostPipeline> pipelines;
+    private boolean pipelinesDirty;
     private int enabledBuffers;
 
     /**
@@ -69,6 +72,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.activePipelines = new LinkedList<>();
         this.activePipelinesView = Collections.unmodifiableList(this.activePipelines);
         this.pipelines = new HashMap<>();
+        this.pipelinesDirty = false;
         this.enabledBuffers = 0;
     }
 
@@ -79,7 +83,12 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @return Whether that pipeline is active
      */
     public boolean isActive(ResourceLocation pipeline) {
-        return this.activePipelines.stream().anyMatch(entry -> entry.pipeline.equals(pipeline));
+        for (ProfileEntry entry : this.activePipelines) {
+            if (entry.pipeline.equals(pipeline)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -102,11 +111,21 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @return Whether the pipeline was added or had a priority change
      */
     public boolean add(int priority, ResourceLocation pipeline) {
-        if (this.activePipelines.stream().anyMatch(entry -> entry.priority == priority && entry.pipeline.equals(pipeline))) {
-            return false;
+        ListIterator<ProfileEntry> iterator = this.activePipelines.listIterator();
+        while (iterator.hasNext()) {
+            ProfileEntry entry = iterator.next();
+            if (entry.pipeline.equals(pipeline)) {
+                if (entry.priority == priority) {
+                    return false;
+                }
+                iterator.set(new ProfileEntry(pipeline, priority));
+                this.pipelinesDirty = true;
+                return true;
+            }
         }
-        this.activePipelines.removeIf(entry -> entry.pipeline.equals(pipeline));
+
         this.activePipelines.add(new ProfileEntry(pipeline, priority));
+        this.pipelinesDirty = true;
         return true;
     }
 
@@ -117,7 +136,15 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @return If the pipeline was previously active
      */
     public boolean remove(ResourceLocation pipeline) {
-        return this.activePipelines.removeIf(entry -> entry.pipeline.equals(pipeline));
+        Iterator<ProfileEntry> iterator = this.activePipelines.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().pipeline.equals(pipeline)) {
+                iterator.remove();
+                this.pipelinesDirty = true;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -137,6 +164,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
     }
 
     private void setup() {
+        VeilRenderProfiler.get().push("veil_post", RenderProfilerCounter.FRAGMENT_SHADER_INVOCATIONS);
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL_ALWAYS);
         RenderSystem.depthMask(false);
@@ -153,6 +181,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
         FramebufferStack.pop(POST);
+        VeilRenderProfiler.get().pop();
     }
 
     private void clearPipeline() {
@@ -181,7 +210,10 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
-        this.activePipelines.sort(PIPELINE_SORTER);
+        if (this.pipelinesDirty) {
+            this.pipelinesDirty = false;
+            this.activePipelines.sort(PIPELINE_SORTER);
+        }
         for (ProfileEntry entry : this.activePipelines) {
             ResourceLocation id = entry.getPipeline();
             CompositePostPipeline pipeline = this.pipelines.get(id);
@@ -398,6 +430,10 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      * @return An immutable view of all active profiles and their priorities
      */
     public List<ProfileEntry> getActivePipelines() {
+        if (this.pipelinesDirty) {
+            this.pipelinesDirty = false;
+            this.activePipelines.sort(PIPELINE_SORTER);
+        }
         return this.activePipelinesView;
     }
 

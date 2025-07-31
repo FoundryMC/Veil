@@ -8,6 +8,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * Loads resources from resource manager into the veil resource system.
+ *
+ * @author RyanH
+ * @since 1.0.0
+ */
 public interface VeilResourceLoader {
 
     /**

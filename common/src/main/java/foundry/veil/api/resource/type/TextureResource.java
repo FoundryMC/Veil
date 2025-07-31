@@ -27,12 +27,14 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.InactiveProfiler;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+@ApiStatus.Internal
 public record TextureResource(VeilResourceInfo resourceInfo) implements VeilResource<TextureResource> {
 
     @Override

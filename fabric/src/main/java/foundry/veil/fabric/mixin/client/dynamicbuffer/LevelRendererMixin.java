@@ -15,7 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = LevelRenderer.class, priority = 200) // Apply these changes last
 public abstract class LevelRendererMixin {
 
-    @Shadow @Nullable public abstract RenderTarget getParticlesTarget();
+    @Shadow
+    @Nullable
+    public abstract RenderTarget getParticlesTarget();
 
     @Unique
     private final DynamicBufferShard veil$particleBufferShard = new DynamicBufferShard("particles", this::getParticlesTarget);

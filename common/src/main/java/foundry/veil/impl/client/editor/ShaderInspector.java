@@ -423,66 +423,39 @@ public class ShaderInspector extends SingleWindowInspector implements ResourceMa
         try (MemoryStack stack = MemoryStack.stackPush()) {
             return switch (uniform.type()) {
                 case GL_FLOAT -> this.formatUniformFloats(stack, "float " + name, program, uniform.location(), 1, 1);
-                case GL_FLOAT_VEC2 ->
-                        this.formatUniformFloats(stack, "vec2 " + name, program, uniform.location(), 2, 1);
-                case GL_FLOAT_VEC3 ->
-                        this.formatUniformFloats(stack, "vec3 " + name, program, uniform.location(), 3, 1);
-                case GL_FLOAT_VEC4 ->
-                        this.formatUniformFloats(stack, "vec4 " + name, program, uniform.location(), 4, 1);
+                case GL_FLOAT_VEC2 -> this.formatUniformFloats(stack, "vec2 " + name, program, uniform.location(), 2, 1);
+                case GL_FLOAT_VEC3 -> this.formatUniformFloats(stack, "vec3 " + name, program, uniform.location(), 3, 1);
+                case GL_FLOAT_VEC4 -> this.formatUniformFloats(stack, "vec4 " + name, program, uniform.location(), 4, 1);
                 case GL_DOUBLE -> this.formatUniformDoubles(stack, "double " + name, program, uniform.location(), 1, 1);
-                case GL_DOUBLE_VEC2 ->
-                        this.formatUniformDoubles(stack, "dvec2 " + name, program, uniform.location(), 2, 1);
-                case GL_DOUBLE_VEC3 ->
-                        this.formatUniformDoubles(stack, "dvec3 " + name, program, uniform.location(), 3, 1);
-                case GL_DOUBLE_VEC4 ->
-                        this.formatUniformDoubles(stack, "dvec4 " + name, program, uniform.location(), 4, 1);
+                case GL_DOUBLE_VEC2 -> this.formatUniformDoubles(stack, "dvec2 " + name, program, uniform.location(), 2, 1);
+                case GL_DOUBLE_VEC3 -> this.formatUniformDoubles(stack, "dvec3 " + name, program, uniform.location(), 3, 1);
+                case GL_DOUBLE_VEC4 -> this.formatUniformDoubles(stack, "dvec4 " + name, program, uniform.location(), 4, 1);
                 case GL_INT -> this.formatUniformInts(stack, "int " + name, program, uniform.location(), 1);
                 case GL_INT_VEC2 -> this.formatUniformInts(stack, "ivec2 " + name, program, uniform.location(), 2);
                 case GL_INT_VEC3 -> this.formatUniformInts(stack, "ivec3 " + name, program, uniform.location(), 3);
                 case GL_INT_VEC4 -> this.formatUniformInts(stack, "ivec4 " + name, program, uniform.location(), 4);
                 case GL_UNSIGNED_INT -> this.formatUniformUInts(stack, "uint " + name, program, uniform.location(), 1);
-                case GL_UNSIGNED_INT_VEC2 ->
-                        this.formatUniformUInts(stack, "uvec2 " + name, program, uniform.location(), 2);
-                case GL_UNSIGNED_INT_VEC3 ->
-                        this.formatUniformUInts(stack, "uvec3 " + name, program, uniform.location(), 3);
-                case GL_UNSIGNED_INT_VEC4 ->
-                        this.formatUniformUInts(stack, "uvec4 " + name, program, uniform.location(), 4);
-                case GL_FLOAT_MAT2 ->
-                        this.formatUniformFloats(stack, "mat2 " + name, program, uniform.location(), 2, 2);
-                case GL_FLOAT_MAT3 ->
-                        this.formatUniformFloats(stack, "mat3 " + name, program, uniform.location(), 3, 3);
-                case GL_FLOAT_MAT4 ->
-                        this.formatUniformFloats(stack, "mat4 " + name, program, uniform.location(), 4, 4);
-                case GL_FLOAT_MAT2x3 ->
-                        this.formatUniformFloats(stack, "mat2x3 " + name, program, uniform.location(), 2, 3);
-                case GL_FLOAT_MAT2x4 ->
-                        this.formatUniformFloats(stack, "mat2x4 " + name, program, uniform.location(), 2, 4);
-                case GL_FLOAT_MAT3x2 ->
-                        this.formatUniformFloats(stack, "mat3x2 " + name, program, uniform.location(), 3, 2);
-                case GL_FLOAT_MAT3x4 ->
-                        this.formatUniformFloats(stack, "mat3x4 " + name, program, uniform.location(), 3, 4);
-                case GL_FLOAT_MAT4x2 ->
-                        this.formatUniformFloats(stack, "mat4x2 " + name, program, uniform.location(), 4, 2);
-                case GL_FLOAT_MAT4x3 ->
-                        this.formatUniformFloats(stack, "mat4x3 " + name, program, uniform.location(), 4, 3);
-                case GL_DOUBLE_MAT2 ->
-                        this.formatUniformDoubles(stack, "dmat2 " + name, program, uniform.location(), 2, 2);
-                case GL_DOUBLE_MAT3 ->
-                        this.formatUniformDoubles(stack, "dmat3 " + name, program, uniform.location(), 3, 3);
-                case GL_DOUBLE_MAT4 ->
-                        this.formatUniformDoubles(stack, "dmat4 " + name, program, uniform.location(), 4, 4);
-                case GL_DOUBLE_MAT2x3 ->
-                        this.formatUniformDoubles(stack, "dmat2x3 " + name, program, uniform.location(), 2, 3);
-                case GL_DOUBLE_MAT2x4 ->
-                        this.formatUniformDoubles(stack, "dmat2x4 " + name, program, uniform.location(), 2, 4);
-                case GL_DOUBLE_MAT3x2 ->
-                        this.formatUniformDoubles(stack, "dmat3x2 " + name, program, uniform.location(), 3, 2);
-                case GL_DOUBLE_MAT3x4 ->
-                        this.formatUniformDoubles(stack, "dmat3x4 " + name, program, uniform.location(), 3, 4);
-                case GL_DOUBLE_MAT4x2 ->
-                        this.formatUniformDoubles(stack, "dmat4x2 " + name, program, uniform.location(), 4, 2);
-                case GL_DOUBLE_MAT4x3 ->
-                        this.formatUniformDoubles(stack, "dmat4x3 " + name, program, uniform.location(), 4, 3);
+                case GL_UNSIGNED_INT_VEC2 -> this.formatUniformUInts(stack, "uvec2 " + name, program, uniform.location(), 2);
+                case GL_UNSIGNED_INT_VEC3 -> this.formatUniformUInts(stack, "uvec3 " + name, program, uniform.location(), 3);
+                case GL_UNSIGNED_INT_VEC4 -> this.formatUniformUInts(stack, "uvec4 " + name, program, uniform.location(), 4);
+                case GL_FLOAT_MAT2 -> this.formatUniformFloats(stack, "mat2 " + name, program, uniform.location(), 2, 2);
+                case GL_FLOAT_MAT3 -> this.formatUniformFloats(stack, "mat3 " + name, program, uniform.location(), 3, 3);
+                case GL_FLOAT_MAT4 -> this.formatUniformFloats(stack, "mat4 " + name, program, uniform.location(), 4, 4);
+                case GL_FLOAT_MAT2x3 -> this.formatUniformFloats(stack, "mat2x3 " + name, program, uniform.location(), 2, 3);
+                case GL_FLOAT_MAT2x4 -> this.formatUniformFloats(stack, "mat2x4 " + name, program, uniform.location(), 2, 4);
+                case GL_FLOAT_MAT3x2 -> this.formatUniformFloats(stack, "mat3x2 " + name, program, uniform.location(), 3, 2);
+                case GL_FLOAT_MAT3x4 -> this.formatUniformFloats(stack, "mat3x4 " + name, program, uniform.location(), 3, 4);
+                case GL_FLOAT_MAT4x2 -> this.formatUniformFloats(stack, "mat4x2 " + name, program, uniform.location(), 4, 2);
+                case GL_FLOAT_MAT4x3 -> this.formatUniformFloats(stack, "mat4x3 " + name, program, uniform.location(), 4, 3);
+                case GL_DOUBLE_MAT2 -> this.formatUniformDoubles(stack, "dmat2 " + name, program, uniform.location(), 2, 2);
+                case GL_DOUBLE_MAT3 -> this.formatUniformDoubles(stack, "dmat3 " + name, program, uniform.location(), 3, 3);
+                case GL_DOUBLE_MAT4 -> this.formatUniformDoubles(stack, "dmat4 " + name, program, uniform.location(), 4, 4);
+                case GL_DOUBLE_MAT2x3 -> this.formatUniformDoubles(stack, "dmat2x3 " + name, program, uniform.location(), 2, 3);
+                case GL_DOUBLE_MAT2x4 -> this.formatUniformDoubles(stack, "dmat2x4 " + name, program, uniform.location(), 2, 4);
+                case GL_DOUBLE_MAT3x2 -> this.formatUniformDoubles(stack, "dmat3x2 " + name, program, uniform.location(), 3, 2);
+                case GL_DOUBLE_MAT3x4 -> this.formatUniformDoubles(stack, "dmat3x4 " + name, program, uniform.location(), 3, 4);
+                case GL_DOUBLE_MAT4x2 -> this.formatUniformDoubles(stack, "dmat4x2 " + name, program, uniform.location(), 4, 2);
+                case GL_DOUBLE_MAT4x3 -> this.formatUniformDoubles(stack, "dmat4x3 " + name, program, uniform.location(), 4, 3);
                 default -> name;
             };
         }
@@ -506,14 +479,10 @@ public class ShaderInspector extends SingleWindowInspector implements ResourceMa
                     this.formatDoubles((uniform.offset() + offset) + ": dvec3 " + name, i -> buffer.getDouble(uniform.offset() + offset + (i << 3)), 3, 1);
             case GL_DOUBLE_VEC4 ->
                     this.formatDoubles((uniform.offset() + offset) + ": dvec4 " + name, i -> buffer.getDouble(uniform.offset() + offset + (i << 3)), 4, 1);
-            case GL_INT ->
-                    this.formatInts((uniform.offset() + offset) + ": int " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 1);
-            case GL_INT_VEC2 ->
-                    this.formatInts((uniform.offset() + offset) + ": ivec2 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 2);
-            case GL_INT_VEC3 ->
-                    this.formatInts((uniform.offset() + offset) + ": ivec3 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 3);
-            case GL_INT_VEC4 ->
-                    this.formatInts((uniform.offset() + offset) + ": ivec4 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 4);
+            case GL_INT -> this.formatInts((uniform.offset() + offset) + ": int " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 1);
+            case GL_INT_VEC2 -> this.formatInts((uniform.offset() + offset) + ": ivec2 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 2);
+            case GL_INT_VEC3 -> this.formatInts((uniform.offset() + offset) + ": ivec3 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 3);
+            case GL_INT_VEC4 -> this.formatInts((uniform.offset() + offset) + ": ivec4 " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 4);
             case GL_UNSIGNED_INT ->
                     this.formatUInts((uniform.offset() + offset) + ": uint " + name, i -> buffer.getInt(uniform.offset() + offset + (i << 2)), 1);
             case GL_UNSIGNED_INT_VEC2 ->

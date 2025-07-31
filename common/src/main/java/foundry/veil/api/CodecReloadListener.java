@@ -30,6 +30,7 @@ import java.util.Map;
  *
  * @param <T> The type of mapped data to return
  * @see Codec
+ * @since 1.0.0
  */
 public abstract class CodecReloadListener<T> extends SimplePreparableReloadListener<Map<ResourceLocation, T>> {
 

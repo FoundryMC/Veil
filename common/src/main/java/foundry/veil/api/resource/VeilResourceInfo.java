@@ -14,10 +14,14 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 /**
+ * Information about a specific Veil resource.
+ *
  * @param location        The resource location path this resource is located at
  * @param filePath        The file path of this resource
  * @param modResourcePath The path to this resource in the build folder if in a dev environment
  * @param hidden          Whether this resource should appear in the resource panel
+ * @author Ocelot, RyanH
+ * @see VeilResource
  */
 public record VeilResourceInfo(PackType packType,
                                ResourceLocation location,

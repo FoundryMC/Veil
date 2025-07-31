@@ -8,7 +8,8 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.ByteBuffer;
 
-import static org.lwjgl.opengl.ARBDirectStateAccess.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.glNamedBufferData;
+import static org.lwjgl.opengl.ARBDirectStateAccess.glVertexArrayElementBuffer;
 import static org.lwjgl.opengl.GL15C.GL_STATIC_DRAW;
 
 @ApiStatus.Internal
@@ -30,11 +31,5 @@ public class DSAVertexArray extends VertexArray {
         super.uploadIndexBuffer(drawState);
         PipelineAutoStorageIndexBufferAccessor ext = (PipelineAutoStorageIndexBufferAccessor) (Object) RenderSystem.getSequentialBuffer(drawState.mode());
         glVertexArrayElementBuffer(this.id, ext.getName());
-    }
-
-    @Deprecated
-    @Override
-    public void uploadVertexBuffer(int buffer, ByteBuffer data, int usage) {
-        glNamedBufferData(buffer, data, usage);
     }
 }

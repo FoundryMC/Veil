@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * Allows the creation of normal vanilla dynamic registries. They can be created client or server side depending on the use case.
  *
  * @author Ocelot
+ * @since 1.0.0
  */
 public class VeilDynamicRegistry {
 
@@ -102,6 +103,13 @@ public class VeilDynamicRegistry {
         return LOADING.get();
     }
 
+    /**
+     * Stored data about loaded dynamic registries.
+     *
+     * @param registryAccess The created registry access
+     * @param errors         Any errors thrown while loading registries
+     * @since 1.0.0
+     */
     public record Data(RegistryAccess registryAccess, Map<ResourceKey<?>, Exception> errors) {
     }
 }

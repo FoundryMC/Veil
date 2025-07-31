@@ -12,6 +12,7 @@ import java.util.concurrent.*;
  * Schedules tasks to be run on future ticks.
  *
  * @author Ocelot
+ * @since 1.0.0
  */
 public interface TickTaskScheduler extends Executor {
 

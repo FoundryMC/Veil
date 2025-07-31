@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * @author Ocelot
  */
-public class ParticleModuleSet {
+public final class ParticleModuleSet {
 
     private final ParticleModule[] modules;
     private final InitParticleModule[] initModules;
@@ -82,6 +82,22 @@ public class ParticleModuleSet {
                 return ParticleModuleSet.this.enabledRenderModules[this.cursor++];
             }
         };
+    }
+
+    /**
+     * @return The number of enabled render modules
+     * @since 1.3.0
+     */
+    public int getEnabledRenderModuleCount() {
+        return this.enabledRenderModulesSize;
+    }
+
+    /**
+     * @return Raw access to the enabled modules array
+     * @since 1.3.0
+     */
+    public RenderParticleModule[] getEnabledRenderModulesArray() {
+        return this.enabledRenderModules;
     }
 
     public static Builder builder() {

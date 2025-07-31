@@ -1,0 +1,26 @@
+{
+  "format": "POSITION_TEX",
+  "mode": "QUADS",
+  "bufferSize": "TRANSIENT",
+  "sort": false,
+  "affectsCrumbling": false,
+  "outline": false,
+  "layers": [
+    {
+      "type": "veil:shader",
+      "name": "veil:light/point"
+    },
+    {
+      "type": "minecraft:write_mask",
+      "depth": false
+    },
+    {
+      "type": "minecraft:depth_test",
+      "mode": "greater"
+    },
+    {
+      "type": "minecraft:transparency",
+      "mode": "additive"
+    }
+  ]
+}

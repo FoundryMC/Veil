@@ -16,11 +16,13 @@ public class LegacyVertexAttribBindingBuilder implements VertexArrayBuilder {
 
     private final VertexArray vertexArray;
     private final VertexBufferRegion[] vertexBuffers;
+    private final VertexAttribute[] vertexAttributes;
     private int boundIndex = -1;
 
     public LegacyVertexAttribBindingBuilder(VertexArray vertexArray) {
         this.vertexArray = vertexArray;
         this.vertexBuffers = new VertexBufferRegion[VeilRenderSystem.maxVertexAttributes()];
+        this.vertexAttributes = new VertexAttribute[VeilRenderSystem.maxVertexAttributes()];
     }
 
     private void bindIndex(int index) {
@@ -38,6 +40,15 @@ public class LegacyVertexAttribBindingBuilder implements VertexArrayBuilder {
         }
     }
 
+    private void setAttribute(int index, VertexAttribute attribute) {
+        this.vertexAttributes[index] = attribute;
+        VertexBufferRegion buffer = this.vertexBuffers[attribute.bufferIndex()];
+        if (buffer != null) {
+            this.bindIndex(attribute.bufferIndex());
+            attribute.apply(index, buffer);
+        }
+    }
+
     @Override
     public VertexArray vertexArray() {
         return this.vertexArray;
@@ -49,38 +60,39 @@ public class LegacyVertexAttribBindingBuilder implements VertexArrayBuilder {
             throw new IllegalArgumentException("Invalid vertex attribute index. Must be between 0 and " + (this.vertexBuffers.length - 1) + ": " + index);
         }
         this.vertexBuffers[index] = new VertexBufferRegion(buffer, offset, stride, divisor);
+        this.bindIndex(index);
+        for (VertexAttribute attribute : this.vertexAttributes) {
+            if (attribute != null && attribute.bufferIndex() == index) {
+                attribute.apply(index, this.vertexBuffers[index]);
+            }
+        }
         return this;
     }
 
     @Override
     public VertexArrayBuilder setVertexAttribute(int index, int bufferIndex, int size, DataType type, boolean normalized, int relativeOffset) {
+        VertexArrayBuilder.validateFloatType(type, size);
         VertexArrayBuilder.validateRelativeOffset(relativeOffset);
-        this.bindIndex(bufferIndex);
         glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, size, type.getGlType(), normalized, this.vertexBuffers[this.boundIndex].stride, this.vertexBuffers[this.boundIndex].offset + relativeOffset);
-        glVertexAttribDivisor(index, this.vertexBuffers[this.boundIndex].divisor);
+        this.setAttribute(index, new FloatAttribute(bufferIndex, size, type, normalized, relativeOffset));
         return this;
     }
 
     @Override
     public VertexArrayBuilder setVertexIAttribute(int index, int bufferIndex, int size, DataType type, int relativeOffset) {
+        VertexArrayBuilder.validateIntType(type);
         VertexArrayBuilder.validateRelativeOffset(relativeOffset);
-        this.bindIndex(bufferIndex);
         glEnableVertexAttribArray(index);
-        glVertexAttribIPointer(index, size, type.getGlType(), this.vertexBuffers[this.boundIndex].stride, this.vertexBuffers[this.boundIndex].offset + relativeOffset);
-        glVertexAttribDivisor(index, this.vertexBuffers[this.boundIndex].divisor);
+        this.setAttribute(index, new IntAttribute(bufferIndex, size, type, relativeOffset));
         return this;
     }
 
     @Override
     public VertexArrayBuilder setVertexLAttribute(int index, int bufferIndex, int size, DataType type, int relativeOffset) {
-        if (!VeilRenderSystem.vertexAttribute64BitSupported()) {
-            throw new UnsupportedOperationException("Long attributes not supported");
-        }
-        this.bindIndex(bufferIndex);
+        VertexArrayBuilder.validateLongType(type);
+        VertexArrayBuilder.validateRelativeOffset(relativeOffset);
         glEnableVertexAttribArray(index);
-        glVertexAttribLPointer(index, size, type.getGlType(), this.vertexBuffers[this.boundIndex].stride, this.vertexBuffers[this.boundIndex].offset + relativeOffset);
-        glVertexAttribDivisor(index, this.vertexBuffers[this.boundIndex].divisor);
+        this.setAttribute(index, new LongAttribute(bufferIndex, size, type, relativeOffset));
         return this;
     }
 
@@ -96,6 +108,7 @@ public class LegacyVertexAttribBindingBuilder implements VertexArrayBuilder {
     @Override
     public VertexArrayBuilder removeAttribute(int index) {
         glDisableVertexAttribArray(index);
+        this.vertexAttributes[index] = null;
         return this;
     }
 
@@ -107,10 +120,41 @@ public class LegacyVertexAttribBindingBuilder implements VertexArrayBuilder {
 
     @Override
     public VertexArrayBuilder clearVertexAttributes() {
-        for (int i = 0; i < VeilRenderSystem.maxVertexAttributes(); i++) {
+        for (int i = 0; i < this.vertexAttributes.length; i++) {
             glDisableVertexAttribArray(i);
         }
+        Arrays.fill(this.vertexAttributes, null);
         return this;
+    }
+
+    private sealed interface VertexAttribute {
+        int bufferIndex();
+
+        void apply(int index, VertexBufferRegion region);
+    }
+
+    private record FloatAttribute(int bufferIndex, int size, DataType type, boolean normalized, int relativeOffset) implements VertexAttribute {
+        @Override
+        public void apply(int index, VertexBufferRegion region) {
+            glVertexAttribPointer(index, this.size, this.type.getGlType(), this.normalized, region.stride, region.offset + this.relativeOffset);
+            glVertexAttribDivisor(index, region.divisor);
+        }
+    }
+
+    private record IntAttribute(int bufferIndex, int size, DataType type, int relativeOffset) implements VertexAttribute {
+        @Override
+        public void apply(int index, VertexBufferRegion region) {
+            glVertexAttribIPointer(index, this.size, this.type.getGlType(), region.stride, region.offset + this.relativeOffset);
+            glVertexAttribDivisor(index, region.divisor);
+        }
+    }
+
+    private record LongAttribute(int bufferIndex, int size, DataType type, int relativeOffset) implements VertexAttribute {
+        @Override
+        public void apply(int index, VertexBufferRegion region) {
+            glVertexAttribLPointer(index, this.size, this.type.getGlType(), region.stride, region.offset + this.relativeOffset);
+            glVertexAttribDivisor(index, region.divisor);
+        }
     }
 
     private record VertexBufferRegion(int buffer, int offset, int stride, int divisor) {

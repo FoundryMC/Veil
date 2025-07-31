@@ -2,10 +2,10 @@ package foundry.veil.forge.mixin.client.perspective.sodium;
 
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.forge.ext.RenderSectionExtension;
+import foundry.veil.forge.impl.PerspectiveChunkCollector;
 import net.caffeinemc.mods.sodium.client.render.chunk.ChunkUpdateType;
 import net.caffeinemc.mods.sodium.client.render.chunk.RenderSection;
 import net.caffeinemc.mods.sodium.client.render.chunk.RenderSectionManager;
-import foundry.veil.forge.impl.PerspectiveChunkCollector;
 import net.caffeinemc.mods.sodium.client.render.chunk.lists.SortedRenderLists;
 import net.caffeinemc.mods.sodium.client.render.chunk.occlusion.OcclusionCuller;
 import net.caffeinemc.mods.sodium.client.render.viewport.Viewport;

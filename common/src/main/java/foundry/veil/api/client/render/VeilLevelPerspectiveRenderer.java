@@ -113,7 +113,7 @@ public final class VeilLevelPerspectiveRenderer {
 
         int backupWidth = window.getWidth();
         int backupHeight = window.getHeight();
-        if(!FlashbackCompat.isLoaded()) {
+        if (!FlashbackCompat.isLoaded()) {
             window.setWidth(framebuffer.getWidth());
             window.setHeight(framebuffer.getHeight());
         }
@@ -199,7 +199,7 @@ public final class VeilLevelPerspectiveRenderer {
             RenderSystem.setShaderFogEnd(backupFogEnd);
             RenderSystem.setShaderFogShape(backupFogShape);
 
-            if(!FlashbackCompat.isLoaded()) {
+            if (!FlashbackCompat.isLoaded()) {
                 window.setWidth(backupWidth);
                 window.setHeight(backupHeight);
             }

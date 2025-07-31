@@ -4,8 +4,8 @@
 
 in vec2 texCoord;
 
-uniform sampler2D VeilDynamicAlbedoSampler;
-uniform sampler2D VeilDynamicNormalSampler;
+uniform sampler2D AlbedoSampler;
+uniform sampler2D NormalSampler;
 
 uniform vec3 LightColor;
 uniform vec3 LightDirection;
@@ -13,12 +13,12 @@ uniform vec3 LightDirection;
 out vec4 fragColor;
 
 void main() {
-    vec4 albedoColor = texture(VeilDynamicAlbedoSampler, texCoord);
+    vec4 albedoColor = texture(AlbedoSampler, texCoord);
     if (albedoColor.a == 0) {
         discard;
     }
 
-    vec3 normalVS = texture(VeilDynamicNormalSampler, texCoord).xyz;
+    vec3 normalVS = texture(NormalSampler, texCoord).xyz;
     vec3 lightDirectionVS = (VeilCamera.ViewMat * vec4(LightDirection, 0.0)).xyz;
 
     // lighting calculation

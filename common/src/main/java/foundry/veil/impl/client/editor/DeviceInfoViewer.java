@@ -17,7 +17,6 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import java.util.*;
 
-import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL30C.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL30C.GL_VERTEX_SHADER;
@@ -113,12 +112,16 @@ public class DeviceInfoViewer extends SingleWindowInspector {
         flagText("inspector.veil.device_info.opengl.feature_flag.texture_anisotropy", VeilRenderSystem.textureAnisotropySupported(), "Whether GL_TEXTURE_MAX_ANISOTROPY can be set as a texture parameter");
         flagText("inspector.veil.device_info.opengl.feature_flag.texture_mirror_clamp_to_edge", VeilRenderSystem.textureMirrorClampToEdgeSupported(), "Whether GL_MIRROR_CLAMP_TO_EDGE can be set as a texture edge value option");
         flagText("inspector.veil.device_info.opengl.feature_flag.texture_cube_map_seamless", VeilRenderSystem.textureCubeMapSeamlessSupported(), "Whether GL_TEXTURE_CUBE_MAP_SEAMLESS can be set as a texture parameter");
+        flagText("inspector.veil.device_info.opengl.feature_flag.texture_cube_map_array", VeilRenderSystem.textureCubeMapArraySupported(), "Whether GL_TEXTURE_CUBE_MAP_ARRAY can be used as a texture type");
         flagText("inspector.veil.device_info.opengl.feature_flag.nv_draw_texture", VeilRenderSystem.nvDrawTextureSupported(), "Whether glDrawTextureNV can be used");
         flagText("inspector.veil.device_info.opengl.feature_flag.draw_indirect", VeilRenderSystem.drawIndirectSupported(), "Whether glDrawArraysInstanced and glDrawElementsInstancedBaseVertex can be used");
         flagText("inspector.veil.device_info.opengl.feature_flag.multi_draw_indirect", VeilRenderSystem.multiDrawIndirectSupported(), "Whether multiple indirect commands can be natively drawn in one command");
         flagText("inspector.veil.device_info.opengl.feature_flag.shader_float64", VeilRenderSystem.gpuShaderFloat64BitSupported(), "Whether 64-bit floats can be used in shader files");
         flagText("inspector.veil.device_info.opengl.feature_flag.shader_int64", VeilRenderSystem.gpuShaderInt64BitSupported(), "Whether 64-bit integers can be used in shader files");
         flagText("inspector.veil.device_info.opengl.feature_flag.vertex_attribute_64", VeilRenderSystem.vertexAttribute64BitSupported(), "Whether 64-bit values can be used as vertex attributes");
+        flagText("inspector.veil.device_info.opengl.feature_flag.bindless_texture", VeilRenderSystem.bindlessTextureSupported(), "Whether shaders can reference textures by handle instead of by unit");
+        flagText("inspector.veil.device_info.opengl.feature_flag.vertex_type_10f_11f_11f_rev", VeilRenderSystem.vertexType10F11F11FRevSupported(), "Whether Vertex Arrays can use GL_UNSIGNED_INT_10F_11F_11F_REV");
+        flagText("inspector.veil.device_info.opengl.feature_flag.pipeline_statistics_query", VeilRenderSystem.pipelineStatisticsQuerySupported(), "Whether pipeline statistics be queried");
         ImGui.separator();
 
         GLCapabilities caps = GL.getCapabilities();
@@ -198,14 +201,6 @@ public class DeviceInfoViewer extends SingleWindowInspector {
         text("inspector.veil.device_info.opengl.framebuffer.max_samples", null, VeilRenderSystem.maxSamples());
     }
 
-    private void renderOpenAL() {
-        ImGui.pushStyleColor(ImGuiCol.Text, 0xFFFFFFFF);
-        text("inspector.veil.device_info.openal.vendor", null, alGetString(AL_VENDOR));
-        text("inspector.veil.device_info.openal.renderer", null, alGetString(AL_RENDERER));
-        text("inspector.veil.device_info.openal.version", null, alGetString(AL_VERSION));
-        ImGui.popStyleColor();
-    }
-
     public static Component getShaderName(int shader) {
         return SHADER_TYPES.get(shader);
     }
@@ -225,21 +220,6 @@ public class DeviceInfoViewer extends SingleWindowInspector {
         ImGui.pushStyleColor(ImGuiCol.Text, TEXT_COLOR);
         this.renderOpenGL();
         ImGui.popStyleColor();
-//        if (ImGui.beginTabBar("##info")) {
-//            if (ImGui.beginTabItem(I18n.get("inspector.veil.device_info.opengl"))) {
-//                ImGui.pushStyleColor(ImGuiCol.Text, TEXT_COLOR);
-//                this.renderOpenGL();
-//                ImGui.popStyleColor();
-//                ImGui.endTabItem();
-//            }
-//            if (ImGui.beginTabItem(I18n.get("inspector.veil.device_info.openal"))) {
-//                ImGui.pushStyleColor(ImGuiCol.Text, TEXT_COLOR);
-//                this.renderOpenAL();
-//                ImGui.popStyleColor();
-//                ImGui.endTabItem();
-//            }
-//            ImGui.endTabBar();
-//        }
     }
 
     @Override

@@ -4,6 +4,13 @@ import net.minecraft.network.chat.Component;
 
 import java.util.OptionalInt;
 
+/**
+ * Adds an action to the context menu for performing actions on resources.
+ *
+ * @param <T> The type of resource to perform actions on
+ * @author Ocelot, RyanH
+ * @since 1.0.0
+ */
 public interface VeilResourceAction<T extends VeilResource<?>> {
 
     /**

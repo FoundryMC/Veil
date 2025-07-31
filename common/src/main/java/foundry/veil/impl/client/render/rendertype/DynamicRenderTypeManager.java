@@ -1,5 +1,7 @@
 package foundry.veil.impl.client.render.rendertype;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -7,8 +9,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.rendertype.layer.CompositeRenderTypeData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.FileToIdConverter;
@@ -25,10 +25,13 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
@@ -99,14 +102,18 @@ public class DynamicRenderTypeManager extends SimplePreparableReloadListener<Map
 
         private final String name;
         private final CompositeRenderTypeData data;
-        private final Int2ObjectMap<RenderType> objectCache;
+        private final Cache<Integer, RenderType> objectCache;
         private RenderType defaultCache;
         private boolean defaultError;
 
         public RenderTypeCache(String name, CompositeRenderTypeData data) {
             this.name = name;
             this.data = data;
-            this.objectCache = new Int2ObjectArrayMap<>(4);
+            this.objectCache = CacheBuilder.newBuilder()
+                    .initialCapacity(4)
+                    .maximumSize(64)
+                    .expireAfterAccess(Duration.of(1000, ChronoUnit.SECONDS))
+                    .build();
             this.defaultCache = null;
         }
 
@@ -127,14 +134,14 @@ public class DynamicRenderTypeManager extends SimplePreparableReloadListener<Map
                 return this.defaultCache;
             }
 
-            return this.objectCache.computeIfAbsent(Arrays.hashCode(params), i -> {
-                try {
-                    return this.data.createRenderType(this.name, params);
-                } catch (Exception e) {
-                    Veil.LOGGER.error("Failed to create rendertype {} with parameters: [{}]", this.name, Arrays.stream(params).map(Objects::toString).collect(Collectors.joining(", ")), e);
-                    return null;
-                }
-            });
+            try {
+                return this.objectCache.get(Arrays.hashCode(params), () -> this.data.createRenderType(this.name, params));
+            } catch (ExecutionException e) {
+                Veil.LOGGER.error("Failed to create rendertype {} with parameters: [{}]", this.name, Arrays.stream(params)
+                        .map(Objects::toString)
+                        .collect(Collectors.joining(", ")), e);
+                return null;
+            }
         }
     }
 }

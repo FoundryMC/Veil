@@ -10,8 +10,10 @@ import io.github.ocelot.glslprocessor.api.visitor.GlslNodeStringWriter;
 import io.github.ocelot.glslprocessor.lib.anarres.cpp.LexerException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Adds support for <code>layout(binding = #)</code> in the shader source without needing shader version 420.
@@ -37,10 +39,11 @@ public class ShaderBindingProcessor implements ShaderPreProcessor {
                 return;
             }
 
-            Iterator<GlslTypeQualifier> qualifierIterator = type.getQualifiers().iterator();
+            ListIterator<GlslTypeQualifier> qualifierIterator = type.getQualifiers().listIterator();
             while (qualifierIterator.hasNext()) {
                 GlslTypeQualifier qualifier = qualifierIterator.next();
-                if (qualifier instanceof GlslTypeQualifier.Layout(List<GlslTypeQualifier.LayoutId> layoutIds)) {
+                if (qualifier instanceof GlslTypeQualifier.Layout(List<GlslTypeQualifier.LayoutId> list)) {
+                    List<GlslTypeQualifier.LayoutId> layoutIds = new ArrayList<>(list);
                     Iterator<GlslTypeQualifier.LayoutId> layoutIdIterator = layoutIds.iterator();
                     while (layoutIdIterator.hasNext()) {
                         GlslTypeQualifier.LayoutId layoutId = layoutIdIterator.next();
@@ -53,13 +56,18 @@ public class ShaderBindingProcessor implements ShaderPreProcessor {
                                 writer.visitSpecifiedType(type);
                                 name = writer.toString();
                             }
-                            
+
                             veilContext.addUniformBinding(name, constantNode.intValue());
                             layoutIdIterator.remove();
                         }
                     }
-                    if (layoutIds.isEmpty()) {
-                        qualifierIterator.remove();
+
+                    if (layoutIds.size() != list.size()) {
+                        if (layoutIds.isEmpty()) {
+                            qualifierIterator.remove();
+                        } else {
+                            qualifierIterator.set(GlslTypeQualifier.layout(layoutIds));
+                        }
                     }
                 }
             }

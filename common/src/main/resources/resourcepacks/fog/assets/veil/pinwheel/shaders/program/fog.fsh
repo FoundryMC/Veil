@@ -1,5 +1,5 @@
 #include veil:fog
-#include veil:deferred_utils
+#include veil:space_helper
 
 uniform sampler2D DiffuseSampler0;
 uniform sampler2D DiffuseDepthSampler;
@@ -15,9 +15,8 @@ out vec4 fragColor;
 
 void main() {
     vec4 baseColor = texture(DiffuseSampler0, texCoord);
-    float depthSample = texture(DiffuseDepthSampler, texCoord).r;
-    vec3 pos = viewPosFromDepthSample(depthSample, texCoord);
+    vec3 viewPos = screenToLocalSpace(texCoord, texture(DiffuseDepthSampler, texCoord).r).xyz;
 
-    float vertexDistance = fog_distance(pos, FogShape);
+    float vertexDistance = fog_distance(viewPos, FogShape);
     fragColor = linear_fog(baseColor, vertexDistance, FogStart, FogEnd, FogColor);
 }

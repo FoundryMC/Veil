@@ -48,6 +48,9 @@ public abstract class ShaderInstanceMixin implements Shader {
     @Final
     private List<String> samplerNames;
 
+    @Shadow
+    @Final
+    private List<Integer> samplerLocations;
     @Unique
     private final Map<String, Uniform> veil$uniforms = new Object2ObjectArrayMap<>();
 
@@ -76,6 +79,10 @@ public abstract class ShaderInstanceMixin implements Shader {
 
     @Inject(method = "close", at = @At("HEAD"))
     public void close(CallbackInfo ci) {
+        if (this.veil$uniforms.isEmpty()) {
+            return;
+        }
+
         for (Uniform uniform : this.veil$uniforms.values()) {
             uniform.close();
         }
@@ -83,9 +90,18 @@ public abstract class ShaderInstanceMixin implements Shader {
 
     @Inject(method = "apply", at = @At("TAIL"))
     public void apply(CallbackInfo ci) {
+        if (this.veil$uniforms.isEmpty()) {
+            return;
+        }
+
         for (Uniform uniform : this.veil$uniforms.values()) {
             uniform.upload();
         }
+    }
+
+    @Inject(method = "updateLocations", at = @At("HEAD"))
+    public void clearSamplerLocations(CallbackInfo ci) {
+        this.samplerLocations.clear();
     }
 
     @SuppressWarnings("ConstantValue")
@@ -107,6 +123,11 @@ public abstract class ShaderInstanceMixin implements Shader {
             IntBuffer type = stack.mallocInt(1);
             for (int i = 0; i < uniformCount; i++) {
                 String name = glGetActiveUniform(this.programId, i, maxUniformLength, size, type);
+                int length = size.get(0);
+                if (length > 1) {
+                    // Cut off the trailing [0]
+                    name = name.substring(0, name.length() - 3);
+                }
 
                 if (this.uniformMap.containsKey(name) || this.samplerNames.contains(name)) {
                     continue;
@@ -114,14 +135,12 @@ public abstract class ShaderInstanceMixin implements Shader {
 
                 int dataType = type.get(0);
                 String typeName = ShaderUniformCache.getName(dataType);
-                int length = size.get(0);
                 if (ShaderUniformCache.isSampler(dataType)) {
                     for (int j = 0; j < length; j++) {
-                        if (length > 1) {
-                            name = name.substring(0, name.length() - 3) + '[' + j + ']';
-                        }
-                        Veil.LOGGER.debug("Shader {} detected sampler: {}", this.name, typeName + " " + name);
-                        this.samplerNames.add(name);
+                        String samplerName = length > 1 ? name + '[' + j + ']' : name;
+                        Veil.LOGGER.debug("Shader {} detected sampler: {}", this.name, typeName + " " + samplerName);
+                        this.samplerNames.add(samplerName);
+                        this.samplerLocations.add(Uniform.glGetUniformLocation(this.programId, samplerName));
                     }
                     continue;
                 }
@@ -180,37 +199,35 @@ public abstract class ShaderInstanceMixin implements Shader {
                 }
 
                 for (int j = 0; j < length; j++) {
-                    if (length > 1) {
-                        name = name.substring(0, name.indexOf('[')) + '[' + j + ']';
-                    }
+                    String uniformName = length > 1 ? name + '[' + j + ']' : name;
 
-                    int location = Uniform.glGetUniformLocation(this.programId, name);
+                    int location = Uniform.glGetUniformLocation(this.programId, uniformName);
                     if (location == -1) {
                         // If the length is not 1, then it must be another mod adding a uniform block, so ignore
                         if (length == 1) {
-                            Veil.LOGGER.warn("Shader {} could not find uniform named {} in the specified shader program.", this.name, name);
+                            Veil.LOGGER.warn("Shader {} could not find uniform named {} in the specified shader program.", this.name, uniformName);
                         }
 
                         // Don't leak resources
-                        Uniform old = this.veil$uniforms.remove(name);
+                        Uniform old = this.veil$uniforms.remove(uniformName);
                         if (old != null) {
                             old.close();
                         }
                         continue;
                     }
 
-                    Veil.LOGGER.debug("Shader {} detected uniform: {}", this.name, typeName + " " + name);
-                    Uniform old = this.veil$uniforms.get(name);
+                    Veil.LOGGER.debug("Shader {} detected uniform: {}", this.name, typeName + " " + uniformName);
+                    Uniform old = this.veil$uniforms.get(uniformName);
                     Uniform uniform;
                     if (old != null) {
                         if (old.getType() != minecraftType) {
                             old.close();
-                            this.veil$uniforms.put(name, uniform = new Uniform(name, minecraftType, minecraftCount, this));
+                            this.veil$uniforms.put(uniformName, uniform = new Uniform(uniformName, minecraftType, minecraftCount, this));
                         } else {
                             uniform = old;
                         }
                     } else {
-                        this.veil$uniforms.put(name, uniform = new Uniform(name, minecraftType, minecraftCount, this));
+                        this.veil$uniforms.put(uniformName, uniform = new Uniform(uniformName, minecraftType, minecraftCount, this));
                     }
 
                     IntBuffer intBuffer = uniform.getIntBuffer();
@@ -225,7 +242,7 @@ public abstract class ShaderInstanceMixin implements Shader {
 
                     this.uniformLocations.add(location);
                     uniform.setLocation(location);
-                    this.uniformMap.put(name, uniform);
+                    this.uniformMap.put(uniformName, uniform);
                 }
             }
         }

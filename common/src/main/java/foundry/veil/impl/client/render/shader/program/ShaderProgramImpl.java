@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.ext.VeilDebug;
+import foundry.veil.api.client.render.shader.ShaderFeature;
 import foundry.veil.api.client.render.shader.ShaderSourceSet;
 import foundry.veil.api.client.render.shader.block.ShaderBlock;
 import foundry.veil.api.client.render.shader.compiler.CompiledShader;
@@ -33,6 +34,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -81,20 +84,23 @@ public class ShaderProgramImpl implements ShaderProgram {
     private final ResourceLocation name;
     private final ShaderTextureCache textures;
     private final Int2ObjectMap<CompiledProgram> programs;
-    private final Map<String, ShaderTexture> definitionTextures;
+    private final Object2ObjectMap<String, ShaderTexture> definitionSamplers;
+    private final ObjectSet<ShaderFeature> requiredFeatures;
     private final Object2ObjectMap<CharSequence, ShaderBlock<?>> shaderBlocks;
-    private final Map<String, ShaderUniformImpl> uniforms;
+    private final Object2ObjectMap<String, ShaderUniformImpl> uniforms;
     private final Supplier<Wrapper> wrapper;
 
     private VertexFormat vertexFormat;
     private ProgramDefinition definition;
     private CompiledProgram compiledProgram;
+    private boolean validated;
 
     public ShaderProgramImpl(ResourceLocation name) {
         this.name = name;
         this.textures = new ShaderTextureCache(this);
         this.programs = new Int2ObjectArrayMap<>(1);
-        this.definitionTextures = new Object2ObjectArrayMap<>();
+        this.definitionSamplers = new Object2ObjectArrayMap<>();
+        this.requiredFeatures = new ObjectArraySet<>();
         this.shaderBlocks = new Object2ObjectArrayMap<>();
         this.uniforms = new Object2ObjectArrayMap<>();
         this.wrapper = Suppliers.memoize(() -> {
@@ -152,6 +158,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         this.textures.clear();
         this.compiledProgram = program;
         this.vertexFormat = program.detectVertexFormat();
+        this.validated = !Veil.platform().isDevelopmentEnvironment();
 
         Set<ShaderUniformImpl> old = new HashSet<>(this.uniforms.values());
 
@@ -188,15 +195,25 @@ public class ShaderProgramImpl implements ShaderProgram {
     }
 
     public void compile(int activeBuffers, ShaderSourceSet sourceSet, @Nullable ProgramDefinition definition, ShaderCompiler compiler) throws ShaderException, IOException {
+        ProgramDefinition old = this.definition;
         this.definition = definition;
-        this.recompile(activeBuffers, sourceSet, compiler);
-        // Compilation was successful, so update the state of this program
-        this.definitionTextures.values().forEach(NativeResource::free);
-        this.definitionTextures.clear();
-        if (this.definition != null) {
-            for (Map.Entry<String, ShaderTextureSource> entry : this.definition.textures().entrySet()) {
-                this.definitionTextures.put(entry.getKey(), ShaderTexture.create(entry.getValue()));
+        try {
+            this.recompile(activeBuffers, sourceSet, compiler);
+        } catch (Throwable t) {
+            if (old != null) {
+                this.definition = old;
             }
+            throw t;
+        }
+        // Compilation was successful, so update the state of this program
+        this.definitionSamplers.values().forEach(NativeResource::free);
+        this.definitionSamplers.clear();
+        this.requiredFeatures.clear();
+        if (this.definition != null) {
+            for (Map.Entry<String, ShaderTextureSource> entry : this.definition.samplers().entrySet()) {
+                this.definitionSamplers.put(entry.getKey(), ShaderTexture.create(entry.getValue()));
+            }
+            this.requiredFeatures.addAll(Arrays.asList(this.definition.requiredFeatures()));
         }
     }
 
@@ -246,12 +263,16 @@ public class ShaderProgramImpl implements ShaderProgram {
         for (Object2ObjectMap.Entry<CharSequence, ShaderBlock<?>> entry : this.shaderBlocks.object2ObjectEntrySet()) {
             VeilRenderSystem.bind(entry.getKey(), entry.getValue());
         }
-        ShaderBlendMode blendMode = this.definition.blendMode();
+        ShaderBlendMode blendMode = this.definition != null ? this.definition.blendMode() : null;
         if (blendMode != null) {
             saveBlendState(blendMode.hasEquation());
             blendMode.apply();
         }
         ShaderProgram.super.bind();
+        if (this.compiledProgram != null && !this.validated) {
+            this.compiledProgram.validate(this);
+            this.validated = true;
+        }
     }
 
     @Override
@@ -259,15 +280,15 @@ public class ShaderProgramImpl implements ShaderProgram {
         this.wrapper.get().setDefaultUniforms(mode, MODEL_VIEW_MATRIX.set(modelViewMatrix), PROJECTION_MATRIX.set(projectionMatrix), Minecraft.getInstance().getWindow());
     }
 
-    private void freeInternal() {
+    public void freeInternal() {
         this.textures.clear();
         for (CompiledProgram program : this.programs.values()) {
             program.free();
         }
         this.uniforms.values().forEach(ShaderUniformImpl::free);
         this.uniforms.clear();
-        this.definitionTextures.values().forEach(NativeResource::free);
-        this.definitionTextures.clear();
+        this.definitionSamplers.values().forEach(NativeResource::free);
+        this.definitionSamplers.clear();
         this.vertexFormat = null;
         this.compiledProgram = null;
     }
@@ -280,6 +301,16 @@ public class ShaderProgramImpl implements ShaderProgram {
     @Override
     public Int2ObjectMap<CompiledShader> getShaders() {
         return this.compiledProgram != null ? this.compiledProgram.shaders : Int2ObjectMaps.emptyMap();
+    }
+
+    @Override
+    public boolean isValid() {
+        return this.compiledProgram != null;
+    }
+
+    @Override
+    public Set<ShaderFeature> getRequiredFeatures() {
+        return this.requiredFeatures;
     }
 
     @Override
@@ -320,12 +351,12 @@ public class ShaderProgramImpl implements ShaderProgram {
     @Override
     public ShaderUniformAccess getUniformSafe(CharSequence name) {
         ShaderUniformImpl uniform = this.uniforms.get(name.toString());
-        return uniform != null ? uniform : ShaderUniformAccess.EMPTY;
+        return uniform != null && uniform.isValid() ? uniform : ShaderUniformAccess.EMPTY;
     }
 
     @Override
     public ShaderUniformImpl getOrCreateUniform(CharSequence name) {
-        return this.uniforms.computeIfAbsent(name.toString(), key -> new ShaderUniformImpl(this::getProgram, key));
+        return this.uniforms.computeIfAbsent(name.toString(), key -> new ShaderUniformImpl(this::getProgram, (String) key));
     }
 
     @Override
@@ -378,7 +409,10 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         if (context != null) {
-            this.definitionTextures.forEach((name, source) -> this.setSampler(name, source.textureSource.getId(context), source.samplerId()));
+            for (Map.Entry<String, ShaderTexture> entry : this.definitionSamplers.entrySet()) {
+                ShaderTexture source = entry.getValue();
+                this.setSampler(entry.getKey(), source.textureSource.getId(context), source.samplerId());
+            }
         }
         this.textures.bind(this.compiledProgram.uniformCache, samplerStart);
     }
@@ -474,17 +508,19 @@ public class ShaderProgramImpl implements ShaderProgram {
             return best;
         }
 
+        public void validate(ShaderProgram shaderProgram) {
+            glValidateProgram(this.program);
+            if (glGetProgrami(this.program, GL_VALIDATE_STATUS) != GL_TRUE) {
+                String log = StringUtils.trim(glGetProgramInfoLog(this.program));
+                Veil.LOGGER.warn("Failed to validate shader ({}) : {}", shaderProgram.getName(), log);
+            }
+        }
+
         public void link(ShaderProgram shaderProgram) throws ShaderException {
             glLinkProgram(this.program);
             if (glGetProgrami(this.program, GL_LINK_STATUS) != GL_TRUE) {
                 String log = StringUtils.trim(glGetProgramInfoLog(this.program));
                 throw new ShaderException("Failed to link shader", log);
-            }
-
-            glValidateProgram(this.program);
-            if (glGetProgrami(this.program, GL_VALIDATE_STATUS) != GL_TRUE) {
-                String log = StringUtils.trim(glGetProgramInfoLog(this.program));
-                Veil.LOGGER.warn("Failed to validate shader ({}) : {}", shaderProgram.getName(), log);
             }
 
             this.uniformCache.clear();
@@ -613,7 +649,7 @@ public class ShaderProgramImpl implements ShaderProgram {
         }
 
         @Override
-        public void setSampler(String name, Object value) {
+        public void setSampler(@NotNull String name, Object value) {
             int sampler = switch (value) {
                 case RenderTarget target -> target.getColorTextureId();
                 case AbstractTexture texture -> texture.getId();

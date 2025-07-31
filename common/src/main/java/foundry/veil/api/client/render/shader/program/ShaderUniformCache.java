@@ -324,7 +324,7 @@ public class ShaderUniformCache {
                             int type = values.get(4);
                             if (arrayLength > 0) {
                                 int stride = values.get(2);
-                                String nameBase = name.substring(0, name.length() - 3);
+                                String nameBase = name.endsWith("]") ? name.substring(0, name.length() - 3) : name;
                                 for (int k = 0; k < arrayLength; k++) {
                                     fields.add(new Uniform(nameBase + '[' + k + ']', -1, offset + stride * k, type, 1));
                                 }

@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.gson.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import foundry.veil.api.client.render.shader.ShaderFeature;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -35,8 +36,9 @@ import static org.lwjgl.opengl.GL43C.GL_COMPUTE_SHADER;
  *                              Compute should be in a shader by itself
  * @param definitions           The definitions to inject when compiling
  * @param definitionDefaults    The default values for definitions
- * @param textures              The textures to bind when using this shader
+ * @param samplers              The samplers to bind when using this shader
  * @param shaders               A map of all sources and their OpenGL types for convenience
+ * @param requiredFeatures      The features this shader requires, or it will not be allowed to load
  * @param blendMode             The blend mode to use or <code>null</code> to use the current blend mode
  * @author Ocelot
  */
@@ -48,8 +50,9 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
                                 @Nullable ResourceLocation compute,
                                 String[] definitions,
                                 Map<String, String> definitionDefaults,
-                                Map<String, ShaderTextureSource> textures,
+                                Map<String, ShaderTextureSource> samplers,
                                 Int2ObjectMap<ResourceLocation> shaders,
+                                ShaderFeature[] requiredFeatures,
                                 @Nullable ShaderBlendMode blendMode) {
 
     public Map<String, String> getMacros(Set<String> dependencies, ShaderPreDefinitions definitions) {
@@ -157,6 +160,30 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
                 blendMode = null;
             }
 
+            Set<ShaderFeature> requiredFeatures;
+            if (json.has("required_features")) {
+                Set<ShaderFeature> features = new HashSet<>();
+
+                JsonElement requiredFeaturesElement = json.get("required_features");
+                if (!requiredFeaturesElement.isJsonArray()) {
+                    throw new JsonSyntaxException("Expected required_features to be a JsonArray, was " + GsonHelper.getType(requiredFeaturesElement));
+                }
+
+                for (JsonElement featureElement : requiredFeaturesElement.getAsJsonArray()) {
+                    DataResult<ShaderFeature> result = ShaderFeature.CODEC.parse(JsonOps.INSTANCE, featureElement);
+                    if (result.isSuccess()) {
+                        features.add(result.getOrThrow());
+                        continue;
+                    }
+
+                    throw new JsonSyntaxException("Failed to parse shader feature: " + featureElement + ". " + result.error().orElseThrow().message());
+                }
+
+                requiredFeatures = features;
+            } else {
+                requiredFeatures = new HashSet<>();
+            }
+
             Int2ObjectMap<ResourceLocation> sources = new Int2ObjectArrayMap<>();
             if (vertex != null) {
                 sources.put(GL_VERTEX_SHADER, vertex);
@@ -175,6 +202,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
             }
             if (compute != null) {
                 sources.put(GL_COMPUTE_SHADER, compute);
+                requiredFeatures.add(ShaderFeature.COMPUTE);
             }
 
             return new ProgramDefinition(vertex,
@@ -187,6 +215,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
                     definitionDefaults,
                     textures,
                     Int2ObjectMaps.unmodifiable(sources),
+                    requiredFeatures.toArray(ShaderFeature[]::new),
                     blendMode);
         }
     }

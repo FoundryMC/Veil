@@ -13,7 +13,7 @@ import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.ShaderModificationManager;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.VanillaShaderCompiler;
 import foundry.veil.impl.client.render.pipeline.VeilBloomRenderer;
 import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
@@ -48,7 +48,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     public static final ResourceLocation COMPOSITE = Veil.veilPath("core/composite");
 
     private final VanillaShaderCompiler vanillaShaderCompiler;
-    private final DynamicBufferManger dynamicBufferManger;
+    private final DynamicBufferManager dynamicBufferManager;
     private final ShaderModificationManager shaderModificationManager;
     private final ShaderPreDefinitions shaderPreDefinitions;
     private final ShaderManager shaderManager;
@@ -64,10 +64,10 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     @ApiStatus.Internal
     public VeilRenderer(ReloadableResourceManager resourceManager, Window window) {
         this.vanillaShaderCompiler = new VanillaShaderCompiler();
-        this.dynamicBufferManger = new DynamicBufferManger(window.getWidth(), window.getHeight());
+        this.dynamicBufferManager = new DynamicBufferManager(window.getWidth(), window.getHeight());
         this.shaderPreDefinitions = new ShaderPreDefinitions();
         this.shaderModificationManager = new ShaderModificationManager();
-        this.shaderManager = new ShaderManager(ShaderManager.PROGRAM_SET, this.shaderPreDefinitions, this.dynamicBufferManger);
+        this.shaderManager = new ShaderManager(ShaderManager.PROGRAM_SET, this.shaderPreDefinitions, this.dynamicBufferManager);
         this.framebufferManager = new FramebufferManager();
         this.postProcessingManager = new PostProcessingManager();
         this.dynamicRenderTypeManager = new DynamicRenderTypeManager();
@@ -97,7 +97,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         boolean ambientOcclusion = this.lightRenderer.isAmbientOcclusionEnabled();
         consumer.accept("Ambient Occlusion: " + (ambientOcclusion ? ChatFormatting.GREEN + "On" : ChatFormatting.RED + "Off"));
         this.lightRenderer.addDebugInfo(consumer);
-        int mask = this.dynamicBufferManger.getActiveBuffers();
+        int mask = this.dynamicBufferManager.getActiveBuffers();
         if (mask != 0) {
             String buffers = Arrays.stream(DynamicBufferType.decode(mask)).map(DynamicBufferType::getName).collect(Collectors.joining(", "));
             consumer.accept("Active Buffers: " + buffers);
@@ -116,7 +116,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         if (buffers.length == 0) {
             return false;
         }
-        return this.dynamicBufferManger.setActiveBuffers(name, DynamicBufferType.encode(buffers));
+        return this.dynamicBufferManager.setActiveBuffers(name, DynamicBufferType.encode(buffers));
     }
 
     /**
@@ -132,8 +132,8 @@ public class VeilRenderer implements ResourceManagerReloadListener {
             return false;
         }
 
-        int active = this.dynamicBufferManger.getActiveBuffers(name) & ~DynamicBufferType.encode(buffers);
-        return this.dynamicBufferManger.setActiveBuffers(name, active);
+        int active = this.dynamicBufferManager.getActiveBuffers(name) & ~DynamicBufferType.encode(buffers);
+        return this.dynamicBufferManager.setActiveBuffers(name, active);
     }
 
     /**
@@ -144,7 +144,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
      */
     public boolean disableBuffers(ResourceLocation name) {
         RenderSystem.assertOnRenderThreadOrInit();
-        return this.dynamicBufferManger.setActiveBuffers(name, 0);
+        return this.dynamicBufferManager.setActiveBuffers(name, 0);
     }
 
     /**
@@ -157,8 +157,8 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     /**
      * @return The manger for all dynamically added framebuffer attachments
      */
-    public DynamicBufferManger getDynamicBufferManger() {
-        return this.dynamicBufferManger;
+    public DynamicBufferManager getDynamicBufferManger() {
+        return this.dynamicBufferManager;
     }
 
     /**
@@ -243,7 +243,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     @ApiStatus.Internal
     public void resize(int width, int height) {
         this.framebufferManager.resizeFramebuffers(width, height);
-        this.dynamicBufferManger.resizeFramebuffers(width, height);
+        this.dynamicBufferManager.resizeFramebuffers(width, height);
 
         // The old texture is deleted, so we have to remake the framebuffer
         VeilFirstPersonRenderer.free();
@@ -253,13 +253,13 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     @ApiStatus.Internal
     public void endFrame() {
         this.framebufferManager.clear();
-        this.dynamicBufferManger.clear();
+        this.dynamicBufferManager.clear();
         this.postProcessingManager.endFrame();
     }
 
     @ApiStatus.Internal
     public void free() {
-        this.dynamicBufferManger.free();
+        this.dynamicBufferManager.free();
         this.shaderManager.close();
         this.framebufferManager.free();
         this.postProcessingManager.free();

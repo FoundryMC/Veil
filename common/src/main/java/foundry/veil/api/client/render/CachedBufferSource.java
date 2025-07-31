@@ -22,12 +22,16 @@ public class CachedBufferSource implements MultiBufferSource, NativeResource {
     @Nullable
     private RenderType lastSharedType;
 
+    private void clearBuffers() {
+        this.buffers.values().forEach(ByteBufferBuilder::clear);
+        this.buffers.clear();
+    }
+
     @Override
     public @NotNull VertexConsumer getBuffer(@NotNull RenderType renderType) {
         BufferBuilder last = this.startedBuilders.get(renderType);
         if (last != null && !renderType.canConsolidateConsecutiveGeometry()) {
             this.endBatch(renderType, last);
-            last = null;
         }
 
         if (last != null) {
@@ -42,8 +46,7 @@ public class CachedBufferSource implements MultiBufferSource, NativeResource {
 
     @Override
     public void free() {
-        this.buffers.values().forEach(ByteBufferBuilder::clear);
-        this.buffers.clear();
+        this.clearBuffers();
         this.startedBuilders.clear();
         this.lastSharedType = null;
     }
@@ -61,17 +64,19 @@ public class CachedBufferSource implements MultiBufferSource, NativeResource {
         for (RenderType rendertype : this.buffers.keySet()) {
             this.endBatch(rendertype);
         }
+
+        this.clearBuffers();
     }
 
-    public void endBatch(RenderType pRenderType) {
-        BufferBuilder bufferbuilder = this.startedBuilders.remove(pRenderType);
+    public void endBatch(RenderType renderType) {
+        BufferBuilder bufferbuilder = this.startedBuilders.remove(renderType);
         if (bufferbuilder != null) {
-            this.endBatch(pRenderType, bufferbuilder);
+            this.endBatch(renderType, bufferbuilder);
         }
     }
 
-    private void endBatch(RenderType renderType, BufferBuilder pBuilder) {
-        MeshData meshdata = pBuilder.build();
+    private void endBatch(RenderType renderType, BufferBuilder builder) {
+        MeshData meshdata = builder.build();
         if (meshdata != null) {
             if (renderType.sortOnUpload()) {
                 ByteBufferBuilder bytebufferbuilder = this.buffers.computeIfAbsent(renderType, unused -> new ByteBufferBuilder(renderType.bufferSize()));

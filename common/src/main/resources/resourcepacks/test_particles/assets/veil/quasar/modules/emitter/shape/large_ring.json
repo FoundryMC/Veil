@@ -1,14 +1,14 @@
 {
-    "shape": "DISC",
-    "dimensions": [
-        2.0,
-        0.01,
-        2.0
-    ],
-    "rotation": [
-        0.0,
-        0.0,
-        0.0
-    ],
-    "from_surface": true
+  "shape": "DISC",
+  "dimensions": [
+    2.0,
+    0.01,
+    2.0
+  ],
+  "rotation": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "from_surface": true
 }

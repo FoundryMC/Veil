@@ -22,10 +22,19 @@ import java.util.concurrent.CompletionException;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
+/**
+ * An abstracted version of a resource independent of client and server resources.
+ * <br>
+ * This is intended to be used on the client side to modify assets during mod and resource pack development.
+ *
+ * @param <T> This resource type
+ * @author RyanH, Ocelot
+ * @since 1.0.0
+ */
 public interface VeilResource<T extends VeilResource<?>> {
 
     /**
-     * Rebders this resource into the resource panel.
+     * Renders this resource into the resource panel.
      *
      * @param dragging Whether the user is dragging the resource
      * @param fullName Whether to render the location of the resource
@@ -55,20 +64,19 @@ public interface VeilResource<T extends VeilResource<?>> {
         if (this.canHotReload() && (event.kind() == ENTRY_CREATE || event.kind() == ENTRY_MODIFY)) {
             Veil.LOGGER.info("Hot swapping {} after file system change", this.resourceInfo().location());
 
-            Minecraft client = Minecraft.getInstance();
             return CompletableFuture.runAsync(() -> {
                 try {
                     this.copyToResources();
                 } catch (IOException e) {
                     throw new CompletionException(e);
                 }
-            }, task -> client.tell(() -> Util.ioPool().execute(task))).thenRunAsync(() -> {
+            }, task -> Minecraft.getInstance().tell(() -> Util.ioPool().execute(task))).thenRunAsync(() -> {
                 try {
                     this.hotReload(resourceManager);
                 } catch (IOException e) {
                     throw new CompletionException(e);
                 }
-            }, client).exceptionally(e -> {
+            }, Minecraft.getInstance()).exceptionally(e -> {
                 while (e instanceof CompletionException) {
                     e = e.getCause();
                 }
@@ -79,6 +87,9 @@ public interface VeilResource<T extends VeilResource<?>> {
         return CompletableFuture.completedFuture(null);
     }
 
+    /**
+     * @return Information about this resource
+     */
     VeilResourceInfo resourceInfo();
 
     /**
@@ -99,6 +110,11 @@ public interface VeilResource<T extends VeilResource<?>> {
      */
     void hotReload(VeilResourceManager resourceManager) throws IOException;
 
+    /**
+     * Copies this resource from the build folder to the actual asset root.
+     *
+     * @throws IOException If there was an error copying the file
+     */
     default void copyToResources() throws IOException {
         VeilResourceInfo info = this.resourceInfo();
         Path filePath = info.filePath();

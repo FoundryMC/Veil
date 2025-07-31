@@ -41,7 +41,7 @@ out vec3 normal;
 void main() {
     BoneData data = Bones[BoneIndex + NecromancerBoneCount * gl_InstanceID];
     mat4 transform = mat4(data.Transform);
-    transform[3] = vec4(0.0, 0.0, 0.0, 1.0); // Last column is color, so set it to identity
+    transform[3] = vec4(0.0, 0.0, 0.0, 1.0);// Last column is color, so set it to identity
     gl_Position = ProjMat * ModelViewMat * transpose(transform) * vec4(Position, 1.0);
 
     vertexDistance = fog_distance(ModelViewMat, Position, FogShape);

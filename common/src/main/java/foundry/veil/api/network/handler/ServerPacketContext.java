@@ -2,6 +2,7 @@ package foundry.veil.api.network.handler;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,4 +22,9 @@ public interface ServerPacketContext extends PacketContext {
     @Override
     @NotNull
     ServerPlayer player();
+
+    @Override
+    default @NotNull Level level() {
+        return this.player().level();
+    }
 }

@@ -3,7 +3,6 @@ package foundry.veil.fabric.mixin.compat.sodium;
 import com.google.common.base.Stopwatch;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.ext.sodium.ChunkShaderOptionsExtension;

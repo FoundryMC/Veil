@@ -30,11 +30,11 @@ public class Color implements Colorc {
     /**
      * Allows only RGB components with a full alpha component.
      */
-    public static final Codec<Color> RGB_CODEC = RGB_INT_CODEC.xmap(Color::new, Colorc::argb);
+    public static final Codec<Colorc> RGB_CODEC = RGB_INT_CODEC.xmap(Color::new, Colorc::argb);
     /**
      * Allows ARGB components.
      */
-    public static final Codec<Color> ARGB_CODEC = ARGB_INT_CODEC.xmap(Color::new, Colorc::argb);
+    public static final Codec<Colorc> ARGB_CODEC = ARGB_INT_CODEC.xmap(Color::new, Colorc::argb);
 
     public static final Colorc WHITE = new Color(0xFFFFFFFF);
     public static final Colorc BLACK = new Color(0xFF000000);
@@ -208,6 +208,20 @@ public class Color implements Colorc {
      */
     public Color alphaInt(int alpha) {
         return this.alpha(alpha / 255.0F);
+    }
+
+    /**
+     * Sets the red, green, blue, and alpha components of this color.
+     *
+     * @param color The new color
+     * @return This color
+     */
+    public Color set(Colorc color) {
+        this.red = color.red();
+        this.green = color.green();
+        this.blue = color.blue();
+        this.alpha = color.alpha();
+        return this;
     }
 
     /**

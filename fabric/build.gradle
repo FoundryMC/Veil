@@ -52,16 +52,16 @@ dependencies {
 //    modRuntimeOnly "maven.modrinth:cameratweaks:1.7.0-1.21.1"
 //    modRuntimeOnly "maven.modrinth:yacl:3.6.3+1.21.1-fabric"
 
-    api(include("gg.moonflower:molang-compiler:${molang_compiler_version}"))
-    api(include("io.github.ocelot:glsl-processor:${glsl_processor_version}"))
+    include(api("gg.moonflower:molang-compiler:${molang_compiler_version}"))
+    include(api("io.github.ocelot:glsl-processor:${glsl_processor_version}"))
 
-    api(include("io.github.spair:imgui-java-binding:$imgui_version"))
-    api(include(("io.github.spair:imgui-java-lwjgl3:$imgui_version"))) {
+    include(api("io.github.spair:imgui-java-binding:$imgui_version"))
+    include(api("io.github.spair:imgui-java-lwjgl3:$imgui_version")) {
         exclude group: 'org.lwjgl'
         exclude group: 'org.lwjgl.lwjgl'
     }
 
-    runtimeOnly(include("io.github.spair:imgui-java-natives-linux:$imgui_version"))
-    runtimeOnly(include("io.github.spair:imgui-java-natives-macos:$imgui_version"))
-    runtimeOnly(include("io.github.spair:imgui-java-natives-windows:$imgui_version"))
+    include(runtimeOnly("io.github.spair:imgui-java-natives-linux:$imgui_version"))
+    include(runtimeOnly("io.github.spair:imgui-java-natives-macos:$imgui_version"))
+    include(runtimeOnly("io.github.spair:imgui-java-natives-windows:$imgui_version"))
 }

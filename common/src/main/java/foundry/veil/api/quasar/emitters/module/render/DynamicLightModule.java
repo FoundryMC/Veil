@@ -1,13 +1,14 @@
 package foundry.veil.api.quasar.emitters.module.render;
 
+import foundry.veil.api.client.color.Color;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.PointLight;
+import foundry.veil.api.client.render.light.data.PointLightData;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.quasar.data.module.init.LightModuleData;
 import foundry.veil.api.quasar.emitters.module.RenderParticleModule;
 import foundry.veil.api.quasar.emitters.module.UpdateParticleModule;
 import foundry.veil.api.quasar.particle.QuasarParticle;
 import net.minecraft.util.Mth;
-import org.joml.Vector4f;
 
 public class DynamicLightModule implements UpdateParticleModule, RenderParticleModule {
 
@@ -16,11 +17,12 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
     private float lastRadius;
     private float radius;
 
-    private final Vector4f lastColor;
-    private final Vector4f color;
-    private final Vector4f renderColor;
+    private final Color lastColor;
+    private final Color color;
+    private final Color renderColor;
     private float lastBrightness;
-    private PointLight light;
+    private final PointLightData light;
+    private LightRenderHandle<PointLightData> lightHandle;
 
     private final boolean constantColor;
     private final boolean constantBrightness;
@@ -33,16 +35,20 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
         this.constantBrightness = this.constantColor && data.brightness().isConstant();
         this.constantRadius = data.radius().isConstant();
 
-        this.lastColor = new Vector4f(1.0F);
-        this.color = new Vector4f(1.0F);
-        this.renderColor = new Vector4f(1.0F);
-        this.light = null;
+        this.lastColor = new Color(Color.WHITE);
+        this.color = new Color(Color.WHITE);
+        this.renderColor = new Color(Color.WHITE);
+        this.light = new PointLightData();
 
         if (this.constantColor) {
             data.color().getColor(0.0F, this.color);
             this.lastColor.set(this.color);
             this.renderColor.set(this.color);
         }
+
+        this.light.setBrightness(this.brightness * this.renderColor.alpha());
+        this.light.setRadius(this.radius);
+        this.light.setColor(this.color);
     }
 
     @Override
@@ -60,24 +66,14 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
             this.radius = particle.getEnvironment().safeResolve(this.data.radius());
         }
 
-        float brightness = this.brightness * this.color.w;
-        if (this.color.lengthSquared() < 0.1 && brightness < 0.1) {
+        float brightness = this.brightness * this.color.alpha();
+        if (this.color.luminance() < 0.1 && brightness < 0.1) {
             this.onRemove();
             return;
         }
 
-        if (this.light == null) {
-            this.light = new PointLight();
-            if (this.constantColor) {
-                this.light.setColor(this.color.x, this.color.y, this.color.z);
-            }
-            if (this.constantBrightness) {
-                this.light.setBrightness(this.brightness * this.renderColor.w);
-            }
-            if (this.constantRadius) {
-                this.light.setBrightness(this.radius);
-            }
-            VeilRenderSystem.renderer().getLightRenderer().addLight(this.light);
+        if (this.lightHandle == null) {
+            this.lightHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(this.light);
         }
         this.lastBrightness = brightness;
     }
@@ -92,10 +88,10 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
 
         if (!this.constantColor) {
             this.lastColor.lerp(this.color, partialTicks, this.renderColor);
-            this.light.setColor(this.renderColor.x, this.renderColor.y, this.renderColor.z);
+            this.light.setColor(this.renderColor);
         }
         if (!this.constantBrightness) {
-            this.light.setBrightness(Mth.lerp(partialTicks, this.lastBrightness, this.brightness) * this.renderColor.w);
+            this.light.setBrightness(Mth.lerp(partialTicks, this.lastBrightness, this.brightness) * this.renderColor.alpha());
         }
         if (!this.constantRadius) {
             this.light.setRadius(Mth.lerp(partialTicks, this.lastRadius, this.radius));
@@ -105,8 +101,8 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
     @Override
     public void onRemove() {
         if (this.light != null) {
-            VeilRenderSystem.renderer().getLightRenderer().removeLight(this.light);
-            this.light = null;
+            this.lightHandle.free();
+            this.lightHandle = null;
         }
     }
 }

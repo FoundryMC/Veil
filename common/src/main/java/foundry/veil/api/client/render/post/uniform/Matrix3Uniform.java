@@ -3,7 +3,6 @@ package foundry.veil.api.client.render.post.uniform;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import foundry.veil.api.client.render.shader.program.MutableUniformAccess;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
 import org.joml.Matrix3f;
 import org.joml.Matrix3fc;

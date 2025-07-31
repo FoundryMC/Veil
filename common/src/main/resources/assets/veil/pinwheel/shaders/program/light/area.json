@@ -1,4 +1,12 @@
 {
   "vertex": "veil:light/area",
-  "fragment": "veil:light/area"
+  "fragment": "veil:light/area",
+  "textures": {
+    "AlbedoSampler": "veil:dynamic_buffer/albedo",
+    "NormalSampler": "veil:dynamic_buffer/normal",
+    "DepthSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main:depth"
+    }
+  }
 }

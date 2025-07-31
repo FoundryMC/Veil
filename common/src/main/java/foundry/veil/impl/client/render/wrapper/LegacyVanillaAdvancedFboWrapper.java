@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.ext.RenderTargetExtension;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -25,7 +24,7 @@ public class LegacyVanillaAdvancedFboWrapper extends VanillaAdvancedFboWrapper {
     }
 
     @Override
-    public void clear(float red, float green, float blue, float alpha, int buffers, int... clearBuffers) {
+    public void clear(float red, float green, float blue, float alpha, float depth, int buffers, int... clearBuffers) {
         if (buffers == 0) {
             return;
         }
@@ -40,7 +39,7 @@ public class LegacyVanillaAdvancedFboWrapper extends VanillaAdvancedFboWrapper {
             RenderSystem.clearColor(red, green, blue, alpha);
         }
         if ((buffers & GL_DEPTH_BUFFER_BIT) != 0) {
-            RenderSystem.clearDepth(1.0);
+            RenderSystem.clearDepth(depth);
         }
         RenderSystem.clear(buffers, Minecraft.ON_OSX);
 

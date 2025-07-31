@@ -10,7 +10,7 @@ import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.ext.RenderTargetExtension;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -44,10 +44,10 @@ public final class VeilFirstPersonRenderer {
                     .build(true);
         }
 
-        DynamicBufferManger dynamicBufferManger = VeilRenderSystem.renderer().getDynamicBufferManger();
-        dynamicBufferManger.setEnabled(true);
-        AdvancedFbo fbo = dynamicBufferManger.getDynamicFbo(firstPerson);
-        dynamicBufferManger.setEnabled(false);
+        DynamicBufferManager dynamicBufferManager = VeilRenderSystem.renderer().getDynamicBufferManger();
+        dynamicBufferManager.setEnabled(true);
+        AdvancedFbo fbo = dynamicBufferManager.getDynamicFbo(firstPerson);
+        dynamicBufferManager.setEnabled(false);
 
         VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(VeilFramebuffers.FIRST_PERSON, fbo);
         fbo.clear(mask);

@@ -22,10 +22,10 @@ public class DynamicBufferShard extends RenderStateShard {
         super(Veil.MODID + ":dynamic_buffer", () -> {
             if (!Veil.platform().hasErrors()) {
                 if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
-                    DynamicBufferManger dynamicBufferManger = VeilRenderSystem.renderer().getDynamicBufferManger();
-                    if (dynamicBufferManger.isEnabled()) {
+                    DynamicBufferManager dynamicBufferManager = VeilRenderSystem.renderer().getDynamicBufferManger();
+                    if (dynamicBufferManager.isEnabled()) {
                         FramebufferStack.push(name);
-                        dynamicBufferManger.setupRenderState(name, targetSupplier.get(), true);
+                        dynamicBufferManager.setupRenderState(name, targetSupplier.get(), true);
                     }
                 }
             }

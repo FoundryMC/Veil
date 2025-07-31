@@ -29,6 +29,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
+@ApiStatus.Internal
 public class FramebufferFileEditor implements ResourceFileEditor<FramebufferResource> {
 
     private static final StringBuilder BUILDER = new StringBuilder();
@@ -549,7 +551,7 @@ public class FramebufferFileEditor implements ResourceFileEditor<FramebufferReso
         }
 
         public FramebufferAttachmentDefinition getOrCreateDepthBuffer() {
-            return Objects.requireNonNullElseGet(this.depthBuffer, () -> this.depthBuffer = new FramebufferAttachmentDefinition(FramebufferAttachmentDefinition.Type.TEXTURE, FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT,  true, TextureFilter.CLAMP, 1, null));
+            return Objects.requireNonNullElseGet(this.depthBuffer, () -> this.depthBuffer = new FramebufferAttachmentDefinition(FramebufferAttachmentDefinition.Type.TEXTURE, FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT, true, TextureFilter.CLAMP, 1, null));
         }
 
         public FramebufferAttachmentDefinition[] getColorBuffers() {

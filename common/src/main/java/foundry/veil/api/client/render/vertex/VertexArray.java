@@ -15,7 +15,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import org.apache.logging.log4j.core.config.Scheduled;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL40C;
@@ -140,8 +139,8 @@ public abstract class VertexArray implements NativeResource {
         renderType.setupRenderState();
         ShaderInstance shader = RenderSystem.getShader();
         if (shader != null) {
-            shader.apply();
             shader.setDefaultUniforms(this.drawMode, RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
+            shader.apply();
         }
     }
 
@@ -289,25 +288,6 @@ public abstract class VertexArray implements NativeResource {
     }
 
     /**
-     * Uploads vertex data to the specified buffer.
-     *
-     * @param buffer The buffer to upload into
-     * @param data   The data to upload
-     * @param usage  The data usage
-     * @deprecated Use {@link #upload(int, MeshData, DrawUsage)} instead
-     */
-    @ApiStatus.ScheduledForRemoval(inVersion = "2.0.0")
-    @Deprecated
-    public void uploadVertexBuffer(int buffer, ByteBuffer data, int usage) {
-        DrawUsage drawUsage = switch (usage) {
-            case GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY -> DrawUsage.STREAM;
-            case GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, GL_DYNAMIC_COPY -> DrawUsage.DYNAMIC;
-            default -> DrawUsage.STATIC;
-        };
-        upload(buffer, data, drawUsage);
-    }
-
-    /**
      * @return A builder for applying changes to this array
      */
     public VertexArrayBuilder editFormat() {
@@ -375,6 +355,14 @@ public abstract class VertexArray implements NativeResource {
      * {@link #bind()} must be called before this.
      */
     public void drawWithRenderType(RenderType renderType) {
+        while (renderType instanceof VeilRenderType.RenderTypeWrapper wrapper) {
+            renderType = wrapper.get();
+        }
+
+        if (renderType == null) {
+            return;
+        }
+
         this.setup(renderType);
         this.draw();
         this.clear(renderType);
@@ -397,6 +385,14 @@ public abstract class VertexArray implements NativeResource {
      * @param instances The number of instances to draw
      */
     public void drawInstancedWithRenderType(RenderType renderType, int instances) {
+        while (renderType instanceof VeilRenderType.RenderTypeWrapper wrapper) {
+            renderType = wrapper.get();
+        }
+
+        if (renderType == null) {
+            return;
+        }
+
         this.setup(renderType);
         this.drawInstanced(instances);
         this.clear(renderType);
@@ -423,6 +419,14 @@ public abstract class VertexArray implements NativeResource {
      * @param stride    The stride between commands or <code>0</code> if they are tightly packed
      */
     public void drawIndirectWithRenderType(RenderType renderType, long indirect, int drawCount, int stride) {
+        while (renderType instanceof VeilRenderType.RenderTypeWrapper wrapper) {
+            renderType = wrapper.get();
+        }
+
+        if (renderType == null) {
+            return;
+        }
+
         this.setup(renderType);
         this.drawIndirect(indirect, drawCount, stride);
         this.clear(renderType);

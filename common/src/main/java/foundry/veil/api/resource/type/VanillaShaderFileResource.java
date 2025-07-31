@@ -4,11 +4,12 @@ import foundry.veil.api.resource.VeilResourceAction;
 import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.impl.resource.action.TextEditAction;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
-public record VanillaShaderFileResource(
-        VeilResourceInfo resourceInfo) implements VeilShaderResource<VanillaShaderFileResource> {
+@ApiStatus.Internal
+public record VanillaShaderFileResource(VeilResourceInfo resourceInfo) implements VeilShaderResource<VanillaShaderFileResource> {
 
     @Override
     public List<VeilResourceAction<VanillaShaderFileResource>> getActions() {

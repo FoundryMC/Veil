@@ -22,7 +22,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -68,7 +67,7 @@ public class QuasarParticle {
         this.lifetime = settings.particleLifetime(this.randomSource);
         this.age = 0;
 
-        this.renderData = new RenderData(data);
+        this.renderData = new RenderData(this, data);
         // Don't create the environment if the particle never uses it
         this.environment = Suppliers.memoize(() -> MolangRuntime.runtime()
                 .setQuery("x", MolangExpression.of(() -> (float) this.renderData.getRenderPosition().x()))
@@ -192,9 +191,10 @@ public class QuasarParticle {
 
     @ApiStatus.Internal
     public void render(float partialTicks) {
-        Iterator<RenderParticleModule> iterator = this.modules.getEnabledRenderModules();
-        while (iterator.hasNext()) {
-            iterator.next().render(this, partialTicks);
+        int count = this.modules.getEnabledRenderModuleCount();
+        RenderParticleModule[] modules = this.modules.getEnabledRenderModulesArray();
+        for (int i = 0; i < count; i++) {
+            modules[i].render(this, partialTicks);
         }
         this.renderData.render(this, partialTicks);
     }

@@ -12,6 +12,7 @@ import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+@ApiStatus.Internal
 public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
 
     private static final Component SAVE = Component.translatable("gui.veil.save");
@@ -48,7 +50,7 @@ public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
     @Override
     public void loadFromDisk() {
         VeilResourceInfo info = this.resource.resourceInfo();
-        TextEditorLanguageDefinition languageDefinition = resource.languageDefinition();
+        TextEditorLanguageDefinition languageDefinition = this.resource.languageDefinition();
         TextEditor editor = this.editor.getEditor();
 
         editor.setReadOnly(true);
@@ -69,7 +71,7 @@ public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
             }
 
             this.editor.show(info.fileName(), contents);
-            this.editor.setSaveCallback((source, errorMap) -> this.save(source.getBytes(StandardCharsets.UTF_8), resourceManager, resource));
+            this.editor.setSaveCallback((source, errorMap) -> this.save(source.getBytes(StandardCharsets.UTF_8), this.resourceManager, this.resource));
 
             editor.setReadOnly(info.isStatic());
             if (languageDefinition != null) {

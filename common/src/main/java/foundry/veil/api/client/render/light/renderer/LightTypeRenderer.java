@@ -2,40 +2,58 @@ package foundry.veil.api.client.render.light.renderer;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.light.Light;
+import foundry.veil.api.client.render.light.data.LightData;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Renders all lights of a specific type.
  *
  * @param <T> The type of lights to render
+ * @since 2.0.0
  */
-public interface LightTypeRenderer<T extends Light> extends NativeResource {
+public interface LightTypeRenderer<T extends LightData> extends NativeResource {
 
     /**
-     * Prepares the specified lights to be rendered.
+     * Adds the specified light to the renderer.
+     *
+     * @param light The light to add
+     * @return A handle to the light in the renderer
+     */
+    LightRenderHandle<T> addLight(T light);
+
+    /**
+     * Attempts to re-add the specified handle to this renderer if invalid.
+     *
+     * @param handle The handle to add
+     * @return A valid handle to this renderer
+     */
+    LightRenderHandle<T> steal(LightRenderHandle<T> handle);
+
+    /**
+     * Prepares the light renderer.
      *
      * @param lightRenderer The light renderer instance
-     * @param lights        The lights to render
-     * @param removedLights The lights that will be removed this frame
      * @param frustum       The culling view frustum
      */
     @ApiStatus.OverrideOnly
-    void prepareLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum);
+    void prepareLights(LightRenderer lightRenderer, CullFrustum frustum);
 
     /**
-     * <p>Renders all prepared lights with this renderer.</p>
-     * <p>Shaders, custom uniforms, and the way lights are rendered is up to the individual renderer.</p>
+     * Renders all prepared lights with this renderer.
+     * <br>
+     * Shaders, custom uniforms, and the way lights are rendered is up to the individual renderer.
      *
      * @param lightRenderer The light renderer instance
-     * @param lights        The lights to render
      */
-    @ApiStatus.OverrideOnly
-    void renderLights(LightRenderer lightRenderer, List<T> lights);
+    void renderLights(LightRenderer lightRenderer);
+
+    /**
+     * @return A view of all lights in this renderer
+     */
+    Collection<? extends LightRenderHandle<T>> getLights();
 
     /**
      * @return The number of lights visible last frame

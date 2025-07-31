@@ -6,11 +6,13 @@ import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.impl.resource.action.TextEditAction;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 
+@ApiStatus.Internal
 public record VeilShaderDefinitionResource(VeilResourceInfo resourceInfo,
                                            ShaderManager shaderManager) implements VeilShaderResource<VeilShaderDefinitionResource> {
 

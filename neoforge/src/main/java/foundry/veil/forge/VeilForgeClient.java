@@ -11,7 +11,6 @@ import foundry.veil.forge.event.ForgeVeilRendererAvailableEvent;
 import foundry.veil.forge.impl.ForgeRenderTypeStageHandler;
 import foundry.veil.impl.VeilBuiltinPacks;
 import foundry.veil.impl.VeilReloadListeners;
-import foundry.veil.impl.client.render.VeilUITooltipRenderer;
 import foundry.veil.impl.client.render.shader.VeilVanillaShaders;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -25,10 +24,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -40,7 +37,6 @@ public class VeilForgeClient {
         VeilClient.init();
 
         modEventBus.addListener(VeilForgeClient::registerKeys);
-        modEventBus.addListener(VeilForgeClient::registerGuiOverlays);
         modEventBus.addListener(VeilForgeClient::registerListeners);
         modEventBus.addListener(VeilForgeClient::registerShaders);
         modEventBus.addListener(VeilForgeClient::addPackFinders);
@@ -53,19 +49,6 @@ public class VeilForgeClient {
             blockLayers.add(renderType);
         }));
         ForgeRenderTypeStageHandler.setBlockLayers(blockLayers);
-
-//        if (SodiumCompat.isEnabled()) {
-//            SodiumCompat.setLoadedShadersSupplier(() -> {
-//                SodiumWorldRenderer worldRenderer = SodiumWorldRenderer.instanceNullable();
-//                if (worldRenderer != null) {
-//                    RenderSectionManagerAccessor renderSectionManager = (RenderSectionManagerAccessor) ((SodiumWorldRendererAccessor) worldRenderer).getRenderSectionManager();
-//                    if (renderSectionManager != null && renderSectionManager.getChunkRenderer() instanceof ShaderChunkRendererAccessor accessor) {
-//                        return Object2IntMaps.singleton(ResourceLocation.fromNamespaceAndPath("sodium", "chunk_shader"), accessor.getPrograms().values().iterator().next().handle());
-//                    }
-//                }
-//                return Object2IntMaps.emptyMap();
-//            });
-//        }
     }
 
     private static void registerListeners(RegisterClientReloadListenersEvent event) {
@@ -77,10 +60,6 @@ public class VeilForgeClient {
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(VeilClient.EDITOR_KEY);
-    }
-
-    private static void registerGuiOverlays(RegisterGuiLayersEvent event) {
-        event.registerAbove(VanillaGuiLayers.HOTBAR, Veil.veilPath("uitooltip"), VeilUITooltipRenderer::renderOverlay);
     }
 
     private static void registerShaders(RegisterShadersEvent event) {

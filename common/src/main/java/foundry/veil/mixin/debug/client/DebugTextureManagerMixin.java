@@ -1,5 +1,6 @@
 package foundry.veil.mixin.debug.client;
 
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.ext.VeilDebug;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -18,8 +19,10 @@ public class DebugTextureManagerMixin {
     public void applyLabel(ResourceLocation name, AbstractTexture texture, CallbackInfo ci) {
         VeilDebug debug = VeilDebug.get();
         if (debug == VeilDebug.ENABLED) {
-            texture.bind(); // Have to bind the texture to make sure it's been initialized
-            debug.objectLabel(GL_TEXTURE, texture.getId(), "Texture " + name);
+            VeilRenderSystem.renderThreadExecutor().execute(() -> {
+                texture.bind(); // Have to bind the texture to make sure it's been initialized
+                debug.objectLabel(GL_TEXTURE, texture.getId(), "Texture " + name);
+            });
         }
     }
 }

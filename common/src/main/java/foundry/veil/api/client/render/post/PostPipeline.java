@@ -13,7 +13,6 @@ import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
 import org.lwjgl.system.NativeResource;
 
 /**
@@ -106,6 +105,7 @@ public interface PostPipeline extends MutableUniformAccess, NativeResource {
      *
      * @author Ocelot
      */
+    @ApiStatus.NonExtendable
     interface Context extends ShaderTextureSource.Context {
 
         /**

@@ -3,6 +3,8 @@ package foundry.veil.api.client.render.shader.program;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.AdvancedFboTextureAttachment;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
+import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -93,4 +95,43 @@ public interface TextureUniformAccess {
      * Clears all samplers.
      */
     void clearSamplers();
+
+    /**
+     * Sets <code>DiffuseSampler0</code>-<code>DiffuseSamplerMax</code> to the color buffers in the specified framebuffer.
+     * <br>
+     * Also sets <code>DiffuseDepthSampler</code> if the framebuffer has a depth attachment.
+     *
+     * @param framebuffer The framebuffer to bind samplers from
+     */
+    static void setFramebufferSamplers(ShaderInstance instance, AdvancedFbo framebuffer) {
+        if (instance instanceof ShaderProgramImpl.Wrapper wrapper) {
+            wrapper.program().setFramebufferSamplers(framebuffer);
+            return;
+        }
+
+        boolean setDiffuseSampler = false;
+        for (int i = 0; i < framebuffer.getColorAttachments(); i++) {
+            if (!framebuffer.isColorTextureAttachment(i)) {
+                continue;
+            }
+
+            AdvancedFboTextureAttachment attachment = framebuffer.getColorTextureAttachment(i);
+            instance.setSampler("DiffuseSampler" + i, attachment);
+            if (attachment.getName() != null) {
+                instance.setSampler(attachment.getName(), attachment);
+            }
+            if (!setDiffuseSampler) {
+                instance.setSampler("DiffuseSampler", attachment);
+                setDiffuseSampler = true;
+            }
+        }
+
+        if (framebuffer.isDepthTextureAttachment()) {
+            AdvancedFboTextureAttachment attachment = framebuffer.getDepthTextureAttachment();
+            instance.setSampler("DiffuseDepthSampler", attachment);
+            if (attachment.getName() != null) {
+                instance.setSampler(attachment.getName(), attachment);
+            }
+        }
+    }
 }

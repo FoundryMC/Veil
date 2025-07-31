@@ -41,8 +41,7 @@ public record VeilShaderBufferLayout<T>(String name,
     public GlslNode createNode(boolean shaderStorageSupported, @Nullable String interfaceName) {
         GlslTypeQualifier.StorageType storageType = switch (this.requestedBinding) {
             case UNIFORM -> GlslTypeQualifier.StorageType.UNIFORM;
-            case SHADER_STORAGE ->
-                    shaderStorageSupported ? GlslTypeQualifier.StorageType.BUFFER : GlslTypeQualifier.StorageType.UNIFORM;
+            case SHADER_STORAGE -> shaderStorageSupported ? GlslTypeQualifier.StorageType.BUFFER : GlslTypeQualifier.StorageType.UNIFORM;
         };
 
         GlslSpecifiedType structSpecifier = new GlslSpecifiedType(this.structSpecifier, GlslTypeQualifier.layout(this.memoryLayout.getLayoutId()), storageType);

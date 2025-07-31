@@ -15,11 +15,13 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.FormattedCharSink;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
@@ -317,6 +319,15 @@ public class VeilImGuiUtil {
             }
 
             if (this.clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
+                String s = StringUtil.filterText(this.clickEvent.getValue());
+                if (s.startsWith("/")) {
+                    LocalPlayer player = Minecraft.getInstance().player;
+                    if (player != null && !player.connection.sendUnsignedCommand(s.substring(1))) {
+                        Veil.LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", s);
+                    }
+                } else {
+                    Veil.LOGGER.error("Failed to run command without '/' prefix from click event: '{}'", s);
+                }
                 return;
             }
 

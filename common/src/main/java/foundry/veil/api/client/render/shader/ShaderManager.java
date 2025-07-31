@@ -15,7 +15,7 @@ import foundry.veil.api.client.render.shader.processor.*;
 import foundry.veil.api.client.render.shader.program.ProgramDefinition;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.ThreadTaskScheduler;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferProcessor;
 import foundry.veil.impl.client.render.shader.ShaderImporterImpl;
 import foundry.veil.impl.client.render.shader.processor.ShaderProcessorList;
@@ -90,13 +90,13 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
             GL_COMPUTE_SHADER, "compute"
     );
 
-    private final DynamicBufferManger dynamicBufferManager;
+    private final DynamicBufferManager dynamicBufferManager;
     private final ShaderSourceSet sourceSet;
     private final ShaderPreDefinitions definitions;
     private final Map<ResourceLocation, ShaderProgramImpl> shaders;
     private final Map<ResourceLocation, ShaderProgram> shadersView;
     private final Set<ResourceLocation> dirtyShaders;
-    private final boolean shaderStorageSupported;
+    private final long supportedFeatures;
 
     private CompletableFuture<Void> recompileFuture;
     private CompletableFuture<Void> updateBuffersFuture;
@@ -108,7 +108,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
      * @param shaderPreDefinitions The set of shader pre-definitions
      * @param dynamicBufferManager The manager for dynamic buffers
      */
-    public ShaderManager(ShaderSourceSet sourceSet, ShaderPreDefinitions shaderPreDefinitions, DynamicBufferManger dynamicBufferManager) {
+    public ShaderManager(ShaderSourceSet sourceSet, ShaderPreDefinitions shaderPreDefinitions, DynamicBufferManager dynamicBufferManager) {
         this.dynamicBufferManager = dynamicBufferManager;
         this.sourceSet = sourceSet;
         this.definitions = shaderPreDefinitions;
@@ -116,7 +116,14 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         this.shaders = new HashMap<>();
         this.shadersView = Collections.unmodifiableMap(this.shaders);
         this.dirtyShaders = new HashSet<>();
-        this.shaderStorageSupported = VeilRenderSystem.shaderStorageBufferSupported();
+
+        long supportedFeatures = 0;
+        for (ShaderFeature feature : ShaderFeature.FEATURES) {
+            if (feature.isSupported()) {
+                supportedFeatures |= 1 << feature.ordinal();
+            }
+        }
+        this.supportedFeatures = supportedFeatures;
 
         this.recompileFuture = CompletableFuture.completedFuture(null);
         this.updateBuffersFuture = CompletableFuture.completedFuture(null);
@@ -133,11 +140,12 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
 
     private void addProcessors(ShaderProcessorList processorList, ResourceProvider provider) {
         processorList.addPreprocessor(new ShaderImportProcessor());
-        processorList.addPreprocessor(new ShaderBufferProcessor(this.shaderStorageSupported));
+        processorList.addPreprocessor(new ShaderBufferProcessor());
         processorList.addPreprocessor(new ShaderBindingProcessor());
         processorList.addPreprocessor(new ShaderVersionProcessor(), false);
         processorList.addPreprocessor(new ShaderModifyProcessor(), false);
         processorList.addPreprocessor(new DynamicBufferProcessor(), false);
+        processorList.addPreprocessor(new ShaderFeatureProcessor(), false);
         VeilClient.clientPlatform().onRegisterShaderPreProcessors(provider, processorList);
     }
 
@@ -193,6 +201,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                     Set<String> dependencies = new HashSet<>();
                     Map<String, String> macros = definition.getMacros(dependencies, this.definitions);
                     DynamicBufferType.addMacros(activeBuffers, macros);
+                    VeilRenderSystem.renderer().getShaderManager().addMacros(macros);
                     GlslTree tree = GlslParser.preprocessParse(source, macros);
 
                     Object2IntMap<String> uniformBindings = new Object2IntArrayMap<>();
@@ -205,12 +214,21 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                             activeBuffers,
                             type,
                             uniformBindings,
+                            dependencies,
                             macros,
                             shaderId,
                             true);
                     processor.modify(preProcessorContext, tree);
                     GlslTree.stripGLMacros(macros);
-                    tree.getMacros().putAll(macros);
+                    Map<String, String> treeMacros = tree.getMacros();
+                    treeMacros.putAll(macros);
+
+                    for (String dependency : dependencies) {
+                        String value = this.definitions.getDefinition(dependency);
+                        if (value != null) {
+                            treeMacros.putIfAbsent(dependency, value);
+                        }
+                    }
 
                     shaderSources.put(location, new VeilShaderSource(shaderId, tree.toSourceString(), uniformBindings, dependencies, new HashSet<>(processorList.getShaderImporter().addedImports())));
                 } catch (Throwable t) {
@@ -220,6 +238,21 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         } catch (IOException | IllegalArgumentException | JsonParseException e) {
             Veil.LOGGER.error("Couldn't parse shader {} from {}", definitionId, this.sourceSet.getShaderDefinitionLister().idToFile(definitionId), e);
         }
+    }
+
+    private boolean isInvalid(ResourceLocation id, ProgramDefinition definition) {
+        if (!this.hasFeatures(definition.requiredFeatures())) {
+            List<String> requiredFeatures = new ArrayList<>();
+            for (ShaderFeature feature : definition.requiredFeatures()) {
+                if (!this.hasFeatures(feature)) {
+                    requiredFeatures.add(feature.name().toLowerCase(Locale.ROOT));
+                }
+            }
+            Veil.LOGGER.info("Skipping shader '{}' (missing required features: {})", id, String.join(", ", requiredFeatures));
+            return true;
+        }
+
+        return false;
     }
 
     private void compile(ShaderProgramImpl program, @Nullable ProgramDefinition definition, ShaderCompiler compiler) {
@@ -287,6 +320,21 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
      */
     public void setGlobal(Consumer<ShaderProgram> setter) {
         this.shaders.values().forEach(setter);
+    }
+
+    /**
+     * Checks if the requested shader features are available.
+     *
+     * @param features The features to check for
+     * @return Whether those features are supported
+     * @since 2.0.0
+     */
+    public boolean hasFeatures(ShaderFeature... features) {
+        int mask = 0;
+        for (ShaderFeature feature : features) {
+            mask |= 1 << feature.ordinal();
+        }
+        return (this.supportedFeatures & mask) == mask;
     }
 
     /**
@@ -366,8 +414,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         try (ShaderCompiler compiler = reloadState.createCompiler()) {
             for (Map.Entry<ResourceLocation, ProgramDefinition> entry : reloadState.definitions().entrySet()) {
                 ProgramDefinition definition = entry.getValue();
-                if (definition.compute() != null && !VeilRenderSystem.computeSupported()) {
-                    Veil.LOGGER.info("Skipping compute shader '{}' (compute is unsupported on this platform)", entry.getKey());
+                if (this.isInvalid(entry.getKey(), definition)) {
                     continue;
                 }
 
@@ -392,10 +439,16 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                 ResourceLocation id = entry.getKey();
                 ShaderProgramImpl program = this.shaders.get(id);
                 if (program == null) {
-                    Veil.LOGGER.warn("Failed to recompile shader: {}", id);
+                    Veil.LOGGER.warn("Failed to recompile unknown shader: {}", id);
                     continue;
                 }
-                this.compile(program, entry.getValue(), compiler);
+
+                ProgramDefinition definition = entry.getValue();
+                if (this.isInvalid(id, definition)) {
+                    continue;
+                }
+
+                this.compile(program, definition, compiler);
             }
         }
 
@@ -598,8 +651,18 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
 
     @Override
     public void close() {
-        this.shaders.values().forEach(ShaderProgram::free);
+        this.shaders.values().forEach(ShaderProgramImpl::freeInternal);
         this.shaders.clear();
+    }
+
+    @ApiStatus.Internal
+    public void addMacros(Map<String, String> macros) {
+        long mask = this.supportedFeatures;
+        while (mask != 0) {
+            int ordinal = Long.numberOfTrailingZeros(mask);
+            macros.put(ShaderFeature.FEATURES[ordinal].getDefinitionName(), "1");
+            mask &= ~(1L << ordinal);
+        }
     }
 
     private record PreProcessorContext(Map<String, Object> customProgramData,
@@ -610,6 +673,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
                                        int activeBuffers,
                                        int type,
                                        Object2IntMap<String> uniformBindings,
+                                       Set<String> definitionDependencies,
                                        Map<String, String> macros,
                                        @Nullable ResourceLocation name,
                                        boolean sourceFile) implements ShaderPreProcessor.VeilContext {
@@ -617,7 +681,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         @Override
         public GlslTree modifyInclude(@Nullable ResourceLocation name, String source) throws IOException, GlslSyntaxException, LexerException {
             GlslTree tree = GlslParser.preprocessParse(source, this.macros);
-            PreProcessorContext context = new PreProcessorContext(this.customProgramData, this.preProcessor, this.definition, this.preDefinitions, this.shaderImporter, this.activeBuffers, this.type, this.uniformBindings, this.macros, name, false);
+            PreProcessorContext context = new PreProcessorContext(this.customProgramData, this.preProcessor, this.definition, this.preDefinitions, this.shaderImporter, this.activeBuffers, this.type, this.uniformBindings, this.definitionDependencies, this.macros, name, false);
             this.preProcessor.modify(context, tree);
             return tree;
         }
@@ -625,6 +689,16 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         @Override
         public void addUniformBinding(String name, int binding) {
             this.uniformBindings.put(name, binding);
+        }
+
+        @Override
+        public void addDefinitionDependency(String name) {
+            this.definitionDependencies.add(name);
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
         }
 
         @Override

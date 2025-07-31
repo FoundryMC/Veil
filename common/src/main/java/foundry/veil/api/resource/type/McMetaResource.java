@@ -5,11 +5,13 @@ import foundry.veil.api.resource.VeilResourceAction;
 import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import net.minecraft.server.packs.resources.ResourceMetadata;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+@ApiStatus.Internal
 public record McMetaResource(VeilResourceInfo resourceInfo, ResourceMetadata metadata) implements VeilResource<McMetaResource> {
 
     @Override

@@ -1,6 +1,7 @@
 package foundry.veil.api.client.render.shader.program;
 
 import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL31C;
 
@@ -52,7 +53,10 @@ public interface UniformAccess {
      *
      * @param name The name of the uniform to get
      * @return The uniform instance
+     * @deprecated Use {@link #getUniformSafe(CharSequence)} instead
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "3.0.0")
     ShaderUniformAccess getOrCreateUniform(CharSequence name);
 
     /**

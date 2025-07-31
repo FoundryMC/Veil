@@ -9,6 +9,8 @@ import foundry.veil.api.client.necromancer.Skeleton;
 import foundry.veil.api.client.necromancer.render.NecromancerRenderer;
 import foundry.veil.api.client.necromancer.render.Skin;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.profiler.VeilRenderProfiler;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.block.DynamicShaderBlock;
 import foundry.veil.api.client.render.shader.block.ShaderBlock;
 import foundry.veil.api.client.render.vertex.VertexArray;
@@ -161,6 +163,8 @@ public class NecromancerRenderDispatcher {
 
         @Override
         public void draw(RenderType renderType, Skeleton skeleton, Skin skin, float partialTicks) {
+            VeilRenderProfiler profiler = VeilRenderProfiler.get();
+            profiler.push("necromancer_draw_immediate_" + VeilRenderType.getName(renderType));
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 ByteBuffer instancedData = stack.malloc(8);
                 instancedData.put(0, (byte) this.overlay);
@@ -183,6 +187,7 @@ public class NecromancerRenderDispatcher {
                 updateBlockSize(1, skin.getSkeletonDataSize());
                 skin.render(renderType, List.of(this.affineTransform), List.of(skeleton), instancedBuffer, boneBuilder, boneBuffer, boneBlock, FloatList.of(partialTicks));
             }
+            profiler.pop();
         }
 
         @Override
@@ -237,8 +242,11 @@ public class NecromancerRenderDispatcher {
         }
 
         public void end() {
+            VeilRenderProfiler profiler = VeilRenderProfiler.get();
             for (SkeletonBatch batch : this.skeletonBatches.values()) {
+                profiler.push("necromancer_draw_batched_" + VeilRenderType.getName(batch.renderType));
                 batch.render();
+                profiler.pop();
             }
             this.skeletonBatches.clear();
 

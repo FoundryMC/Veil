@@ -3,20 +3,19 @@ package foundry.veil.api.client.render.light.renderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
 import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.InstancedLight;
-import foundry.veil.api.client.render.light.Light;
+import foundry.veil.api.client.render.light.InstancedLightData;
+import foundry.veil.api.client.render.light.data.LightData;
 import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
+import net.minecraft.client.renderer.RenderType;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import static org.lwjgl.opengl.GL15C.*;
-import static org.lwjgl.opengl.GL45C.glNamedBufferData;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
 /**
@@ -25,16 +24,19 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
  * @param <T> The type of lights to render
  * @author Ocelot
  */
-public abstract class InstancedLightRenderer<T extends Light & InstancedLight> implements LightTypeRenderer<T> {
+public abstract class InstancedLightRenderer<T extends LightData & InstancedLightData> implements LightTypeRenderer<T> {
 
     private static final int MAX_UPLOADS = 400;
 
     protected final int lightSize;
     protected int maxLights;
 
-    private final List<T> visibleLights;
+    private final List<LightHandle> lights;
+    private final List<LightHandle> visibleLights;
     private final VertexArray vertexArray;
     private final int instancedVbo;
+
+    private boolean freed;
 
     /**
      * Creates a new instanced light renderer with a resizeable light buffer.
@@ -43,21 +45,14 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
      */
     public InstancedLightRenderer(int lightSize) {
         this.lightSize = lightSize;
-        this.maxLights = 100;
+        this.maxLights = 0;
+        this.lights = new LinkedList<>();
         this.visibleLights = new LinkedList<>();
         this.vertexArray = VertexArray.create();
 
         MeshData mesh = this.createMesh();
         this.vertexArray.upload(mesh, VertexArray.DrawUsage.STATIC);
         this.instancedVbo = this.vertexArray.getOrCreateBuffer(2);
-
-        if (VeilRenderSystem.directStateAccessSupported()) {
-            glNamedBufferData(this.instancedVbo, (long) this.maxLights * this.lightSize, GL_DYNAMIC_DRAW);
-        } else {
-            RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
-            glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_DYNAMIC_DRAW);
-            RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
 
         VertexArrayBuilder builder = this.vertexArray.editFormat();
         builder.defineVertexBuffer(2, this.instancedVbo, 0, this.lightSize, 1);
@@ -75,39 +70,21 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     protected abstract void setupBufferState(VertexArrayBuilder builder);
 
     /**
-     * Sets up the render state for drawing all lights.
+     * Calculates the render type to use for the specified lights.
      *
-     * @param lightRenderer The renderer instance
-     * @param lights        All lights in the order they are in the instanced buffer
+     * @param lights All lights in the order they are in the instanced buffer
+     * @return The render type to use
      */
-    protected abstract void setupRenderState(LightRenderer lightRenderer, List<T> lights);
+    protected abstract @Nullable RenderType getRenderType(List<? extends LightRenderHandle<T>> lights);
 
-    /**
-     * Clears the render state after drawing all lights.
-     *
-     * @param lightRenderer The renderer instance
-     * @param lights        All lights in the order they are in the instanced buffer
-     */
-    protected abstract void clearRenderState(LightRenderer lightRenderer, List<T> lights);
-
-    /**
-     * Checks whether the specified light can be seen in the specified frustum.
-     *
-     * @param light   The light to check
-     * @param frustum The frustum to check visibility with
-     * @return Whether that light is visible
-     */
-    protected abstract boolean isVisible(T light, CullFrustum frustum);
-
-    private void updateAllLights(List<T> lights) {
+    private void updateAllLights() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int pointer = 0;
             long offset = 0;
-            ByteBuffer dataBuffer = stack.malloc(Math.min(MAX_UPLOADS, lights.size()) * this.lightSize);
-            for (T light : lights) {
-                light.clean();
+            ByteBuffer dataBuffer = stack.malloc(Math.min(MAX_UPLOADS, this.visibleLights.size()) * this.lightSize);
+            for (LightHandle handle : this.visibleLights) {
                 dataBuffer.position((pointer++) * this.lightSize);
-                light.store(dataBuffer);
+                handle.data.store(dataBuffer);
                 if (pointer >= MAX_UPLOADS) {
                     dataBuffer.rewind();
                     glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
@@ -124,15 +101,39 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     }
 
     @Override
-    public void prepareLights(LightRenderer lightRenderer, List<T> lights, Set<T> removedLights, CullFrustum frustum) {
+    public LightRenderHandle<T> addLight(T light) {
+        LightHandle handle = new LightHandle(light);
+        this.lights.add(handle);
+        return handle;
+    }
+
+    @Override
+    public LightRenderHandle<T> steal(LightRenderHandle<T> handle) {
+        if (!(handle instanceof LightHandle)) {
+            handle.free();
+            return this.addLight(handle.getLightData());
+        }
+        return handle;
+    }
+
+    @Override
+    public void prepareLights(LightRenderer lightRenderer, CullFrustum frustum) {
         this.visibleLights.clear();
-        for (T light : lights) {
-            if (this.isVisible(light, frustum)) {
+        for (LightHandle light : this.lights) {
+            if (light.data.isVisible(frustum)) {
                 this.visibleLights.add(light);
             }
         }
+    }
 
+    @Override
+    public void renderLights(LightRenderer lightRenderer) {
         if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        RenderType renderType = this.getRenderType(this.visibleLights);
+        if (renderType == null) {
             return;
         }
 
@@ -140,26 +141,24 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
 
         // If there is no space, then resize
         if (this.visibleLights.size() > this.maxLights) {
-            this.maxLights = (int) Math.max(Math.ceil(this.maxLights / 2.0), this.visibleLights.size() * 1.5);
+            if (this.maxLights < 100) {
+                this.maxLights = 100;
+            } else {
+                this.maxLights = (int) Math.max(Math.ceil(this.maxLights / 2.0), this.visibleLights.size() * 1.5);
+            }
             glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_STREAM_DRAW);
         }
 
         // Since culling is done CPU-side, the lights that need to be rendered changes every frame
-        this.updateAllLights(this.visibleLights);
+        this.updateAllLights();
+
+        this.vertexArray.bind();
+        this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
     }
 
     @Override
-    public void renderLights(LightRenderer lightRenderer, List<T> lights) {
-        this.setupRenderState(lightRenderer, this.visibleLights);
-        if (lightRenderer.applyShader()) {
-            this.clearRenderState(lightRenderer, this.visibleLights);
-            return;
-        }
-
-        this.vertexArray.bind();
-        this.vertexArray.drawInstanced(this.visibleLights.size());
-        VertexArray.unbind();
-        this.clearRenderState(lightRenderer, this.visibleLights);
+    public List<? extends LightRenderHandle<T>> getLights() {
+        return this.lights;
     }
 
     @Override
@@ -170,5 +169,34 @@ public abstract class InstancedLightRenderer<T extends Light & InstancedLight> i
     @Override
     public void free() {
         this.vertexArray.free();
+        this.freed = true;
+    }
+
+    private class LightHandle implements LightRenderHandle<T> {
+
+        private final T data;
+
+        private LightHandle(T data) {
+            this.data = data;
+        }
+
+        @Override
+        public T getLightData() {
+            return this.data;
+        }
+
+        @Override
+        public void markDirty() {
+        }
+
+        @Override
+        public boolean isValid() {
+            return !InstancedLightRenderer.this.freed;
+        }
+
+        @Override
+        public void free() {
+            InstancedLightRenderer.this.lights.remove(this);
+        }
     }
 }

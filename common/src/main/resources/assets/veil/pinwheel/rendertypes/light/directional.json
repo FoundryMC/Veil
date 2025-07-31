@@ -1,0 +1,22 @@
+{
+  "format": "POSITION_TEX",
+  "mode": "QUADS",
+  "bufferSize": "TRANSIENT",
+  "sort": false,
+  "affectsCrumbling": false,
+  "outline": false,
+  "layers": [
+    {
+      "type": "veil:shader",
+      "name": "veil:light/directional"
+    },
+    {
+      "type": "minecraft:write_mask",
+      "depth": false
+    },
+    {
+      "type": "minecraft:transparency",
+      "mode": "additive"
+    }
+  ]
+}

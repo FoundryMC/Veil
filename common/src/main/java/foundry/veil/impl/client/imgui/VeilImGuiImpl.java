@@ -209,11 +209,11 @@ public class VeilImGuiImpl implements VeilImGui, NativeResource {
     }
 
     public static void setImGuiPath() {
-        if (System.getProperty("os.arch").equals("arm") || System.getProperty("os.arch").startsWith("aarch64")) {
-            // ImGui infers a path for loading the library using this name property
-            // Essential that this property is set, before any ImGui-adjacent native code is loaded
-            System.setProperty("imgui.library.name", "libimgui-javaarm64.dylib");
-        }
+//        if (System.getProperty("os.arch").equals("arm") || System.getProperty("os.arch").startsWith("aarch64")) {
+//            // ImGui infers a path for loading the library using this name property
+//            // Essential that this property is set, before any ImGui-adjacent native code is loaded
+//            System.setProperty("imgui.library.name", "libimgui-javaarm64.dylib");
+//        }
     }
 
     public static VeilImGui get() {

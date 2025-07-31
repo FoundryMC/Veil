@@ -410,6 +410,20 @@ public interface ShaderUniformAccess {
     void setLongs(long... values);
 
     /**
+     * Uploads this uniform as a handle type. Only supported if bindless texture is supported.
+     * @param value The handle to upload
+     * @since 2.0.0
+     */
+    void setHandle(long value);
+
+    /**
+     * Uploads this uniform as a handle type. Only supported if bindless texture is supported.
+     * @param values The handles to upload
+     * @since 2.0.0
+     */
+    void setHandles(long... values);
+
+    /**
      * Sets a matrix in the shader.
      *
      * @param value The value to set

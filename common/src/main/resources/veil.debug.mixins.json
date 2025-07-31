@@ -20,7 +20,8 @@
     "client.DebugMinecraftMixin",
     "client.DebugTextureManagerMixin",
     "client.DebugVertexBufferMixin",
-    "client.DebugVertexFormatMixin"
+    "client.DebugVertexFormatMixin",
+    "client.profiler.GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

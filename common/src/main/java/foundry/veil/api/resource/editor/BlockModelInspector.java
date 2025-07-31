@@ -24,6 +24,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
 
 import java.io.Reader;
@@ -35,6 +36,7 @@ import java.util.List;
  *
  * @author ryanhcode
  */
+@ApiStatus.Internal
 public class BlockModelInspector implements ResourceFileEditor<BlockModelResource> {
 
     private static final Component TITLE = Component.translatable("inspector.veil.block_model.title");

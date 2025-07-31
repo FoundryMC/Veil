@@ -20,7 +20,7 @@ public final class RenderTypeShardRegistry {
 
     private static final Map<String, List<RenderStateShard>> SHARDS = new HashMap<>();
     private static final Set<GenericShard> GENERIC_SHARDS = new HashSet<>();
-    private static final Set<RenderType.CompositeRenderType> CREATED_RENDER_TYPES = new HashSet<>();
+    private static final Map<String, RenderType.CompositeRenderType> CREATED_RENDER_TYPES = new WeakHashMap<>();
 
     private RenderTypeShardRegistry() {
     }
@@ -54,7 +54,7 @@ public final class RenderTypeShardRegistry {
         List<RenderStateShard> newShards = Arrays.asList(shards);
         SHARDS.computeIfAbsent(name, unused -> new ArrayList<>()).addAll(newShards);
 
-        for (RenderType.CompositeRenderType renderType : CREATED_RENDER_TYPES) {
+        for (RenderType.CompositeRenderType renderType : CREATED_RENDER_TYPES.values()) {
             if (name.equals(VeilRenderType.getName(renderType))) {
                 ((CompositeStateExtension) (Object) renderType.state()).veil$addShards(newShards);
             }
@@ -73,7 +73,7 @@ public final class RenderTypeShardRegistry {
         }
         GENERIC_SHARDS.add(new GenericShard(filter, shards));
 
-        for (RenderType.CompositeRenderType renderType : CREATED_RENDER_TYPES) {
+        for (RenderType.CompositeRenderType renderType : CREATED_RENDER_TYPES.values()) {
             if (filter.test(renderType)) {
                 ((CompositeStateExtension) (Object) renderType.state()).veil$addShards(Arrays.asList(shards));
             }
@@ -103,7 +103,7 @@ public final class RenderTypeShardRegistry {
         if (shards != null) {
             ((CompositeStateExtension) (Object) renderType.state()).veil$addShards(shards);
         }
-        CREATED_RENDER_TYPES.add(renderType);
+        CREATED_RENDER_TYPES.put(RenderType.CompositeRenderType.class.getName() + "@" + Integer.toHexString(renderType.hashCode()), renderType);
     }
 
     private record GenericShard(Predicate<RenderType.CompositeRenderType> filter, RenderStateShard[] shards) {

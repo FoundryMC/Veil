@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 /**
  * <p>Manages all editors for Veil. Editors are ImGui powered panels that can be dynamically registered and unregistered with {@link #add(Inspector)}.</p>
@@ -181,6 +182,24 @@ public class EditorManager implements VeilEditorEnvironment, PreparableReloadLis
     public boolean isVisible(Inspector inspector) {
         ImBoolean visible = this.editors.get(inspector);
         return visible != null && visible.get();
+    }
+
+    /**
+     * Checks all matching visible inspectors.
+     * @param filter The filter for what visible inspector to check
+     * @since 2.0.0
+     * @return Whether the filtered inspector is visible
+     */
+    public boolean isVisible(Predicate<Inspector> filter) {
+        if (!this.enabled) {
+            return false;
+        }
+        for (Map.Entry<Inspector, ImBoolean> entry : this.editors.entrySet()) {
+            if (entry.getValue().get() && filter.test(entry.getKey())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public synchronized void add(Inspector inspector) {

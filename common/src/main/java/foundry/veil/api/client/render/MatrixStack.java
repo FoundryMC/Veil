@@ -8,6 +8,8 @@ import org.joml.Quaternionfc;
 
 /**
  * Utility extension for {@link PoseStack} with extra utilities.
+ * <p>
+ * Use {@link #toPoseStack()} for a Vanilla-friendly stack.
  *
  * @see VeilRenderBridge
  */

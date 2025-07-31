@@ -29,61 +29,6 @@ import static org.lwjgl.opengl.GL45C.glGetTextureParameteri;
  */
 public enum VeilMultiBind {
     LEGACY {
-        private static final int[] CHECK_BINDINGS = {
-                // These 3 are the most likely, so check them first
-                GL_TEXTURE_BINDING_2D,
-                GL_TEXTURE_BINDING_2D_ARRAY,
-                GL_TEXTURE_BINDING_CUBE_MAP,
-
-                GL_TEXTURE_BINDING_1D,
-                GL_TEXTURE_BINDING_3D,
-                GL_TEXTURE_BINDING_RECTANGLE,
-                GL_TEXTURE_BINDING_BUFFER,
-                GL_TEXTURE_BINDING_1D_ARRAY,
-                GL_TEXTURE_BINDING_2D_MULTISAMPLE,
-                GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY,
-        };
-        private static final int[] CHECK_TARGETS = {
-                // These 3 are the most likely, so check them first
-                GL_TEXTURE_2D,
-                GL_TEXTURE_2D_ARRAY,
-                GL_TEXTURE_CUBE_MAP,
-
-                GL_TEXTURE_1D,
-                GL_TEXTURE_3D,
-                GL_TEXTURE_RECTANGLE,
-                GL_TEXTURE_BUFFER,
-                GL_TEXTURE_1D_ARRAY,
-                GL_TEXTURE_2D_MULTISAMPLE,
-                GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
-        };
-
-        private static int getTarget(int texture) {
-            GLCapabilities caps = GL.getCapabilities();
-            if (caps.glGetTextureParameteriv != 0L) { // Last ditch effort if the platform has the method anyways
-                return glGetTextureParameteri(texture, GL_TEXTURE_TARGET);
-            }
-            // Nothing else I can do, so do the dirty hack to figure out the target
-
-            // Clear errors
-            while (glGetError() != GL_NO_ERROR) {
-            }
-
-            for (int i = 0; i < CHECK_TARGETS.length; i++) {
-                int target = CHECK_TARGETS[i];
-                int old = glGetInteger(CHECK_BINDINGS[i]);
-                glBindTexture(target, texture);
-                if (glGetError() == GL_NO_ERROR) {
-                    glBindTexture(target, old);
-                    return target;
-                }
-                glBindTexture(target, old);
-            }
-
-            // Should never happen
-            return GL_TEXTURE_2D;
-        }
-
         @Override
         public void bindTextures(int first, IntBuffer textures) {
             int activeTexture = GlStateManager._getActiveTexture();
@@ -135,7 +80,11 @@ public enum VeilMultiBind {
         public void bindTextures(int first, IntBuffer textures) {
             int invalidCount = Math.min(12 - first, textures.limit());
             for (int i = first; i < invalidCount; i++) {
-                GlStateManager.TEXTURES[i].binding = textures.get(i - first);
+                int texture = textures.get(i - first);
+                int target = getTarget(texture);
+                if (target == GL_TEXTURE_2D) {
+                    GlStateManager.TEXTURES[i].binding = texture;
+                }
             }
 
             glBindTextures(first, textures);
@@ -145,7 +94,11 @@ public enum VeilMultiBind {
         public void bindTextures(int first, int... textures) {
             int invalidCount = Math.min(12 - first, textures.length);
             for (int i = first; i < invalidCount; i++) {
-                GlStateManager.TEXTURES[i].binding = textures[i - first];
+                int texture = textures[i - first];
+                int target = getTarget(texture);
+                if (target == GL_TEXTURE_2D) {
+                    GlStateManager.TEXTURES[i].binding = texture;
+                }
             }
 
             glBindTextures(first, textures);
@@ -161,6 +114,62 @@ public enum VeilMultiBind {
             glBindSamplers(first, samplers);
         }
     };
+
+    private static final int[] CHECK_BINDINGS = {
+            // These 3 are the most likely, so check them first
+            GL_TEXTURE_BINDING_2D,
+            GL_TEXTURE_BINDING_2D_ARRAY,
+            GL_TEXTURE_BINDING_CUBE_MAP,
+
+            GL_TEXTURE_BINDING_1D,
+            GL_TEXTURE_BINDING_3D,
+            GL_TEXTURE_BINDING_RECTANGLE,
+            GL_TEXTURE_BINDING_BUFFER,
+            GL_TEXTURE_BINDING_1D_ARRAY,
+            GL_TEXTURE_BINDING_2D_MULTISAMPLE,
+            GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY,
+    };
+    private static final int[] CHECK_TARGETS = {
+            // These 3 are the most likely, so check them first
+            GL_TEXTURE_2D,
+            GL_TEXTURE_2D_ARRAY,
+            GL_TEXTURE_CUBE_MAP,
+
+            GL_TEXTURE_1D,
+            GL_TEXTURE_3D,
+            GL_TEXTURE_RECTANGLE,
+            GL_TEXTURE_BUFFER,
+            GL_TEXTURE_1D_ARRAY,
+            GL_TEXTURE_2D_MULTISAMPLE,
+            GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
+    };
+
+    private static int getTarget(int texture) {
+        GLCapabilities caps = GL.getCapabilities();
+        if (caps.glGetTextureParameteriv != 0L) { // Last ditch effort if the platform has the method anyways
+            return glGetTextureParameteri(texture, GL_TEXTURE_TARGET);
+        }
+        // Nothing else I can do, so do the dirty hack to figure out the target
+
+        // Clear errors
+        while (glGetError() != GL_NO_ERROR) {
+        }
+
+        for (int i = 0; i < CHECK_TARGETS.length; i++) {
+            int target = CHECK_TARGETS[i];
+            int old = glGetInteger(CHECK_BINDINGS[i]);
+            glBindTexture(target, texture);
+            if (glGetError() == GL_NO_ERROR) {
+                glBindTexture(target, old);
+                return target;
+            }
+            glBindTexture(target, old);
+        }
+
+        // Should never happen
+        return GL_TEXTURE_2D;
+    }
+
 
     private static VeilMultiBind multiBind;
 

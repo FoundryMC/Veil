@@ -17,6 +17,8 @@ import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
+import foundry.veil.api.client.render.profiler.RenderProfilerCounter;
+import foundry.veil.api.client.render.profiler.VeilRenderProfiler;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.block.ShaderBlock;
@@ -32,6 +34,7 @@ import foundry.veil.impl.client.render.dynamicbuffer.VanillaShaderCompiler;
 import foundry.veil.impl.client.render.pipeline.VeilBloomRenderer;
 import foundry.veil.impl.client.render.pipeline.VeilShaderBlockState;
 import foundry.veil.impl.client.render.pipeline.VeilShaderBufferCache;
+import foundry.veil.impl.client.render.profiler.VeilRenderProfilerImpl;
 import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
 import foundry.veil.mixin.pipeline.accessor.PipelineBufferSourceAccessor;
 import foundry.veil.platform.VeilEventPlatform;
@@ -104,12 +107,16 @@ public final class VeilRenderSystem {
     private static final BooleanSupplier TEXTURE_ANISOTROPY_SUPPORTED = glCapability(caps -> caps.OpenGL46 || caps.GL_ARB_texture_filter_anisotropic || caps.GL_EXT_texture_filter_anisotropic);
     private static final BooleanSupplier TEXTURE_MIRROR_CLAMP_TO_EDGE_SUPPORTED = glCapability(caps -> caps.OpenGL44 || caps.GL_ARB_texture_mirror_clamp_to_edge);
     private static final BooleanSupplier TEXTURE_CUBE_MAP_SEAMLESS_SUPPORTED = glCapability(caps -> caps.GL_ARB_seamless_cubemap_per_texture);
+    private static final BooleanSupplier TEXTURE_CUBE_MAP_ARRAY_SUPPORTED = glCapability(caps -> caps.OpenGL40 || caps.GL_ARB_texture_cube_map_array);
     private static final BooleanSupplier NV_DRAW_TEXTURE_SUPPORTED = glCapability(caps -> caps.GL_NV_draw_texture);
     private static final BooleanSupplier DRAW_INDIRECT_SUPPORTED = glCapability(caps -> caps.OpenGL40 || caps.GL_ARB_draw_indirect);
     private static final BooleanSupplier MULTI_DRAW_INDIRECT_SUPPORTED = glCapability(caps -> caps.OpenGL43 || caps.GL_ARB_multi_draw_indirect);
     private static final BooleanSupplier GPU_SHADER_FLOAT_64BIT_SUPPORTED = glCapability(caps -> caps.OpenGL40 || caps.GL_ARB_gpu_shader_fp64);
     private static final BooleanSupplier GPU_SHADER_INT_64BIT_SUPPORTED = glCapability(caps -> caps.GL_ARB_gpu_shader_int64);
     private static final BooleanSupplier VERTEX_ATTRIB_64BIT_SUPPORTED = glCapability(caps -> caps.OpenGL41 || caps.GL_ARB_vertex_attrib_64bit);
+    private static final BooleanSupplier BINDLESS_TEXTURE_SUPPORTED = glCapability(caps -> caps.GL_ARB_bindless_texture);
+    private static final BooleanSupplier VERTEX_TYPE_10F_11F_11F_REV_SUPPORTED = glCapability(caps -> caps.OpenGL44 || caps.GL_ARB_vertex_type_10f_11f_11f_rev);
+    private static final BooleanSupplier PIPELINE_STATISTICS_QUERY_SUPPORTED = glCapability(caps -> caps.GL_ARB_pipeline_statistics_query);
 
     private static final IntSupplier MAX_COMBINED_TEXTURE_IMAGE_UNITS = glGetter(() -> glGetInteger(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
     private static final IntSupplier MAX_COLOR_ATTACHMENTS = glGetter(() -> glGetInteger(GL_MAX_COLOR_ATTACHMENTS));
@@ -205,7 +212,8 @@ public final class VeilRenderSystem {
     private static final Supplier<Vector2ic> MAX_FRAMEBUFFER_SIZE = Suppliers.memoize(() -> {
         RenderSystem.assertOnRenderThreadOrInit();
         if (!GL.getCapabilities().OpenGL43) {
-            return new Vector2i(Integer.MAX_VALUE);
+            int maxSupportedTextureSize = RenderSystem.maxSupportedTextureSize();
+            return new Vector2i(maxSupportedTextureSize, maxSupportedTextureSize);
         }
         int width = glGetInteger(GL_MAX_FRAMEBUFFER_WIDTH);
         int height = glGetInteger(GL_MAX_FRAMEBUFFER_HEIGHT);
@@ -629,6 +637,14 @@ public final class VeilRenderSystem {
     }
 
     /**
+     * @return Whether {@link ARBTextureCubeMapArray} is supported
+     * @since 2.1.0
+     */
+    public static boolean textureCubeMapArraySupported() {
+        return TEXTURE_CUBE_MAP_ARRAY_SUPPORTED.getAsBoolean();
+    }
+
+    /**
      * @return Whether {@link NVDrawTexture} is supported
      */
     public static boolean nvDrawTextureSupported() {
@@ -671,6 +687,31 @@ public final class VeilRenderSystem {
     }
 
     /**
+     * @return Whether {@link ARBBindlessTexture} is supported
+     * @since 2.0.0
+     */
+    public static boolean bindlessTextureSupported() {
+        return BINDLESS_TEXTURE_SUPPORTED.getAsBoolean();
+    }
+
+    /**
+     * @return Whether {@link GL30C#GL_UNSIGNED_INT_10F_11F_11F_REV} is supported
+     * @since 2.0.0
+     */
+    public static boolean vertexType10F11F11FRevSupported() {
+        return VERTEX_TYPE_10F_11F_11F_REV_SUPPORTED.getAsBoolean();
+    }
+
+
+    /**
+     * @return Whether {@link ARBPipelineStatisticsQuery} is supported
+     * @since 2.0.0
+     */
+    public static boolean pipelineStatisticsQuerySupported() {
+        return PIPELINE_STATISTICS_QUERY_SUPPORTED.getAsBoolean();
+    }
+
+    /**
      * @return The GL maximum number of texture units that can be bound
      */
     public static int maxCombinedTextureUnits() {
@@ -703,8 +744,7 @@ public final class VeilRenderSystem {
             case GL_UNIFORM_BUFFER -> maxUniformBuffersBindings();
             case GL_ATOMIC_COUNTER_BUFFER -> maxAtomicCounterBufferBindings();
             case GL_SHADER_STORAGE_BUFFER -> maxShaderStorageBufferBindings();
-            default ->
-                    throw new IllegalArgumentException("Invalid Target: 0x" + Integer.toHexString(target).toUpperCase(Locale.ROOT));
+            default -> throw new IllegalArgumentException("Invalid Target: 0x" + Integer.toHexString(target).toUpperCase(Locale.ROOT));
         };
     }
 
@@ -722,8 +762,7 @@ public final class VeilRenderSystem {
             case GL_GEOMETRY_SHADER -> GL_GEOMETRY_SHADER_LIMITS.get();
             case GL_FRAGMENT_SHADER -> GL_FRAGMENT_SHADER_LIMITS.get();
             case GL_COMPUTE_SHADER -> GL_COMPUTE_SHADER_LIMITS.get();
-            default ->
-                    throw new IllegalArgumentException("Invalid Shader Type: 0x" + Integer.toHexString(shader).toUpperCase(Locale.ROOT));
+            default -> throw new IllegalArgumentException("Invalid Shader Type: 0x" + Integer.toHexString(shader).toUpperCase(Locale.ROOT));
         };
     }
 
@@ -1132,6 +1171,7 @@ public final class VeilRenderSystem {
             AdvancedFbo.unbind();
         }
 
+        VeilRenderProfilerImpl.endFrame();
         UNIFORM_BLOCK_STATE.clearUsedBindings();
         VanillaShaderCompiler.clear();
 
@@ -1207,12 +1247,23 @@ public final class VeilRenderSystem {
         VeilDebug debug = VeilDebug.get();
         debug.pushDebugGroup("Veil Draw Lights");
 
+        VeilRenderProfiler renderProfiler = VeilRenderProfiler.get();
+        renderProfiler.push("veil_lights",
+                RenderProfilerCounter.VERTICES_SUBMITTED,
+                RenderProfilerCounter.PRIMITIVES_SUBMITTED,
+                RenderProfilerCounter.VERTEX_SHADER_INVOCATIONS,
+                RenderProfilerCounter.FRAGMENT_SHADER_INVOCATIONS,
+                RenderProfilerCounter.COMPUTE_SHADER_INVOCATIONS,
+                RenderProfilerCounter.CLIPPING_INPUT_PRIMITIVES,
+                RenderProfilerCounter.CLIPPING_OUTPUT_PRIMITIVES
+        );
+
         LightRenderer lightRenderer = renderer.getLightRenderer();
-        profiler.push("setup_lights");
-        lightRenderer.setup(cullFrustum);
-        profiler.popPush("draw_lights");
-        boolean rendered = lightRenderer.render(lightFbo);
+        profiler.push("draw_lights");
+        boolean rendered = lightRenderer.render(cullFrustum, lightFbo);
         profiler.pop();
+
+        renderProfiler.pop();
 
         debug.popDebugGroup();
         return rendered;

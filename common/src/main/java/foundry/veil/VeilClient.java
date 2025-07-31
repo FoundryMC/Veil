@@ -7,11 +7,12 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
+import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.registry.EmitterShapeRegistry;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import foundry.veil.impl.client.editor.*;
 import foundry.veil.impl.client.imgui.VeilImGuiImpl;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferShard;
 import foundry.veil.impl.quasar.QuasarParticleHandler;
 import foundry.veil.impl.resource.VeilResourceManagerImpl;
@@ -24,19 +25,19 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ServiceLoader;
 
+@ApiStatus.Internal
 public class VeilClient {
 
     private static final VeilClientPlatform PLATFORM = ServiceLoader.load(VeilClientPlatform.class).findFirst().orElseThrow(() -> new RuntimeException("Veil expected client platform implementation"));
     private static final VeilResourceManagerImpl RESOURCE_MANAGER = new VeilResourceManagerImpl();
 
-    @ApiStatus.Internal
     public static final KeyMapping EDITOR_KEY = new KeyMapping("key.veil.editor", InputConstants.Type.KEYSYM, InputConstants.KEY_F6, "key.categories.veil");
 
-    @ApiStatus.Internal
     public static void init() {
         VeilRenderSystem.bootstrap();
         VeilImGuiImpl.setImGuiPath();
         QuasarParticleHandler.init();
+        QuasarParticles.bootstrap();
 
         VeilEventPlatform.INSTANCE.onFreeNativeResources(() -> {
             VeilRenderSystem.close();
@@ -54,6 +55,7 @@ public class VeilClient {
 
                 // Debug editors
                 editorManager.add(new DeviceInfoViewer());
+                editorManager.add(new PipelineStatisticsViewer());
                 editorManager.add(new PostInspector());
                 editorManager.add(new ShaderInspector());
                 editorManager.add(new TextureInspector());
@@ -67,7 +69,7 @@ public class VeilClient {
         // This fixes moving transparent blocks drawing too early
         VeilEventPlatform.INSTANCE.onVeilRegisterFixedBuffers(registry -> registry.registerFixedBuffer(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucentMovingBlock()));
 
-        RenderTypeShardRegistry.addGenericShard(renderType -> "main_target".equals(getOutputName(renderType)), new DynamicBufferShard(DynamicBufferManger.MAIN_WRAPPER, () -> Minecraft.getInstance().getMainRenderTarget()));
+        RenderTypeShardRegistry.addGenericShard(renderType -> "main_target".equals(getOutputName(renderType)), new DynamicBufferShard(DynamicBufferManager.MAIN_WRAPPER, () -> Minecraft.getInstance().getMainRenderTarget()));
         RenderTypeShardRegistry.addGenericShard(renderType -> "translucent_target".equals(getOutputName(renderType)), new DynamicBufferShard("translucent", () -> Minecraft.getInstance().levelRenderer.getTranslucentTarget()));
         RenderTypeShardRegistry.addGenericShard(renderType -> "particles_target".equals(getOutputName(renderType)), new DynamicBufferShard("particles", () -> Minecraft.getInstance().levelRenderer.getParticlesTarget()));
         RenderTypeShardRegistry.addGenericShard(renderType -> "weather_target".equals(getOutputName(renderType)), new DynamicBufferShard("weather", () -> Minecraft.getInstance().levelRenderer.getWeatherTarget()));

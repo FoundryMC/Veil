@@ -79,7 +79,7 @@ public class ParticleEmitter {
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
         this.offset = new Vector3d();
-        this.particles = new ArrayList<>();
+        this.particles = new LinkedList<>();
 
         this.maxLifetime = data.maxLifetime();
         this.loop = data.loop();
@@ -145,16 +145,18 @@ public class ParticleEmitter {
     }
 
     private static List<ParticleModuleData> createModuleSet(QuasarParticleData data) {
-        List<ParticleModuleData> list = new ArrayList<>();
-        data.allModules().forEach(module -> {
+        List<Holder<ParticleModuleData>> allModules = data.getAllModules();
+        ArrayList<ParticleModuleData> list = new ArrayList<>(allModules.size());
+        for (Holder<ParticleModuleData> module : allModules) {
             if (!module.isBound()) {
                 if (REPORTED_MODULES.add(module)) {
                     Veil.LOGGER.error("Unknown module: {}", (module instanceof Holder.Reference<ParticleModuleData> ref ? ref.key().location() : module.getClass().getName()));
                 }
-                return;
+                continue;
             }
             list.add(module.value());
-        });
+        }
+        list.trimToSize();
         return list;
     }
 
@@ -219,46 +221,25 @@ public class ParticleEmitter {
     // TODO move to renderer
     @ApiStatus.Internal
     public void render(MatrixStack matrixStack, MultiBufferSource bufferSource, Camera camera, float partialTicks) {
-        Vec3 projectedView = camera.getPosition();
-        RenderStyle renderStyle = this.particleData.renderStyle();
+        if (this.particles.isEmpty()) {
+            return;
+        }
 
+        RenderStyle renderStyle = this.particleData.renderStyle();
+        if (!renderStyle.setup(this.particles.size())) {
+            return;
+        }
+
+        Vec3 projectedView = camera.getPosition();
         Vector3f renderOffset = new Vector3f();
         RenderType lastRenderType = null;
         VertexConsumer builder = null;
+
         for (QuasarParticle particle : this.particles) {
             RenderData renderData = particle.getRenderData();
 
             particle.render(partialTicks);
-//        double ageMultiplier = 1; //1 - Math.pow(Mth.clamp(age + partialTicks, 0, lifetime), 3) / Math.pow(lifetime, 3);
-//        float lX = (float) (Mth.lerp(partialTicks, this.xo, this.x));
-//        float lY = (float) (Mth.lerp(partialTicks, this.yo, this.y));
-//        float lZ = (float) (Mth.lerp(partialTicks, this.zo, this.z));
-//        float lerpedYaw = Mth.lerp(partialTicks, this.oYaw, this.yaw);
-//        float lerpedPitch = Mth.lerp(partialTicks, this.oPitch, this.pitch);
-//        float lerpedRoll = Mth.lerp(partialTicks, this.oRoll, this.roll);
-//        if (!this.renderData.getTrails().isEmpty()) {
-//            if (this.trails.isEmpty()) {
-//                this.renderData.getTrails().forEach(trail -> {
-//                    Trail tr = new Trail(MathUtil.colorFromVec4f(trail.getTrailColor()), (ageScale) -> trail.getTrailWidthModifier().modify(ageScale, ageMultiplier));
-//                    tr.setBillboard(trail.getBillboard());
-//                    tr.setLength(trail.getTrailLength());
-//                    tr.setFrequency(trail.getTrailFrequency());
-//                    tr.setTilingMode(trail.getTilingMode());
-//                    tr.setTexture(trail.getTrailTexture());
-//                    tr.setParentRotation(trail.getParentRotation());
-//                    tr.pushRotatedPoint(new Vec3(this.xo, this.yo, this.zo), new Vec3(lerpedYaw, lerpedPitch, lerpedRoll));
-//                    this.trails.add(tr);
-//                });
-//            }
-//            this.trails.forEach(trail -> {
-//                trail.pushRotatedPoint(new Vec3(lX, lY, lZ), new Vec3(lerpedYaw, lerpedPitch, lerpedRoll));
-//                PoseStack ps = new PoseStack();
-//                ps.pushPose();
-//                ps.translate(-projectedView.x(), -projectedView.y(), -projectedView.z());
-//                trail.render(ps, Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypeRegistry.translucentNoCull(trail.getTexture())), this.emissive ? LightTexture.FULL_BRIGHT : this.getLightColor(partialTicks));
-//                ps.popPose();
-//            });
-//        }
+
             renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT);
 
             Vector3dc renderPosition = renderData.getRenderPosition();
@@ -280,20 +261,22 @@ public class ParticleEmitter {
 
             renderStyle.render(matrixStack, particle, renderData, renderOffset, builder, 1, partialTicks);
         }
+        renderStyle.clear();
     }
 
     @ApiStatus.Internal
     void onRemoved() {
         this.cancelTasks();
-        for (QuasarParticle particle : this.particles) {
-            particle.onRemove();
+        Iterator<QuasarParticle> iterator = this.particles.iterator();
+        while (iterator.hasNext()) {
+            iterator.next().onRemove();
+            iterator.remove();
         }
-        this.particles.clear();
     }
 
     /**
      * <p>Adds a custom module with user code that is added to all particles spawned after this is called.</p>
-     * <p>The module is not able to be serialized and does not affect the state of any other emitters.</p>
+     * <p>The module cannot be serialized and does not affect the state of any other emitters.</p>
      *
      * @param module The module to add
      */
@@ -312,8 +295,12 @@ public class ParticleEmitter {
         if (this.forceSpawn) {
             return 0;
         }
-        int removeCount = Math.min(count, this.particles.size());
-        this.particles.subList(0, removeCount).clear();
+
+        int removeCount;
+        Iterator<QuasarParticle> iterator = this.particles.iterator();
+        for (removeCount = 0; iterator.hasNext() && removeCount < count; removeCount++) {
+            iterator.remove();
+        }
         return removeCount;
     }
 
@@ -405,7 +392,11 @@ public class ParticleEmitter {
         return this.attachedEntity;
     }
 
-    @Deprecated
+    /**
+     * Sets the position of the emitter relative to the origin of the world or attached entity.
+     *
+     * @param position The position
+     */
     public void setPosition(Vec3 position) {
         this.setPosition(position.x, position.y, position.z);
     }

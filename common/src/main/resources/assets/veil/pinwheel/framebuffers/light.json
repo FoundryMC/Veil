@@ -1,5 +1,7 @@
 {
-  "depth": false,
+  "depth": {
+    "type": "RENDER_BUFFER"
+  },
   "autoClear": false,
   "format": "RGB16F"
 }

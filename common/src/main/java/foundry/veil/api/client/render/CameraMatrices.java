@@ -54,6 +54,16 @@ public class CameraMatrices {
                 .build();
     }
 
+    private void extractPlanes() {
+        if ((this.projectionMatrix.properties() & Matrix4fc.PROPERTY_PERSPECTIVE) != 0) {
+            this.nearPlane = this.projectionMatrix.perspectiveNear();
+            this.farPlane = this.projectionMatrix.perspectiveFar();
+        } else {
+            this.nearPlane = this.inverseProjectionMatrix.transformPosition(0, 0, -1, this.cameraPosition).z();
+            this.farPlane = this.inverseProjectionMatrix.transformPosition(0, 0, 1, this.cameraPosition).z();
+        }
+    }
+
     /**
      * Updates the camera matrices to match the in-game camera.
      *
@@ -84,8 +94,7 @@ public class CameraMatrices {
         this.viewMatrix.invert(this.inverseViewMatrix);
         this.inverseViewMatrix.normal(this.inverseViewRotMatrix);
 
-        this.nearPlane = this.inverseProjectionMatrix.transformPosition(0, 0, -1, this.cameraPosition).z();
-        this.farPlane = this.inverseProjectionMatrix.transformPosition(0, 0, 1, this.cameraPosition).z();
+        this.extractPlanes();
         this.cameraPosition.set(x, y, z);
 
         block.set(this);
@@ -108,8 +117,7 @@ public class CameraMatrices {
         this.inverseViewMatrix.identity();
         this.inverseViewRotMatrix.identity();
 
-        this.nearPlane = this.inverseProjectionMatrix.transformPosition(0, 0, -1, this.cameraPosition).z();
-        this.farPlane = this.inverseProjectionMatrix.transformPosition(0, 0, 1, this.cameraPosition).z();
+        this.extractPlanes();
         this.cameraPosition.set(0);
         this.cameraBobOffset.set(0);
 

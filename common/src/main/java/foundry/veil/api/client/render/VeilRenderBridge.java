@@ -8,6 +8,7 @@ import foundry.veil.api.client.render.rendertype.VeilRenderTypeBuilder;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.render.pipeline.AdvancedFboShard;
+import foundry.veil.impl.client.render.pipeline.FlagShards;
 import foundry.veil.impl.client.render.pipeline.PatchStateShard;
 import foundry.veil.impl.client.render.pipeline.ShaderProgramShard;
 import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
@@ -144,5 +145,45 @@ public interface VeilRenderBridge {
      */
     static RenderStateShard patchState(int patchVertices) {
         return new PatchStateShard(patchVertices);
+    }
+
+    /**
+     * @return A render state shard to enable depth clamp
+     * @since 2.0.0
+     */
+    static RenderStateShard depthClampState() {
+        return FlagShards.DEPTH_CLAMP;
+    }
+
+    /**
+     * @return A render state shard to enable color dithering
+     * @since 2.0.0
+     */
+    static RenderStateShard ditherState() {
+        return FlagShards.DITHER;
+    }
+
+    /**
+     * @return A render state shard to enable smooth line rendering
+     * @since 2.0.0
+     */
+    static RenderStateShard lineSmoothState() {
+        return FlagShards.LINE_SMOOTH;
+    }
+
+    /**
+     * @return A render state shard to enable multisampling
+     * @since 2.0.0
+     */
+    static RenderStateShard multisampleState() {
+        return FlagShards.MULTISAMPLE;
+    }
+
+    /**
+     * @return A render state shard to enable seamless cube map textures
+     * @since 2.0.0
+     */
+    static RenderStateShard seamlessCubeMapState() {
+        return FlagShards.TEXTURE_CUBE_MAP_SEAMLESS;
     }
 }

@@ -17,12 +17,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 @Mixin(ShaderInstance.class)
 public abstract class PipelineShaderInstanceMixin {
 
     @Unique
     private static final Direction[] veil$DIRECTIONS = Direction.values();
+    @Unique
+    private static final String[] veil$FACE_BRIGHTNESS_UNIFORM_NAMES = Arrays.stream(veil$DIRECTIONS)
+            .map(direction -> "VeilBlockFaceBrightness[" + direction.get3DDataValue() + "]")
+            .toArray(String[]::new);
 
     @Shadow
     @Nullable
@@ -43,7 +48,7 @@ public abstract class PipelineShaderInstanceMixin {
         ClientLevel level = Minecraft.getInstance().level;
         if (level != null) {
             for (Direction value : veil$DIRECTIONS) {
-                Uniform uniform = this.getUniform("VeilBlockFaceBrightness[" + value.get3DDataValue() + "]");
+                Uniform uniform = this.getUniform(veil$FACE_BRIGHTNESS_UNIFORM_NAMES[value.ordinal()]);
                 if (uniform != null) {
                     uniform.set(level.getShade(value, true));
                 }

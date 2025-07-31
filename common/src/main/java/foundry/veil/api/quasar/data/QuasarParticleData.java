@@ -13,9 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * <p>Data passed to each particle when it is created.</p>
@@ -61,8 +61,8 @@ public record QuasarParticleData(boolean shouldCollide,
             ParticleModuleData.RENDER_CODEC.listOf().optionalFieldOf("render_modules", Collections.emptyList()).forGetter(QuasarParticleData::renderModules),
             SpriteData.CODEC.optionalFieldOf("sprite_data").forGetter(data -> Optional.ofNullable(data.spriteData())),
             Codec.BOOL.optionalFieldOf("additive", false).forGetter(QuasarParticleData::additive),
-            RenderStyle.CODEC.optionalFieldOf("render_style", RenderStyleRegistry.BILLBOARD.get()).forGetter(QuasarParticleData::renderStyle)
-    ).apply(instance, (shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData, additive, renderStyle) -> new QuasarParticleData(shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData.orElse(null), additive, renderStyle)));
+            RenderStyle.CODEC.optionalFieldOf("render_style").forGetter(particleData -> Optional.of(particleData.renderStyle()))
+    ).apply(instance, (shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData, additive, renderStyle) -> new QuasarParticleData(shouldCollide, faceVelocity, velocityStretchFactor, initModules, updateModules, collisionModules, forceModules, renderModules, spriteData.orElse(null), additive, renderStyle.orElseGet(RenderStyleRegistry.BILLBOARD))));
     public static final Codec<Holder<QuasarParticleData>> CODEC = RegistryFileCodec.create(QuasarParticles.PARTICLE_DATA, DIRECT_CODEC);
 
     public QuasarParticleData(boolean shouldCollide,
@@ -91,90 +91,20 @@ public record QuasarParticleData(boolean shouldCollide,
     }
 
     /**
-     * @return A stream containing all modules in the particle.
+     * @return A list containing all modules in the particle
+     * @since 1.3.0
      */
-    public Stream<Holder<ParticleModuleData>> allModules() {
-        Stream.Builder<Holder<ParticleModuleData>> builder = Stream.builder();
-        for (Holder<ParticleModuleData> initModule : this.initModules) {
-            builder.add(initModule);
-        }
-        for (Holder<ParticleModuleData> initModule : this.updateModules) {
-            builder.add(initModule);
-        }
-        for (Holder<ParticleModuleData> initModule : this.collisionModules) {
-            builder.add(initModule);
-        }
-        for (Holder<ParticleModuleData> initModule : this.forceModules) {
-            builder.add(initModule);
-        }
-        for (Holder<ParticleModuleData> initModule : this.renderModules) {
-            builder.add(initModule);
-        }
-        return builder.build();
+    public List<Holder<ParticleModuleData>> getAllModules() {
+        List<Holder<ParticleModuleData>> builder = new LinkedList<>();
+        builder.addAll(this.initModules);
+        builder.addAll(this.updateModules);
+        builder.addAll(this.collisionModules);
+        builder.addAll(this.forceModules);
+        builder.addAll(this.renderModules);
+        return builder;
     }
 
     public @Nullable ResourceLocation getRegistryId() {
         return QuasarParticles.registryAccess().registry(QuasarParticles.PARTICLE_DATA).map(registry -> registry.getKey(this)).orElse(null);
     }
-
-//
-//    @Deprecated
-//    public void addInitModule(InitParticleModule module) {
-//        initModules.add(module);
-//    }
-//
-//    @Deprecated
-//    public void addInitModules(InitParticleModule... modules) {
-//        initModules.addAll(Arrays.asList(modules));
-//    }
-//
-//    @Deprecated
-//    public void addRenderModule(RenderParticleModule module) {
-//        renderModules.add(module);
-//    }
-//
-//    @Deprecated
-//    public void addRenderModules(RenderParticleModule... modules) {
-//        renderModules.addAll(Arrays.asList(modules));
-//    }
-//
-//    @Deprecated
-//    public void addUpdateModule(UpdateParticleModule module) {
-//        updateModules.add(module);
-//    }
-//
-//    @Deprecated
-//    public void addUpdateModules(UpdateParticleModule... modules) {
-//        updateModules.addAll(Arrays.asList(modules));
-//    }
-//
-//    @Deprecated
-//    public void addCollisionModule(CollisionParticleModule module) {
-//        collisionModules.add(module);
-//    }
-//
-//    @Deprecated
-//    public void addCollisionModules(CollisionParticleModule... modules) {
-//        collisionModules.addAll(Arrays.asList(modules));
-//    }
-//
-//    @Deprecated
-//    public void addForce(AbstractParticleForce force) {
-//        forces.add(force);
-//    }
-//
-//    @Deprecated
-//    public void addForces(AbstractParticleForce... forces) {
-//        this.forces.addAll(Arrays.asList(forces));
-//    }
-//
-//    @Deprecated
-//    public void addSubEmitter(ResourceLocation emitter) {
-//        subEmitters.add(emitter);
-//    }
-//
-//    @Deprecated
-//    public void addSubEmitters(ResourceLocation... emitters) {
-//        subEmitters.addAll(Arrays.asList(emitters));
-//    }
 }

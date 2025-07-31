@@ -9,12 +9,14 @@ import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.InactiveProfiler;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@ApiStatus.Internal
 public record RenderTypeResource(VeilResourceInfo resourceInfo) implements VeilTextResource<RenderTypeResource> {
 
     @Override

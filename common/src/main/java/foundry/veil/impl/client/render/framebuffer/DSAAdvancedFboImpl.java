@@ -21,7 +21,7 @@ import static org.lwjgl.opengl.ARBDirectStateAccess.*;
 import static org.lwjgl.opengl.GL30C.*;
 
 /**
- * Legacy implementation of {@link AdvancedFbo}.
+ * Direct-state implementation of {@link AdvancedFbo}.
  *
  * @author Ocelot
  */
@@ -65,7 +65,7 @@ public class DSAAdvancedFboImpl extends AdvancedFboImpl {
     }
 
     @Override
-    public void clear(float red, float green, float blue, float alpha, int clearMask, int... buffers) {
+    public void clear(float red, float green, float blue, float alpha, float depth, int clearMask, int... buffers) {
         if (clearMask == 0) {
             return;
         }
@@ -89,33 +89,33 @@ public class DSAAdvancedFboImpl extends AdvancedFboImpl {
             }
 
             if (this.depthAttachment != null) {
-                boolean depth = (clearMask & GL_DEPTH_BUFFER_BIT) != 0;
-                boolean stencil = this.hasStencil && (clearMask & GL_STENCIL_BUFFER_BIT) != 0;
-                if (!depth && !stencil) {
+                boolean hasDepth = (clearMask & GL_DEPTH_BUFFER_BIT) != 0;
+                boolean hasStencil = this.hasStencil && (clearMask & GL_STENCIL_BUFFER_BIT) != 0;
+                if (!hasDepth && !hasStencil) {
                     return;
                 }
 
                 if (this.hasStencil) {
-                    if (depth && stencil) {
+                    if (hasDepth && hasStencil) {
                         if (clearTex && this.depthAttachment instanceof AdvancedFboTextureAttachment texture) {
                             glClearTexImage(texture.getId(), 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, (ByteBuffer) null);
                         } else {
-                            glClearNamedFramebufferfi(this.id, GL_DEPTH_STENCIL, 0, 1.0F, 0);
+                            glClearNamedFramebufferfi(this.id, GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
                         }
                     } else {
                         // Can't clear the texture if only clearing depth or stencil
-                        if (depth) {
-                            glClearNamedFramebufferfv(this.id, GL_DEPTH, 0, stack.floats(1.0F));
+                        if (hasDepth) {
+                            glClearNamedFramebufferfv(this.id, GL_DEPTH, 0, stack.floats(depth));
                         }
-                        if (stencil) {
-                            glClearNamedFramebufferiv(this.id, GL_STENCIL, 0, stack.ints(0));
+                        if (hasStencil) {
+                            glClearNamedFramebufferiv(this.id, GL_STENCIL, 0, stack.ints(glGetInteger(GL_STENCIL_CLEAR_VALUE)));
                         }
                     }
                 } else {
                     if (clearTex && this.depthAttachment instanceof AdvancedFboTextureAttachment texture) {
-                        glClearTexImage(texture.getId(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, stack.floats(1.0F));
+                        glClearTexImage(texture.getId(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, stack.floats(depth));
                     } else {
-                        glClearNamedFramebufferfv(this.id, GL_DEPTH, 0, stack.floats(1.0F));
+                        glClearNamedFramebufferfv(this.id, GL_DEPTH, 0, stack.floats(depth));
                     }
                 }
             }

@@ -6,25 +6,23 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.AreaLight;
+import foundry.veil.api.client.render.light.data.AreaLightData;
 import foundry.veil.api.client.render.light.renderer.InstancedLightRenderer;
-import foundry.veil.api.client.render.light.renderer.LightRenderer;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.client.render.light.renderer.LightTypeRenderer;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2fc;
-import org.joml.Vector3dc;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @ApiStatus.Internal
-public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
+public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> {
 
-    private static final ResourceLocation SHADER = Veil.veilPath("light/area");
+    private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/area");
 
     public AreaLightRenderer() {
         super(Float.BYTES * 22 + 2);
@@ -50,26 +48,7 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLight> {
     }
 
     @Override
-    protected void setupRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<AreaLight> lights) {
-        VeilRenderSystem.setShader(SHADER);
-    }
-
-    @Override
-    protected void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<AreaLight> lights) {
-    }
-
-    // the bounding box here isn't particularly tight, but it should always encapsulate the light's area.
-    @Override
-    protected boolean isVisible(AreaLight light, CullFrustum frustum) {
-        Vector2fc size = light.getSize();
-        Vector3dc position = light.getPosition();
-        float radius = Math.max(size.x(), size.y()) + light.getDistance();
-        return frustum.testAab(
-                position.x() - radius,
-                position.y() - radius,
-                position.z() - radius,
-                position.x() + radius,
-                position.y() + radius,
-                position.z() + radius);
+    protected @Nullable RenderType getRenderType(List<? extends LightRenderHandle<AreaLightData>> lights) {
+        return VeilRenderType.get(RENDER_TYPE);
     }
 }

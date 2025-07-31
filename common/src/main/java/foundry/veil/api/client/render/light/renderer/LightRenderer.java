@@ -1,6 +1,5 @@
 package foundry.veil.api.client.render.light.renderer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
 import foundry.veil.api.client.registry.LightTypeRegistry;
@@ -9,32 +8,33 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.light.Light;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
-import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManger;
+import foundry.veil.api.client.render.light.data.LightData;
+import foundry.veil.api.client.render.vertex.VertexArray;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.system.NativeResource;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+
+import static org.lwjgl.opengl.GL11C.*;
 
 /**
  * Renders all lights in a scene.
- * <p>Lights can be added with {@link #addLight(Light)}, and subsequently removed with
- * {@link #removeLight(Light)}. Lights are automatically updated the next time {@link #render(AdvancedFbo)}
- * is called if {@link Light#isDirty()} is <code>true</code>.
- * </p>
- * <p>There is no way to retrieve a light, so care should be taken to keep track of what lights
- * have been added to the scene and when they should be removed.</p>
+ * <br>
+ * There is no way to retrieve a light, so care should be taken to keep track of what lights
+ * have been added to the scene and when they should be removed.
  *
  * @author Ocelot
  */
 public final class LightRenderer implements NativeResource {
 
     private static final ResourceLocation BUFFER_ID = Veil.veilPath("lights");
-    private final Map<LightTypeRegistry.LightType<?>, LightData<?>> lights;
+    private final Map<LightTypeRegistry.LightType<?>, LightTypeRenderer<?>> renderers;
 
     private boolean ambientOcclusionEnabled;
 
@@ -42,44 +42,8 @@ public final class LightRenderer implements NativeResource {
      * Creates a new light renderer.
      */
     public LightRenderer() {
-        this.lights = new HashMap<>();
+        this.renderers = new Object2ObjectArrayMap<>();
         this.ambientOcclusionEnabled = true;
-    }
-
-    /**
-     * Applies the shader set to {@link VeilRenderSystem}.
-     *
-     * @return If the shader failed to apply
-     */
-    public boolean applyShader() {
-        ShaderProgram shader = VeilRenderSystem.getShader();
-        if (shader == null) {
-            return true;
-        }
-
-        shader.bind();
-        AdvancedFbo fbo = AdvancedFbo.getMainFramebuffer();
-        shader.setFramebufferSamplers(fbo);
-
-        ShaderUniform screenSize = shader.getUniform("ScreenSize");
-        if (screenSize != null) {
-            screenSize.setVector(fbo.getWidth(), fbo.getHeight());
-        }
-
-        DynamicBufferManger bufferManger = VeilRenderSystem.renderer().getDynamicBufferManger();
-        for (DynamicBufferType dynamicBuffer : DynamicBufferType.values()) {
-            shader.setSampler(dynamicBuffer.getSourceName() + "Sampler", bufferManger.getBufferTexture(dynamicBuffer));
-        }
-
-        shader.bindSamplers(0);
-        return false;
-    }
-
-    @ApiStatus.Internal
-    public void setup(CullFrustum frustum) {
-        for (Map.Entry<LightTypeRegistry.LightType<?>, LightData<?>> entry : this.lights.entrySet()) {
-            entry.getValue().prepare(this, frustum);
-        }
     }
 
     /**
@@ -89,22 +53,22 @@ public final class LightRenderer implements NativeResource {
      * @return If any lights were actually rendered
      */
     @ApiStatus.Internal
-    public boolean render(AdvancedFbo lightFbo) {
+    public boolean render(CullFrustum frustum, AdvancedFbo lightFbo) {
         boolean hasRendered = false;
         VeilRenderer renderer = VeilRenderSystem.renderer();
 
-        for (LightData<?> value : this.lights.values()) {
+        for (LightTypeRenderer<?> lightRenderer : this.renderers.values()) {
+            lightRenderer.prepareLights(this, frustum);
+
             // If there are no visible lights, then don't render anything
-            if (value.renderer.getVisibleLights() <= 0) {
+            if (lightRenderer.getVisibleLights() <= 0) {
                 continue;
             }
 
             if (!hasRendered) {
-                RenderSystem.enableBlend();
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-                RenderSystem.depthMask(false);
                 lightFbo.bind(true);
-                lightFbo.clear();
+                lightFbo.clear(GL_COLOR_BUFFER_BIT);
+                AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
 
             hasRendered = true;
@@ -112,43 +76,41 @@ public final class LightRenderer implements NativeResource {
                 break;
             }
 
-            value.render(this);
+            lightRenderer.renderLights(this);
         }
-        if (hasRendered) {
-            RenderSystem.depthMask(true);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
-        } else {
+
+        if (!hasRendered) {
             renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
+            return false;
         }
-        return hasRendered;
+
+        VertexArray.unbind();
+        return true;
     }
 
     /**
      * Adds a light to the renderer.
      *
-     * @param light The light to add
+     * @param lightData The light to add
      */
-    public void addLight(Light light) {
-        Objects.requireNonNull(light, "light");
+    @SuppressWarnings("unchecked")
+    public <T extends LightData> LightRenderHandle<T> addLight(T lightData) {
+        Objects.requireNonNull(lightData, "light");
         RenderSystem.assertOnRenderThreadOrInit();
-        this.lights.computeIfAbsent(light.getType(), LightData::new).addLight(light);
+        return ((LightTypeRenderer<T>) this.renderers.computeIfAbsent(lightData.getType(), lightType -> lightType.rendererFactory().createRenderer())).addLight(lightData);
     }
 
     /**
-     * Removes the specified light from the renderer.
+     * Attempts to re-add the specified light handle to the renderer.
      *
-     * @param light The light to remove
+     * @param handle The handle of the light to add
+     * @return The same handle or a new one if re-added
      */
     @SuppressWarnings("unchecked")
-    public <T extends Light> void removeLight(T light) {
-        Objects.requireNonNull(light, "light");
+    public <T extends LightData> LightRenderHandle<T> addLight(LightRenderHandle<T> handle) {
+        Objects.requireNonNull(handle, "light");
         RenderSystem.assertOnRenderThreadOrInit();
-
-        LightData<T> data = (LightData<T>) this.lights.get(light.getType());
-        if (data != null) {
-            data.removedLights.add(light);
-        }
+        return ((LightTypeRenderer<T>) this.renderers.computeIfAbsent(handle.getLightData().getType(), lightType -> lightType.rendererFactory().createRenderer())).steal(handle);
     }
 
     /**
@@ -158,13 +120,9 @@ public final class LightRenderer implements NativeResource {
      * @return A list of lights for the specified type in the scene
      */
     @SuppressWarnings("unchecked")
-    public <T extends Light> List<T> getLights(LightTypeRegistry.LightType<? extends T> type) {
-        LightData<?> data = this.lights.get(type);
-        if (data == null) {
-            return Collections.emptyList();
-        }
-
-        return (List<T>) data.lightsView;
+    public <T extends LightData> Collection<? extends LightRenderHandle<T>> getLights(LightTypeRegistry.LightType<? extends T> type) {
+        LightTypeRenderer<?> renderer = this.renderers.get(type);
+        return renderer != null ? (Collection<? extends LightRenderHandle<T>>) renderer.getLights() : Collections.emptyList();
     }
 
     /**
@@ -196,55 +154,18 @@ public final class LightRenderer implements NativeResource {
 
     @Override
     public void free() {
-        this.lights.values().forEach(LightData::free);
-        this.lights.clear();
+        this.renderers.values().forEach(LightTypeRenderer::free);
+        this.renderers.clear();
     }
 
     @ApiStatus.Internal
     public void addDebugInfo(Consumer<String> consumer) {
-        int visible = this.lights.values().stream().mapToInt(data -> data.renderer.getVisibleLights()).sum();
-        int all = this.lights.values().stream().mapToInt(data -> data.lights.size()).sum();
+        int visible = 0;
+        int all = 0;
+        for (LightTypeRenderer<?> renderer : this.renderers.values()) {
+            visible += renderer.getVisibleLights();
+            all += renderer.getLights().size();
+        }
         consumer.accept("Lights: " + visible + " / " + all);
-    }
-
-    @ApiStatus.Internal
-    private static class LightData<T extends Light> implements NativeResource {
-
-        private final LightTypeRenderer<T> renderer;
-        private final List<T> lights;
-        private final List<T> lightsView;
-        private final Set<T> removedLights;
-
-        private LightData(LightTypeRenderer<T> renderer) {
-            this.renderer = renderer;
-            this.lights = new ArrayList<>();
-            this.lightsView = Collections.unmodifiableList(this.lights);
-            this.removedLights = new HashSet<>();
-        }
-
-        @SuppressWarnings("unchecked")
-        public LightData(LightTypeRegistry.LightType<?> type) {
-            this((LightTypeRenderer<T>) Objects.requireNonNull(type, "type").rendererFactory().createRenderer());
-        }
-
-        private void prepare(LightRenderer lightRenderer, CullFrustum frustum) {
-            this.lights.removeAll(this.removedLights);
-            this.renderer.prepareLights(lightRenderer, this.lights, this.removedLights, frustum);
-            this.removedLights.clear();
-        }
-
-        private void render(LightRenderer lightRenderer) {
-            this.renderer.renderLights(lightRenderer, this.lights);
-        }
-
-        @SuppressWarnings("unchecked")
-        private void addLight(Light light) {
-            this.lights.add((T) light);
-        }
-
-        @Override
-        public void free() {
-            this.renderer.free();
-        }
     }
 }

@@ -41,7 +41,7 @@ public interface AdvancedFbo extends NativeResource {
      * Clears the buffers in this framebuffer.
      */
     default void clear() {
-        this.clear(0.0F, 0.0F, 0.0F, 0.0F, this.getClearMask(), this.getDrawBuffers());
+        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, this.getClearMask(), this.getDrawBuffers());
     }
 
     /**
@@ -50,7 +50,7 @@ public interface AdvancedFbo extends NativeResource {
      * @param buffers The buffers to clear
      */
     default void clear(int buffers) {
-        this.clear(0.0F, 0.0F, 0.0F, 0.0F, buffers, this.getDrawBuffers());
+        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, buffers, this.getDrawBuffers());
     }
 
     /**
@@ -60,7 +60,7 @@ public interface AdvancedFbo extends NativeResource {
      * @param clearBuffers The color buffers to clear
      */
     default void clear(int buffers, int... clearBuffers) {
-        this.clear(0.0F, 0.0F, 0.0F, 0.0F, buffers, clearBuffers);
+        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, buffers, clearBuffers);
     }
 
     /**
@@ -73,7 +73,7 @@ public interface AdvancedFbo extends NativeResource {
      * @param buffers The buffers to clear
      */
     default void clear(float red, float green, float blue, float alpha, int buffers) {
-        this.clear(red, green, blue, alpha, buffers, this.getDrawBuffers());
+        this.clear(red, green, blue, alpha, 1.0F, buffers, this.getDrawBuffers());
     }
 
     /**
@@ -86,7 +86,38 @@ public interface AdvancedFbo extends NativeResource {
      * @param clearMask    The buffers to clear
      * @param clearBuffers The color buffers to clear
      */
-    void clear(float red, float green, float blue, float alpha, int clearMask, int... clearBuffers);
+    default void clear(float red, float green, float blue, float alpha, int clearMask, int... clearBuffers) {
+        this.clear(red, green, blue, alpha, 1.0F, clearMask, clearBuffers);
+    }
+
+    /**
+     * Clears the specified buffers.
+     *
+     * @param red     The red clear value
+     * @param green   The green clear value
+     * @param blue    The blue clear value
+     * @param alpha   The alpha clear value
+     * @param depth   The depth to clear the framebuffer with
+     * @param buffers The buffers to clear
+     * @since 1.3.0
+     */
+    default void clear(float red, float green, float blue, float alpha, float depth, int buffers) {
+        this.clear(red, green, blue, alpha, depth, buffers, this.getDrawBuffers());
+    }
+
+    /**
+     * Clears the specified buffers.
+     *
+     * @param red          The red clear value
+     * @param green        The green clear value
+     * @param blue         The blue clear value
+     * @param alpha        The alpha clear value
+     * @param depth        The depth to clear the framebuffer with
+     * @param clearMask    The buffers to clear
+     * @param clearBuffers The color buffers to clear
+     * @since 1.3.0
+     */
+    void clear(float red, float green, float blue, float alpha, float depth, int clearMask, int... clearBuffers);
 
     /**
      * Resets the draw buffers to enable all buffers.
@@ -617,9 +648,9 @@ public interface AdvancedFbo extends NativeResource {
 
         private TextureFilter.EdgeType getEdgeType() {
             if (this.format == GL_RED_INTEGER ||
-                this.format == GL_RG_INTEGER ||
-                this.format == GL_RGB_INTEGER ||
-                this.format == GL_RGBA_INTEGER) {
+                    this.format == GL_RG_INTEGER ||
+                    this.format == GL_RGB_INTEGER ||
+                    this.format == GL_RGBA_INTEGER) {
                 return TextureFilter.EdgeType.INT;
             }
             if (this.format == GL_DEPTH_STENCIL) {
@@ -867,8 +898,8 @@ public interface AdvancedFbo extends NativeResource {
         /**
          * Adds a color texture buffer with the specified size.
          *
-         * @param width    The width of the texture buffer
-         * @param height   The height of the texture buffer
+         * @param width  The width of the texture buffer
+         * @param height The height of the texture buffer
          */
         public Builder addColorTextureBuffer(int width, int height) {
             this.setDefaultFormat(FramebufferAttachmentDefinition.Format.RGBA8);
@@ -955,8 +986,8 @@ public interface AdvancedFbo extends NativeResource {
         /**
          * Sets the depth texture buffer to the specified size and data type.
          *
-         * @param width    The width of the texture buffer
-         * @param height   The height of the texture buffer
+         * @param width  The width of the texture buffer
+         * @param height The height of the texture buffer
          */
         public Builder setDepthTextureBuffer(int width, int height) {
             this.setDefaultFormat(FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT);

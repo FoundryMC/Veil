@@ -6,23 +6,23 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.CullFrustum;
-import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.PointLight;
+import foundry.veil.api.client.render.light.data.PointLightData;
 import foundry.veil.api.client.render.light.renderer.InstancedLightRenderer;
-import foundry.veil.api.client.render.light.renderer.LightRenderer;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.client.render.light.renderer.LightTypeRenderer;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @ApiStatus.Internal
-public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLight> {
+public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLightData> {
 
-    private static final ResourceLocation SHADER = Veil.veilPath("light/point");
+    private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/point");
 
     public InstancedPointLightRenderer() {
         super(Float.BYTES * 7);
@@ -43,16 +43,7 @@ public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLig
     }
 
     @Override
-    protected void setupRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<PointLight> lights) {
-        VeilRenderSystem.setShader(SHADER);
-    }
-
-    @Override
-    protected void clearRenderState(@NotNull LightRenderer lightRenderer, @NotNull List<PointLight> lights) {
-    }
-
-    @Override
-    protected boolean isVisible(PointLight light, CullFrustum frustum) {
-        return frustum.testSphere(light.getPosition(), light.getRadius() * 1.4F);
+    protected @Nullable RenderType getRenderType(List<? extends LightRenderHandle<PointLightData>> lights) {
+        return VeilRenderType.get(RENDER_TYPE);
     }
 }

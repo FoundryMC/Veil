@@ -23,10 +23,12 @@ import io.github.ocelot.glslprocessor.api.node.variable.GlslNewFieldNode;
 import io.github.ocelot.glslprocessor.api.node.variable.GlslVariableNode;
 import io.github.ocelot.glslprocessor.api.visitor.GlslNodeStringWriter;
 import io.github.ocelot.glslprocessor.lib.anarres.cpp.LexerException;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.*;
 
+@ApiStatus.Internal
 public class DynamicBufferProcessor implements ShaderPreProcessor {
 
     private static final String[] VECTOR_ELEMENTS = {".x", ".y", ".z", ".w"};

@@ -1,66 +1,67 @@
 package foundry.veil.api.quasar.emitters.module.render;
 
+import foundry.veil.api.client.color.Color;
+import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.light.PointLight;
+import foundry.veil.api.client.render.light.data.PointLightData;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.quasar.emitters.module.RenderParticleModule;
 import foundry.veil.api.quasar.emitters.module.UpdateParticleModule;
 import foundry.veil.api.quasar.particle.QuasarParticle;
-import org.joml.Vector4f;
 
 public class CustomLightModule implements UpdateParticleModule, RenderParticleModule {
 
-    private final Vector4f lastColor;
-    private final Vector4f color;
-    private final Vector4f renderColor;
+    private final Color lastColor;
+    private final Color color;
+    private final Color renderColor;
+    private final PointLightData light;
     private float brightness;
-    private float radius;
-    private PointLight light;
+    private LightRenderHandle<PointLightData> lightHandle;
 
     public CustomLightModule() {
-        this.lastColor = new Vector4f(1.0F);
-        this.color = new Vector4f(1.0F);
-        this.renderColor = new Vector4f(1.0F);
-        this.light = null;
+        this.lastColor = new Color(Color.WHITE);
+        this.color = new Color(Color.WHITE);
+        this.renderColor = new Color(Color.WHITE);
+        this.light = new PointLightData();
+        this.lightHandle = null;
     }
 
     @Override
     public void update(QuasarParticle particle) {
         this.lastColor.set(this.color);
-        float brightness = this.brightness * this.color.w;
+        float brightness = this.brightness * this.color.alpha();
 
-        if (this.color.lengthSquared() < 0.1 && brightness < 0.1) {
+        if (this.color.luminance() < 0.1 && brightness < 0.1) {
             this.onRemove();
         } else {
-            if (this.light == null) {
-                this.light = new PointLight().setRadius(this.radius);
-                VeilRenderSystem.renderer().getLightRenderer().addLight(this.light);
+            this.light.setColor(this.color).setBrightness(brightness);
+            if (this.lightHandle == null) {
+                this.lightHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(this.light);
             }
-            this.light.setColor(this.color.x, this.color.y, this.color.z);
-            this.light.setBrightness(this.brightness * this.color.w);
         }
     }
 
     @Override
     public void render(QuasarParticle particle, float partialTicks) {
-        if (this.light == null) {
+        if (this.lightHandle == null) {
             return;
         }
 
         this.light.setPosition(particle.getRenderData().getRenderPosition());
         this.lastColor.lerp(this.color, partialTicks, this.renderColor);
-        this.light.setColor(this.renderColor.x, this.renderColor.y, this.renderColor.z);
-        this.light.setBrightness(this.brightness * this.renderColor.w);
+        this.light.setColor(this.renderColor);
+        this.light.setBrightness(this.brightness * this.renderColor.alpha());
     }
 
     @Override
     public void onRemove() {
-        if (this.light != null) {
-            VeilRenderSystem.renderer().getLightRenderer().removeLight(this.light);
-            this.light = null;
+        if (this.lightHandle != null) {
+            this.lightHandle.free();
+            this.lightHandle = null;
         }
     }
 
-    public Vector4f getColor() {
+    public Colorc getColor() {
         return this.color;
     }
 
@@ -69,7 +70,7 @@ public class CustomLightModule implements UpdateParticleModule, RenderParticleMo
     }
 
     public float getRadius() {
-        return this.radius;
+        return this.light.getRadius();
     }
 
     public void setBrightness(float brightness) {
@@ -77,6 +78,6 @@ public class CustomLightModule implements UpdateParticleModule, RenderParticleMo
     }
 
     public void setRadius(float radius) {
-        this.radius = radius;
+        this.light.setRadius(radius);
     }
 }

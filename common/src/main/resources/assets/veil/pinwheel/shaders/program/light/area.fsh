@@ -9,9 +9,9 @@ in vec2 size;
 in float maxAngle;
 in float maxDistance;
 
-uniform sampler2D VeilDynamicAlbedoSampler;
-uniform sampler2D VeilDynamicNormalSampler;
-uniform sampler2D DiffuseDepthSampler;
+uniform sampler2D AlbedoSampler;
+uniform sampler2D NormalSampler;
+uniform sampler2D DepthSampler;
 
 uniform vec2 ScreenSize;
 
@@ -46,13 +46,13 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 p
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
 
-    vec4 albedoColor = texture(VeilDynamicAlbedoSampler, screenUv);
+    vec4 albedoColor = texture(AlbedoSampler, screenUv);
     if (albedoColor.a == 0) {
         discard;
     }
 
-    vec3 normalVS = texture(VeilDynamicNormalSampler, screenUv).xyz;
-    float depth = texture(DiffuseDepthSampler, screenUv).r;
+    vec3 normalVS = texture(NormalSampler, screenUv).xyz;
+    float depth = texture(DepthSampler, screenUv).r;
     vec3 pos = screenToWorldSpace(screenUv, depth).xyz;
 
     // lighting calculation

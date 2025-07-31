@@ -1,6 +1,7 @@
 package foundry.veil.api.quasar.particle;
 
 import foundry.veil.Veil;
+import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.quasar.data.QuasarParticleData;
@@ -20,11 +21,12 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RenderData {
+public final class RenderData {
 
     @Deprecated
-    private static final ResourceLocation BLANK = Veil.veilPath("textures/special/blank.png");
+    public static final ResourceLocation BLANK = Veil.veilPath("textures/special/blank.png");
 
+    private final QuasarParticle particle;
     private final Vector3d prevPosition;
     private final Vector3d renderPosition;
     private final Vector3f prevRotation;
@@ -39,13 +41,17 @@ public class RenderData {
     private float alpha;
     public float renderAge;
     public float agePercent;
-    private final boolean additive;
+
+    private boolean additive;
     private SpriteData spriteData;
     private TextureAtlasSprite atlasSprite;
     private RenderType renderType;
+    private boolean renderTypeDirty;
+
     private final List<Trail> trails;
 
-    public RenderData(QuasarParticleData data) {
+    public RenderData(QuasarParticle particle, QuasarParticleData data) {
+        this.particle = particle;
         this.prevPosition = new Vector3d();
         this.renderPosition = new Vector3d();
         this.prevRotation = new Vector3f();
@@ -59,21 +65,14 @@ public class RenderData {
         this.blue = 1.0F;
         this.alpha = 1.0F;
         this.renderAge = 0.0F;
+        this.agePercent = 0.0F;
+
         this.additive = data.additive();
         this.spriteData = data.spriteData();
         this.atlasSprite = null;
-        this.updateRenderType();
-        this.trails = new ArrayList<>();
-    }
+        this.markDirty();
 
-    private void updateRenderType() {
-        if (this.atlasSprite != null) {
-            this.renderType = VeilRenderType.quasarParticle(this.atlasSprite.atlasLocation(), this.additive);
-        } else if (this.spriteData != null) {
-            this.renderType = VeilRenderType.quasarParticle(this.spriteData.sprite(), this.additive);
-        } else {
-            this.renderType = VeilRenderType.quasarParticle(BLANK, this.additive);
-        }
+        this.trails = new ArrayList<>();
     }
 
     @ApiStatus.Internal
@@ -91,6 +90,15 @@ public class RenderData {
         this.renderRadius = Mth.lerp(partialTicks, this.prevRadius, particle.getRadius());
         this.renderAge = particle.getAge() + partialTicks;
         this.agePercent = Math.min(this.renderAge / (float) particle.getLifetime(), 1.0F);
+    }
+
+    /**
+     * Forces the render type to be updated on the next render call.
+     *
+     * @since 1.3.0
+     */
+    public void markDirty() {
+        this.renderTypeDirty = true;
     }
 
     public Vector3dc getRenderPosition() {
@@ -145,7 +153,20 @@ public class RenderData {
         return this.atlasSprite;
     }
 
+    /**
+     * @since 1.3.0
+     */
+    public boolean isAdditive() {
+        return this.additive;
+    }
+
+    /**
+     * @return The render type to use for this particle
+     */
     public RenderType getRenderType() {
+        if (this.renderTypeDirty) {
+            this.renderType = this.particle.getData().renderStyle().getRenderType(this.particle, this);
+        }
         return this.renderType;
     }
 
@@ -198,17 +219,32 @@ public class RenderData {
         this.alpha = color.w();
     }
 
+    public void setColor(Colorc color) {
+        this.red = color.red();
+        this.green = color.green();
+        this.blue = color.blue();
+        this.alpha = color.alpha();
+    }
+
     public void setFixedPackedLight(int fixedPackedLight) {
         this.fixedPackedLight = fixedPackedLight;
     }
 
+    /**
+     * @since 1.3.0
+     */
+    public void setAdditive(boolean additive) {
+        this.additive = additive;
+        this.markDirty();
+    }
+
     public void setSpriteData(@Nullable SpriteData spriteData) {
         this.spriteData = spriteData;
-        this.updateRenderType();
+        this.markDirty();
     }
 
     public void setAtlasSprite(@Nullable TextureAtlasSprite atlasSprite) {
         this.atlasSprite = atlasSprite;
-        this.updateRenderType();
+        this.markDirty();
     }
 }

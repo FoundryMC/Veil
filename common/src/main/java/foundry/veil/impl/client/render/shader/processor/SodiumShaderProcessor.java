@@ -1,6 +1,7 @@
 package foundry.veil.impl.client.render.shader.processor;
 
 import foundry.veil.VeilClient;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.shader.processor.ShaderImporter;
 import foundry.veil.api.client.render.shader.processor.ShaderModifyProcessor;
@@ -53,8 +54,9 @@ public class SodiumShaderProcessor {
         processor.getShaderImporter().reset();
         Map<String, String> macros = new HashMap<>();
         DynamicBufferType.addMacros(activeBuffers, macros);
+        VeilRenderSystem.renderer().getShaderManager().addMacros(macros);
         GlslTree tree = GlslParser.preprocessParse(source, macros);
-        processor.getProcessor().modify(new Context(CUSTOM_PROGRAM_DATA.get(), processor, name, activeBuffers, type, macros), tree);
+        processor.getProcessor().modify(new Context(CUSTOM_PROGRAM_DATA.get(), processor, name, activeBuffers, type, macros, true), tree);
         GlslTree.stripGLMacros(macros);
         tree.getMacros().putAll(macros);
         return tree.toSourceString();
@@ -62,26 +64,22 @@ public class SodiumShaderProcessor {
 
     private record Context(Map<String, Object> customProgramData,
                            ShaderProcessorList processor,
-                           ResourceLocation name,
+                           @Nullable ResourceLocation name,
                            int activeBuffers,
                            int type,
-                           Map<String, String> macros) implements ShaderPreProcessor.SodiumContext {
+                           Map<String, String> macros,
+                           boolean sourceFile) implements ShaderPreProcessor.SodiumContext {
 
         @Override
         public GlslTree modifyInclude(@Nullable ResourceLocation name, String source) throws IOException, GlslSyntaxException, LexerException {
             GlslTree tree = GlslParser.preprocessParse(source, this.macros);
-            this.processor.getImportProcessor().modify(new Context(this.customProgramData, this.processor, name, this.activeBuffers, this.type, this.macros), tree);
+            this.processor.getImportProcessor().modify(new Context(this.customProgramData, this.processor, name, this.activeBuffers, this.type, this.macros, false), tree);
             return tree;
         }
 
         @Override
-        public @Nullable ResourceLocation name() {
-            return this.name;
-        }
-
-        @Override
         public boolean isSourceFile() {
-            return true;
+            return this.sourceFile;
         }
 
         @Override

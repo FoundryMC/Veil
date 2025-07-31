@@ -1,6 +1,5 @@
 package foundry.veil.fabric.mixin.client;
 
-import com.google.common.collect.ImmutableList;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;

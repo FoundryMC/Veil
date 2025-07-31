@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -22,6 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 // TODO finish
+@ApiStatus.Internal
 public class ResourceOverrideEditor implements ResourceFileEditor<VeilResource<?>> {
 
     private static final Component NAME = Component.translatable("resource.veil.action.override");

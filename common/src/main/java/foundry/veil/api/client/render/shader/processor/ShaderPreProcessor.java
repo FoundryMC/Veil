@@ -2,9 +2,11 @@ package foundry.veil.api.client.render.shader.processor;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.shader.ShaderFeature;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
 import foundry.veil.api.client.render.shader.program.ProgramDefinition;
+import foundry.veil.impl.client.render.shader.program.DynamicShaderProgramImpl;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.node.GlslNode;
 import io.github.ocelot.glslprocessor.api.node.GlslRootNode;
@@ -173,6 +175,17 @@ public interface ShaderPreProcessor {
         }
 
         /**
+         * Checks if the requested shader features are available.
+         *
+         * @param features The features to check for
+         * @return Whether those features are supported
+         * @since 2.0.0
+         */
+        default boolean hasFeatures(ShaderFeature... features) {
+            return VeilRenderSystem.renderer().getShaderManager().hasFeatures(features);
+        }
+
+        /**
          * Loads the specified import from file <code>assets/modid/pinwheel/shaders/include/path.glsl</code> and adds it to this source tree.
          *
          * @param name     The name of the import to load
@@ -336,6 +349,21 @@ public interface ShaderPreProcessor {
          * @param binding The binding to set it to
          */
         void addUniformBinding(String name, int binding);
+
+        /**
+         * Adds a new shader definition dependency
+         *
+         * @param name The name of the dependency to add
+         * @since 2.2.0
+         */
+        void addDefinitionDependency(String name);
+
+        /**
+         * @return Whether the shader being compiled is dynamic
+         * @see DynamicShaderProgramImpl
+         * @since 2.2.0
+         */
+        boolean isDynamic();
 
         /**
          * @return The definition of the program this is being compiled for or <code>null</code> if the shader is standalone

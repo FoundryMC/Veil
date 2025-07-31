@@ -7,9 +7,9 @@ in vec3 lightPos;
 in vec3 lightColor;
 in float radius;
 
-uniform sampler2D VeilDynamicAlbedoSampler;
-uniform sampler2D VeilDynamicNormalSampler;
-uniform sampler2D DiffuseDepthSampler;
+uniform sampler2D AlbedoSampler;
+uniform sampler2D NormalSampler;
+uniform sampler2D DepthSampler;
 
 uniform vec2 ScreenSize;
 
@@ -18,18 +18,18 @@ out vec4 fragColor;
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
 
-    vec4 albedoColor = texture(VeilDynamicAlbedoSampler, screenUv);
+    vec4 albedoColor = texture(AlbedoSampler, screenUv);
     if (albedoColor.a == 0) {
         discard;
     }
 
-    float depth = texture(DiffuseDepthSampler, screenUv).r;
+    float depth = texture(DepthSampler, screenUv).r;
     vec3 pos = screenToWorldSpace(screenUv, depth).xyz;
 
     // lighting calculation
     vec3 offset = lightPos - pos;
 
-    vec3 normalVS = texture(VeilDynamicNormalSampler, screenUv).xyz;
+    vec3 normalVS = texture(NormalSampler, screenUv).xyz;
     vec3 lightDirection = normalize((VeilCamera.ViewMat * vec4(offset, 0.0)).xyz);
     float diffuse = clamp(0.0, 1.0, dot(normalVS, lightDirection));
     diffuse = (diffuse + MINECRAFT_AMBIENT_LIGHT) / (1.0 + MINECRAFT_AMBIENT_LIGHT);
