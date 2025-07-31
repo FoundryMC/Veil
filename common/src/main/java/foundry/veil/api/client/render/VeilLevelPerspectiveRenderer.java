@@ -8,6 +8,7 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.compat.FlashbackCompat;
 import foundry.veil.api.compat.SodiumCompat;
 import foundry.veil.ext.RenderTargetExtension;
+import foundry.veil.impl.client.render.perspective.FlashbackAccess;
 import foundry.veil.impl.client.render.perspective.IrisPipelineAccess;
 import foundry.veil.impl.client.render.perspective.LevelPerspectiveCamera;
 import foundry.veil.mixin.perspective.accessor.GameRendererAccessor;
@@ -44,6 +45,9 @@ public final class VeilLevelPerspectiveRenderer {
     private static final Matrix4f BACKUP_PROJECTION = new Matrix4f();
     private static final Vector3f BACKUP_LIGHT0_POSITION = new Vector3f();
     private static final Vector3f BACKUP_LIGHT1_POSITION = new Vector3f();
+
+    private static final Matrix4f BACKUP_FLASHBACK_PROJECTION = new Matrix4f();
+    private static final Quaternionf BACKUP_FLASHBACK_CAMERA = new Quaternionf();
 
     private static boolean renderingPerspective = false;
 
@@ -116,6 +120,8 @@ public final class VeilLevelPerspectiveRenderer {
         if (!FlashbackCompat.isLoaded()) {
             window.setWidth(framebuffer.getWidth());
             window.setHeight(framebuffer.getHeight());
+        } else {
+            FlashbackAccess.backup(BACKUP_FLASHBACK_PROJECTION, BACKUP_FLASHBACK_CAMERA);
         }
 
         final Object backupPipeline = IrisPipelineAccess.getPipeline(levelRenderer);
@@ -202,6 +208,8 @@ public final class VeilLevelPerspectiveRenderer {
             if (!FlashbackCompat.isLoaded()) {
                 window.setWidth(backupWidth);
                 window.setHeight(backupHeight);
+            } else {
+                FlashbackAccess.restore(BACKUP_FLASHBACK_PROJECTION, BACKUP_FLASHBACK_CAMERA);
             }
 
             accessor.setRenderDistance(backupRenderDistance);
