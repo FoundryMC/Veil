@@ -1,0 +1,19 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"2": "cassini:shells"
+	},
+	"elements": [
+		{
+			"from": [2, -16, 2],
+			"to": [14, 0, 14],
+			"faces": {
+				"north": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"east": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"south": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"west": {"uv": [16, 16, 0, 0], "texture": "#2"}
+			}
+		}
+	]
+}

@@ -14,8 +14,8 @@ import org.joml.Vector3fc;
 public record InitRandomRotationModuleData(Vector3fc minDegrees, Vector3fc maxDegrees) implements ParticleModuleData {
 
     public static final MapCodec<InitRandomRotationModuleData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            CodecUtil.VECTOR3F_CODEC.fieldOf("min_degrees").forGetter(InitRandomRotationModuleData::minDegrees),
-            CodecUtil.VECTOR3F_CODEC.fieldOf("max_degrees").forGetter(InitRandomRotationModuleData::maxDegrees)
+            CodecUtil.VECTOR3FC_CODEC.fieldOf("min_degrees").forGetter(InitRandomRotationModuleData::minDegrees),
+            CodecUtil.VECTOR3FC_CODEC.fieldOf("max_degrees").forGetter(InitRandomRotationModuleData::maxDegrees)
     ).apply(instance, InitRandomRotationModuleData::new));
 
     @Override

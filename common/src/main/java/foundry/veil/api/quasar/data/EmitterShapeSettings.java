@@ -20,8 +20,8 @@ public record EmitterShapeSettings(EmitterShape shape,
 
     public static final Codec<EmitterShapeSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             EmitterShape.CODEC.fieldOf("shape").forGetter(EmitterShapeSettings::shape),
-            CodecUtil.VECTOR3F_CODEC.fieldOf("dimensions").forGetter(EmitterShapeSettings::dimensions),
-            CodecUtil.VECTOR3F_CODEC.fieldOf("rotation").forGetter(EmitterShapeSettings::rotation),
+            CodecUtil.VECTOR3FC_CODEC.fieldOf("dimensions").forGetter(EmitterShapeSettings::dimensions),
+            CodecUtil.VECTOR3FC_CODEC.fieldOf("rotation").forGetter(EmitterShapeSettings::rotation),
             Codec.BOOL.fieldOf("from_surface").forGetter(EmitterShapeSettings::fromSurface)
     ).apply(instance, EmitterShapeSettings::new));
     public static final Codec<Holder<EmitterShapeSettings>> CODEC = RegistryFileCodec.create(QuasarParticles.EMITTER_SHAPE_SETTINGS, DIRECT_CODEC);

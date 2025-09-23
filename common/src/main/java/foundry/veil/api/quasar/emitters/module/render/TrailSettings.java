@@ -20,7 +20,7 @@ public class TrailSettings {
     public static final Codec<TrailSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.optionalFieldOf("trailFrequency", 1).forGetter(settings -> settings.trailFrequency),
             Codec.INT.optionalFieldOf("trailLength", 20).forGetter(settings -> settings.trailLength),
-            CodecUtil.VECTOR4F_CODEC.optionalFieldOf("trailColor", new Vector4f(1.0F)).forGetter(settings -> settings.trailColor),
+            CodecUtil.VECTOR4FC_CODEC.optionalFieldOf("trailColor", new Vector4f(1.0F)).forGetter(settings -> settings.trailColor),
             Codec.FLOAT.fieldOf("trailWidthModifier").forGetter(settings -> settings.trailWidthModifierFloat),
             ResourceLocation.CODEC.fieldOf("trailTexture").forGetter(settings -> settings.trailTexture),
             Codec.FLOAT.fieldOf("trailPointModifier").forGetter(settings -> 1.0F),

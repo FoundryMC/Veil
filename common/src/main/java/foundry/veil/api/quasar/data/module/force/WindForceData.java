@@ -29,7 +29,7 @@ public record WindForceData(Vector3dc windDirection,
                             float strength) implements ParticleModuleData {
 
     public static final MapCodec<WindForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            CodecUtil.VECTOR3D_CODEC.fieldOf("wind_direction").forGetter(WindForceData::windDirection),
+            CodecUtil.VECTOR3DC_CODEC.fieldOf("wind_direction").forGetter(WindForceData::windDirection),
             Codec.FLOAT.fieldOf("wind_speed").forGetter(WindForceData::windSpeed),
             Codec.FLOAT.fieldOf("strength").forGetter(WindForceData::strength)
     ).apply(instance, WindForceData::new));

@@ -43,6 +43,8 @@ description='''${description}'''
 [[mixins]]
     config = "${mod_id}.scheduler.mixins.json"
 [[mixins]]
+    config = "${mod_id}.flare.mixins.json"
+[[mixins]]
     config = "${mod_id}.shader.mixins.json"
 [[mixins]]
     config = "${mod_id}.neoforge.mixins.json"

@@ -27,8 +27,8 @@ public record VortexForceData(Vector3dc vortexAxis,
                               float strength) implements ParticleModuleData {
 
     public static final MapCodec<VortexForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            CodecUtil.VECTOR3D_CODEC.fieldOf("vortex_axis").forGetter(VortexForceData::vortexAxis),
-            CodecUtil.VECTOR3D_CODEC.fieldOf("vortex_center").forGetter(VortexForceData::vortexCenter),
+            CodecUtil.VECTOR3DC_CODEC.fieldOf("vortex_axis").forGetter(VortexForceData::vortexAxis),
+            CodecUtil.VECTOR3DC_CODEC.fieldOf("vortex_center").forGetter(VortexForceData::vortexCenter),
             Codec.BOOL.optionalFieldOf("local_position", false).forGetter(VortexForceData::localPosition),
             Codec.DOUBLE.fieldOf("range").forGetter(VortexForceData::range),
             Codec.FLOAT.fieldOf("strength").forGetter(VortexForceData::strength)

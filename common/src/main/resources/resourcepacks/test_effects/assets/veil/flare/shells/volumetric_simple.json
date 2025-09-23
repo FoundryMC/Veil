@@ -1,0 +1,21 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"2": "cassini:shells"
+	},
+	"elements": [
+		{
+			"from": [-4, -16, -4],
+			"to": [20, -0.001, 20],
+			"faces": {
+				"north": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"east": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"south": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"west": {"uv": [16, 16, 0, 0], "texture": "#2"},
+				"up": {"uv": [16, 16, 16, 16], "texture": "#2"},
+                "down": {"uv": [0, 0, 0, 0], "texture": "#2"}
+            }
+		}
+	]
+}

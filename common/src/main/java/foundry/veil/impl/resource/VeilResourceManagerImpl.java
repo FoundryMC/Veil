@@ -69,6 +69,8 @@ public class VeilResourceManagerImpl implements VeilResourceManager, NativeResou
         this.addLoader(new McMetaResourceLoader());
         this.addLoader(new LanguageResourceLoader());
         this.addLoader(new BlockModelResourceLoader());
+        this.addLoader(new ShellResourceLoader());
+        this.addLoader(new FlareResourcesLoader());
     }
 
     /**

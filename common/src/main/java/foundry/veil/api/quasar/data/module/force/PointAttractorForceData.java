@@ -39,7 +39,7 @@ public record PointAttractorForceData(Vector3dc position,
                                       boolean invertDistanceModifier) implements ParticleModuleData {
 
     public static final MapCodec<PointAttractorForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            CodecUtil.VECTOR3D_CODEC.fieldOf("position").forGetter(PointAttractorForceData::position),
+            CodecUtil.VECTOR3DC_CODEC.fieldOf("position").forGetter(PointAttractorForceData::position),
             Codec.BOOL.optionalFieldOf("localPosition", false).forGetter(PointAttractorForceData::invertDistanceModifier),
             Codec.FLOAT.fieldOf("range").forGetter(PointAttractorForceData::range),
             Codec.FLOAT.fieldOf("strength").forGetter(PointAttractorForceData::strength),

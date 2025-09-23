@@ -1,0 +1,10 @@
+package foundry.veil.api.client.property.model;
+
+import foundry.veil.api.client.property.properties.Mat4Property;
+import org.joml.Matrix4f;
+
+public class Mat4ModelProperty extends Mat4Property implements ModelProperty {
+    public Mat4ModelProperty(Matrix4f value) {
+        super(value);
+    }
+}

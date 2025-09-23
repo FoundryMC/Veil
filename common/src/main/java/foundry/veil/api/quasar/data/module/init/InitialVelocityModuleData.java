@@ -18,7 +18,7 @@ public record InitialVelocityModuleData(Vector3dc velocityDirection,
 
     public static final MapCodec<InitialVelocityModuleData> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    CodecUtil.VECTOR3D_CODEC.fieldOf("direction").forGetter(InitialVelocityModuleData::velocityDirection),
+                    CodecUtil.VECTOR3DC_CODEC.fieldOf("direction").forGetter(InitialVelocityModuleData::velocityDirection),
                     Codec.BOOL.fieldOf("take_parent_rotation").orElse(true).forGetter(InitialVelocityModuleData::takesParentRotation),
                     Codec.FLOAT.fieldOf("strength").forGetter(InitialVelocityModuleData::strength)
             ).apply(instance, InitialVelocityModuleData::new));

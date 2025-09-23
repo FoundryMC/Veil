@@ -21,7 +21,7 @@ public record PointForceData(Vector3dc point,
                              float strength) implements ParticleModuleData {
 
     public static final MapCodec<PointForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            CodecUtil.VECTOR3D_CODEC.optionalFieldOf("point", new Vector3d(69, 69, 96)).forGetter(PointForceData::point),
+            CodecUtil.VECTOR3DC_CODEC.optionalFieldOf("point", new Vector3d(69, 69, 96)).forGetter(PointForceData::point),
             Codec.BOOL.optionalFieldOf("localPoint", false).forGetter(PointForceData::localPoint),
             Codec.FLOAT.fieldOf("range").forGetter(PointForceData::range),
             Codec.FLOAT.fieldOf("strength").forGetter(PointForceData::strength)

@@ -84,6 +84,8 @@ public class VeilClient {
         EmitterShapeRegistry.bootstrap();
         RenderStyleRegistry.bootstrap();
         ParticleModuleTypeRegistry.bootstrap();
+        PropertyRegistry.bootstrap();
+        PropertyModifierRegistry.bootstrap();
     }
 
     private static String getOutputName(RenderType.CompositeRenderType renderType) {
