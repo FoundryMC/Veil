@@ -6,7 +6,6 @@ uniform float FogEnd;
 uniform vec4 FogColor;
 
 in vec2 texCoord0;
-in float vertexDistance;
 in vec4 vertexColor;
 in vec4 vertexNormal;
 

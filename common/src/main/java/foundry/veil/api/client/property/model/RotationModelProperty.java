@@ -1,5 +1,6 @@
 package foundry.veil.api.client.property.model;
 
+import foundry.veil.api.client.property.InapplicableProperty;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.util.Mth;
 import foundry.veil.api.flare.modifier.PropertyModifier;

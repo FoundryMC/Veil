@@ -9,23 +9,14 @@ import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
-import io.github.ocelot.glslprocessor.api.grammar.GlslTypeSpecifier;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class Property<T> {
-    private static final Map<GlslTypeSpecifier.BuiltinType, MapCodec<? extends Property<?>>> CODECS = new HashMap<>();
-    public static <T> boolean registerImplementation(GlslTypeSpecifier.BuiltinType type, MapCodec<? extends Property<T>> codec) {
-        if (CODECS.containsKey(type)) return false;
-        CODECS.put(type, codec);
-        return true;
-    }
 
     protected T overrideValue;
     protected final T value;

@@ -3,11 +3,11 @@ package foundry.veil.api.flare.data.effect;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.property.InapplicableProperty;
 import foundry.veil.api.client.property.InvertibleProperty;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.property.properties.RandomFloatProperty;
-import foundry.veil.api.client.property.model.Mat4ModelProperty;
-import foundry.veil.api.client.property.model.ModelProperty;
+import foundry.veil.api.client.property.ModelProperty;
 import foundry.veil.api.client.property.properties.FloatProperty;
 import foundry.veil.api.client.registry.PropertyRegistry;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
@@ -59,17 +59,25 @@ public record FlareMaterial(String clazz, ResourceLocation renderTypeLocation, b
             String name = entry.getKey();
             Property<?> property = entry.getValue();
 
-            if (!(property instanceof ModelProperty) || property instanceof Mat4ModelProperty)
+            if (property instanceof InapplicableProperty) continue;
+
+            if (!(property instanceof ModelProperty))
                 PropertyModifier.modifyProperty(host, clazz, property, modifiers.get(name));
 
             property.applyValue(name, program);
 
             if (property instanceof InvertibleProperty<?> invertibleProperty)
                 invertibleProperty.applyInverseValue(name, program);
+        }
+    }
 
+    public void resetProperties(EffectHost host, ShaderProgram program) {
+        if (program == null) return;
+        for (Property<?> property : properties.values()) {
             if (property instanceof ModelProperty) continue;
             property.resetOverrideValue();
         }
+
     }
 
     private static List<Pair<String, Property<?>>> getListOfPairs(FlareMaterial material) {

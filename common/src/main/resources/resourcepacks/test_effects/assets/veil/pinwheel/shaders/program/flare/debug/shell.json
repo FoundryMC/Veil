@@ -1,4 +1,4 @@
 {
-  "vertex": "cassini:flare/debug/shell",
-  "fragment": "cassini:flare/debug/shell"
+  "vertex": "veil:flare/debug/shell",
+  "fragment": "veil:flare/debug/shell"
 }

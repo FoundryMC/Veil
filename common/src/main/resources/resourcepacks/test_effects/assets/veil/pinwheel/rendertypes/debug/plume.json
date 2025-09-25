@@ -1,5 +1,5 @@
 {
-  "format": "POSITION_TEX_COLOR",
+  "format": "BLOCK",
   "mode": "QUADS",
   "bufferSize": "TRANSIENT",
   "sort": false,
@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:flare/debug/shell"
+      "name": "veil:flare/debug/plume"
     },
     {
       "type": "minecraft:depth_test",
@@ -16,7 +16,7 @@
     },
     {
       "type": "minecraft:transparency",
-      "mode": "lightning"
+      "mode": "additive"
     },
     {
       "type": "minecraft:write_mask",

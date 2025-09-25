@@ -1,5 +1,6 @@
 package foundry.veil.api.client.property.model;
 
+import foundry.veil.api.client.property.ModelProperty;
 import foundry.veil.api.client.property.properties.Mat4Property;
 import org.joml.Matrix4f;
 

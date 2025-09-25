@@ -14,6 +14,7 @@ import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.flare.EffectHost;
+import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.data.effect.FlareEffectTemplate;
 import foundry.veil.api.flare.data.effect.FlareModule;
 import foundry.veil.api.flare.data.model.FlareBakedQuad;
@@ -47,13 +48,14 @@ import java.util.List;
 import static foundry.veil.Veil.LOGGER;
 
 public class EffectInspector implements ResourceFileEditor<FlareResource>, EffectHost {
-    private static final Component TITLE = Component.translatable("inspector.veil.shell.title");
+    private static final Component TITLE = Component.translatable("inspector.veil.effect.title");
     private static final PoseStack POSE_STACK = new PoseStack();
 
     private final ImBoolean open;
     private final VeilResourceManager resourceManager;
     private final FlareResource resource;
     private final ImVec2 mouseDragDelta;
+//    private final
     private double offsetXRot;
     private double offsetYRot;
     private float cameraDistance;
@@ -110,9 +112,7 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
                 RenderSystem.backupProjectionMatrix();
                 RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
 
-                POSE_STACK.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
                 template.render(this, (MatrixStack) POSE_STACK, null);
-                POSE_STACK.translate(cameraPos.x, cameraPos.y, cameraPos.z);
 
                 stack.popMatrix();
                 RenderSystem.restoreProjectionMatrix();

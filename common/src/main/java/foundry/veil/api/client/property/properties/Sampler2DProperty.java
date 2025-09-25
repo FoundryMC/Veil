@@ -1,5 +1,6 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.serialization.MapCodec;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
@@ -30,10 +31,12 @@ public class Sampler2DProperty extends Property<AbstractTexture> {
 
     @Override
     public void applyValue(ShaderUniformAccess uniform, int location) {
+        int originalTexture = GlStateManager._getActiveTexture();
         uniform.setInt(overrideValue.getId());
         glActiveTexture(GL33.GL_TEXTURE0 + overrideValue.getId());
         overrideValue.bind();
         glBindSampler(overrideValue.getId(), 0);
+        glActiveTexture(originalTexture);
     }
 
     @Override

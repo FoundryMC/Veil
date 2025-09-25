@@ -11,11 +11,12 @@ import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.vertex.VertexArray;
+import foundry.veil.api.flare.FlareVertexArrayExtension;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.flare.data.model.FlareBakedQuad;
 import foundry.veil.api.flare.modifier.PropertyModifier;
+import foundry.veil.api.resource.editor.ShellInspector;
 import foundry.veil.api.util.CodecUtil;
-import foundry.veil.ext.RenderStateShardExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +40,7 @@ public class FlareModel {
             CodecUtil.VECTOR3FC_CODEC.fieldOf("scaleOffset").forGetter(FlareModel::getScaleOffset),
             CodecUtil.singleOrList(FlareMaterial.CODEC).fieldOf("materials").forGetter(FlareModel::getMaterials)
     ).apply(instance, FlareModel::new));
-    public static final Supplier<VertexArray> VAO = Suppliers.memoize(VertexArray::create);
+    public static final Supplier<FlareVertexArrayExtension> VAO = Suppliers.memoize(() -> new FlareVertexArrayExtension(VertexArray.create()));
 
     public static final Matrix4f dummyMatrix = new Matrix4f();
     public static final Vector3f dummyVector = new Vector3f();
@@ -82,26 +83,28 @@ public class FlareModel {
                 Optional.empty()
         );
 
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
         BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(shell)) ?
                 shellOverrides.get(shell) :
                 FlareEffectManager.getInstance().getShellManager().getBakedShell(shell);
 
         for (FlareBakedQuad quad : bakedShell.getQuads()) {
-            quad.putBakedQuadInto(builder, matrixStack.pose(), EMPTY_COLOR);
+            quad.putBakedQuadInto(builder, matrixStack.pose());
         }
 
-        VertexArray vao = VAO.get();
+        FlareVertexArrayExtension vao = VAO.get();
         vao.upload(builder.buildOrThrow(), VertexArray.DrawUsage.STATIC);
-        vao.setIndexCount(vao.getIndexCount(), VertexArray.IndexType.INT);
+        vao.setIndexCount(vao.getIndexCount(), VertexArray.IndexType.SHORT);
 
         vao.bind();
         for (FlareMaterial material : materials) {
-            RenderType renderType = VeilRenderType.get(material.renderTypeLocation());
+            RenderType renderType = VeilRenderType.get(material.renderTypeLocation())/*VeilRenderType.get(ShellInspector.RENDE_RTYPE)*/;
             if (renderType == null) continue;
-            ((RenderStateShardExtension) renderType).veil$addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
+            vao.addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
+            vao.addClear(() -> material.resetProperties(host, VeilRenderSystem.getShader()));
             vao.drawWithRenderType(renderType);
         }
+        VertexArray.unbind();
         matrixStack.matrixPop();
 
     }

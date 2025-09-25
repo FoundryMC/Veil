@@ -29,8 +29,6 @@ import static foundry.veil.Veil.LOGGER;
 
 public abstract class PropertyModifier<T> {
 
-    private static final Map<GlslTypeSpecifier.BuiltinType, MapCodec<? extends PropertyModifier<?>>> CODECS = new HashMap<>();
-
     private final String name;
     private final @Nullable String clazz;
     private final String inputControllerName;
@@ -110,12 +108,6 @@ public abstract class PropertyModifier<T> {
         if (mode == PropertyModifierMode.MOLANG)
             return Codec.mapPair(MolangExpressionCodec.CODEC.listOf(size, size).optionalFieldOf("molang"), MapCodec.unit(mode));
         return MapCodec.unit(Pair.of(Optional.empty(), mode));
-    }
-
-    public static <T> boolean registerImplementation(GlslTypeSpecifier.BuiltinType type, MapCodec<? extends PropertyModifier<T>> codec) {
-        if (CODECS.containsKey(type)) return false;
-        CODECS.put(type, codec);
-        return true;
     }
 
     public static void modifyProperty(EffectHost host, @Nullable String clazz, Property<?> property, List<PropertyModifier<?>> modifiers) {

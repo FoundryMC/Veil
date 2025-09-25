@@ -81,6 +81,7 @@ public class FlareEffectLayer {
         model.positionOffset.resetOverrideValue();
         model.rotationOffset.resetOverrideValue();
         model.scaleOffset.resetOverrideValue();
+        model.modelToWorld.resetOverrideValue();
 
     }
 

@@ -1,5 +1,5 @@
 {
-  "format": "POSITION_TEX_COLOR",
+  "format": "BLOCK",
   "mode": "QUADS",
   "bufferSize": "TRANSIENT",
   "sort": false,
@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:flare/debug/rainbow"
+      "name": "veil:flare/debug/shell"
     },
     {
       "type": "minecraft:depth_test",
@@ -16,7 +16,7 @@
     },
     {
       "type": "minecraft:transparency",
-      "mode": "translucent"
+      "mode": "none"
     },
     {
       "type": "minecraft:write_mask",
@@ -25,7 +25,7 @@
     },
     {
       "type": "minecraft:cull",
-      "face": "none"
+      "face": "back"
     }
   ]
 }

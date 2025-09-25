@@ -1,5 +1,6 @@
 package foundry.veil.mixin.debug.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.MatrixStack;
@@ -7,9 +8,11 @@ import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.data.effect.FlareModule;
 import foundry.veil.api.flare.data.effect.FlareSubModule;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +36,7 @@ public class DebugChestRendererMixin implements EffectHost {
 
     @Override
     public float getValue(String name) {
-        return 0.5f;
+        return Mth.sin((RenderSystem.getShaderGameTime() * 750) % Mth.TWO_PI);
     }
 
     @Override

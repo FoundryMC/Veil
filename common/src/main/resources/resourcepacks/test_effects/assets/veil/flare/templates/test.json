@@ -1,0 +1,140 @@
+{
+  "layers": {
+    "name": "testing",
+    "model": {
+      "path": "veil:simple_plume",
+      "positionOffset": [0, -9, 0],
+      "rotationOffset": [0, 0, 0],
+      "scaleOffset": [2, 2, 2],
+      "materials": {
+        "class": "base",
+        "renderType": "veil:debug/shell",
+        "properties": [
+          {
+            "name": "Speed",
+            "type": "float",
+            "value": 1
+          },
+          {
+            "name": "ColorMultiplier",
+            "type": "vec4",
+            "value": [1, 1.0, 1.0, 0.7]
+          },
+          {
+            "name": "Noise",
+            "type": "sampler2d",
+            "value": "veil:textures/noise/animated_noise.png"
+          }
+        ]
+      }
+    },
+    "modifiers": [
+      {
+        "name": "Throttle",
+        "controller": "throttle",
+        "property": "Speed",
+        "type": "float",
+        "curve": [
+          {"time": 0.0, "value": 0.0, "easing": "ease_out_quad"},
+          {"time": 0.05, "value": 0.3, "easing": "ease_in_quad"},
+          {"time": 1.0, "value": 1.0, "easing": "linear"}
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "FlameColor",
+        "controller": "throttle",
+        "property": "ColorMultiplier",
+        "type": "vec4",
+        "curves": [
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_out_quad"},
+            {"time": 0.05, "value": 0.9, "easing": "ease_in_quad"},
+            {"time": 1.0, "value": 0.1, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_out_quad"},
+            {"time": 0.05, "value": 0.1, "easing": "linear"},
+            {"time": 1.0, "value": 0.3, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_out_quad"},
+            {"time": 0.05, "value": 0.2, "easing": "ease_out_quad"},
+            {"time": 1.0, "value": 0.8, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_out_quad"},
+            {"time": 0.05, "value": 0.1, "easing": "ease_in_quad"},
+            {"time": 1.0, "value": 0.2, "easing": "linear"}
+          ]
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "Length",
+        "controller": "throttle",
+        "property": "model::scale",
+        "type": "vec3",
+        "curves": [
+          [
+            {"time": 0.0, "value": 2.0, "easing": "linear"},
+            {"time": 1.0, "value": 2.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
+            {"time": 0.05, "value": 0.2, "easing": "ease_out_quad"},
+            {"time": 1.0, "value": 1.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 2.0, "easing": "linear"},
+            {"time": 1.0, "value": 2.0, "easing": "linear"}
+          ]
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "LengthOffset",
+        "controller": "throttle",
+        "property": "model::position",
+        "type": "vec3",
+        "curves": [
+          [
+            {"time": 0.0, "value": 0.0, "easing": "linear"},
+            {"time": 1.0, "value": 0.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
+            {"time": 0.05, "value": 1.8, "easing": "ease_out_quad"},
+            {"time": 1.0, "value": 9.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "linear"},
+            {"time": 1.0, "value": 0.0, "easing": "linear"}
+          ]
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "RotationOffset",
+        "controller": "throttle",
+        "property": "model::rotation",
+        "type": "vec3",
+        "curves": [
+          [
+            {"time": 0.0, "value": 0.0, "easing": "linear"},
+            {"time": 1.0, "value": 360.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "linear"},
+            {"time": 1.0, "value": 360.0, "easing": "linear"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "linear"},
+            {"time": 1.0, "value": 0.0, "easing": "linear"}
+          ]
+        ],
+        "mode": "replace"
+      }
+    ]
+  }
+}

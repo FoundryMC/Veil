@@ -41,7 +41,7 @@ import static foundry.veil.Veil.LOGGER;
 public class ShellInspector implements ResourceFileEditor<ShellResource> {
     private static final Component TITLE = Component.translatable("inspector.veil.shell.title");
     private static final PoseStack.Pose POSE = new PoseStack().last();
-    public static final ResourceLocation RENDERTYPE = Veil.veilPath("debug/shell");
+    public static final ResourceLocation RENDER_TYPE = Veil.veilPath("debug/shell");
 
     private final ImBoolean open;
     private final VeilResourceManager resourceManager;
@@ -94,18 +94,17 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 Matrix4f projMat = new Matrix4f().perspective((float) Math.toRadians(40.0), aspect, 0.3f, 1000.0f);
                 Matrix4f modelView = new Matrix4f().mul(viewMatrix);
 
-                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
                 for (FlareBakedQuad quad : quads) {
-                    Vector3fc normal = quad.normal();
-                    quad.putBakedQuadInto(builder, POSE, new Vector4f(normal, 1.0f));
+                    quad.putBakedQuadInto(builder, POSE);
                 }
 
                 // draw!
                 MeshData data = builder.build();
 
                 if (data != null) {
-                    RenderType renderType = VeilRenderType.get(RENDERTYPE);
+                    RenderType renderType = VeilRenderType.get(RENDER_TYPE);
                     if (renderType == null) return;
                     Matrix4fStack stack = RenderSystem.getModelViewStack();
 

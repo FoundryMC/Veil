@@ -134,6 +134,7 @@
 
   "inspector.veil.block_model.title": "Block Model Viewer",
   "inspector.veil.shell.title": "Shell Viewer",
+  "inspector.veil.effect.title": "Effect Viewer",
 
   "inspector.veil.shader.title": "GPU Shader Inspector",
   "inspector.veil.shader.button.upload": "Upload",
