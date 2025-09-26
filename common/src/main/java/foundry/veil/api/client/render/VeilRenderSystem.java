@@ -27,6 +27,7 @@ import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.texture.VeilPreloadedTexture;
 import foundry.veil.api.compat.SodiumCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
+import foundry.veil.api.flare.modifier.RandomnessController;
 import foundry.veil.ext.LevelRendererExtension;
 import foundry.veil.ext.TextureManagerExtension;
 import foundry.veil.ext.VertexBufferExtension;
@@ -1141,6 +1142,9 @@ public final class VeilRenderSystem {
             }
 
             UNIFORM_BLOCK_STATE.onShaderCompile();
+        });
+        VeilEventPlatform.INSTANCE.onVeilRegisterGlobalControllers(registry -> {
+            registry.registerGlobalController(RandomnessController.INSTANCE);
         });
     }
 

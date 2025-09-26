@@ -2,6 +2,7 @@ package foundry.veil.api.flare.modifier;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import foundry.veil.VeilClient;
 import foundry.veil.api.flare.EffectHost;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,14 +10,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ControllerManager {
+    /**
+     * <p>A table to store non-global controllers.</p>
+     * <p>Rows - Controllers</p>
+     * <p>Columns - Hosts</p>
+     */
     private final Table<String, String, Controller> controllers = HashBasedTable.create();
-    private final Map<String, Controller> globalControllers = new HashMap<>();
+    private final Map<String, GlobalController> globalControllers = new HashMap<>();
+
+    public ControllerManager() {
+        VeilClient.clientPlatform().onRegisterGlobalControllers(this::addGlobalController);
+    }
 
     public void addController(Controller controller) {
         String name = controller.getIdentifier().name();
-        String invoker = controller.getIdentifier().host();
-        if (name.startsWith("global::")) globalControllers.put(name, controller);
-        else controllers.put(name, invoker, controller);
+        String host = controller.getIdentifier().host();
+        if (name.startsWith("global::") || controller instanceof GlobalController) throw new IllegalArgumentException("Global controllers should be ");
+        else controllers.put(name, host, controller);
+    }
+
+    private void addGlobalController(GlobalController globalController) {
+        String name = globalController.getIdentifier().name();
+        globalControllers.put(name, globalController);
     }
 
     public @Nullable Controller getController(String name, String host) {
@@ -35,10 +50,7 @@ public class ControllerManager {
         return controller;
     }
 
-    public void updateAllControllers(float partialTick) {
-        for (Controller controller : controllers.values()) {
-            if (controller == null) continue;
-            controller.update(partialTick);
-        }
+    public void removeHost(String host) {
+        controllers.columnKeySet().remove(host);
     }
 }

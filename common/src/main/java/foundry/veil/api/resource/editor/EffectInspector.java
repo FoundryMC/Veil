@@ -161,6 +161,11 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
     }
 
     @Override
+    public void close() {
+        EffectHost.super.close();
+    }
+
+    @Override
     public void loadFromDisk() {
         try (Reader reader = resource.resourceInfo().openAsReader(resourceManager)) {
             JsonElement element = JsonParser.parseReader(reader);

@@ -32,4 +32,7 @@ public interface VeilEventPlatform {
     void onVeilShaderCompile(VeilShaderCompileEvent event);
 
     void onVeilDynamicBuffersChanged(VeilDynamicBuffersChangedEvent event);
+
+    void onVeilRegisterGlobalControllers(VeilRegisterGlobalControllersEvent event);
+
 }

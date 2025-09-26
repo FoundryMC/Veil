@@ -1,5 +1,6 @@
 package foundry.veil.api.flare;
 
+import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
@@ -34,7 +35,6 @@ public final class FlareEffectManager implements NativeResource {
         shellManager = new ShellManager();
         flareManager = new FlareManager();
         controllerManager = new ControllerManager();
-        controllerManager.addController(RandomnessController.INSTANCE);
     }
 
     public ShellManager getShellManager() {

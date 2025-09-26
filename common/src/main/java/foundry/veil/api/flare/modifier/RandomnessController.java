@@ -7,17 +7,13 @@ import net.minecraft.util.RandomSource;
  *
  * @author GuyApooye
  */
-public class RandomnessController extends Controller {
-    public static final RandomnessController INSTANCE = new RandomnessController("global::random");
+public class RandomnessController extends GlobalController {
+    public static final RandomnessController INSTANCE = new RandomnessController("random");
 
     private final RandomSource randomSource = RandomSource.create(10840L);
 
     private RandomnessController(String name) {
-        super(new ControllerIdentifier(name, "global"), null);
-    }
-
-    @Override
-    public void update(float partialTick) {
+        super(name);
     }
 
     @Override
@@ -27,7 +23,6 @@ public class RandomnessController extends Controller {
 
     @Override
     public float getValue() {
-        value = randomSource.nextFloat();
-        return value;
+        return value = randomSource.nextFloat();
     }
 }

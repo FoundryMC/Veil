@@ -4,10 +4,9 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBuffersChange;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.forge.event.ForgeVeilAddShaderProcessorsEvent;
-import foundry.veil.forge.event.ForgeVeilDynamicBuffersChangedEvent;
-import foundry.veil.forge.event.ForgeVeilPostProcessingEvent;
-import foundry.veil.forge.event.ForgeVeilShaderCompileEvent;
+import foundry.veil.api.event.VeilAddShaderPreProcessorsEvent;
+import foundry.veil.api.event.VeilRegisterGlobalControllersEvent;
+import foundry.veil.forge.event.*;
 import foundry.veil.platform.VeilClientPlatform;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
@@ -31,7 +30,7 @@ public class NeoForgeVeilClientPlatform implements VeilClientPlatform {
     }
 
     @Override
-    public void onRegisterShaderPreProcessors(ResourceProvider resourceProvider, Registry registry) {
+    public void onRegisterShaderPreProcessors(ResourceProvider resourceProvider, VeilAddShaderPreProcessorsEvent.Registry registry) {
         ModLoader.postEvent(new ForgeVeilAddShaderProcessorsEvent(resourceProvider, registry));
     }
 
@@ -43,5 +42,10 @@ public class NeoForgeVeilClientPlatform implements VeilClientPlatform {
     @Override
     public void onVeilDynamicBuffersChanged(DynamicBuffersChange change) {
         ModLoader.postEvent(new ForgeVeilDynamicBuffersChangedEvent(change));
+    }
+
+    @Override
+    public void onRegisterGlobalControllers(VeilRegisterGlobalControllersEvent.Registry registry) {
+        ModLoader.postEvent(new ForgeVeilRegisterGlobalControllersEvent(registry));
     }
 }

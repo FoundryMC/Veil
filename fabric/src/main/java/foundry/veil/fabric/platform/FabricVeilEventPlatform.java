@@ -57,4 +57,9 @@ public class FabricVeilEventPlatform implements VeilEventPlatform {
     public void onVeilDynamicBuffersChanged(VeilDynamicBuffersChangedEvent event) {
         FabricVeilDynamicBuffersChangedEvent.EVENT.register(event);
     }
+
+    @Override
+    public void onVeilRegisterGlobalControllers(VeilRegisterGlobalControllersEvent event) {
+        FabricVeilRegisterGlobalControllersEvent.EVENT.register(event);
+    }
 }

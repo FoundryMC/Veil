@@ -1,14 +1,18 @@
 package foundry.veil.platform;
 
-import foundry.veil.api.event.VeilAddShaderPreProcessorsEvent;
-import foundry.veil.api.event.VeilDynamicBuffersChangedEvent;
-import foundry.veil.api.event.VeilPostProcessingEvent;
-import foundry.veil.api.event.VeilShaderCompileEvent;
+import foundry.veil.api.event.*;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Manages client platform-specific features.
  */
 @ApiStatus.Internal
-public interface VeilClientPlatform extends VeilPostProcessingEvent.Pre, VeilPostProcessingEvent.Post, VeilAddShaderPreProcessorsEvent, VeilShaderCompileEvent, VeilDynamicBuffersChangedEvent {
+public interface VeilClientPlatform extends
+        VeilPostProcessingEvent.Pre,
+        VeilPostProcessingEvent.Post,
+        VeilAddShaderPreProcessorsEvent,
+        VeilShaderCompileEvent,
+        VeilDynamicBuffersChangedEvent,
+        VeilRegisterGlobalControllersEvent
+{
 }
