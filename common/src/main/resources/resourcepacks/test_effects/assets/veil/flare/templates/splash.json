@@ -1,0 +1,86 @@
+{
+  "layers": {
+    "name": "splash0",
+    "model": {
+      "path": "veil:cube",
+      "positionOffset": [0, 0, 0],
+      "rotationOffset": [0, 0, 0],
+      "scaleOffset": [1, 1, 1],
+      "materials": {
+        "class": "base",
+        "renderType": "veil:flare/splash",
+        "properties": [
+          {
+            "name": "Shift",
+            "type": "float",
+            "value": 0
+          },
+          {
+            "name": "Time",
+            "type": "float",
+            "value": 0
+          },
+          {
+            "name": "Blue",
+            "type": "vec3",
+            "value": [0.2, 0.3, 0.8]
+          },
+          {
+            "name": "Sampler0",
+            "type": "sampler2d",
+            "value": "minecraft:textures/block/water_still.png"
+          }
+        ]
+      }
+    },
+    "modifiers": [
+      {
+        "name": "ScaleModel",
+        "controller": "time",
+        "property": "model::scale",
+        "type": "vec3",
+        "curves": [
+          [
+            {"time": 0.0, "value": 1.0, "easing": "ease_out_quad"}
+          ],
+          [
+            {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
+            {"time": 0.5, "value": 1.5, "easing": "ease_in_quad"},
+            {"time": 0.75, "value": 1.25, "easing": "ease_in_quad"},
+            {"time": 0.8, "value": 1.0, "easing": "ease_in_quad"},
+            {"time": 1.0, "value": 0.0, "easing": "ease_in_quad"}
+          ],
+          [
+            {"time": 0.0, "value": 1.0, "easing": "ease_out_quad"}
+          ]
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "Scale",
+        "controller": "time",
+        "property": "Shift",
+        "type": "float",
+        "curve": [
+          {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
+          {"time": 0.5, "value": 1.25, "easing": "ease_in_quad"},
+          {"time": 0.75, "value": 1.5, "easing": "ease_in_quad"},
+          {"time": 0.8, "value": 1.5, "easing": "ease_in_quad"},
+          {"time": 1.0, "value": 0.0, "easing": "ease_in_quad"}
+        ],
+        "mode": "replace"
+      },
+      {
+        "name": "Time",
+        "controller": "time",
+        "property": "Time",
+        "type": "float",
+        "curve": [
+          {"time": 0.0, "value": 0.0, "easing": "linear"},
+          {"time": 1.0, "value": 1.0, "easing": "linear"}
+        ],
+        "mode": "replace"
+      }
+    ]
+  }
+}

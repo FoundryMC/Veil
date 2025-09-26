@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:flare/debug/plume"
+      "name": "veil:flare/plume"
     },
     {
       "type": "minecraft:depth_test",
@@ -29,3 +29,4 @@
     }
   ]
 }
+

@@ -1,14 +1,14 @@
 {
   "layers": {
-    "name": "testing",
+    "name": "plume",
     "model": {
-      "path": "veil:simple_plume",
+      "path": "veil:cylinder",
       "positionOffset": [0, -9, 0],
       "rotationOffset": [0, 0, 0],
       "scaleOffset": [2, 2, 2],
       "materials": {
         "class": "base",
-        "renderType": "veil:debug/shell",
+        "renderType": "veil:flare/plume",
         "properties": [
           {
             "name": "Speed",

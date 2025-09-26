@@ -72,7 +72,6 @@ public class FlareModel {
 
         matrixStack.matrixPush();
         matrixStack.translate(positionOffset.x(), positionOffset.y(), positionOffset.z());
-        matrixStack.translate(0.5f, 0.0f, 0.5f);
         matrixStack.rotate(rotationOffset.getRotation());
         matrixStack.applyScale(scaleOffset.x(), scaleOffset.y(), scaleOffset.z());
         Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();

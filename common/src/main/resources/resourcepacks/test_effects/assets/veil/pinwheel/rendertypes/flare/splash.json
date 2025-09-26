@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:flare/debug/shell"
+      "name": "veil:flare/splash"
     },
     {
       "type": "minecraft:depth_test",
@@ -16,16 +16,17 @@
     },
     {
       "type": "minecraft:transparency",
-      "mode": "none"
+      "mode": "additive"
     },
     {
       "type": "minecraft:write_mask",
       "color": true,
-      "depth": true
+      "depth": false
     },
     {
       "type": "minecraft:cull",
-      "face": "back"
+      "face": "none"
     }
   ]
 }
+

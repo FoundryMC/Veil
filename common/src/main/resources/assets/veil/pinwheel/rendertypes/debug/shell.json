@@ -1,5 +1,5 @@
 {
-  "format": "POSITION_COLOR_NORMAL",
+  "format": "BLOCK",
   "mode": "QUADS",
   "bufferSize": "TRANSIENT",
   "sort": false,
@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:debug/shell"
+      "name": "veil:flare/debug/shell"
     },
     {
       "type": "minecraft:depth_test",
