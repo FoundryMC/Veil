@@ -88,7 +88,9 @@ public class FlareModel {
                 shellOverrides.get(shell) :
                 FlareEffectManager.getInstance().getShellManager().getBakedShell(shell);
 
-        for (FlareBakedQuad quad : bakedShell.getQuads()) {
+        List<FlareBakedQuad> quads = bakedShell.getQuads();
+        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
+            FlareBakedQuad quad = quads.get(i);
             quad.putBakedQuadInto(builder, matrixStack.pose());
         }
 
@@ -97,8 +99,9 @@ public class FlareModel {
         vao.setIndexCount(vao.getIndexCount(), VertexArray.IndexType.SHORT);
 
         vao.bind();
-        for (FlareMaterial material : materials) {
-            RenderType renderType = VeilRenderType.get(material.renderTypeLocation())/*VeilRenderType.get(ShellInspector.RENDE_RTYPE)*/;
+        for (int i = 0, materialsSize = materials.size(); i < materialsSize; i++) {
+            FlareMaterial material = materials.get(i);
+            RenderType renderType = VeilRenderType.get(material.renderTypeLocation());
             if (renderType == null) continue;
             vao.addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
             vao.addClear(() -> material.resetProperties(host, VeilRenderSystem.getShader()));

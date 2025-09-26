@@ -35,7 +35,8 @@ public final class FlareSubModule {
 
     public void render(EffectHost host, MatrixStack matrixStack, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         FlareEffectManager flare = FlareEffectManager.getInstance();
-        for (ResourceLocation templateLocation : templates) {
+        for (int i = 0, templatesSize = templates.size(); i < templatesSize; i++) {
+            ResourceLocation templateLocation = templates.get(i);
             FlareEffectTemplate template = flare.getTemplate(templateLocation);
             if (template == null) {
                 LOGGER.error("Template {} could not be found!", templateLocation);
