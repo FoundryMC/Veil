@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * <p>Properties are variables (and usually also shader uniforms) that can be created from a data driven context. Used by Flare effects to manipulate models and shader uniforms<p/>
+ * <p>Properties are variables (and usually also shader uniforms) that can be created from a data driven context. Used by Flare effects to manipulate models and shader uniforms</p>
  *
  * @author GuyApooye
  * @param <T>

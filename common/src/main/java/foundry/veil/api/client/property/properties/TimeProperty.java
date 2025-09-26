@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <p>Applies time in seconds since client booted up according to this vector: (t/20, t, t*2, t*3)<p/>
- * Added as a default property named '_Time' in all {@link FlareMaterial}.
+ * <p>Applies time in seconds since client booted up according to this vector: (t/20, t, t*2, t*3)</p>
+ * Added as a default property named <code>_Time</code> in all {@link FlareMaterial}.
  *
  * @author GuyApooye
  */

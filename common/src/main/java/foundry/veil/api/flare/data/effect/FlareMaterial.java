@@ -15,7 +15,6 @@ import foundry.veil.api.flare.modifier.PropertyModifier;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.resources.ResourceLocation;
 import foundry.veil.api.flare.EffectHost;
-import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;
