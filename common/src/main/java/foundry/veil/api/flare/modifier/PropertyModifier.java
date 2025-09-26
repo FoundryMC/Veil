@@ -10,7 +10,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.registry.PropertyModifierRegistry;
 import foundry.veil.api.molang.MolangExpressionCodec;
 import gg.moonflower.molangcompiler.api.MolangExpression;
-import io.github.ocelot.glslprocessor.api.grammar.GlslTypeSpecifier;
 import net.minecraft.util.StringRepresentable;
 import foundry.veil.api.client.property.ImmutableProperty;
 import foundry.veil.api.client.property.Property;
@@ -19,9 +18,7 @@ import foundry.veil.api.flare.FlareEffectManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 

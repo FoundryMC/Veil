@@ -21,6 +21,11 @@ import java.util.Map;
 import static net.minecraft.client.resources.model.ModelBakery.MODEL_LISTER;
 import static foundry.veil.Veil.LOGGER;
 
+/**
+ * Adapted from {@link ModelBakery}
+ *
+ * @author GuyApooye
+*/
 public class ShellBakery {
     public static final ResourceLocation MISSING_SHELL_LOCATION = Veil.veilPath("builtin/missing");
     public static final ModelResourceLocation MISSING_SHELL_VARIANT = new ModelResourceLocation(MISSING_SHELL_LOCATION, "shell");
@@ -94,7 +99,6 @@ public class ShellBakery {
         UnbakedShell unbakedShell = shellResources.get(resourcelocation);
         if (unbakedShell == null) {
             return null;
-//            throw new RuntimeException(new FileNotFoundException(resourcelocation.toString()));
         } else {
             unbakedShell.setLocation(location);
             return unbakedShell;

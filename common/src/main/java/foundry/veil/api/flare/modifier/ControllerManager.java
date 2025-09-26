@@ -14,7 +14,7 @@ public class ControllerManager {
 
     public void addController(Controller controller) {
         String name = controller.getIdentifier().name();
-        String invoker = controller.getIdentifier().name();
+        String invoker = controller.getIdentifier().host();
         if (name.startsWith("global::")) globalControllers.put(name, controller);
         else controllers.put(name, invoker, controller);
     }

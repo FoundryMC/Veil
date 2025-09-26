@@ -1,9 +1,17 @@
 package foundry.veil.api.flare;
 
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.api.flare.data.effect.FlareEffectTemplate;
 import foundry.veil.api.flare.data.effect.FlareModel;
 import foundry.veil.api.flare.data.effect.FlareModule;
+import foundry.veil.platform.VeilEventPlatform;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 import foundry.veil.api.flare.modifier.ControllerManager;
 import foundry.veil.api.flare.model.BakedShell;
@@ -12,6 +20,7 @@ import foundry.veil.api.flare.modifier.RandomnessController;
 import foundry.veil.impl.flare.FlareManager;
 import foundry.veil.impl.flare.ShellManager;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4fc;
 import org.lwjgl.system.NativeResource;
 
 public final class FlareEffectManager implements NativeResource {
@@ -58,6 +67,6 @@ public final class FlareEffectManager implements NativeResource {
 
     @Override
     public void free() {
-        FlareModel.VAO.get().free();
+        FlareModel.VAO.get().getVertexArray().free();
     }
 }

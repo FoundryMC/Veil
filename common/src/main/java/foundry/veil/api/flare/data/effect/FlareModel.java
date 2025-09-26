@@ -15,7 +15,6 @@ import foundry.veil.api.flare.FlareVertexArrayExtension;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.flare.data.model.FlareBakedQuad;
 import foundry.veil.api.flare.modifier.PropertyModifier;
-import foundry.veil.api.resource.editor.ShellInspector;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -32,7 +31,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class FlareModel {
-    public static final Vector4fc EMPTY_COLOR = new Vector4f();
     public static final Codec<FlareModel> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("path").forGetter(FlareModel::getShell),
             CodecUtil.VECTOR3FC_CODEC.fieldOf("positionOffset").forGetter(FlareModel::getPositionOffset),
@@ -43,7 +41,6 @@ public class FlareModel {
     public static final Supplier<FlareVertexArrayExtension> VAO = Suppliers.memoize(() -> new FlareVertexArrayExtension(VertexArray.create()));
 
     public static final Matrix4f dummyMatrix = new Matrix4f();
-    public static final Vector3f dummyVector = new Vector3f();
 
     public static final String POSITION_PROPERTY_NAME = "model::position";
     public static final String ROTATION_PROPERTY_NAME = "model::rotation";
@@ -65,7 +62,7 @@ public class FlareModel {
         this.materials = materials;
     }
 
-    public void render(EffectHost host, MatrixStack matrixStack, Map<String, List<PropertyModifier<?>>> modifiers, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
+    public void render(EffectHost host, MatrixStack matrixStack, float partialTick, Map<String, List<PropertyModifier<?>>> modifiers, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
 
         Vector3fc positionOffset = this.positionOffset.getValue();
         Vector3fc scaleOffset = this.scaleOffset.getValue();
@@ -93,7 +90,8 @@ public class FlareModel {
             quad.putBakedQuadInto(builder, matrixStack.pose());
         }
 
-        FlareVertexArrayExtension vao = VAO.get();
+        FlareVertexArrayExtension vaoExtension = VAO.get();
+        VertexArray vao = vaoExtension.getVertexArray();
         vao.upload(builder.buildOrThrow(), VertexArray.DrawUsage.STATIC);
         vao.setIndexCount(vao.getIndexCount(), VertexArray.IndexType.SHORT);
 
@@ -102,9 +100,9 @@ public class FlareModel {
             FlareMaterial material = materials.get(i);
             RenderType renderType = VeilRenderType.get(material.renderTypeLocation());
             if (renderType == null) continue;
-            vao.addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
-            vao.addClear(() -> material.resetProperties(host, VeilRenderSystem.getShader()));
-            vao.drawWithRenderType(renderType);
+            vaoExtension.addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
+            vaoExtension.addClear(() -> material.resetProperties(host, VeilRenderSystem.getShader()));
+            vaoExtension.drawWithRenderType(renderType);
         }
         VertexArray.unbind();
         matrixStack.matrixPop();

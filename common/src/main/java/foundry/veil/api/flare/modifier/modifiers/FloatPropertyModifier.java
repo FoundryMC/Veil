@@ -1,4 +1,4 @@
-package foundry.veil.api.client.property.modifiers;
+package foundry.veil.api.flare.modifier.modifiers;
 
 import foundry.veil.api.client.registry.PropertyModifierRegistry;
 import foundry.veil.api.flare.data.FloatCurve;

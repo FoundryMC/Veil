@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.registry.PropertyModifierRegistry;
 import foundry.veil.api.client.render.MatrixStack;
+import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.resources.ResourceLocation;
@@ -69,14 +70,19 @@ public class FlareEffectLayer {
         materialProperties.put("_Time", TimeProperty.INSTANCE);
     }
 
-    public void render(EffectHost host, MatrixStack matrixStack, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
+    public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         if (disabled) return;
+
+        for (int i = 0, originalModifiersSize = originalModifiers.size(); i < originalModifiersSize; i++) {
+            PropertyModifier<?> modifier = originalModifiers.get(i);
+            FlareEffectManager.getInstance().getControllerManager().getOrCreateController(modifier.inputControllerName(), host).update(partialTick);
+        }
 
         PropertyModifier.modifyProperty(host, null, model.positionOffset, modifiers.get(FlareModel.POSITION_PROPERTY_NAME));
         PropertyModifier.modifyProperty(host, null, model.rotationOffset, modifiers.get(FlareModel.ROTATION_PROPERTY_NAME));
         PropertyModifier.modifyProperty(host, null, model.scaleOffset, modifiers.get(FlareModel.SCALE_PROPERTY_NAME));
 
-        model.render(host, matrixStack, modifiers, shellOverrides);
+        model.render(host, matrixStack, partialTick, modifiers, shellOverrides);
 
         model.positionOffset.resetOverrideValue();
         model.rotationOffset.resetOverrideValue();

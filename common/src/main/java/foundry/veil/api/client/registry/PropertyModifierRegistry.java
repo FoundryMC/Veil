@@ -2,12 +2,12 @@ package foundry.veil.api.client.registry;
 
 import com.mojang.serialization.MapCodec;
 import foundry.veil.Veil;
-import foundry.veil.api.client.property.modifiers.FloatPropertyModifier;
-import foundry.veil.api.client.property.modifiers.Vec2PropertyModifier;
-import foundry.veil.api.client.property.modifiers.Vec3PropertyModifier;
-import foundry.veil.api.client.property.modifiers.Vec4PropertyModifier;
 import foundry.veil.api.flare.data.FloatCurve;
 import foundry.veil.api.flare.modifier.PropertyModifier;
+import foundry.veil.api.flare.modifier.modifiers.FloatPropertyModifier;
+import foundry.veil.api.flare.modifier.modifiers.Vec2PropertyModifier;
+import foundry.veil.api.flare.modifier.modifiers.Vec3PropertyModifier;
+import foundry.veil.api.flare.modifier.modifiers.Vec4PropertyModifier;
 import foundry.veil.platform.registry.RegistrationProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +16,9 @@ import org.joml.*;
 
 import java.util.function.Supplier;
 
+/**
+ * Registry for all property modifier types.
+ */
 public final class PropertyModifierRegistry {
 
     public static final ResourceKey<Registry<PropertyModifierType<?,?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(Veil.veilPath("property_modifier"));

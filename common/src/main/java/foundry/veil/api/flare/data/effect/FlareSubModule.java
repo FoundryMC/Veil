@@ -33,7 +33,7 @@ public final class FlareSubModule {
         return Either.right(subModule.templates);
     }
 
-    public void render(EffectHost host, MatrixStack matrixStack, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
+    public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         FlareEffectManager flare = FlareEffectManager.getInstance();
         for (int i = 0, templatesSize = templates.size(); i < templatesSize; i++) {
             ResourceLocation templateLocation = templates.get(i);
@@ -42,7 +42,7 @@ public final class FlareSubModule {
                 LOGGER.error("Template {} could not be found!", templateLocation);
                 continue;
             }
-            template.render(host, matrixStack, shellOverrides);
+            template.render(host, matrixStack, partialTick, shellOverrides);
         }
     }
 

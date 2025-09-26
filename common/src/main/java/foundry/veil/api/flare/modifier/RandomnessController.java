@@ -2,6 +2,11 @@ package foundry.veil.api.flare.modifier;
 
 import net.minecraft.util.RandomSource;
 
+/**
+ * Controller with a random value each time {@link Controller#getValue()} is called.
+ *
+ * @author GuyApooye
+ */
 public class RandomnessController extends Controller {
     public static final RandomnessController INSTANCE = new RandomnessController("global::random");
 
@@ -13,11 +18,16 @@ public class RandomnessController extends Controller {
 
     @Override
     public void update(float partialTick) {
-        value = getUpdatedValue();
     }
 
     @Override
     protected float getUpdatedValue() {
-        return randomSource.nextFloat();
+        return value;
+    }
+
+    @Override
+    public float getValue() {
+        value = randomSource.nextFloat();
+        return value;
     }
 }

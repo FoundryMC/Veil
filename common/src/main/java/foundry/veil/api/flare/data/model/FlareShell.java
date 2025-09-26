@@ -11,6 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Textureless model, may contain texture coordinate data.
+ *
+ * @author GuyApooye
+ */
 public class FlareShell implements UnbakedShell {
 
     public static final Codec<FlareShell> CODEC = RecordCodecBuilder.create(instance -> instance.group(

@@ -4,6 +4,7 @@ import foundry.veil.api.client.property.ImmutableProperty;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import foundry.veil.api.flare.data.effect.FlareMaterial;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.client.Minecraft;
@@ -13,6 +14,12 @@ import org.joml.Vector4f;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <p>Applies time in seconds since client booted up according to this vector: (t/20, t, t*2, t*3)<p/>
+ * Added as a default property named '_Time' in all {@link FlareMaterial}.
+ *
+ * @author GuyApooye
+ */
 public class TimeProperty extends Property<Vector4f> implements ImmutableProperty {
 
     private static final Minecraft minecraft = Minecraft.getInstance();

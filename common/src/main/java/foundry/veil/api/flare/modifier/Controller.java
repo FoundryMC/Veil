@@ -1,7 +1,14 @@
 package foundry.veil.api.flare.modifier;
 
+import foundry.veil.api.client.property.Property;
 import foundry.veil.api.flare.EffectHost;
+import foundry.veil.api.flare.data.FloatCurve;
 
+/**
+ * Controllers collect values from {@link EffectHost}s to be used to evaluate {@link FloatCurve}s and modify {@link Property}s.
+ *
+ * @author GuyApooye
+ */
 public class Controller {
     protected final ControllerIdentifier identifier;
     protected final EffectHost host;

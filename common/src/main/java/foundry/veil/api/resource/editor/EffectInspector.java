@@ -9,46 +9,36 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import foundry.veil.Veil;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.MatrixStack;
-import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.flare.EffectHost;
-import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.data.effect.FlareEffectTemplate;
-import foundry.veil.api.flare.data.effect.FlareModule;
-import foundry.veil.api.flare.data.model.FlareBakedQuad;
-import foundry.veil.api.flare.data.model.FlareShell;
-import foundry.veil.api.flare.data.model.ShellElement;
-import foundry.veil.api.flare.data.model.ShellElementFace;
-import foundry.veil.api.flare.model.ShellBakery;
 import foundry.veil.api.resource.VeilEditorEnvironment;
 import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.api.resource.type.FlareResource;
-import foundry.veil.api.resource.type.ShellResource;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 
 import java.io.Reader;
 import java.lang.Math;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static foundry.veil.Veil.LOGGER;
 
+/**
+ * Viewer for effect templates. Adapted from {@link BlockModelInspector}
+ *
+ * @author GuyApooye
+ */
 public class EffectInspector implements ResourceFileEditor<FlareResource>, EffectHost {
     private static final Component TITLE = Component.translatable("inspector.veil.effect.title");
     private static final PoseStack POSE_STACK = new PoseStack();
@@ -133,7 +123,7 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
                 RenderSystem.backupProjectionMatrix();
                 RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
 
-                template.render(this, (MatrixStack) POSE_STACK, null);
+                template.render(this, (MatrixStack) POSE_STACK, 0.0f, null);
 
                 stack.popMatrix();
                 RenderSystem.restoreProjectionMatrix();

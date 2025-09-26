@@ -38,6 +38,11 @@ import java.util.List;
 
 import static foundry.veil.Veil.LOGGER;
 
+/**
+ * Viewer for shells. Adapted from {@link BlockModelInspector}
+ *
+ * @author GuyApooye
+ */
 public class ShellInspector implements ResourceFileEditor<ShellResource> {
     private static final Component TITLE = Component.translatable("inspector.veil.shell.title");
     private static final PoseStack.Pose POSE = new PoseStack().last();

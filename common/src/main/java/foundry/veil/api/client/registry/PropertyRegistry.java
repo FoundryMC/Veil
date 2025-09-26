@@ -16,6 +16,9 @@ import org.joml.*;
 
 import java.util.function.Supplier;
 
+/**
+ * Registry for all property types.
+ */
 public final class PropertyRegistry {
 
     public static final ResourceKey<Registry<PropertyType<?,?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(Veil.veilPath("property"));

@@ -23,7 +23,6 @@ import java.util.Map;
 
 public record FlareMaterial(String clazz, ResourceLocation renderTypeLocation, boolean useRandomSeed,
                             Map<String, Property<?>> properties) {
-    private static final Vector4f EMPTY_COLOR = new Vector4f();
     public static Codec<FlareMaterial> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("class").forGetter(FlareMaterial::clazz),
             ResourceLocation.CODEC.fieldOf("renderType").forGetter(FlareMaterial::renderTypeLocation),

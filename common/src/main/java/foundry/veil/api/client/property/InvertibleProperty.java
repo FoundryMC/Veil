@@ -8,6 +8,12 @@ import foundry.veil.api.flare.modifier.PropertyModifier;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A property that applies its inverse value after applying the main one, adding the "I" prefix to it.
+ *
+ * @author GuyApooye
+ * @param <T>
+ */
 public abstract class InvertibleProperty<T> extends Property<T> {
     protected T overrideInverseValue;
     private final T inverseValue;

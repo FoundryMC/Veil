@@ -11,6 +11,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Float curves are built from several easing functions strapped together.
+ *
+ * @author GuyApooye
+ */
 public class FloatCurve {
     
     public static final Codec<FloatCurve> CODEC = Key.CODEC.listOf().xmap(FloatCurve::new, FloatCurve::getKeys);
