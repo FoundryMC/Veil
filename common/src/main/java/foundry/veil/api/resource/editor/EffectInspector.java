@@ -43,7 +43,9 @@ import org.joml.*;
 
 import java.io.Reader;
 import java.lang.Math;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static foundry.veil.Veil.LOGGER;
 
@@ -55,7 +57,8 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
     private final VeilResourceManager resourceManager;
     private final FlareResource resource;
     private final ImVec2 mouseDragDelta;
-//    private final
+    private final Map<String, Float> values;
+    private String selectedValue;
     private double offsetXRot;
     private double offsetYRot;
     private float cameraDistance;
@@ -67,6 +70,7 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
         this.resourceManager = environment.getResourceManager();
         this.resource = resource;
         this.mouseDragDelta = new ImVec2();
+        this.values = new HashMap<>();
         offsetXRot = Math.toRadians(45.0);
         offsetYRot = Math.toRadians(30.0);
         cameraDistance = 10.0f;
@@ -84,6 +88,23 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
         ImGui.setNextWindowSize(256.0F, 256.0F, ImGuiCond.Once);
         if (ImGui.begin(TITLE.getString() + "###shell_editor_" + resourceInfo.fileName(), this.open, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoSavedSettings)) {
             VeilImGuiUtil.resourceLocation(resourceInfo.location());
+
+            if (selectedValue == null && !values.isEmpty()) {
+                selectedValue = values.entrySet().iterator().next().getKey();
+            }
+            if (selectedValue != null) {
+                float[] value = new float[]{getValue(selectedValue)};
+                if (ImGui.beginCombo("##values", selectedValue + " = " + value[0])) {
+                    for (String name : values.keySet()) {
+                        if (ImGui.selectable(name)) selectedValue = name;
+                    }
+                    ImGui.endCombo();
+                }
+                if (ImGui.dragFloat("##value", value, 0.05f)) {
+                    values.put(selectedValue, value[0]);
+                }
+            }
+
             int desiredWidth = ((int) ImGui.getContentRegionAvailX() - 2) * 2;
             int desiredHeight = ((int) ImGui.getContentRegionAvailY() - 2) * 2;
 
@@ -168,7 +189,7 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
 
     @Override
     public float getValue(String name) {
-        return 1.0f;
+        return values.computeIfAbsent(name, n -> 0.0f);
     }
 
     @Override
