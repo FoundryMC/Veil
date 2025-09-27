@@ -1,0 +1,8 @@
+{
+  "subModules": {
+    "plume": "veil:plume",
+    "splash": [
+      "veil:splash"
+    ]
+  }
+}

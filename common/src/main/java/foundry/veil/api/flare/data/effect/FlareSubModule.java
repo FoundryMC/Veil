@@ -17,9 +17,7 @@ import static foundry.veil.Veil.LOGGER;
 
 public final class FlareSubModule {
     public static final Codec<FlareSubModule> CODEC = Codec.either(ResourceLocation.CODEC.listOf()
-                            .xmap(FlareSubModule::new, FlareSubModule::templates)
-                            .fieldOf("templates")
-                            .codec(),
+                            .xmap(FlareSubModule::new, FlareSubModule::templates),
                     ResourceLocation.CODEC.xmap(List::of, List::getFirst)
             )
             .xmap(FlareSubModule::eitherToModule, FlareSubModule::moduleToEither);
