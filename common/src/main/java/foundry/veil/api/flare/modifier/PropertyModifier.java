@@ -15,6 +15,7 @@ import foundry.veil.api.client.property.ImmutableProperty;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.FlareEffectManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -154,7 +155,8 @@ public abstract class PropertyModifier<T> {
         ADD("add"),
         SUBTRACT("subtract"),
         MULTIPLY("multiply"),
-        MOLANG("molang");
+        @ApiStatus.Experimental
+        MOLANG("molang"); //Buggy, don't use.
 
         private final String name;
 

@@ -80,3 +80,4 @@ dependencies {
 - [Easings](Easings)
 - [Poses and custom code-based Animations](Poses)
 - [Quasar](Quasar)
+- [Flare](Flare)

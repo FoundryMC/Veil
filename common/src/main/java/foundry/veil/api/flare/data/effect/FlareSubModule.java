@@ -44,6 +44,10 @@ public final class FlareSubModule {
         }
     }
 
+    public void render(EffectHost host, MatrixStack matrixStack, float partialTick) {
+        this.render(host, matrixStack, partialTick, null);
+    }
+
     private static FlareSubModule eitherToModule(Either<FlareSubModule, List<ResourceLocation>> either) {
         return either.map(Function.identity(), FlareSubModule::new);
     }
