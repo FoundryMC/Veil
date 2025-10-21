@@ -17,10 +17,12 @@ in vec3 normal;
 out vec4 fragColor;
 
 void main() {
+    vec4 baseColor = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+
     // #veil:albedo
-    vec4 albedoColor = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+    vec4 albedoColor = mix(vec4(overlayColor.rgb, baseColor.a), baseColor, overlayColor.a);
+
     vec4 color = albedoColor * lightMapColor;
-    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     if (color.a < 0.05) discard;
 
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);

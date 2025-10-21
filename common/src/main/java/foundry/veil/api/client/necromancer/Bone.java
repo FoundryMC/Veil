@@ -21,6 +21,7 @@ public class Bone {
     public List<Bone> children;
 
     public final String identifier;
+    private int index;
 
     // list of all parents, starting from the root and going down
     public List<Bone> parentChain;
@@ -50,6 +51,14 @@ public class Bone {
 
         this.children = new ArrayList<>();
         this.parentChain = new ArrayList<>();
+    }
+
+    protected void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 
     public void setBaseAttributes(Vector3fc pos, Quaternionfc rotation, Vector3f rotationPoint, Vector3fc scale, Vector4fc color) {

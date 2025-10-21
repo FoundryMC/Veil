@@ -3,7 +3,7 @@
   "fragment": "veil:necromancer/skinned_mesh",
   "definitions": [
     {
-      "NECROMANCER_BONE_BUFFER_SIZE": 1
+      "NECROMANCER_BONE_BUFFER_SIZE": 256
     }
   ]
 }

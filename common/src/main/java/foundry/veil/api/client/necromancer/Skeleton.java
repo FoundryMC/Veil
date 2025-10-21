@@ -10,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 public abstract class Skeleton {
-
     public static final int MAX_BONES = 256;
     public static final int UNIFORM_STRIDE = 28 * Float.BYTES;
 
@@ -34,6 +33,7 @@ public abstract class Skeleton {
     }
 
     public void addBone(Bone part) {
+        part.setIndex(this.bones.size());
         this.bones.put(part.identifier, part);
     }
 
@@ -77,26 +77,47 @@ public abstract class Skeleton {
      * @param matrixStack
      * @param orientationStack
      */
-    public void storeInstancedData(ByteBuffer buffer, Collection<Bone> bones, Object2IntMap<String> boneIds, int depth, Vector4f color, Matrix3f normalMatrix, Matrix4x3f baseTransform, Matrix4x3f[] matrixStack, Quaternionf[] orientationStack, float partialTicks) {
+    public void storeInstancedData(
+            ByteBuffer buffer,
+            Collection<Bone> bones,
+            Object2IntMap<String> boneIds,
+            int depth, Vector4f color,
+            Matrix3f normalMatrix,
+            Matrix4x3f baseTransform,
+            Matrix4x3f[] matrixStack,
+            Quaternionf[] orientationStack,
+            float partialTicks) {
         for (Bone bone : bones) {
-            int id = boneIds.getInt(bone.identifier);
+            int boneBufferIndex = boneIds.getInt(bone.identifier);
+            boolean hasBufferPosition = boneBufferIndex != -1;
             boolean hasChildren = !bone.children.isEmpty();
 
             Matrix4x3f matrix = matrixStack[depth].set(baseTransform);
             Quaternionf orientation = orientationStack[depth];
-            if (id != -1 || hasChildren) {
+            if (hasBufferPosition || hasChildren) {
                 bone.getLocalTransform(matrix, orientation, partialTicks);
-                if (id != -1) {
+                if (hasBufferPosition) {
                     // Turns this into 3 columns, so in the shader we can use the last column for colors
-                    matrix.getTransposed(buffer.position() + id * UNIFORM_STRIDE, buffer);
+                    matrix.getTransposed(buffer.position() + boneBufferIndex * UNIFORM_STRIDE, buffer);
                     bone.getColor(color, partialTicks);
-                    color.get(buffer.position() + id * UNIFORM_STRIDE + 12 * Float.BYTES, buffer);
-                    matrix.normal(normalMatrix).get3x4(buffer.position() + id * UNIFORM_STRIDE + 16 * Float.BYTES, buffer);
+                    color.get(buffer.position() + boneBufferIndex * UNIFORM_STRIDE + 12 * Float.BYTES, buffer);
+                    matrix.normal(normalMatrix).get3x4(boneBufferIndex * UNIFORM_STRIDE + 16 * Float.BYTES, buffer);
                 }
             }
 
             if (hasChildren) {
-                this.storeInstancedData(buffer, bone.children, boneIds, depth + 1, color, normalMatrix, matrix, matrixStack, orientationStack, partialTicks);
+                this.storeInstancedData(
+                        buffer,
+                        bone.children,
+                        boneIds,
+                        depth + 1,
+                        color,
+                        normalMatrix,
+                        matrix,
+                        matrixStack,
+                        orientationStack,
+                        partialTicks
+                );
             }
         }
     }
