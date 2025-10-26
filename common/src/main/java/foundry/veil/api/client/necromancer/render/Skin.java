@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import foundry.veil.api.client.necromancer.Bone;
 import foundry.veil.api.client.necromancer.Skeleton;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -98,7 +99,18 @@ public class Skin implements NativeResource {
                 this.matrixStack[j].identity();
             }
             buffer.position(i * skeletonDataSize);
-            skeleton.storeInstancedData(buffer, skeleton.roots, this.boneIds, 0, this.color, this.normalMatrix, transforms.get(i), this.matrixStack, this.orientationStack, partialTicks.getFloat(i));
+            skeleton.storeInstancedData(
+                    buffer,
+                    skeleton.roots,
+                    this.boneIds,
+                    0,
+                    this.color,
+                    this.normalMatrix,
+                    transforms.get(i),
+                    this.matrixStack,
+                    this.orientationStack,
+                    partialTicks.getFloat(i)
+            );
         }
 
         buffer.rewind();
@@ -176,7 +188,6 @@ public class Skin implements NativeResource {
     }
 
     public static class Builder {
-
         private static final Vector3f POS = new Vector3f();
         private static final Vector3f NORMAL = new Vector3f();
 
@@ -191,7 +202,7 @@ public class Skin implements NativeResource {
 
         private int nextIndex;
 
-        public Builder(float textureWidth, float textureHeight) {
+        private Builder(float textureWidth, float textureHeight) {
             this.vertexArray = createVertexArray();
             this.vertices = new ByteBufferBuilder(Skeleton.MAX_BONES * 24 * 24);
             this.indices = new IntArrayList();
@@ -276,87 +287,99 @@ public class Skin implements NativeResource {
             return this;
         }
 
-        public Builder addMirroredQuadIndices(int index) {
-            this.addIndex(index);
-            this.addIndex(index + 3);
-            this.addIndex(index + 2);
-            this.addIndex(index + 2);
-            this.addIndex(index + 1);
-            this.addIndex(index);
-            return this;
-        }
+        public Skin.Builder addCube(
+                float xSize, float ySize, float zSize,
+                float xOffset, float yOffset, float zOffset,
+                float xInflate, float yInflate, float zInflate,
+                float uOffset, float vOffset, boolean mirrored) {
+            float minX = xOffset - xInflate, minY = yOffset - yInflate, minZ = zOffset - zInflate;
+            float maxX = xOffset + xSize + xInflate, maxY = yOffset + ySize + yInflate, maxZ = zOffset + zSize + zInflate;
 
-        public Builder addCube(float xSize, float ySize, float zSize, float xOffset, float yOffset, float zOffset, float xInflate, float yInflate, float zInflate, float uOffset, float vOffset, boolean mirrored) {
-            float minX = xOffset;
-            float minY = yOffset;
-            float minZ = zOffset;
-            float maxX = xOffset + xSize;
-            float maxY = yOffset + ySize;
-            float maxZ = zOffset + zSize;
-            minX -= xInflate;
-            minY -= yInflate;
-            minZ -= zInflate;
-            maxX += xInflate;
-            maxY += yInflate;
-            maxZ += zInflate;
-            if (mirrored) {
-                float swap = maxX;
-                maxX = minX;
-                minX = swap;
+            float u0 = uOffset, u1 = u0 + zSize, u2 = u1 + xSize, u3 = u2 + zSize, u4 = u3 + xSize;
+            u0 /= this.textureWidth; u1 /= this.textureWidth; u2 /= this.textureWidth; u3 /= this.textureWidth; u4 /= this.textureWidth;
+            float topBottomU0 = uOffset + zSize, topBottomU1 = topBottomU0 + xSize, topBottomU2 = topBottomU1 + xSize;
+            topBottomU0 /= this.textureWidth; topBottomU1 /= this.textureWidth; topBottomU2 /= this.textureWidth;
+
+            float v0 = vOffset, v1 = v0 + zSize, v2 = v1 + ySize;
+            v0 /= this.textureHeight; v1 /= this.textureHeight; v2 /= this.textureHeight;
+
+            // A little gross, but should work in every case.
+            if (!mirrored) {
+                // Up
+                this.addVertex(minX, maxY, minZ, topBottomU1, v1, 0.0F, 1.0F, 0.0F);
+                this.addVertex(minX, maxY, maxZ, topBottomU1, v0, 0.0F, 1.0F, 0.0F);
+                this.addVertex(maxX, maxY, maxZ, topBottomU0, v0, 0.0F, 1.0F, 0.0F);
+                this.addVertex(maxX, maxY, minZ, topBottomU0, v1, 0.0F, 1.0F, 0.0F);
+
+                // Down
+                this.addVertex(maxX, minY, maxZ, topBottomU1, v0, 0.0F, -1.0F, 0.0F);
+                this.addVertex(minX, minY, maxZ, topBottomU2, v0, 0.0F, -1.0F, 0.0F);
+                this.addVertex(minX, minY, minZ, topBottomU2, v1, 0.0F, -1.0F, 0.0F);
+                this.addVertex(maxX, minY, minZ, topBottomU1, v1, 0.0F, -1.0F, 0.0F);
+
+                // East
+                this.addVertex(maxX, minY, maxZ, u0, v2, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, minY, minZ, u1, v2, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, maxY, minZ, u1, v1, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, maxY, maxZ, u0, v1, 1.0F, 0.0F, 0.0F);
+
+                // West
+                this.addVertex(minX, minY, minZ, u2, v2, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, minY, maxZ, u3, v2, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, maxY, maxZ, u3, v1, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, maxY, minZ, u2, v1, -1.0F, 0.0F, 0.0F);
+
+                // North
+                this.addVertex(maxX, minY, minZ, u1, v2, 0.0F, 0.0F, -1.0F);
+                this.addVertex(minX, minY, minZ, u2, v2, 0.0F, 0.0F, -1.0F);
+                this.addVertex(minX, maxY, minZ, u2, v1, 0.0F, 0.0F, -1.0F);
+                this.addVertex(maxX, maxY, minZ, u1, v1, 0.0F, 0.0F, -1.0F);
+
+                // South
+                this.addVertex(minX, minY, maxZ, u3, v2, 0.0F, 0.0F, 1.0F);
+                this.addVertex(maxX, minY, maxZ, u4, v2, 0.0F, 0.0F, 1.0F);
+                this.addVertex(maxX, maxY, maxZ, u4, v1, 0.0F, 0.0F, 1.0F);
+                this.addVertex(minX, maxY, maxZ, u3, v1, 0.0F, 0.0F, 1.0F);
+            } else {
+                // Up, mirrored
+                this.addVertex(minX, maxY, minZ, topBottomU0, v1, 0.0F, 1.0F, 0.0F);
+                this.addVertex(minX, maxY, maxZ, topBottomU0, v0, 0.0F, 1.0F, 0.0F);
+                this.addVertex(maxX, maxY, maxZ, topBottomU1, v0, 0.0F, 1.0F, 0.0F);
+                this.addVertex(maxX, maxY, minZ, topBottomU1, v1, 0.0F, 1.0F, 0.0F);
+
+                // Down, mirrored
+                this.addVertex(maxX, minY, maxZ, topBottomU2, v0, 0.0F, -1.0F, 0.0F);
+                this.addVertex(minX, minY, maxZ, topBottomU1, v0, 0.0F, -1.0F, 0.0F);
+                this.addVertex(minX, minY, minZ, topBottomU1, v1, 0.0F, -1.0F, 0.0F);
+                this.addVertex(maxX, minY, minZ, topBottomU2, v1, 0.0F, -1.0F, 0.0F);
+
+                // East, mirrored
+                this.addVertex(maxX, minY, maxZ, u3, v2, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, minY, minZ, u2, v2, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, maxY, minZ, u2, v1, 1.0F, 0.0F, 0.0F);
+                this.addVertex(maxX, maxY, maxZ, u3, v1, 1.0F, 0.0F, 0.0F);
+
+                // West, mirrored
+                this.addVertex(minX, minY, minZ, u1, v2, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, minY, maxZ, u0, v2, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, maxY, maxZ, u0, v1, -1.0F, 0.0F, 0.0F);
+                this.addVertex(minX, maxY, minZ, u1, v1, -1.0F, 0.0F, 0.0F);
+
+                // North, mirrored
+                this.addVertex(maxX, minY, minZ, u2, v2, 0.0F, 0.0F, -1.0F);
+                this.addVertex(minX, minY, minZ, u1, v2, 0.0F, 0.0F, -1.0F);
+                this.addVertex(minX, maxY, minZ, u1, v1, 0.0F, 0.0F, -1.0F);
+                this.addVertex(maxX, maxY, minZ, u2, v1, 0.0F, 0.0F, -1.0F);
+
+                // South, mirrored
+                this.addVertex(minX, minY, maxZ, u4, v2, 0.0F, 0.0F, 1.0F);
+                this.addVertex(maxX, minY, maxZ, u3, v2, 0.0F, 0.0F, 1.0F);
+                this.addVertex(maxX, maxY, maxZ, u3, v1, 0.0F, 0.0F, 1.0F);
+                this.addVertex(minX, maxY, maxZ, u4, v1, 0.0F, 0.0F, 1.0F);
             }
 
-            float eastUStart = uOffset;
-            float northUStart = uOffset + Mth.floor(zSize);
-            float westUStart = uOffset + Mth.floor(zSize) + Mth.floor(xSize);
-            float southUStart = uOffset + Mth.floor(zSize) + Mth.floor(xSize) + Mth.floor(xSize);
-            float southUEnd = uOffset + Mth.floor(zSize) + Mth.floor(xSize) + Mth.floor(zSize) + Mth.floor(xSize);
-
-            float topVStart = vOffset;
-            float sideVStart = vOffset + Mth.floor(zSize);
-            float sideVEnd = vOffset + Mth.floor(zSize) + Mth.floor(ySize);
-
-            // Up
-            this.addVertex(minX, maxY, minZ, northUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 1.0F, 0.0F);
-            this.addVertex(minX, maxY, maxZ, northUStart / this.textureWidth, topVStart / this.textureHeight, 0.0F, 1.0F, 0.0F);
-            this.addVertex(maxX, maxY, maxZ, westUStart / this.textureWidth, topVStart / this.textureHeight, 0.0F, 1.0F, 0.0F);
-            this.addVertex(maxX, maxY, minZ, westUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 1.0F, 0.0F);
-
-            // Down
-            this.addVertex(maxX, minY, maxZ, westUStart / this.textureWidth, topVStart / this.textureHeight, 0.0F, -1.0F, 0.0F);
-            this.addVertex(minX, minY, maxZ, southUStart / this.textureWidth, topVStart / this.textureHeight, 0.0F, -1.0F, 0.0F);
-            this.addVertex(minX, minY, minZ, southUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, -1.0F, 0.0F);
-            this.addVertex(maxX, minY, minZ, westUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, -1.0F, 0.0F);
-
-            // East
-            this.addVertex(maxX, minY, maxZ, eastUStart / this.textureWidth, sideVEnd / this.textureHeight, 1.0F, 0.0F, 0.0F);
-            this.addVertex(maxX, minY, minZ, northUStart / this.textureWidth, sideVEnd / this.textureHeight, 1.0F, 0.0F, 0.0F);
-            this.addVertex(maxX, maxY, minZ, northUStart / this.textureWidth, sideVStart / this.textureHeight, 1.0F, 0.0F, 0.0F);
-            this.addVertex(maxX, maxY, maxZ, eastUStart / this.textureWidth, sideVStart / this.textureHeight, 1.0F, 0.0F, 0.0F);
-
-            // West
-            this.addVertex(minX, minY, minZ, westUStart / this.textureWidth, sideVEnd / this.textureHeight, -1.0F, 0.0F, 0.0F);
-            this.addVertex(minX, minY, maxZ, southUStart / this.textureWidth, sideVEnd / this.textureHeight, -1.0F, 0.0F, 0.0F);
-            this.addVertex(minX, maxY, maxZ, southUStart / this.textureWidth, sideVStart / this.textureHeight, -1.0F, 0.0F, 0.0F);
-            this.addVertex(minX, maxY, minZ, westUStart / this.textureWidth, sideVStart / this.textureHeight, -1.0F, 0.0F, 0.0F);
-
-            // North
-            this.addVertex(maxX, minY, minZ, northUStart / this.textureWidth, sideVEnd / this.textureHeight, 0.0F, 0.0F, -1.0F);
-            this.addVertex(minX, minY, minZ, westUStart / this.textureWidth, sideVEnd / this.textureHeight, 0.0F, 0.0F, -1.0F);
-            this.addVertex(minX, maxY, minZ, westUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 0.0F, -1.0F);
-            this.addVertex(maxX, maxY, minZ, northUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 0.0F, -1.0F);
-
-            // South
-            this.addVertex(minX, minY, maxZ, southUStart / this.textureWidth, sideVEnd / this.textureHeight, 0.0F, 0.0F, 1.0F);
-            this.addVertex(maxX, minY, maxZ, southUEnd / this.textureWidth, sideVEnd / this.textureHeight, 0.0F, 0.0F, 1.0F);
-            this.addVertex(maxX, maxY, maxZ, southUEnd / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 0.0F, 1.0F);
-            this.addVertex(minX, maxY, maxZ, southUStart / this.textureWidth, sideVStart / this.textureHeight, 0.0F, 0.0F, 1.0F);
-
             for (int i = 0; i < 6; i++) {
-                if (mirrored) {
-                    this.addMirroredQuadIndices(this.nextIndex);
-                } else {
-                    this.addQuadIndices(this.nextIndex);
-                }
+                this.addQuadIndices(this.nextIndex());
             }
 
             return this;
@@ -371,9 +394,9 @@ public class Skin implements NativeResource {
             this.addVertex(x1, y1, z1, u1, v1, normalX, normalY, normalZ);
             this.addVertex(x2, y2, z2, u2, v2, normalX, normalY, normalZ);
             this.addVertex(x3, y3, z3, u3, v3, normalX, normalY, normalZ);
-            this.addIndex(this.nextIndex);
-            this.addIndex(this.nextIndex);
-            this.addIndex(this.nextIndex);
+            this.addIndex(this.nextIndex());
+            this.addIndex(this.nextIndex());
+            this.addIndex(this.nextIndex());
             return this;
         }
 
@@ -382,14 +405,13 @@ public class Skin implements NativeResource {
                 float x2, float y2, float z2, float u2, float v2,
                 float x3, float y3, float z3, float u3, float v3,
                 float x4, float y4, float z4, float u4, float v4,
-                float normalX, float normalY, float normalZ
-        ) {
+                float normalX, float normalY, float normalZ) {
             this.vertices.reserve(96);
             this.addVertex(x1, y1, z1, u1, v1, normalX, normalY, normalZ);
             this.addVertex(x2, y2, z2, u2, v2, normalX, normalY, normalZ);
             this.addVertex(x3, y3, z3, u3, v3, normalX, normalY, normalZ);
             this.addVertex(x4, y4, z4, u4, v4, normalX, normalY, normalZ);
-            this.addQuadIndices(this.nextIndex);
+            this.addQuadIndices(this.nextIndex());
             return this;
         }
 
@@ -424,9 +446,8 @@ public class Skin implements NativeResource {
                 this.vertexArray.uploadIndexBuffer(indices, indexType);
 
                 Object2IntMap<String> boneIds = new Object2IntArrayMap<>(this.boneNames.size());
-                for (int i = 0; i < this.boneNames.size(); i++) {
+                for (int i = 0; i < this.boneNames.size(); i++)
                     boneIds.put(this.boneNames.get(i), i);
-                }
 
                 return new Skin(this.vertexArray, Object2IntMaps.unmodifiable(boneIds));
             } finally {

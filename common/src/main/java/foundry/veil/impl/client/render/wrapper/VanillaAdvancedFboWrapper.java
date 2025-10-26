@@ -57,9 +57,9 @@ public abstract class VanillaAdvancedFboWrapper implements AdvancedFbo {
     }
 
     @Override
-    public void clear(int buffers) {
+    public void clear(int clearMask) {
         float[] clearChannels = ((FramebufferRenderTargetAccessor) this.toRenderTarget()).getClearChannels();
-        this.clear(clearChannels[0], clearChannels[1], clearChannels[2], clearChannels[3], buffers, this.getDrawBuffers());
+        this.clear(clearChannels[0], clearChannels[1], clearChannels[2], clearChannels[3], clearMask, this.getDrawBuffers());
     }
 
     // Don't do anything here because there's no point in disabling the ONLY draw buffer. Use glColorMask instead

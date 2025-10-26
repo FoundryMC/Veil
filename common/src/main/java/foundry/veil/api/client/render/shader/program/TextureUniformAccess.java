@@ -4,7 +4,10 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.AdvancedFboTextureAttachment;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
 import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -51,6 +54,31 @@ public interface TextureUniformAccess {
     /**
      * Adds a texture that is dynamically bound and sets texture units.
      *
+     * @param name     The name of the texture to set
+     * @param location The name of the texture in the texture manager to bind and assign a texture unit
+     * @since 2.5.0
+     */
+    default void setSampler(CharSequence name, ResourceLocation location) {
+        AbstractTexture abstractTexture = Minecraft.getInstance().getTextureManager().getTexture(location);
+        this.setSampler(name, abstractTexture.getId(), 0);
+    }
+
+    /**
+     * Adds a texture that is dynamically bound and sets texture units.
+     *
+     * @param name      The name of the texture to set
+     * @param location  The name of the texture in the texture manager to bind and assign a texture unit
+     * @param samplerId The id of the sampler assign a texture unit
+     * @since 2.5.0
+     */
+    default void setSampler(CharSequence name, ResourceLocation location, int samplerId) {
+        AbstractTexture abstractTexture = Minecraft.getInstance().getTextureManager().getTexture(location);
+        this.setSampler(name, abstractTexture.getId(), samplerId);
+    }
+
+    /**
+     * Adds a texture that is dynamically bound and sets texture units.
+     *
      * @param name      The name of the texture to set
      * @param textureId The id of the texture to bind and assign a texture unit
      */
@@ -68,7 +96,7 @@ public interface TextureUniformAccess {
     void setSampler(CharSequence name, int textureId, int samplerId);
 
     /**
-     * Removes the specified sampler binding.
+     * Removes the specified sampler binding. This will effectively make it a missing texture.
      *
      * @param name The name of the sampler to remove
      */

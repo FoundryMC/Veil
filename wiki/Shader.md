@@ -125,6 +125,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
@@ -138,8 +140,17 @@ public class RenderClass {
             return;
         }
 
-        shader.setFloat("CustomValue", 37.2F);
-        shader.setMatrix("CustomProjection", new Matrix4f().ortho(0, 10, 10, 0, 0.3F, 100.0F, false));
+        ShaderUniform customValue = shader.getUniform("CustomValue");
+        // Always check if the uniform for nullability
+        // because it will be null if it doesn't exist
+        if (customValue != null) {
+            customValue.setFloat(32.2F);
+        }
+        ShaderUniform customProjection = shader.getUniform("CustomProjection");
+        if (customProjection != null) {
+            Matrix4f projection = new Matrix4f().ortho(0, 10, 10, 0, 0.3F, 100.0F, false);
+            customProjection.setMatrix(projection, false);
+        }
 
         shader.bind();
         // rendering code here
@@ -151,8 +162,11 @@ public class RenderClass {
 ### Post-Processing Example
 
 ```java
-import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.Veil;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
+import foundry.veil.platform.VeilEventPlatform;
+import net.minecraft.resources.ResourceLocation;
 
 public class MainModClass {
 
@@ -165,7 +179,10 @@ public class MainModClass {
             if (CUSTOM_POST_PIPELINE.equals(pipelineName)) {
                 ShaderProgram shader = context.getShader(CUSTOM_POST_SHADER);
                 if (shader != null) {
-                    shader.setInt("Secret", 42);
+                    ShaderUniform secret = shader.getUniform("Secret");
+                    if (secret != null) {
+                        secret.setInt(42);
+                    }
                 }
             }
         });
@@ -290,7 +307,6 @@ See the [framebuffer documentation](Framebuffer) for more information.
     },
     "CubemapTexture": {
       "type": "location",
-      "type": "cubemap"
       "location": "veil:textures/somecubemap.png"
     },
     "ExampleFramebuffer": {

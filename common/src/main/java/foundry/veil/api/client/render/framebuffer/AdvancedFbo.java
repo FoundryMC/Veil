@@ -47,33 +47,33 @@ public interface AdvancedFbo extends NativeResource {
     /**
      * Clears the specified buffers.
      *
-     * @param buffers The buffers to clear
+     * @param clearMask The buffers to clear
      */
-    default void clear(int buffers) {
-        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, buffers, this.getDrawBuffers());
+    default void clear(int clearMask) {
+        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, clearMask, this.getDrawBuffers());
     }
 
     /**
      * Clears the specified buffers.
      *
-     * @param buffers      The buffers to clear
+     * @param clearMask    The buffers to clear
      * @param clearBuffers The color buffers to clear
      */
-    default void clear(int buffers, int... clearBuffers) {
-        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, buffers, clearBuffers);
+    default void clear(int clearMask, int... clearBuffers) {
+        this.clear(0.0F, 0.0F, 0.0F, 0.0F, 1.0F, clearMask, clearBuffers);
     }
 
     /**
      * Clears the specified buffers.
      *
-     * @param red     The red clear value
-     * @param green   The green clear value
-     * @param blue    The blue clear value
-     * @param alpha   The alpha clear value
-     * @param buffers The buffers to clear
+     * @param red       The red clear value
+     * @param green     The green clear value
+     * @param blue      The blue clear value
+     * @param alpha     The alpha clear value
+     * @param clearMask The buffers to clear
      */
-    default void clear(float red, float green, float blue, float alpha, int buffers) {
-        this.clear(red, green, blue, alpha, 1.0F, buffers, this.getDrawBuffers());
+    default void clear(float red, float green, float blue, float alpha, int clearMask) {
+        this.clear(red, green, blue, alpha, 1.0F, clearMask, this.getDrawBuffers());
     }
 
     /**
@@ -93,16 +93,16 @@ public interface AdvancedFbo extends NativeResource {
     /**
      * Clears the specified buffers.
      *
-     * @param red     The red clear value
-     * @param green   The green clear value
-     * @param blue    The blue clear value
-     * @param alpha   The alpha clear value
-     * @param depth   The depth to clear the framebuffer with
-     * @param buffers The buffers to clear
+     * @param red       The red clear value
+     * @param green     The green clear value
+     * @param blue      The blue clear value
+     * @param alpha     The alpha clear value
+     * @param depth     The depth to clear the framebuffer with
+     * @param clearMask The buffers to clear
      * @since 1.3.0
      */
-    default void clear(float red, float green, float blue, float alpha, float depth, int buffers) {
-        this.clear(red, green, blue, alpha, depth, buffers, this.getDrawBuffers());
+    default void clear(float red, float green, float blue, float alpha, float depth, int clearMask) {
+        this.clear(red, green, blue, alpha, depth, clearMask, this.getDrawBuffers());
     }
 
     /**

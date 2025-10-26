@@ -1,11 +1,8 @@
 package foundry.veil.platform;
 
-import org.jetbrains.annotations.ApiStatus;
-
 /**
  * Manages common platform-specific features.
  */
-@ApiStatus.Internal
 public interface VeilPlatform {
 
     /**

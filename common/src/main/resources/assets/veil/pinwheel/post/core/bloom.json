@@ -54,26 +54,34 @@
       "width": "q.screen_width / 2.0",
       "height": "q.screen_height / 2.0",
       "depth": false,
-      "linear": true,
+      "filter": {
+        "blur": true
+      },
       "format": "R11F_G11F_B10F"
     },
     "layer2": {
       "width": "q.screen_width / 4.0",
       "height": "q.screen_height / 4.0",
       "depth": false,
-      "linear": true,
+      "filter": {
+        "blur": true
+      },
       "format": "R11F_G11F_B10F"
     },
     "layer3": {
       "width": "q.screen_width / 8.0",
       "height": "q.screen_height / 8.0",
       "depth": false,
-      "linear": true,
+      "filter": {
+        "blur": true
+      },
       "format": "R11F_G11F_B10F"
     },
     "final": {
       "depth": false,
-      "linear": true,
+      "filter": {
+        "blur": true
+      },
       "format": "R11F_G11F_B10F"
     }
   },
