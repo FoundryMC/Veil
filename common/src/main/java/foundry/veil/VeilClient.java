@@ -15,6 +15,7 @@ import foundry.veil.impl.client.editor.*;
 import foundry.veil.impl.client.imgui.VeilImGuiImpl;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferShard;
+import foundry.veil.impl.flare.FlareManager;
 import foundry.veil.impl.quasar.QuasarParticleHandler;
 import foundry.veil.impl.resource.VeilResourceManagerImpl;
 import foundry.veil.platform.VeilClientPlatform;
@@ -39,6 +40,7 @@ public class VeilClient {
         VeilImGuiImpl.setImGuiPath();
         QuasarParticleHandler.init();
         QuasarParticles.bootstrap();
+        FlareManager.bootstrap();
 
         VeilEventPlatform.INSTANCE.onFreeNativeResources(() -> {
             VeilRenderSystem.close();

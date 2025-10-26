@@ -13,11 +13,10 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import foundry.veil.Veil;
 import foundry.veil.api.flare.data.effect.FlareEffectTemplate;
 import foundry.veil.api.flare.data.effect.FlareModule;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -33,22 +32,11 @@ public class FlareManager {
             new RegistryDataLoader.RegistryData<>(EFFECT_MODULES, FlareModule.CODEC, false)
     );
     private static RegistryAccess registryAccess = RegistryAccess.EMPTY;
-    private static boolean registriesDirty = false;
 
-
-    private final ResourcesCache cache = new ResourcesCache();
-
-    public FlareEffectTemplate getTemplate(ResourceLocation resourceLocation) {
-        return cache.getCachedTemplate(resourceLocation);
+    private FlareManager() {
     }
 
-    public FlareModule getModule(ResourceLocation resourceLocation) {
-        return cache.getCachedModule(resourceLocation);
-    }
-
-    public FlareManager() {
-    }
-
+    @ApiStatus.Internal
     public static void bootstrap() {
     }
 
@@ -56,48 +44,8 @@ public class FlareManager {
         return ResourceKey.createRegistryKey(Veil.veilPath(name));
     }
 
-    private static class ResourcesCache {
-
-        public Map<ResourceLocation, FlareEffectTemplate> templateCache = new HashMap<>();
-        public Map<ResourceLocation, FlareModule> moduleCache = new HashMap<>();
-
-        public FlareEffectTemplate getCachedTemplate(ResourceLocation resourceLocation) {
-            FlareEffectTemplate template;
-            if (!registriesDirty) {
-                clearRegistries();
-                template = templateFromRegistry(resourceLocation);
-            } else if ((template = templateCache.get(resourceLocation)) == null) {
-                template = templateFromRegistry(resourceLocation);
-            }
-
-            return template;
-        }
-
-        public FlareModule getCachedModule(ResourceLocation resourceLocation) {
-            FlareModule module;
-            if (!registriesDirty) {
-                clearRegistries();
-                module = moduleFromRegistry(resourceLocation);
-            } else if ((module = moduleCache.get(resourceLocation)) == null) {
-                module = moduleFromRegistry(resourceLocation);
-            }
-
-            return module;
-        }
-
-        private FlareEffectTemplate templateFromRegistry(ResourceLocation resourceLocation) {
-            return registryAccess.registry(EFFECT_TEMPLATES).map(registry -> registry.get(resourceLocation)).orElse(null);
-        }
-
-        private FlareModule moduleFromRegistry(ResourceLocation resourceLocation) {
-            return registryAccess.registry(EFFECT_MODULES).map(registry -> registry.get(resourceLocation)).orElse(null);
-        }
-
-        private void clearRegistries() {
-            templateCache.clear();
-            moduleCache.clear();
-            registriesDirty = false;
-        }
+    public static RegistryAccess registryAccess() {
+        return registryAccess;
     }
 
     public static class Reloader implements PreparableReloadListener {
@@ -121,7 +69,7 @@ public class FlareManager {
                         }
                         LOGGER.info("Loaded {} templates", registryAccess.registryOrThrow(EFFECT_TEMPLATES).size());
                         LOGGER.info("Loaded {} modules", registryAccess.registryOrThrow(EFFECT_MODULES).size());
-                        registriesDirty = true;
+
                     }, gameExecutor);
         }
 

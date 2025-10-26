@@ -231,7 +231,7 @@ public static void renderEffect(...) {
     MatrixStack matrixStack = ...;
     float partialTick = ...;
     try {
-        VeilRenderSystem.renderer().getEffectManager().getModule(module).getSubModule(subModule).render(host, matrixStack, partialTick);
+        FlareEffectManager.getModule(module).getSubModule(subModule).render(host, matrixStack, partialTick);
     } catch (Exception ignored) {
         
     }
@@ -247,7 +247,7 @@ public static void renderEffect(...) {
     MatrixStack matrixStack = ...;
     float partialTick = ...;
     try {
-        VeilRenderSystem.renderer().getEffectManager().getTemplate(template).render(host, matrixStack, partialTick);
+        FlareEffectManager.getTemplate(template).render(host, matrixStack, partialTick);
     } catch (Exception ignored) {
         
     }
