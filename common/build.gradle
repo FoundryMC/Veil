@@ -33,8 +33,9 @@ dependencies {
     }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.joml:joml:1.10.+'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testRuntimeOnly 'com.mojang:datafixerupper:8.0.16'
+    testRuntimeOnly 'com.mojang:datafixerupper:8.0.+'
     testRuntimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

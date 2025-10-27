@@ -1,38 +1,73 @@
 package foundry.veil.impl.flare;
 
-import foundry.veil.api.CodecReloadListener;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
+import foundry.veil.Veil;
+import foundry.veil.api.flare.data.model.FlareShell;
+import foundry.veil.api.flare.model.BakedShell;
+import foundry.veil.api.flare.model.ShellBakery;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import foundry.veil.api.flare.model.ShellBakery;
-import foundry.veil.api.flare.model.BakedShell;
-import foundry.veil.api.flare.model.UnbakedShell;
-import foundry.veil.api.flare.data.model.FlareShell;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.io.Reader;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-public class ShellManager extends CodecReloadListener<FlareShell> {
-    private ShellBakery shellBakery;
+@ApiStatus.Internal
+public class ShellManager extends SimplePreparableReloadListener<Map<ResourceLocation, BakedShell>> {
+
+    private static final FileToIdConverter CONVERTER = FileToIdConverter.json("flare/shells");
+
+    private Map<ResourceLocation, BakedShell> shells;
 
     public ShellManager() {
-        super(FlareShell.CODEC, FileToIdConverter.json("flare/shells"));
+        this.shells = Map.of();
     }
 
-    @ApiStatus.Internal
     @Override
-    protected void apply(Map<ResourceLocation, FlareShell> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        this.shellBakery = new ShellBakery(map, List.of(), profilerFiller);
-        this.shellBakery.bakeShells();
+    protected @NotNull Map<ResourceLocation, BakedShell> prepare(@NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        Map<ResourceLocation, BakedShell> data = new HashMap<>();
+
+        Map<ResourceLocation, Resource> resources = CONVERTER.listMatchingResources(resourceManager);
+        for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
+            ResourceLocation location = entry.getKey();
+            ResourceLocation id = CONVERTER.fileToId(location);
+
+            try (Reader reader = entry.getValue().openAsReader()) {
+                JsonElement element = JsonParser.parseReader(reader);
+                DataResult<FlareShell> result = FlareShell.CODEC.parse(JsonOps.INSTANCE, element);
+
+                if (result.error().isPresent()) {
+                    throw new JsonSyntaxException(result.error().get().message());
+                }
+
+                if (data.put(id, result.result().orElseThrow().bake()) != null) {
+                    throw new IllegalStateException("Duplicate data file ignored with ID " + id);
+                }
+            } catch (Exception e) {
+                Veil.LOGGER.error("Couldn't parse data file {} from {}", id, location, e);
+            }
+        }
+
+        return data;
     }
 
-    public UnbakedShell getUnbakedShell(ResourceLocation shellLocation) {
-        return shellBakery.getShell(shellLocation);
+    @Override
+    protected void apply(@NotNull Map<ResourceLocation, BakedShell> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        this.shells = Collections.unmodifiableMap(map);
     }
 
     public BakedShell getBakedShell(ResourceLocation shellLocation) {
-        return shellBakery.getBakedShell(shellLocation);
+        return this.shells.getOrDefault(shellLocation, ShellBakery.MISSING_SHELL);
     }
 }

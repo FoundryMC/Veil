@@ -3,37 +3,41 @@ package foundry.veil.api.flare.data.effect;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import foundry.veil.api.client.render.MatrixStack;
-import foundry.veil.api.flare.model.BakedShell;
-import net.minecraft.resources.ResourceLocation;
 import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.FlareEffectManager;
+import foundry.veil.api.flare.model.BakedShell;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import static foundry.veil.Veil.LOGGER;
 
-public final class FlareSubModule {
-    public static final Codec<FlareSubModule> CODEC = Codec.either(ResourceLocation.CODEC.listOf()
-                            .xmap(FlareSubModule::new, FlareSubModule::templates),
-                    ResourceLocation.CODEC.xmap(List::of, List::getFirst)
+/**
+ * @since 2.5.0
+ */
+public record FlareSubModule(List<ResourceLocation> templates) {
+
+    public static final Codec<FlareSubModule> CODEC = Codec.either(
+                    ResourceLocation.CODEC.listOf(),
+                    ResourceLocation.CODEC
             )
-            .xmap(FlareSubModule::eitherToModule, FlareSubModule::moduleToEither);
-    private final List<ResourceLocation> templates;
+            .xmap(either -> either.map(FlareSubModule::new, single -> new FlareSubModule(List.of(single))),
+                    subModule -> subModule.templates.size() == 1 ? Either.right(subModule.templates.getFirst()) : Either.left(subModule.templates));
 
     public FlareSubModule(List<ResourceLocation> templates) {
-        this.templates = templates;
+        this.templates = Collections.unmodifiableList(templates);
     }
 
-    private static Either<FlareSubModule, List<ResourceLocation>> moduleToEither(FlareSubModule subModule) {
-        return Either.right(subModule.templates);
+    public void render(EffectHost host, MatrixStack matrixStack, float partialTick) {
+        this.render(host, matrixStack, partialTick, null);
     }
 
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
-        for (int i = 0, templatesSize = templates.size(); i < templatesSize; i++) {
-            ResourceLocation templateLocation = templates.get(i);
+        for (ResourceLocation templateLocation : this.templates) {
             FlareEffectTemplate template = FlareEffectManager.getTemplate(templateLocation);
             if (template == null) {
                 LOGGER.error("Template {} could not be found!", templateLocation);
@@ -42,17 +46,4 @@ public final class FlareSubModule {
             template.render(host, matrixStack, partialTick, shellOverrides);
         }
     }
-
-    public void render(EffectHost host, MatrixStack matrixStack, float partialTick) {
-        this.render(host, matrixStack, partialTick, null);
-    }
-
-    private static FlareSubModule eitherToModule(Either<FlareSubModule, List<ResourceLocation>> either) {
-        return either.map(Function.identity(), FlareSubModule::new);
-    }
-
-    private List<ResourceLocation> templates() {
-        return templates;
-    }
-
 }

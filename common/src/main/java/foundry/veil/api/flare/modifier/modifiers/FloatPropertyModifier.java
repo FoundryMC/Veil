@@ -19,11 +19,11 @@ public class FloatPropertyModifier extends PropertyModifier<Float> {
     }
 
     public FloatCurve getCurve() {
-        return curve;
+        return this.curve;
     }
 
     @Override
     public Float get(Controller controller) {
-        return curve.evaluate(controller.getValue());
+        return this.curve.evaluate(controller.getValue());
     }
 }

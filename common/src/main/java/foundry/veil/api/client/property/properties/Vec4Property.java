@@ -1,11 +1,13 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.modifier.PropertyModifier;
+import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
@@ -18,17 +20,20 @@ public class Vec4Property extends Property<Vector4f> {
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        uniform.setVector(overrideValue);
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            uniform.set(this.overrideValue);
+        }
     }
 
     @Override
     protected void setQueries(MolangRuntime.Builder builder) {
         super.setQueries(builder);
-        builder.setQuery("x", overrideValue::x);
-        builder.setQuery("y", overrideValue::y);
-        builder.setQuery("z", overrideValue::z);
-        builder.setQuery("w", overrideValue::w);
+        builder.setQuery("x", this.overrideValue::x);
+        builder.setQuery("y", this.overrideValue::y);
+        builder.setQuery("z", this.overrideValue::z);
+        builder.setQuery("w", this.overrideValue::w);
     }
 
     @Override
@@ -41,13 +46,21 @@ public class Vec4Property extends Property<Vector4f> {
             case MOLANG -> {
                 this.overrideValue.set(value);
                 optionalMolang.ifPresent(molang -> {
-                    try {
-                        this.overrideValue.x = getEnvironment().get().resolve(molang.get(0));
-                        this.overrideValue.y = getEnvironment().get().resolve(molang.get(1));
-                        this.overrideValue.z = getEnvironment().get().resolve(molang.get(2));
-                        this.overrideValue.w = getEnvironment().get().resolve(molang.get(3));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    MolangEnvironment environment = this.getEnvironment().get();
+                    if (!molang.isEmpty()) {
+                        this.overrideValue.x = environment.safeResolve(molang.getFirst());
+                    }
+                    if (molang.size() > 1) {
+                        this.overrideValue.y = environment.safeResolve(molang.get(1));
+                    }
+                    if (molang.size() > 2) {
+                        this.overrideValue.z = environment.safeResolve(molang.get(2));
+                    }
+                    if (molang.size() > 2) {
+                        this.overrideValue.z = environment.safeResolve(molang.get(2));
+                    }
+                    if (molang.size() > 3) {
+                        this.overrideValue.w = environment.safeResolve(molang.get(3));
                     }
                 });
             }

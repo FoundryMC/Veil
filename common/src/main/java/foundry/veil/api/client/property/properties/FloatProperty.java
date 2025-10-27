@@ -1,11 +1,12 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
+import net.minecraft.client.renderer.ShaderInstance;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +18,11 @@ public class FloatProperty extends Property<Float> {
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        uniform.setFloat(overrideValue);
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            uniform.set(this.overrideValue);
+        }
     }
 
     @Override
@@ -32,7 +36,7 @@ public class FloatProperty extends Property<Float> {
                 this.overrideValue = value;
                 optionalMolang.ifPresent(molang -> {
                     try {
-                        this.overrideValue = getEnvironment().get().resolve(molang.getFirst());
+                        this.overrideValue = this.getEnvironment().get().resolve(molang.getFirst());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -44,7 +48,7 @@ public class FloatProperty extends Property<Float> {
     @Override
     protected void setQueries(MolangRuntime.Builder builder) {
         super.setQueries(builder);
-        builder.setQuery("v", () -> overrideValue);
+        builder.setQuery("v", () -> this.overrideValue);
     }
 
     @Override

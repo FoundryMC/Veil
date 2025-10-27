@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import foundry.veil.api.client.necromancer.Bone;
 import foundry.veil.api.client.necromancer.Skeleton;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -296,12 +295,20 @@ public class Skin implements NativeResource {
             float maxX = xOffset + xSize + xInflate, maxY = yOffset + ySize + yInflate, maxZ = zOffset + zSize + zInflate;
 
             float u0 = uOffset, u1 = u0 + zSize, u2 = u1 + xSize, u3 = u2 + zSize, u4 = u3 + xSize;
-            u0 /= this.textureWidth; u1 /= this.textureWidth; u2 /= this.textureWidth; u3 /= this.textureWidth; u4 /= this.textureWidth;
+            u0 /= this.textureWidth;
+            u1 /= this.textureWidth;
+            u2 /= this.textureWidth;
+            u3 /= this.textureWidth;
+            u4 /= this.textureWidth;
             float topBottomU0 = uOffset + zSize, topBottomU1 = topBottomU0 + xSize, topBottomU2 = topBottomU1 + xSize;
-            topBottomU0 /= this.textureWidth; topBottomU1 /= this.textureWidth; topBottomU2 /= this.textureWidth;
+            topBottomU0 /= this.textureWidth;
+            topBottomU1 /= this.textureWidth;
+            topBottomU2 /= this.textureWidth;
 
             float v0 = vOffset, v1 = v0 + zSize, v2 = v1 + ySize;
-            v0 /= this.textureHeight; v1 /= this.textureHeight; v2 /= this.textureHeight;
+            v0 /= this.textureHeight;
+            v1 /= this.textureHeight;
+            v2 /= this.textureHeight;
 
             // A little gross, but should work in every case.
             if (!mirrored) {
@@ -446,8 +453,9 @@ public class Skin implements NativeResource {
                 this.vertexArray.uploadIndexBuffer(indices, indexType);
 
                 Object2IntMap<String> boneIds = new Object2IntArrayMap<>(this.boneNames.size());
-                for (int i = 0; i < this.boneNames.size(); i++)
+                for (int i = 0; i < this.boneNames.size(); i++) {
                     boneIds.put(this.boneNames.get(i), i);
+                }
 
                 return new Skin(this.vertexArray, Object2IntMaps.unmodifiable(boneIds));
             } finally {

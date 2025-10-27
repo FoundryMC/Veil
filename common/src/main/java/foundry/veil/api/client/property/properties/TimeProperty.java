@@ -1,13 +1,14 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.ImmutableProperty;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.data.effect.FlareMaterial;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.util.Mth;
 import org.joml.Vector4f;
 
@@ -20,9 +21,9 @@ import java.util.Optional;
  *
  * @author GuyApooye
  */
-public class TimeProperty extends Property<Vector4f> implements ImmutableProperty {
+@ImmutableProperty
+public class TimeProperty extends Property<Vector4f> {
 
-    private static final Minecraft minecraft = Minecraft.getInstance();
     public static final TimeProperty INSTANCE = new TimeProperty();
 
     private TimeProperty() {
@@ -30,10 +31,12 @@ public class TimeProperty extends Property<Vector4f> implements ImmutablePropert
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        float time = minecraft.getFrameTimeNs() * 1e-9f;
-        value.set(time / 20.0f, time, 2.0f * time, Mth.sin(time));
-        uniform.setVector(value);
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            float time = Minecraft.getInstance().getFrameTimeNs() * 1e-9f;
+            uniform.set(this.value.set(time / 20.0f, time, 2.0f * time, Mth.sin(time)));
+        }
     }
 
     @Override

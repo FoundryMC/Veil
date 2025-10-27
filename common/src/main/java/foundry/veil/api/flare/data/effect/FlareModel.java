@@ -1,36 +1,38 @@
 package foundry.veil.api.flare.data.effect;
 
-import com.google.common.base.Suppliers;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.property.model.Mat4ModelProperty;
 import foundry.veil.api.client.property.model.RotationModelProperty;
 import foundry.veil.api.client.property.model.Vec3ModelProperty;
 import foundry.veil.api.client.render.MatrixStack;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.vertex.VertexArray;
-import foundry.veil.api.flare.FlareVertexArrayExtension;
+import foundry.veil.api.flare.EffectHost;
+import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.model.BakedShell;
-import foundry.veil.api.flare.data.model.FlareBakedQuad;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import foundry.veil.api.flare.EffectHost;
-import foundry.veil.api.flare.FlareEffectManager;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
+/**
+ * @since 2.5.0
+ */
 public class FlareModel {
+
     public static final Codec<FlareModel> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("path").forGetter(FlareModel::getShell),
             CodecUtil.VECTOR3FC_CODEC.fieldOf("positionOffset").forGetter(FlareModel::getPositionOffset),
@@ -38,7 +40,6 @@ public class FlareModel {
             CodecUtil.VECTOR3FC_CODEC.fieldOf("scaleOffset").forGetter(FlareModel::getScaleOffset),
             CodecUtil.singleOrList(FlareMaterial.CODEC).fieldOf("materials").forGetter(FlareModel::getMaterials)
     ).apply(instance, FlareModel::new));
-    public static final Supplier<FlareVertexArrayExtension> VAO = Suppliers.memoize(() -> new FlareVertexArrayExtension(VertexArray.create()));
 
     public static final Matrix4f dummyMatrix = new Matrix4f();
 
@@ -62,100 +63,91 @@ public class FlareModel {
         this.materials = materials;
     }
 
-    public void render(EffectHost host, MatrixStack matrixStack, float partialTick, Map<String, List<PropertyModifier<?>>> modifiers, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
-
+    public void render(EffectHost host, MatrixStack matrixStack, Map<String, List<PropertyModifier<?>>> modifiers, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         Vector3fc positionOffset = this.positionOffset.getValue();
         Vector3fc scaleOffset = this.scaleOffset.getValue();
 
         matrixStack.matrixPush();
         matrixStack.translate(positionOffset.x(), positionOffset.y(), positionOffset.z());
-        matrixStack.rotate(rotationOffset.getRotation());
+        matrixStack.rotate(this.rotationOffset.getRotation());
         matrixStack.applyScale(scaleOffset.x(), scaleOffset.y(), scaleOffset.z());
         Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-        modelToWorld.modify(
+        this.modelToWorld.modify(
                 matrixStack.position().translateLocal((float) cameraPos.x, (float) cameraPos.y, (float) cameraPos.z, dummyMatrix),
                 PropertyModifier.PropertyModifierMode.REPLACE,
                 Optional.empty()
         );
 
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-        BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(shell)) ?
-                shellOverrides.get(shell) :
-                FlareEffectManager.getInstance().getShellManager().getBakedShell(shell);
+        BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(this.shell)) ?
+                shellOverrides.get(this.shell) :
+                FlareEffectManager.getInstance().getShellManager().getBakedShell(this.shell);
 
-        List<FlareBakedQuad> quads = bakedShell.getQuads();
-        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
-            FlareBakedQuad quad = quads.get(i);
-            quad.putBakedQuadInto(builder, matrixStack.pose());
-        }
+        Matrix4fStack stack = RenderSystem.getModelViewStack();
+        stack.pushMatrix();
+        stack.mul(matrixStack.position());
+        RenderSystem.applyModelViewMatrix();
 
-        FlareVertexArrayExtension vaoExtension = VAO.get();
-        VertexArray vao = vaoExtension.getVertexArray();
-        vao.upload(builder.buildOrThrow(), VertexArray.DrawUsage.STATIC);
-        vao.setIndexCount(vao.getIndexCount(), VertexArray.IndexType.SHORT);
-
-        vao.bind();
-        for (int i = 0, materialsSize = materials.size(); i < materialsSize; i++) {
-            FlareMaterial material = materials.get(i);
+        VertexArray vertexArray = bakedShell.getVertexArray();
+        vertexArray.bind();
+        for (FlareMaterial material : this.materials) {
             RenderType renderType = VeilRenderType.get(material.renderTypeLocation());
-            if (renderType == null) continue;
-            vaoExtension.addSetup(() -> material.applyProperties(host, VeilRenderSystem.getShader(), modifiers));
-            vaoExtension.addClear(() -> material.resetProperties(host, VeilRenderSystem.getShader()));
-            vaoExtension.drawWithRenderType(renderType);
+            if (renderType == null) {
+                continue;
+            }
+
+            this.draw(renderType, vertexArray, host, material, modifiers);
         }
         VertexArray.unbind();
         matrixStack.matrixPop();
 
+        stack.popMatrix();
+        RenderSystem.applyModelViewMatrix();
     }
 
-//Vector3fc positionOffset = this.positionOffset.getValue();
-//        Vector3fc scaleOffset = this.scaleOffset.getValue();
-//        matrixStack.matrixPush();
-//        matrixStack.translate(positionOffset.x(), positionOffset.y(), positionOffset.z());
-//        matrixStack.translate(0.5f, 0.0f, 0.5f);
-//        matrixStack.rotate(rotationOffset.getRotation());
-//        matrixStack.applyScale(scaleOffset.x(), scaleOffset.y(), scaleOffset.z());
-//        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-//        modelToWorld.overrideUnsafe(PropertyModifier.PropertyModifierMode.REPLACE, matrixStack.position().translateLocal((float) cameraPos.x, (float) cameraPos.y, (float) cameraPos.z, dummyMatrix), Optional.empty());
-//
-//        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-//        BakedShell bakedShell = Flare.getInstance().getShellManager().getBakedShell(shell);
-//
-//        for (FlareBakedQuad quad : bakedShell.getQuads()) {
-//            quad.putBakedQuadInto(buffer, matrixStack.pose(), EMPTY_COLOR);
-//        }
-//
-//        RenderType[] renderTypes = new RenderType[materials.size()];
-//        for (int i = 0, materialsSize = materials.size(); i < materialsSize; i++) {
-//            renderTypes[i] = VeilRenderType.get(materials.get(i).renderTypeLocation());
-//        }
-//        RenderType renderType = VeilRenderType.layered(renderTypes);
-//        if (renderType != null) {
-//            for (FlareMaterial material : materials) {
-//                ((RenderTypeExtension) renderType).cassini$addPreDraw(() -> material.applyProperties(VeilRenderSystem.getShader()));
-//            }
-//            renderType.draw(buffer.buildOrThrow());
-//        }
-//        matrixStack.matrixPop();
+    private void draw(RenderType renderType, VertexArray vertexArray, EffectHost host, FlareMaterial material, Map<String, List<PropertyModifier<?>>> modifiers) {
+        while (renderType instanceof VeilRenderType.RenderTypeWrapper wrapper) {
+            renderType = wrapper.get();
+        }
+
+        if (renderType == null) {
+            return;
+        }
+
+        vertexArray.setup(renderType);
+        material.applyProperties(host, RenderSystem.getShader(), modifiers);
+        vertexArray.draw();
+        material.resetProperties(host, RenderSystem.getShader());
+        vertexArray.clear(renderType);
+
+        if (renderType instanceof VeilRenderType.LayeredRenderType layeredRenderType) {
+            for (RenderType layer : layeredRenderType.getLayers()) {
+                vertexArray.setup(layer);
+                material.applyProperties(host, RenderSystem.getShader(), modifiers);
+                vertexArray.draw();
+                material.resetProperties(host, RenderSystem.getShader());
+                vertexArray.clear(layer);
+            }
+        }
+    }
 
     public ResourceLocation getShell() {
-        return shell;
+        return this.shell;
     }
 
     public Vector3fc getPositionOffset() {
-        return positionOffset.getValue();
+        return this.positionOffset.getValue();
     }
 
     public Vector3fc getRotationOffset() {
-        return rotationOffset.getValue();
+        return this.rotationOffset.getValue();
     }
 
     public Vector3fc getScaleOffset() {
-        return scaleOffset.getValue();
+        return this.scaleOffset.getValue();
     }
 
     public List<FlareMaterial> getMaterials() {
-        return materials;
+        return this.materials;
     }
 }

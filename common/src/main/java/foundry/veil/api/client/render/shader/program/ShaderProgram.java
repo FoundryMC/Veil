@@ -93,6 +93,8 @@ public interface ShaderProgram extends NativeResource, MutableUniformAccess, Tex
     @Override
     ShaderUniform getUniform(CharSequence name);
 
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "3.0.0")
     @Override
     ShaderUniform getOrCreateUniform(CharSequence name);
 

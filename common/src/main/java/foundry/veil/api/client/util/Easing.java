@@ -1,5 +1,6 @@
 package foundry.veil.api.client.util;
 
+import foundry.veil.api.util.EnumCodec;
 import net.minecraft.util.Mth;
 
 /**
@@ -184,7 +185,50 @@ public enum Easing {
                     ? (1 - bounceOut(1 - 2 * x)) / 2
                     : (1 + bounceOut(2 * x - 1)) / 2;
         }
+    },
+
+    // Additional Easings
+
+    /**
+     * @since 2.4.0
+     */
+    EASE_OUT_IN_QUAD {
+        public float ease(float x) {
+            return x < 0.5 ? 1 - Mth.square(x - 1) : 1 + Mth.square(x - 1);
+        }
+    },
+    /**
+     * @since 2.4.0
+     */
+    EASE_OUT_IN_CUBIC {
+        public float ease(float x) {
+            return 1 - (float) Math.pow(x - 1, 3);
+        }
+    },
+    /**
+     * @since 2.4.0
+     */
+    EASE_OUT_IN_QUART {
+        public float ease(float x) {
+            return x < 0.5 ? 1 - (float) Math.pow(x - 1, 4) : 1 + (float) Math.pow(x - 1, 4);
+        }
+    },
+    /**
+     * @since 2.4.0
+     */
+    EASE_OUT_IN_QUINT {
+        public float ease(float x) {
+            return 1 - (float) Math.pow(x - 1, 5);
+        }
     };
+
+    /**
+     * @since 2.4.0
+     */
+    public static final EnumCodec<Easing> CODEC = EnumCodec.
+            <Easing>builder("Easing")
+            .values(Easing.class)
+            .build();
 
     /**
      * Applies the easing to the specified input.

@@ -1,11 +1,12 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
+import net.minecraft.client.renderer.ShaderInstance;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +17,11 @@ public class BoolProperty extends Property<Boolean> {
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        uniform.setInt(overrideValue ? 1 : 0);
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            uniform.set(this.overrideValue ? 1 : 0);
+        }
     }
 
     @Override
@@ -26,7 +30,7 @@ public class BoolProperty extends Property<Boolean> {
         if (mode == PropertyModifier.PropertyModifierMode.MOLANG) {
             optionalMolang.ifPresent(molang -> {
                 try {
-                    this.overrideValue = getEnvironment().get().resolve(molang.getFirst()) >= 0;
+                    this.overrideValue = this.getEnvironment().get().resolve(molang.getFirst()) >= 0;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -37,7 +41,7 @@ public class BoolProperty extends Property<Boolean> {
     @Override
     protected void setQueries(MolangRuntime.Builder builder) {
         super.setQueries(builder);
-        builder.setQuery("v", () -> overrideValue ? 1.0f : -1.0f);
+        builder.setQuery("v", () -> this.overrideValue ? 1.0f : -1.0f);
     }
 
     @Override

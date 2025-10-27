@@ -22,6 +22,7 @@ import java.util.concurrent.Executor;
 
 import static foundry.veil.Veil.LOGGER;
 
+@ApiStatus.Internal
 public class FlareManager {
 
     public static final ResourceKey<Registry<FlareEffectTemplate>> EFFECT_TEMPLATES = createRegistryKey("flare/templates");
@@ -36,7 +37,6 @@ public class FlareManager {
     private FlareManager() {
     }
 
-    @ApiStatus.Internal
     public static void bootstrap() {
     }
 
@@ -50,10 +50,9 @@ public class FlareManager {
 
     public static class Reloader implements PreparableReloadListener {
 
-        public static Reloader INSTANCE = new Reloader();
+        public static final Reloader INSTANCE = new Reloader();
 
         private Reloader() {
-
         }
 
         @Override
@@ -69,7 +68,6 @@ public class FlareManager {
                         }
                         LOGGER.info("Loaded {} templates", registryAccess.registryOrThrow(EFFECT_TEMPLATES).size());
                         LOGGER.info("Loaded {} modules", registryAccess.registryOrThrow(EFFECT_MODULES).size());
-
                     }, gameExecutor);
         }
 

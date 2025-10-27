@@ -3,7 +3,7 @@ package foundry.veil.impl.client.render.vertex;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
 import foundry.veil.api.client.render.vertex.VertexArray;
-import foundry.veil.mixin.pipeline.accessor.PipelineAutoStorageIndexBufferAccessor;
+import foundry.veil.ext.AutoStorageIndexBufferExtension;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.ByteBuffer;
@@ -21,6 +21,7 @@ public class DSAVertexArray extends VertexArray {
 
     @Override
     public void uploadIndexBuffer(ByteBuffer data) {
+        this.indexBuffer = null;
         int elementArrayBuffer = this.getOrCreateBuffer(ELEMENT_ARRAY_BUFFER);
         glNamedBufferData(elementArrayBuffer, data, GL_STATIC_DRAW);
         glVertexArrayElementBuffer(this.id, elementArrayBuffer);
@@ -28,8 +29,9 @@ public class DSAVertexArray extends VertexArray {
 
     @Override
     public void uploadIndexBuffer(MeshData.DrawState drawState) {
-        super.uploadIndexBuffer(drawState);
-        PipelineAutoStorageIndexBufferAccessor ext = (PipelineAutoStorageIndexBufferAccessor) (Object) RenderSystem.getSequentialBuffer(drawState.mode());
-        glVertexArrayElementBuffer(this.id, ext.getName());
+        this.indexBuffer = RenderSystem.getSequentialBuffer(drawState.mode());
+        AutoStorageIndexBufferExtension ext = (AutoStorageIndexBufferExtension) (Object) this.indexBuffer;
+        ext.veil$ensureStorage(drawState.indexCount());
+        glVertexArrayElementBuffer(this.id, ext.veil$getBuffer());
     }
 }

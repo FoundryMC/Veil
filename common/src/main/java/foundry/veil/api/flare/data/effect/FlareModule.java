@@ -2,26 +2,25 @@ package foundry.veil.api.flare.data.effect;
 
 import com.mojang.serialization.Codec;
 
+import java.util.Collections;
 import java.util.Map;
 
-public final class FlareModule {
+/**
+ * @since 2.5.0
+ */
+public record FlareModule(Map<String, FlareSubModule> subModules) {
+
     public static final Codec<FlareModule> CODEC = Codec.unboundedMap(Codec.STRING, FlareSubModule.CODEC)
             .xmap(FlareModule::new, FlareModule::subModules)
             .fieldOf("subModules")
             .codec();
 
-    private final Map<String, FlareSubModule> subModules;
-
     public FlareModule(Map<String, FlareSubModule> subModules) {
-        this.subModules = subModules;
+        this.subModules = Collections.unmodifiableMap(subModules);
     }
 
     public FlareSubModule getSubModule(String name) {
-        return subModules.get(name);
-    }
-
-    private Map<String, FlareSubModule> subModules() {
-        return subModules;
+        return this.subModules.get(name);
     }
 
 }

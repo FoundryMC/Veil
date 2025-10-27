@@ -20,7 +20,7 @@ public record FlareResource(VeilResourceInfo resourceInfo) implements VeilTextRe
 
     @Override
     public List<VeilResourceAction<FlareResource>> getActions() {
-        return resourceInfo.location().getPath().startsWith("flare/templates") ?
+        return this.resourceInfo.location().getPath().startsWith("flare/templates") ?
                 List.of(new TextEditAction<>(), new TemplateInspectAction<>()) :
                 List.of(new TextEditAction<>());
     }

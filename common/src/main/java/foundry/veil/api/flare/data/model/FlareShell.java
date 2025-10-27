@@ -5,53 +5,39 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.flare.model.ShellBakery;
 import foundry.veil.api.flare.model.UnbakedShell;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Textureless model, may contain texture coordinate data.
  *
  * @author GuyApooye
+ * @since 2.5.0
  */
-public class FlareShell implements UnbakedShell {
+public record FlareShell(List<ShellElement> elements) implements UnbakedShell {
 
     public static final Codec<FlareShell> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ShellElement.CODEC.listOf().fieldOf("elements").forGetter(FlareShell::getElements)
+            ShellElement.CODEC.listOf().fieldOf("elements").forGetter(FlareShell::elements)
     ).apply(instance, FlareShell::new));
-
-    @Nullable
-    private ResourceLocation location = null;
-    private final List<ShellElement> elements;
-
-    public FlareShell(List<ShellElement> elements) {
-        this.elements = elements;
-    }
 
     @Override
     public @Nullable BakedShell bake() {
-        return ShellBakery.FaceBakery.bake(this);
+        SimpleBakedShell.Builder builder = new SimpleBakedShell.Builder();
+        for (ShellElement element : this.elements) {
+            for (Map.Entry<Direction, ShellElementFace> entry : element.faces().entrySet()) {
+                builder.addFace(ShellBakery.bakeQuad(element, entry.getValue(), entry.getKey()));
+            }
+        }
+
+        return builder.build();
     }
 
     @Override
-    public void setLocation(@Nullable ResourceLocation location) {
-        this.location = location;
-    }
-
-    @Override
-    public @Nullable ResourceLocation getLocation() {
-        return location;
-    }
-
-    @Override
-    public List<ShellElement> getElements() {
-        return new ArrayList<>(elements);
-    }
-
-    @Override
-    public String toString() {
-        return location == null ? "" : location.toString();
+    public List<ShellElement> elements() {
+        return new ArrayList<>(this.elements);
     }
 }

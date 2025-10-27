@@ -4,39 +4,31 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
+import foundry.veil.api.flare.data.model.FlareShell;
+import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.resource.VeilEditorEnvironment;
 import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
+import foundry.veil.api.resource.type.ShellResource;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import foundry.veil.api.flare.model.ShellBakery;
-import foundry.veil.api.flare.data.model.FlareBakedQuad;
-import foundry.veil.api.flare.data.model.FlareShell;
-import foundry.veil.api.flare.data.model.ShellElement;
-import foundry.veil.api.flare.data.model.ShellElementFace;
-import foundry.veil.api.resource.type.ShellResource;
 import org.joml.*;
 
 import java.io.Reader;
 import java.lang.Math;
-import java.util.List;
-
-import static foundry.veil.Veil.LOGGER;
 
 /**
  * Viewer for shells. Adapted from {@link BlockModelInspector}
@@ -44,8 +36,8 @@ import static foundry.veil.Veil.LOGGER;
  * @author GuyApooye
  */
 public class ShellInspector implements ResourceFileEditor<ShellResource> {
+
     private static final Component TITLE = Component.translatable("inspector.veil.shell.title");
-    private static final PoseStack.Pose POSE = new PoseStack().last();
     public static final ResourceLocation RENDER_TYPE = Veil.veilPath("debug/shell");
 
     private final ImBoolean open;
@@ -56,22 +48,22 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
     private double offsetYRot;
     private float cameraDistance;
 
-    private ObjectArrayList<FlareBakedQuad> quads;
+    private BakedShell shell;
 
     public ShellInspector(VeilEditorEnvironment environment, ShellResource resource) {
         this.open = new ImBoolean(true);
         this.resourceManager = environment.getResourceManager();
         this.resource = resource;
         this.mouseDragDelta = new ImVec2();
-        offsetXRot = Math.toRadians(45.0);
-        offsetYRot = Math.toRadians(30.0);
-        cameraDistance = 10.0f;
+        this.offsetXRot = Math.toRadians(45.0);
+        this.offsetYRot = Math.toRadians(30.0);
+        this.cameraDistance = 10.0f;
         this.loadFromDisk();
     }
 
     @Override
     public void render() {
-        if (this.resource == null || !this.open.get()) {
+        if (this.resource == null || !this.open.get() || this.shell == null) {
             return;
         }
 
@@ -90,8 +82,8 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
 
             int texture = VeilImGuiUtil.renderArea(desiredWidth, desiredHeight, fbo -> {
 
-                Quaterniond cameraOrientation = new Quaterniond().rotateX(offsetXRot).rotateY(offsetYRot);
-                Vector3d cameraPos = cameraOrientation.transformInverse(new Vector3d(0.0, 0.0, cameraDistance)).add(0.0, 0.0, 0.0);
+                Quaterniond cameraOrientation = new Quaterniond().rotateX(this.offsetXRot).rotateY(this.offsetYRot);
+                Vector3d cameraPos = cameraOrientation.transformInverse(new Vector3d(0.0, 0.0, this.cameraDistance)).add(0.0, 0.0, 0.0);
 
                 Matrix4f viewMatrix = new Matrix4f().rotate(new Quaternionf(cameraOrientation)).translate((float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
 
@@ -99,37 +91,31 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 Matrix4f projMat = new Matrix4f().perspective((float) Math.toRadians(40.0), aspect, 0.3f, 1000.0f);
                 Matrix4f modelView = new Matrix4f().mul(viewMatrix);
 
-                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-
-                for (FlareBakedQuad quad : quads) {
-                    quad.putBakedQuadInto(builder, POSE);
-                }
-
                 // draw!
-                MeshData data = builder.build();
-
-                if (data != null) {
-                    RenderType renderType = VeilRenderType.get(RENDER_TYPE);
-                    if (renderType == null) return;
-                    Matrix4fStack stack = RenderSystem.getModelViewStack();
-
-                    stack.pushMatrix();
-                    stack.set(modelView);
-                    RenderSystem.applyModelViewMatrix();
-                    RenderSystem.backupProjectionMatrix();
-                    RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
-
-                    renderType.draw(data);
-
-                    stack.popMatrix();
-                    RenderSystem.restoreProjectionMatrix();
-                    RenderSystem.applyModelViewMatrix();
-                    renderType.clearRenderState();
+                RenderType renderType = VeilRenderType.get(RENDER_TYPE);
+                if (renderType == null) {
+                    return;
                 }
+                Matrix4fStack stack = RenderSystem.getModelViewStack();
+
+                stack.pushMatrix();
+                stack.set(modelView);
+                RenderSystem.applyModelViewMatrix();
+                RenderSystem.backupProjectionMatrix();
+                RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
+
+                this.shell.getVertexArray().drawWithRenderType(renderType);
+
+                stack.popMatrix();
+                RenderSystem.restoreProjectionMatrix();
+                RenderSystem.applyModelViewMatrix();
+                renderType.clearRenderState();
             });
 
             if (ImGui.beginChild("3D View", desiredWidth / 2.0F + 2, desiredHeight / 2.0F + 2, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove)) {
-                if (ImGui.isWindowHovered()) applyCameraChanges();
+                if (ImGui.isWindowHovered()) {
+                    this.applyCameraChanges();
+                }
                 ImGui.image(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.1F);
             }
             ImGui.endChild();
@@ -139,13 +125,13 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
 
     private void applyCameraChanges() {
         if (ImGui.isMouseDragging(ImGuiMouseButton.Left)) {
-            ImGui.getMouseDragDelta(mouseDragDelta);
+            ImGui.getMouseDragDelta(this.mouseDragDelta);
             ImGui.resetMouseDragDelta();
-            offsetXRot += mouseDragDelta.y * 0.01f;
-            offsetYRot += mouseDragDelta.x * 0.01f;
+            this.offsetXRot += this.mouseDragDelta.y * 0.01f;
+            this.offsetYRot += this.mouseDragDelta.x * 0.01f;
         }
 
-        cameraDistance -= ImGui.getIO().getMouseWheel();
+        this.cameraDistance -= ImGui.getIO().getMouseWheel();
     }
 
     @Override
@@ -160,8 +146,12 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
 
     @Override
     public void loadFromDisk() {
-        this.quads = new ObjectArrayList<>();
-        try (Reader reader = resource.resourceInfo().openAsReader(resourceManager)) {
+        if (this.shell != null) {
+            this.shell.free();
+            this.shell = null;
+        }
+
+        try (Reader reader = this.resource.resourceInfo().openAsReader(this.resourceManager)) {
             JsonElement element = JsonParser.parseReader(reader);
             DataResult<FlareShell> result = FlareShell.CODEC.parse(JsonOps.INSTANCE, element);
 
@@ -169,19 +159,18 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 throw new JsonSyntaxException(result.error().get().message());
             }
 
-            FlareShell unbaked = result.getOrThrow();
-
-            List<ShellElement> elements = unbaked.getElements();
-
-            for (ShellElement shellElement : elements) {
-                for (Direction direction : shellElement.faces().keySet()) {
-                    ShellElementFace shellElementFace = shellElement.faces().get(direction);
-                    
-                    quads.add(ShellBakery.FaceBakery.bakeQuad(shellElement.from(), shellElement.to(), shellElementFace, direction, shellElement.rotation()));
-                }
-            }
+            this.shell = result.getOrThrow().bake();
         } catch (Exception e) {
-            LOGGER.error("Failed to load shell", e);
+            Veil.LOGGER.error("Failed to load shell", e);
+        }
+    }
+
+    @Override
+    public void close() {
+        ResourceFileEditor.super.close();
+        if (this.shell != null) {
+            this.shell.free();
+            this.shell = null;
         }
     }
 }

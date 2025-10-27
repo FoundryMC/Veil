@@ -5,9 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import foundry.veil.Veil;
-import foundry.veil.api.client.util.AdditionalEasing;
-import foundry.veil.api.client.util.Easing;
-import foundry.veil.api.client.util.EasingWrapper;
 import io.github.ocelot.glslprocessor.api.grammar.GlslTypeSpecifier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -21,18 +18,6 @@ import java.util.function.Function;
 public class CodecUtil {
 
     public static final EnumCodec<GlslTypeSpecifier.BuiltinType> BUILTIN_TYPE_CODEC = EnumCodec.<GlslTypeSpecifier.BuiltinType>builder("glsl_type").values(GlslTypeSpecifier.BuiltinType.values()).build();
-
-    public static final Codec<EasingWrapper> EASING_CODEC = Codec.STRING.xmap(name -> {
-        try {
-            return new EasingWrapper.Additional(AdditionalEasing.valueOf(name.toUpperCase()));
-        } catch (Exception e1) {
-            try {
-                return new EasingWrapper.EasingsDotNet(Easing.valueOf(name.toUpperCase()));
-            } catch (Exception e2) {
-                throw new IllegalStateException("Easing " + name + " could not be found in neither " + Easing.class + " nor " + AdditionalEasing.class + "!");
-            }
-        }
-    }, EasingWrapper::name);
 
     public static final Codec<Vector2fc> VECTOR2FC_CODEC = Codec.FLOAT.listOf()
             .flatXmap(list -> check(3, list), list -> check(2, list))
@@ -187,7 +172,7 @@ public class CodecUtil {
                 .xmap(e -> e.map(Function.identity(), Function.identity()), Either::left);
     }
 
-    public static <V, K> Map<V, K> pairListToMap(List<? extends Pair<? extends V,? extends K>> pairList) {
+    public static <V, K> Map<V, K> pairListToMap(List<? extends Pair<? extends V, ? extends K>> pairList) {
         Map<V, K> map = new HashMap<>();
         for (Pair<? extends V, ? extends K> pair : pairList) {
             map.put(pair.getFirst(), pair.getSecond());

@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL40C;
 import org.lwjgl.opengl.GLCapabilities;
@@ -54,6 +55,9 @@ public abstract class VertexArray implements NativeResource {
     protected int indexCount;
     protected IndexType indexType;
     protected VertexFormat.Mode drawMode;
+
+    @Nullable
+    protected RenderSystem.AutoStorageIndexBuffer indexBuffer;
 
     @ApiStatus.Internal
     protected VertexArray(int id, Function<VertexArray, VertexArrayBuilder> builder) {
@@ -262,7 +266,8 @@ public abstract class VertexArray implements NativeResource {
      * @param drawState The buffer draw state
      */
     public void uploadIndexBuffer(MeshData.DrawState drawState) {
-        RenderSystem.getSequentialBuffer(drawState.mode()).bind(drawState.indexCount());
+        this.indexBuffer = RenderSystem.getSequentialBuffer(drawState.mode());
+        this.indexBuffer.bind(drawState.indexCount());
     }
 
     /**
@@ -271,6 +276,7 @@ public abstract class VertexArray implements NativeResource {
      * @param data The data to upload
      */
     public void uploadIndexBuffer(ByteBuffer data) {
+        this.indexBuffer = null;
         GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.getOrCreateBuffer(ELEMENT_ARRAY_BUFFER));
         RenderSystem.glBufferData(GL_ELEMENT_ARRAY_BUFFER, data, GL_STATIC_DRAW);
     }
@@ -300,6 +306,15 @@ public abstract class VertexArray implements NativeResource {
      */
     public void bind() {
         VeilRenderSystem.bindVertexArray(this.id);
+
+        // Because the auto index buffers can decide to change formats occasionally, this is needed to keep the type correct
+        if (this.indexBuffer != null) {
+            IndexType expectedIndexType = IndexType.fromBlaze3D(this.indexBuffer.type());
+            if (this.indexType != expectedIndexType) {
+                this.indexBuffer.bind(this.indexCount);
+                this.indexType = expectedIndexType;
+            }
+        }
     }
 
     /**

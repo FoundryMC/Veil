@@ -1,11 +1,12 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.InvertibleProperty;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
@@ -19,8 +20,11 @@ public class Mat4Property extends InvertibleProperty<Matrix4f> {
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        uniform.setMatrix(overrideValue);
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            uniform.set(this.overrideValue);
+        }
     }
 
     @Override

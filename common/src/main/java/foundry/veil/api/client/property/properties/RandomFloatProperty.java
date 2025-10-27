@@ -1,12 +1,13 @@
 package foundry.veil.api.client.property.properties;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import foundry.veil.api.client.property.ImmutableProperty;
 import foundry.veil.api.client.property.Property;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
 import foundry.veil.api.flare.data.effect.FlareMaterial;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.util.RandomSource;
 
 import java.util.List;
@@ -18,7 +19,9 @@ import java.util.Optional;
  *
  * @author GuyApooye
  */
-public class RandomFloatProperty extends Property<Float> implements ImmutableProperty {
+@ImmutableProperty
+public class RandomFloatProperty extends Property<Float> {
+
     private final RandomSource randomSource = RandomSource.create(10841L);
     public static final RandomFloatProperty INSTANCE = new RandomFloatProperty();
 
@@ -27,8 +30,11 @@ public class RandomFloatProperty extends Property<Float> implements ImmutablePro
     }
 
     @Override
-    public void applyValue(ShaderUniformAccess uniform, int location) {
-        uniform.setFloat(randomSource.nextFloat());
+    public void applyValue(String name, ShaderInstance shader) {
+        Uniform uniform = shader.getUniform(name);
+        if (uniform != null) {
+            uniform.set(this.randomSource.nextFloat());
+        }
     }
 
     @Override

@@ -6,69 +6,31 @@ import foundry.veil.api.util.CodecUtil;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import javax.annotation.Nullable;
-
-public class ShellFaceUV {
+/**
+ * @since 2.5.0
+ */
+public record ShellFaceUV(Vector4fc uvs, int rotation) {
 
     public static final Codec<ShellFaceUV> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            CodecUtil.VECTOR4FC_CODEC.fieldOf("uv").forGetter(ShellFaceUV::getUVs),
-            Codec.INT.optionalFieldOf("rotation", 0).forGetter(ShellFaceUV::getRotation)
+            CodecUtil.VECTOR4FC_CODEC.fieldOf("uv").forGetter(ShellFaceUV::uvs),
+            Codec.INT.optionalFieldOf("rotation", 0).forGetter(ShellFaceUV::rotation)
     ).apply(instance, ShellFaceUV::new));
 
-    public float[] uvs;
-    public final int rotation;
-
-    public ShellFaceUV(@Nullable float[] uvs, int rotation) {
-        this.uvs = uvs;
-        this.rotation = rotation;
-    }
-
-    private ShellFaceUV(Vector4fc uvs, Integer rotation) {
-        this(vectorToArray(uvs), rotation);
+    public ShellFaceUV(float u0, float v0, float u1, float v1, int rotation) {
+        this(new Vector4f(u0, v0, u1, v1), rotation);
     }
 
     public float getU(int index) {
-        if (this.uvs == null) {
-            throw new NullPointerException("uvs");
-        } else {
-            int i = this.getShiftedIndex(index);
-            return this.uvs[i != 0 && i != 1 ? 2 : 0];
-        }
+        int i = this.getShiftedIndex(index);
+        return this.uvs.get(i != 0 && i != 1 ? 2 : 0);
     }
 
     public float getV(int index) {
-        if (this.uvs == null) {
-            throw new NullPointerException("uvs");
-        } else {
-            int i = this.getShiftedIndex(index);
-            return this.uvs[i != 0 && i != 3 ? 3 : 1];
-        }
+        int i = this.getShiftedIndex(index);
+        return this.uvs.get(i != 0 && i != 3 ? 3 : 1);
     }
 
     private int getShiftedIndex(int index) {
         return (index + this.rotation / 90) % 4;
-    }
-
-    public int getReverseIndex(int index) {
-        return (index + 4 - this.rotation / 90) % 4;
-    }
-
-    public void setMissingUv(float[] uvs) {
-        if (this.uvs == null) {
-            this.uvs = uvs;
-        }
-
-    }
-
-    private Vector4f getUVs() {
-        return new Vector4f(uvs);
-    }
-
-    public int getRotation() {
-        return rotation;
-    }
-
-    private static float[] vectorToArray(Vector4fc uvs) {
-        return new float[]{uvs.x(), uvs.y(), uvs.z(), uvs.w()};
     }
 }

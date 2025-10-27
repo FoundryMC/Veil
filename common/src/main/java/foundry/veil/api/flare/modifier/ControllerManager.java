@@ -25,32 +25,35 @@ public class ControllerManager {
     public void addController(Controller controller) {
         String name = controller.getIdentifier().name();
         String host = controller.getIdentifier().host();
-        if (name.startsWith("global::") || controller instanceof GlobalController) throw new IllegalArgumentException("Global controllers should be ");
-        else controllers.put(name, host, controller);
+        if (name.startsWith("global::") || controller instanceof GlobalController) {
+            throw new IllegalArgumentException("Global controllers should be ");
+        } else {
+            this.controllers.put(name, host, controller);
+        }
     }
 
     private void addGlobalController(GlobalController globalController) {
         String name = globalController.getIdentifier().name();
-        globalControllers.put(name, globalController);
+        this.globalControllers.put(name, globalController);
     }
 
     public @Nullable Controller getController(String name, String host) {
         return name.startsWith("global::") ?
-                globalControllers.get(name) :
-                controllers.get(name, host);
+                this.globalControllers.get(name) :
+                this.controllers.get(name, host);
     }
 
     public Controller getOrCreateController(String name, EffectHost host) {
-        Controller controller = getController(name, host.getName());
+        Controller controller = this.getController(name, host.getName());
         if (controller == null) {
             controller = new Controller(name, host);
             controller.initialize();
-            addController(controller);
+            this.addController(controller);
         }
         return controller;
     }
 
     public void removeHost(String host) {
-        controllers.columnKeySet().remove(host);
+        this.controllers.columnKeySet().remove(host);
     }
 }

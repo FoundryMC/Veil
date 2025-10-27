@@ -4,30 +4,40 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.property.Property;
+import foundry.veil.api.client.property.properties.TimeProperty;
 import foundry.veil.api.client.registry.PropertyModifierRegistry;
 import foundry.veil.api.client.render.MatrixStack;
+import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.flare.model.BakedShell;
-import foundry.veil.api.util.CodecUtil;
-import net.minecraft.resources.ResourceLocation;
-import foundry.veil.api.client.property.properties.TimeProperty;
-import foundry.veil.api.client.property.Property;
-import foundry.veil.api.flare.EffectHost;
+import foundry.veil.api.flare.modifier.ControllerManager;
 import foundry.veil.api.flare.modifier.PropertyModifier;
+import foundry.veil.api.util.CodecUtil;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * @since 2.5.0
+ */
 public class FlareEffectLayer {
+
     public static final Codec<FlareEffectLayer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(FlareEffectLayer::getName),
             Codec.BOOL.optionalFieldOf("disabled", false).forGetter(FlareEffectLayer::isDisabled),
             FlareModel.CODEC.fieldOf("model").forGetter(FlareEffectLayer::getModel),
             CodecUtil.registryOrLegacyCodec(PropertyModifierRegistry.REGISTRY)
-                    .<PropertyModifier<?>>dispatch(PropertyModifier::type, PropertyModifier::codec)
-                        .listOf()
-                        .optionalFieldOf("modifiers", new ArrayList<>())
-                        .forGetter(FlareEffectLayer::getModifiers)
+                    .<PropertyModifier<?>>dispatch(PropertyModifier::type, PropertyModifierRegistry.PropertyModifierType::codec)
+                    .listOf()
+                    .optionalFieldOf("modifiers", new ArrayList<>())
+                    .forGetter(FlareEffectLayer::getModifiers)
     ).apply(instance, FlareEffectLayer::new));
 
     private final String name;
@@ -35,75 +45,72 @@ public class FlareEffectLayer {
     private final FlareModel model;
     private final Map<String, List<PropertyModifier<?>>> modifiers;
     private final List<PropertyModifier<?>> originalModifiers;
-    private final Map<String, Map<String, Property<?>>> properties;
 
     public FlareEffectLayer(String name, boolean disabled, FlareModel model, List<PropertyModifier<?>> modifiers) {
         this.name = name;
         this.disabled = disabled;
         this.model = model;
         this.originalModifiers = ImmutableList.copyOf(modifiers);
-        Map<String, List<PropertyModifier<?>>> modifierMap = new HashMap<>();
-        Map<String, Map<String, Property<?>>> properties = new HashMap<>();
 
-        for (FlareMaterial material : model.getMaterials()) {
-            Map<String, Property<?>> materialProperties = material.properties();
-            this.putModelProperties(materialProperties);
-            properties.put(material.clazz(), materialProperties);
+        List<FlareMaterial> materials = model.getMaterials();
+        Map<String, List<PropertyModifier<?>>> modifierMap = new Object2ObjectArrayMap<>();
+
+        for (FlareMaterial material : materials) {
+            this.putModelProperties(material.properties());
         }
 
         for (PropertyModifier<?> modifier : modifiers) {
-            List<PropertyModifier<?>> modifierList = modifierMap.computeIfAbsent(modifier.outputPropertyName(), n -> new ArrayList<>());
+            List<PropertyModifier<?>> modifierList = modifierMap.computeIfAbsent(modifier.outputPropertyName(), unused -> new ObjectArrayList<>());
             modifierList.add(modifier);
         }
 
-        modifierMap.replaceAll((k, v) -> ImmutableList.copyOf(v));
-        this.modifiers = ImmutableMap.copyOf(modifierMap);
-
-        this.properties = ImmutableMap.copyOf(properties);
+        modifierMap.replaceAll((key, value) -> Collections.unmodifiableList(value));
+        this.modifiers = Collections.unmodifiableMap(modifierMap);
     }
 
     public void putModelProperties(Map<String, Property<?>> materialProperties) {
-        materialProperties.put(FlareModel.POSITION_PROPERTY_NAME, model.positionOffset);
-        materialProperties.put(FlareModel.ROTATION_PROPERTY_NAME, model.rotationOffset);
-        materialProperties.put(FlareModel.SCALE_PROPERTY_NAME, model.scaleOffset);
-        materialProperties.put("ModelToWorld", model.modelToWorld);
+        materialProperties.put(FlareModel.POSITION_PROPERTY_NAME, this.model.positionOffset);
+        materialProperties.put(FlareModel.ROTATION_PROPERTY_NAME, this.model.rotationOffset);
+        materialProperties.put(FlareModel.SCALE_PROPERTY_NAME, this.model.scaleOffset);
+        materialProperties.put("ModelToWorld", this.model.modelToWorld);
         materialProperties.put("_Time", TimeProperty.INSTANCE);
     }
 
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
-        if (disabled) return;
-
-        for (int i = 0, originalModifiersSize = originalModifiers.size(); i < originalModifiersSize; i++) {
-            PropertyModifier<?> modifier = originalModifiers.get(i);
-            FlareEffectManager.getInstance().getControllerManager().getOrCreateController(modifier.inputControllerName(), host).update(partialTick);
+        if (this.disabled) {
+            return;
         }
 
-        PropertyModifier.modifyProperty(host, null, model.positionOffset, modifiers.get(FlareModel.POSITION_PROPERTY_NAME));
-        PropertyModifier.modifyProperty(host, null, model.rotationOffset, modifiers.get(FlareModel.ROTATION_PROPERTY_NAME));
-        PropertyModifier.modifyProperty(host, null, model.scaleOffset, modifiers.get(FlareModel.SCALE_PROPERTY_NAME));
+        ControllerManager controllerManager = FlareEffectManager.getInstance().getControllerManager();
+        for (PropertyModifier<?> modifier : this.originalModifiers) {
+            controllerManager.getOrCreateController(modifier.inputControllerName(), host).update(partialTick);
+        }
 
-        model.render(host, matrixStack, partialTick, modifiers, shellOverrides);
+        PropertyModifier.modifyProperty(host, null, this.model.positionOffset, this.modifiers.get(FlareModel.POSITION_PROPERTY_NAME));
+        PropertyModifier.modifyProperty(host, null, this.model.rotationOffset, this.modifiers.get(FlareModel.ROTATION_PROPERTY_NAME));
+        PropertyModifier.modifyProperty(host, null, this.model.scaleOffset, this.modifiers.get(FlareModel.SCALE_PROPERTY_NAME));
 
-        model.positionOffset.resetOverrideValue();
-        model.rotationOffset.resetOverrideValue();
-        model.scaleOffset.resetOverrideValue();
-        model.modelToWorld.resetOverrideValue();
+        this.model.render(host, matrixStack, this.modifiers, shellOverrides);
 
+        this.model.positionOffset.resetOverrideValue();
+        this.model.rotationOffset.resetOverrideValue();
+        this.model.scaleOffset.resetOverrideValue();
+        this.model.modelToWorld.resetOverrideValue();
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public FlareModel getModel() {
-        return model;
+        return this.model;
     }
 
     public List<PropertyModifier<?>> getModifiers() {
-        return originalModifiers;
+        return this.originalModifiers;
     }
 
     public boolean isDisabled() {
-        return disabled;
+        return this.disabled;
     }
 }

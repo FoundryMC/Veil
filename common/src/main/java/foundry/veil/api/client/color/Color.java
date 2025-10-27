@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import org.joml.Vector3fc;
+import org.joml.Vector4fc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +126,32 @@ public class Color implements Colorc {
         this.green = copy.green();
         this.blue = copy.blue();
         this.alpha = copy.alpha();
+    }
+
+    /**
+     * Copies the color from the specified vector.
+     *
+     * @param copy The vector to copy from
+     * @since 2.5.0
+     */
+    public Color(Vector3fc copy) {
+        this.red = copy.x();
+        this.green = copy.y();
+        this.blue = copy.z();
+        this.alpha = 1.0F;
+    }
+
+    /**
+     * Copies the color from the specified vector.
+     *
+     * @param copy The vector to copy from
+     * @since 2.5.0
+     */
+    public Color(Vector4fc copy) {
+        this.red = copy.x();
+        this.green = copy.y();
+        this.blue = copy.z();
+        this.alpha = copy.w();
     }
 
     /**

@@ -1,15 +1,15 @@
 package foundry.veil.api.client.property;
 
 import com.google.common.base.Suppliers;
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import foundry.veil.api.client.registry.PropertyRegistry;
-import foundry.veil.api.client.render.shader.program.ShaderProgram;
-import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangEnvironment;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
-import foundry.veil.api.flare.modifier.PropertyModifier;
+import net.minecraft.client.renderer.ShaderInstance;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +19,8 @@ import java.util.function.Supplier;
 /**
  * <p>Properties are variables (and usually also shader uniforms) that can be created from a data driven context. Used by Flare effects to manipulate models and shader uniforms</p>
  *
- * @author GuyApooye
  * @param <T>
+ * @author GuyApooye
  */
 public abstract class Property<T> {
 
@@ -32,10 +32,10 @@ public abstract class Property<T> {
     public Property(PropertyRegistry.PropertyType<T, ? extends Property<T>> type, T value) {
         this.type = type;
         this.value = value;
-        this.overrideValue = cloneValue(value);
+        this.overrideValue = this.cloneValue(value);
         this.environment = Suppliers.memoize(() -> {
             MolangRuntime.Builder builder = MolangRuntime.runtime();
-            setQueries(builder);
+            this.setQueries(builder);
             return builder.create();
         });
     }
@@ -43,19 +43,18 @@ public abstract class Property<T> {
     protected void setQueries(MolangRuntime.Builder builder) {
     }
 
-    public void applyValue(String name, ShaderProgram shader) {
-        this.applyValue(shader.getOrCreateUniform(name), shader.getUniformLocation(name));
-    }
-    public abstract void applyValue(ShaderUniformAccess uniformAccess, int location);
+    public abstract void applyValue(String name, ShaderInstance shader);
+
     public abstract void modify(T value, PropertyModifier.PropertyModifierMode mode, Optional<List<MolangExpression>> optionalMolang);
+
     protected abstract T cloneValue(T value);
 
     public void resetOverrideValue() {
-        this.overrideValue = cloneValue(value);
+        this.overrideValue = this.cloneValue(this.value);
     }
 
     public PropertyRegistry.PropertyType<T, ? extends Property<T>> getType() {
-        return type;
+        return this.type;
     }
 
     public static <T, M extends Property<T>> MapCodec<M> codec(PropertyRegistry.PropertyType<T, M> type) {
@@ -67,6 +66,6 @@ public abstract class Property<T> {
     }
 
     public Supplier<MolangEnvironment> getEnvironment() {
-        return environment;
+        return this.environment;
     }
 }

@@ -5,25 +5,29 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 
-public record ShellElement(Vector3f from, Vector3f to, Map<Direction, ShellElementFace> faces,
-                           @Nullable ShellElementRotation rotation) {
+/**
+ * @since 2.5.0
+ */
+public record ShellElement(
+        Vector3fc from,
+        Vector3fc to,
+        @Nullable ShellElementRotation rotation,
+        Map<Direction, ShellElementFace> faces
+) {
     public static final Codec<ShellElement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CodecUtil.VECTOR3FC_CODEC.fieldOf("from").forGetter(ShellElement::from),
             CodecUtil.VECTOR3FC_CODEC.fieldOf("to").forGetter(ShellElement::to),
-            ShellElementRotation.CODEC.optionalFieldOf("rotation").forGetter(ShellElement::getRotation),
+            ShellElementRotation.CODEC.optionalFieldOf("rotation").forGetter(element -> Optional.ofNullable(element.rotation)),
             ShellElementFace.FULL_CODEC.fieldOf("faces").forGetter(ShellElement::faces)
-    ).apply(instance, ShellElement::create));
-
-    private static ShellElement create(Vector3fc from, Vector3fc to, Optional<ShellElementRotation> rotation, Map<Direction, ShellElementFace> faces) {
-        return new ShellElement(new Vector3f(from), new Vector3f(to), faces, rotation.orElse(null));
-    }
-
-    private Optional<ShellElementRotation> getRotation() {
-        return Optional.ofNullable(rotation);
-    }
+    ).apply(instance, (from, to, rotation, faces) -> {
+        Map<Direction, ShellElementFace> facesMap = faces.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(new EnumMap<>(faces));
+        return new ShellElement(from, to, rotation.orElse(null), facesMap);
+    }));
 }
