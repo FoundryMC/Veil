@@ -183,7 +183,11 @@ public class EnumCodec<T extends Enum<?>> implements Codec<T> {
                 throw new IllegalArgumentException("All values must be unique");
             }
 
-            Enum<?>[] enumValues = this.values[0].getClass().getEnumConstants();
+            Class<?> clazz = this.values[0].getClass();
+            while (!clazz.isEnum()) {
+                clazz = clazz.getSuperclass();
+            }
+            Enum<?>[] enumValues = (Enum<?>[]) clazz.getEnumConstants();
             return new EnumCodec<>(this.name, this.values, this.toString, enumValues.length == this.values.length);
         }
     }
