@@ -16,6 +16,7 @@ import foundry.veil.api.flare.modifier.PropertyModifier;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -115,17 +116,19 @@ public class FlareModel {
         }
 
         vertexArray.setup(renderType);
-        material.applyProperties(host, RenderSystem.getShader(), modifiers);
+        ShaderInstance currentShader = RenderSystem.getShader();
+        material.applyProperties(host, currentShader, modifiers);
         vertexArray.draw();
-        material.resetProperties(host, RenderSystem.getShader());
+        material.resetProperties(host, currentShader);
         vertexArray.clear(renderType);
 
         if (renderType instanceof VeilRenderType.LayeredRenderType layeredRenderType) {
             for (RenderType layer : layeredRenderType.getLayers()) {
                 vertexArray.setup(layer);
-                material.applyProperties(host, RenderSystem.getShader(), modifiers);
+                currentShader = RenderSystem.getShader();
+                material.applyProperties(host, currentShader, modifiers);
                 vertexArray.draw();
-                material.resetProperties(host, RenderSystem.getShader());
+                material.resetProperties(host, currentShader);
                 vertexArray.clear(layer);
             }
         }

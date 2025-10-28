@@ -9,23 +9,25 @@
       "materials": {
         "class": "base",
         "renderType": "veil:flare/plume",
-        "properties": [
-          {
-            "name": "Speed",
+        "properties": {
+          "Speed": {
             "type": "float",
             "value": 1
           },
-          {
-            "name": "ColorMultiplier",
+          "ColorMultiplier": {
             "type": "vec4",
-            "value": [1, 1.0, 1.0, 0.7]
+            "value": [
+              1,
+              1.0,
+              1.0,
+              0.7
+            ]
           },
-          {
-            "name": "Noise",
+          "Noise": {
             "type": "sampler2d",
             "value": "veil:textures/noise/animated_noise.png"
           }
-        ]
+        }
       }
     },
     "modifiers": [

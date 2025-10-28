@@ -6,7 +6,6 @@ import foundry.veil.api.client.registry.*;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
-import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.registry.EmitterShapeRegistry;

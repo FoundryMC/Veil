@@ -34,7 +34,7 @@ public record FlareMaterial(
             ResourceLocation.CODEC.fieldOf("renderType").forGetter(FlareMaterial::renderTypeLocation),
             Codec.BOOL.optionalFieldOf("randomizeSeed", false).forGetter(FlareMaterial::randomizeSeed),
             Codec.unboundedMap(
-                            Codec.STRING.fieldOf("name").codec(),
+                            Codec.STRING,
                             CodecUtil.registryOrLegacyCodec(PropertyRegistry.REGISTRY)
                                     .<Property<?>>dispatchMap(Property::getType, Property::codec)
                                     .codec()

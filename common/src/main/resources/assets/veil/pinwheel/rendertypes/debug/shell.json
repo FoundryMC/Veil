@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:flare/debug/shell"
+      "name": "veil:debug/shell"
     },
     {
       "type": "minecraft:depth_test",

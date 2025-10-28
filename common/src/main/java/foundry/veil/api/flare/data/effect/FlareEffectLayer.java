@@ -19,10 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @since 2.5.0
@@ -53,7 +50,7 @@ public class FlareEffectLayer {
         this.originalModifiers = ImmutableList.copyOf(modifiers);
 
         List<FlareMaterial> materials = model.getMaterials();
-        Map<String, List<PropertyModifier<?>>> modifierMap = new Object2ObjectArrayMap<>();
+        Map<String, List<PropertyModifier<?>>> modifierMap = new HashMap<>();
 
         for (FlareMaterial material : materials) {
             this.putModelProperties(material.properties());
@@ -65,7 +62,7 @@ public class FlareEffectLayer {
         }
 
         modifierMap.replaceAll((key, value) -> Collections.unmodifiableList(value));
-        this.modifiers = Collections.unmodifiableMap(modifierMap);
+        this.modifiers = Collections.unmodifiableMap(new Object2ObjectArrayMap<>(modifierMap));
     }
 
     public void putModelProperties(Map<String, Property<?>> materialProperties) {

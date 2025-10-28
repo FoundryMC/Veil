@@ -10,28 +10,28 @@
         "materials": {
           "class": "base",
           "renderType": "veil:flare/splash",
-          "properties": [
-            {
-              "name": "Shift",
+          "properties": {
+            "Shift": {
               "type": "float",
               "value": 0
             },
-            {
-              "name": "Time",
+            "Time": {
               "type": "float",
               "value": 0
             },
-            {
-              "name": "Blue",
+            "Blue": {
               "type": "vec3",
-              "value": [0.2, 0.3, 0.8]
+              "value": [
+                0.2,
+                0.3,
+                0.8
+              ]
             },
-            {
-              "name": "Sampler0",
+            "Sampler0": {
               "type": "sampler2d",
               "value": "minecraft:textures/block/water_still.png"
             }
-          ]
+          }
         }
       },
       "modifiers": [
@@ -94,28 +94,24 @@
         "materials": {
           "class": "base",
           "renderType": "veil:flare/splash",
-          "properties": [
-            {
-              "name": "Shift",
+          "properties": {
+            "Shift": {
               "type": "float",
               "value": 0
             },
-            {
-              "name": "Time",
+            "Time": {
               "type": "float",
               "value": 0
             },
-            {
-              "name": "Blue",
+            "Blue": {
               "type": "vec3",
               "value": [0.2, 0.5, 0.8]
             },
-            {
-              "name": "Sampler0",
+            "Sampler0": {
               "type": "sampler2d",
               "value": "minecraft:textures/block/water_still.png"
             }
-          ]
+          }
         }
       },
       "modifiers": [

@@ -1,5 +1,7 @@
 package foundry.veil.api.client.property.model;
 
+import foundry.veil.api.client.property.InapplicableProperty;
+import foundry.veil.api.client.property.ModelProperty;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.util.Mth;
 import foundry.veil.api.flare.modifier.PropertyModifier;
@@ -15,6 +17,8 @@ import java.util.Optional;
  *
  * @author GuyApooye
  */
+@ModelProperty
+@InapplicableProperty
 public class RotationModelProperty extends Vec3ModelProperty {
     private final Quaternionfc rotation;
     private final Quaternionf overrideRotation = new Quaternionf();
