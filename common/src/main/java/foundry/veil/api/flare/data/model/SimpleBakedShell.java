@@ -8,6 +8,7 @@ import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.flare.model.BakedShell;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class SimpleBakedShell implements BakedShell {
     private VertexArray vertexArray;
 
     public SimpleBakedShell(List<FlareBakedQuad> faces) {
-        this.faces = faces;
+        this.faces = Collections.unmodifiableList(faces);
     }
 
     @Override
