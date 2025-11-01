@@ -1,6 +1,5 @@
 package foundry.veil.api.flare.data.effect;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.property.Property;
@@ -46,7 +45,7 @@ public class FlareEffectLayer {
         this.name = name;
         this.disabled = disabled;
         this.model = model;
-        this.originalModifiers = ImmutableList.copyOf(modifiers);
+        this.originalModifiers = Collections.unmodifiableList(modifiers);
 
         List<FlareMaterial> materials = model.getMaterials();
         Map<String, List<PropertyModifier<?>>> modifierMap = new HashMap<>();

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -122,8 +123,9 @@ public abstract class PropertyModifier<T> {
         if (property.getClass().getAnnotation(ImmutableProperty.class) != null) {
             return;
         }
-        for (PropertyModifier<?> modifier : modifiers) {
-            if (clazz != null && (modifier.clazz == null || !modifier.clazz.equals(clazz))) {
+        for (int i = 0, modifiersSize = modifiers.size(); i < modifiersSize; i++) {
+            PropertyModifier<?> modifier = modifiers.get(i);
+            if (clazz != null && Objects.equals(clazz, modifier.clazz)) {
                 continue;
             }
             modifier.apply(host, property);
