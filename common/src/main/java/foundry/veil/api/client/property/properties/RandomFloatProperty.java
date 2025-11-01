@@ -15,7 +15,7 @@ import java.util.Optional;
 
 /**
  * <p>A property that applies a random value each time.</p>
- * Added as a default property named <code>_Seed</code> in all {@link FlareMaterial} that have {@link FlareMaterial#useRandomSeed()} set to <code>true</code>.
+ * Added as a default property named <code>_Seed</code> in all {@link FlareMaterial} that have {@link FlareMaterial#randomizeSeed()} set to <code>true</code>.
  *
  * @author GuyApooye
  */

@@ -3,7 +3,6 @@ package foundry.veil.api.flare.data.model;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
-import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.Map;
 
