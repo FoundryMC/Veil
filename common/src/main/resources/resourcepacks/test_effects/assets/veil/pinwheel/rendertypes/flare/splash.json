@@ -16,7 +16,7 @@
     },
     {
       "type": "minecraft:transparency",
-      "mode": "additive"
+      "mode": "translucent"
     },
     {
       "type": "minecraft:write_mask",

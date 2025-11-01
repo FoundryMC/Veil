@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
@@ -104,12 +104,12 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 RenderSystem.backupProjectionMatrix();
                 RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
 
-                this.shell.getVertexArray().drawWithRenderType(renderType);
+                shell.getVertexArray().bind();
+                shell.getVertexArray().drawWithRenderType(renderType);
 
                 stack.popMatrix();
                 RenderSystem.restoreProjectionMatrix();
                 RenderSystem.applyModelViewMatrix();
-                renderType.clearRenderState();
             });
 
             if (ImGui.beginChild("3D View", desiredWidth / 2.0F + 2, desiredHeight / 2.0F + 2, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove)) {

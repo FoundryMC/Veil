@@ -19,5 +19,6 @@ void main() {
     fragColor *= texCoord0.y * 0.125 / (1.05 - texCoord0.y);
     fragColor.rgb *= Blue;
     fragColor *= edginess * edginess;
+    if (fragColor.a < 0.1) discard;
 }
 
