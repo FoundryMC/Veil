@@ -18,6 +18,16 @@ vanilla mc post-chain, but with a lot more features.
     ...
   },
   // Optional
+  "renderStage": "VeilRenderLevelStageEvent.Stage enum values",
+  // Optional
+  "dynamicBuffers": [
+    "albedo",
+    "normal",
+    "light_uv",
+    "light_color",
+    "debug"
+  ],
+  // Optional
   "priority": 1000,
   // Optional
   "replace": false

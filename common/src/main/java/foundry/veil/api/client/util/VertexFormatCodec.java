@@ -118,14 +118,15 @@ public class VertexFormatCodec {
         return map.build();
     });*/
 
-    public static final Codec<VertexFormat> CODEC = Codec.either(DEFAULT_CODEC, FULL_CODEC).xmap(either -> either.map(a -> a, a -> a), format -> {
-        for (Map.Entry<String, VertexFormat> entry : DEFAULT_FORMATS.entrySet()) {
-            if (format.equals(entry.getValue())) {
-                return Either.left(format);
-            }
-        }
-        return Either.right(format);
-    });
+//    public static final Codec<VertexFormat> CODEC = Codec.either(DEFAULT_CODEC, FULL_CODEC).xmap(either -> either.map(a -> a, a -> a), format -> {
+//        for (Map.Entry<String, VertexFormat> entry : DEFAULT_FORMATS.entrySet()) {
+//            if (format.equals(entry.getValue())) {
+//                return Either.left(format);
+//            }
+//        }
+//        return Either.right(format);
+//    });
+    public static final Codec<VertexFormat> CODEC = DEFAULT_CODEC;
 
     private static final Codec<Integer> DEFAULT_SIZE_CODEC = Codec.STRING.flatXmap(name -> {
         String key = name.toUpperCase(Locale.ROOT);
