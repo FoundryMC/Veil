@@ -17,6 +17,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.system.NativeResource;
 
 import java.io.Reader;
 import java.util.Collections;
@@ -24,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ApiStatus.Internal
-public class ShellManager extends SimplePreparableReloadListener<Map<ResourceLocation, BakedShell>> {
+public class ShellManager extends SimplePreparableReloadListener<Map<ResourceLocation, BakedShell>> implements NativeResource {
 
     private static final FileToIdConverter CONVERTER = FileToIdConverter.json("flare/shells");
 
@@ -64,10 +65,19 @@ public class ShellManager extends SimplePreparableReloadListener<Map<ResourceLoc
 
     @Override
     protected void apply(@NotNull Map<ResourceLocation, BakedShell> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+        this.free();
         this.shells = Collections.unmodifiableMap(map);
     }
 
     public BakedShell getBakedShell(ResourceLocation shellLocation) {
         return this.shells.getOrDefault(shellLocation, ShellBakery.MISSING_SHELL);
+    }
+
+    @Override
+    public void free() {
+        for (BakedShell shell : this.shells.values()) {
+            shell.free();
+        }
+        this.shells.clear();
     }
 }

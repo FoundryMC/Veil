@@ -288,6 +288,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         this.framebufferManager.free();
         this.postProcessingManager.free();
         this.quasarParticleManager.clear();
+        this.flareEffectManager.getShellManager().free();
         this.lightRenderer.free();
     }
 
