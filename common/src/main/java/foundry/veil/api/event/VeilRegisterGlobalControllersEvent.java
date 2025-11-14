@@ -7,9 +7,11 @@ import foundry.veil.api.flare.modifier.GlobalController;
  * Fired to register global controllers to be used when rendering Flare effects.
  *
  * @author GuyApooye
+ * @since 2.5.0
  */
 @FunctionalInterface
 public interface VeilRegisterGlobalControllersEvent {
+
     /**
      * Registers global controllers.
      *

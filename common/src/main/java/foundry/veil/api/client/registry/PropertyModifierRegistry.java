@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 
 /**
  * Registry for all property modifier types.
+ * @since 2.5.0
  */
 public final class PropertyModifierRegistry {
 
@@ -27,7 +28,7 @@ public final class PropertyModifierRegistry {
 
     public static final Supplier<PropertyModifierType<Float, FloatPropertyModifier>> FLOAT = register(
             "float",
-            PropertyModifier.createCodec(FloatPropertyModifier::new, FloatPropertyModifier::getCurve, FloatCurve.CODEC.fieldOf("curve"), 1)
+            PropertyModifier.createCodec(FloatPropertyModifier::new, FloatPropertyModifier::getCurve, FloatCurve.CODEC.optionalFieldOf("curve", FloatCurve.ZERO), 1)
     );
     public static final Supplier<PropertyModifierType<Vector2fc, Vec2PropertyModifier>> VEC2 = register(
             "vec2",

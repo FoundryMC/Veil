@@ -6,13 +6,12 @@ import foundry.veil.api.flare.modifier.GlobalController;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 
-import java.util.function.Consumer;
-
 /**
  * Fired to register global controllers to be used when rendering Flare effects.
  *
- * @see ControllerManager
  * @author GuyApooye
+ * @see ControllerManager
+ * @since 2.5.0
  */
 public class ForgeVeilRegisterGlobalControllersEvent extends Event implements IModBusEvent {
 

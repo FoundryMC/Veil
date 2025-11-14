@@ -11,6 +11,7 @@ import java.util.Collection;
  * Shells are models stripped of their texture, though they may still contain texture coordinates.
  *
  * @author GuyApooye
+ * @since 2.5.0
  */
 public interface BakedShell extends NativeResource {
 

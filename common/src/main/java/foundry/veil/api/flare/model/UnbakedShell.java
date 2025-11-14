@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/**
+ * @since 2.5.0
+ */
 public interface UnbakedShell {
 
     @Contract("->new")

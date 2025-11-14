@@ -82,7 +82,7 @@ public class FlareModel {
 
         BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(this.shell)) ?
                 shellOverrides.get(this.shell) :
-                FlareEffectManager.getInstance().getShellManager().getBakedShell(this.shell);
+                FlareEffectManager.getInstance().getBakedShell(this.shell);
 
         Matrix4fStack stack = RenderSystem.getModelViewStack();
         stack.pushMatrix();

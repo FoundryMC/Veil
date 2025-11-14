@@ -19,7 +19,6 @@ import foundry.veil.impl.client.render.dynamicbuffer.VanillaShaderCompiler;
 import foundry.veil.impl.client.render.pipeline.VeilBloomRenderer;
 import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
 import foundry.veil.impl.client.render.rendertype.DynamicRenderTypeManager;
-import foundry.veil.impl.flare.FlareManager;
 import foundry.veil.mixin.pipeline.accessor.PipelineReloadableResourceManagerAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
@@ -229,9 +228,10 @@ public class VeilRenderer implements ResourceManagerReloadListener {
 
     /**
      * @return The manager for rendering and managing effects
+     * @since 2.5.0
      */
     public FlareEffectManager getEffectManager() {
-        return flareEffectManager;
+        return this.flareEffectManager;
     }
 
     /**

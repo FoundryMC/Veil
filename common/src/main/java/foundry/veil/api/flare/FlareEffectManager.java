@@ -9,9 +9,11 @@ import foundry.veil.impl.flare.FlareManager;
 import foundry.veil.impl.flare.ShellManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.system.NativeResource;
 
-public final class FlareEffectManager implements NativeResource {
+/**
+ * @since 2.5.0
+ */
+public final class FlareEffectManager {
 
     private final ShellManager shellManager;
     private final ControllerManager controllerManager;
@@ -34,6 +36,7 @@ public final class FlareEffectManager implements NativeResource {
         return FlareManager.registryAccess().registry(FlareManager.EFFECT_MODULES).orElseThrow().get(resourceLocation);
     }
 
+    @ApiStatus.Internal
     public ShellManager getShellManager() {
         return this.shellManager;
     }
@@ -44,9 +47,5 @@ public final class FlareEffectManager implements NativeResource {
 
     public ControllerManager getControllerManager() {
         return this.controllerManager;
-    }
-
-    @Override
-    public void free() {
     }
 }

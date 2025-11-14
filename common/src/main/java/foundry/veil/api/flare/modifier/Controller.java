@@ -8,15 +8,16 @@ import foundry.veil.api.flare.data.FloatCurve;
  * Controllers collect values from {@link EffectHost}s to be used to evaluate {@link FloatCurve}s and modify {@link Property}s.
  *
  * @author GuyApooye
+ * @since 2.5.0
  */
 public class Controller {
+
     protected final ControllerIdentifier identifier;
     protected final EffectHost host;
     protected float value;
 
     public Controller(String name, EffectHost host) {
-        this.identifier = new ControllerIdentifier(name, host);
-        this.host = host;
+        this(new ControllerIdentifier(name, host), host);
     }
 
     public Controller(ControllerIdentifier identifier, EffectHost host) {
@@ -25,23 +26,23 @@ public class Controller {
     }
 
     protected void initialize() {
-        update(0.0f);
+        this.update(0.0f);
     }
 
     public void update(float partialTick) {
-        host.update(partialTick);
-        value = getUpdatedValue();
+        this.host.update(partialTick);
+        this.value = this.getUpdatedValue();
     }
 
     protected float getUpdatedValue() {
-        return host.getValue(identifier.name());
+        return this.host.getValue(this.identifier.name());
     }
 
     public float getValue() {
-        return value;
+        return this.value;
     }
 
     public ControllerIdentifier getIdentifier() {
-        return identifier;
+        return this.identifier;
     }
 }

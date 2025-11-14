@@ -25,6 +25,9 @@ import java.util.function.Function;
 
 import static foundry.veil.Veil.LOGGER;
 
+/**
+ * @since 2.5.0
+ */
 public abstract class PropertyModifier<T> {
 
     private final PropertyModifierRegistry.PropertyModifierType<T, ?> type;
@@ -116,15 +119,14 @@ public abstract class PropertyModifier<T> {
         return MapCodec.unit(Pair.of(Optional.empty(), mode));
     }
 
-    public static void modifyProperty(EffectHost host, @Nullable String clazz, Property<?> property, List<PropertyModifier<?>> modifiers) {
+    public static void modifyProperty(EffectHost host, @Nullable String clazz, Property<?> property, Iterable<PropertyModifier<?>> modifiers) {
         if (modifiers == null) {
             return;
         }
         if (property.getClass().getAnnotation(ImmutableProperty.class) != null) {
             return;
         }
-        for (int i = 0, modifiersSize = modifiers.size(); i < modifiersSize; i++) {
-            PropertyModifier<?> modifier = modifiers.get(i);
+        for (PropertyModifier<?> modifier : modifiers) {
             if (clazz != null && Objects.equals(clazz, modifier.clazz)) {
                 continue;
             }
@@ -180,5 +182,4 @@ public abstract class PropertyModifier<T> {
             return this.name;
         }
     }
-
 }

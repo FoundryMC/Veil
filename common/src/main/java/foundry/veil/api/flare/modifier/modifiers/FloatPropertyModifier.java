@@ -9,6 +9,9 @@ import gg.moonflower.molangcompiler.api.MolangExpression;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @since 2.5.0
+ */
 public class FloatPropertyModifier extends PropertyModifier<Float> {
 
     public final FloatCurve curve;

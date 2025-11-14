@@ -3,11 +3,13 @@ package foundry.veil.api.flare.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.util.Easing;
+import it.unimi.dsi.fastutil.floats.FloatOpenHashSet;
+import it.unimi.dsi.fastutil.floats.FloatSet;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,41 +20,39 @@ import java.util.List;
  */
 public class FloatCurve {
 
-    public static final Codec<FloatCurve> CODEC = KeyFrame.CODEC.listOf().xmap(FloatCurve::new, FloatCurve::getKeys);
+    public static final FloatCurve ZERO = new FloatCurve(new KeyFrame[0]);
 
-    private final List<KeyFrame> keys;
+    public static final Codec<FloatCurve> CODEC = KeyFrame.CODEC.listOf().
+            xmap(list -> new FloatCurve(list.toArray(KeyFrame[]::new)),
+                    curve -> Arrays.asList(curve.keys));
 
-    private FloatCurve(List<KeyFrame> keys) {
+    private final KeyFrame[] keys;
+
+    private FloatCurve(KeyFrame[] keys) {
         this.keys = keys;
     }
 
-    public FloatCurve() {
-        this.keys = new ArrayList<>();
-    }
-
-    private List<KeyFrame> getKeys() {
-        return this.keys;
-    }
-
     public float evaluate(float time) {
-        if (this.keys.isEmpty()) {
+        if (this.keys.length == 0) {
             return 0.0f;
         }
-        KeyFrame first = this.keys.getFirst();
+
+        KeyFrame first = this.keys[0];
         if (time < first.time) {
             return first.value;
         }
-        KeyFrame last = this.keys.getLast();
+        KeyFrame last = this.keys[this.keys.length - 1];
         if (time > last.time) {
             return last.value;
         }
 
-        for (int i = 1; i < this.keys.size(); i++) {
-            KeyFrame nextKey = this.keys.get(i);
+        for (int i = 1; i < this.keys.length; i++) {
+            KeyFrame nextKey = this.keys[i];
             if (nextKey.time < time) {
                 continue;
             }
-            KeyFrame previousKey = this.keys.get(i - 1);
+
+            KeyFrame previousKey = this.keys[i - 1];
             float inBetweenTime = Mth.inverseLerp(time, previousKey.time, nextKey.time);
             return Mth.lerp(previousKey.easing.ease(inBetweenTime), previousKey.value, nextKey.value);
         }
@@ -60,22 +60,30 @@ public class FloatCurve {
         return time;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
-        private final ArrayList<KeyFrame> keys = new ArrayList<>();
-        private final ArrayList<Float> times = new ArrayList<>();
+
+        private final List<KeyFrame> keys;
+        private final FloatSet times;
+
+        public Builder() {
+            this.keys = new ArrayList<>();
+            this.times = new FloatOpenHashSet();
+        }
 
         public Builder addKey(KeyFrame key) {
-            if (this.times.contains(key.time)) {
+            if (!this.times.add(key.time)) {
                 throw new IllegalArgumentException("Float curve cannot contain multiple keys with the same time!");
             }
             this.keys.add(key);
-            this.times.add(key.time);
             return this;
         }
 
         public FloatCurve build() {
-            Collections.sort(this.keys);
-            return new FloatCurve(this.keys);
+            return new FloatCurve(this.keys.stream().sorted().toArray(KeyFrame[]::new));
         }
     }
 
@@ -88,7 +96,7 @@ public class FloatCurve {
 
         @Override
         public int compareTo(@NotNull FloatCurve.KeyFrame other) {
-            return Mth.sign(this.time - other.time);
+            return Float.compare(this.time, other.time);
         }
     }
 }

@@ -42,7 +42,6 @@ public record FlareBakedQuad(float[] vertexData, Vector3fc normal) {
                     .setColor(red, green, blue, alpha)
                     .setLight(lightmap[i])
                     .setOverlay(packedOverlay);
-
         }
     }
 }

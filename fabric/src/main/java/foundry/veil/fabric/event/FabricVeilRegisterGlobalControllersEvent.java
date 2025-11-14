@@ -8,8 +8,9 @@ import net.fabricmc.fabric.api.event.EventFactory;
 /**
  * Fired to register global controllers to be used when rendering Flare effects.
  *
- * @see ControllerManager
  * @author GuyApooye
+ * @see ControllerManager
+ * @since 2.5.0
  */
 @FunctionalInterface
 public interface FabricVeilRegisterGlobalControllersEvent extends VeilRegisterGlobalControllersEvent {

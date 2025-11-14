@@ -1,10 +1,8 @@
 package foundry.veil.api.flare.model;
 
-import foundry.veil.Veil;
 import foundry.veil.api.flare.data.model.*;
 import net.minecraft.client.renderer.FaceInfo;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -18,10 +16,11 @@ import java.util.Objects;
 
 /**
  * Bakes {@link UnbakedShell} into {@link BakedShell}.
+ *
+ * @since 2.5.0
  */
 public final class ShellBakery {
 
-    public static final ResourceLocation MISSING_SHELL_LOCATION = Veil.veilPath("builtin/missing");
     public static final BakedShell MISSING_SHELL;
 
     static {

@@ -9,7 +9,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @since 2.5.0
+ */
 public class ControllerManager {
+
     /**
      * <p>A table to store non-global controllers.</p>
      * <p>Rows - Controllers</p>

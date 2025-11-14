@@ -5,6 +5,7 @@ import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.util.CodecUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,8 +30,7 @@ public record FlareEffectTemplate(List<FlareEffectLayer> effectLayers) {
             }
         }
 
-        enabledLayers.trimToSize(); // slight memory improvement
-        this.effectLayers = Collections.unmodifiableList(enabledLayers);
+        this.effectLayers = Collections.unmodifiableList(new ObjectArrayList<>(enabledLayers));
     }
 
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
