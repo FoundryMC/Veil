@@ -72,7 +72,7 @@ exception is include shaders which always use `.glsl` as the file extension.
 | Tesselation Evaluation | `.tesh`   |
 | Geometry               | `.gsh`    |
 | Fragment               | `.fsh`    |
-| Compute                | `.csh`    |
+| Compute                | `.comp`   |
 
 # Includes
 
