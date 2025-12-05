@@ -30,6 +30,11 @@ public class ShaderImportProcessor implements ShaderPreProcessor {
         }
         for (String directive : imports) {
             String importId = directive.substring(ShaderImportProcessor.INCLUDE_KEY.length()).trim();
+
+            if ((importId.startsWith("\"") && importId.endsWith("\"")) || (importId.startsWith("<") && importId.endsWith(">"))) {
+                importId = importId.substring(1, importId.length() - 1);
+            }
+
             try {
                 ctx.include(tree, ResourceLocation.parse(importId), IncludeOverloadStrategy.SOURCE);
             } catch (ResourceLocationException e) {
