@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Textureless model, may contain texture coordinate data.
@@ -18,12 +19,17 @@ import java.util.Map;
  * @author GuyApooye
  * @since 2.5.0
  */
-public record FlareShell(List<ShellElement> elements) implements UnbakedShell {
-
+public final class FlareShell implements UnbakedShell {
+    
     public static final Codec<FlareShell> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ShellElement.CODEC.listOf().fieldOf("elements").forGetter(FlareShell::elements)
     ).apply(instance, FlareShell::new));
-
+    private final List<ShellElement> elements;
+    
+    public FlareShell(List<ShellElement> elements) {
+        this.elements = List.copyOf(elements);
+    }
+    
     @Override
     public @Nullable BakedShell bake() {
         SimpleBakedShell.Builder builder = new SimpleBakedShell.Builder();
@@ -32,12 +38,13 @@ public record FlareShell(List<ShellElement> elements) implements UnbakedShell {
                 builder.addFace(ShellBakery.bakeQuad(element, entry.getValue(), entry.getKey()));
             }
         }
-
+        
         return builder.build();
     }
-
+    
     @Override
     public List<ShellElement> elements() {
         return new ArrayList<>(this.elements);
     }
+    
 }

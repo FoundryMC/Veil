@@ -23,12 +23,7 @@ import java.util.Map;
 /**
  * @since 2.5.0
  */
-public record FlareMaterial(
-        String clazz,
-        ResourceLocation renderTypeLocation,
-        boolean randomizeSeed,
-        Map<String, Property<?>> properties
-) {
+public final class FlareMaterial {
     public static Codec<FlareMaterial> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("class").forGetter(FlareMaterial::clazz),
             ResourceLocation.CODEC.fieldOf("renderType").forGetter(FlareMaterial::renderTypeLocation),
@@ -42,14 +37,23 @@ public record FlareMaterial(
                     .optionalFieldOf("properties", Map.of())
                     .forGetter(FlareMaterial::properties)
     ).apply(instance, (clazz, renderType, randomizeSeed, properties) -> new FlareMaterial(clazz, renderType, randomizeSeed, new Object2ObjectArrayMap<>(properties))));
-
-    public FlareMaterial {
+    private final String clazz;
+    private final ResourceLocation renderTypeLocation;
+    private final boolean randomizeSeed;
+    private final Map<String, Property<?>> properties;
+    
+    
+    public FlareMaterial(String clazz, ResourceLocation renderTypeLocation, boolean randomizeSeed, Map<String, Property<?>> properties) {
         properties.put("_ClipBrightness", new FloatProperty(1.0f));
         if (randomizeSeed) {
             properties.put("_Seed", RandomFloatProperty.INSTANCE);
         }
+        this.clazz = clazz;
+        this.renderTypeLocation = renderTypeLocation;
+        this.randomizeSeed = randomizeSeed;
+        this.properties = Map.copyOf(properties);
     }
-
+    
     public void applyProperties(EffectHost host, @Nullable ShaderInstance shader, Map<String, List<PropertyModifier<?>>> modifiers) {
         if (shader == null) {
             return;
@@ -57,23 +61,23 @@ public record FlareMaterial(
         for (Map.Entry<String, Property<?>> entry : this.properties.entrySet()) {
             Property<?> property = entry.getValue();
             Class<?> propertyClass = property.getClass();
-
+            
             if (propertyClass.getAnnotation(InapplicableProperty.class) != null) {
                 continue;
             }
-
+            
             String name = entry.getKey();
             if (propertyClass.getAnnotation(ModelProperty.class) == null) {
                 PropertyModifier.modifyProperty(host, this.clazz, property, modifiers.get(name));
             }
-
+            
             property.applyValue(name, shader);
             if (property instanceof InvertibleProperty<?> invertibleProperty) {
                 invertibleProperty.applyInverseValue(name, shader);
             }
         }
     }
-
+    
     public void resetProperties(EffectHost host, @Nullable ShaderInstance shader) {
         if (shader == null) {
             return;
@@ -85,4 +89,21 @@ public record FlareMaterial(
             property.resetOverrideValue();
         }
     }
+    
+    public String clazz() {
+        return clazz;
+    }
+    
+    public ResourceLocation renderTypeLocation() {
+        return renderTypeLocation;
+    }
+    
+    public boolean randomizeSeed() {
+        return randomizeSeed;
+    }
+    
+    public Map<String, Property<?>> properties() {
+        return properties;
+    }
+    
 }

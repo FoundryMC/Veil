@@ -9,37 +9,41 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @since 2.5.0
  */
-public record FlareEffectTemplate(List<FlareEffectLayer> effectLayers) {
-
+public final class FlareEffectTemplate {
+    
     public static final Codec<FlareEffectTemplate> CODEC = CodecUtil.singleOrList(FlareEffectLayer.CODEC).fieldOf("layers").xmap(FlareEffectTemplate::new, FlareEffectTemplate::effectLayers).codec();
-
+    private final List<FlareEffectLayer> effectLayers;
+    
+    
     public FlareEffectTemplate(List<FlareEffectLayer> effectLayers) {
         ArrayList<FlareEffectLayer> enabledLayers = new ArrayList<>(effectLayers.size());
-
+        
         for (FlareEffectLayer effectLayer : effectLayers) {
             if (!effectLayer.isDisabled()) {
                 enabledLayers.add(effectLayer);
             }
         }
-
-        this.effectLayers = Collections.unmodifiableList(new ObjectArrayList<>(enabledLayers));
+        
+        this.effectLayers = List.copyOf(new ObjectArrayList<>(enabledLayers));
     }
-
+    
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         for (FlareEffectLayer effectLayer : this.effectLayers) {
             effectLayer.render(host, matrixStack, partialTick, shellOverrides);
         }
     }
-
+    
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick) {
         this.render(host, matrixStack, partialTick, null);
     }
+    
+    public List<FlareEffectLayer> effectLayers() {
+        return effectLayers;
+    }
+    
 }

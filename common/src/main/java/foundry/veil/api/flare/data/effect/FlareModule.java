@@ -4,23 +4,30 @@ import com.mojang.serialization.Codec;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @since 2.5.0
  */
-public record FlareModule(Map<String, FlareSubModule> subModules) {
-
+public final class FlareModule {
+    
     public static final Codec<FlareModule> CODEC = Codec.unboundedMap(Codec.STRING, FlareSubModule.CODEC)
             .xmap(FlareModule::new, FlareModule::subModules)
             .fieldOf("subModules")
             .codec();
-
+    private final Map<String, FlareSubModule> subModules;
+    
+    
     public FlareModule(Map<String, FlareSubModule> subModules) {
-        this.subModules = Collections.unmodifiableMap(subModules);
+        this.subModules = Map.copyOf(subModules);
     }
-
+    
     public FlareSubModule getSubModule(String name) {
         return this.subModules.get(name);
     }
-
+    
+    public Map<String, FlareSubModule> subModules() {
+        return subModules;
+    }
+    
 }

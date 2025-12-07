@@ -12,29 +12,32 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static foundry.veil.Veil.LOGGER;
 
 /**
  * @since 2.5.0
  */
-public record FlareSubModule(List<ResourceLocation> templates) {
-
+public final class FlareSubModule {
+    
     public static final Codec<FlareSubModule> CODEC = Codec.either(
                     ResourceLocation.CODEC.listOf(),
                     ResourceLocation.CODEC
             )
             .xmap(either -> either.map(FlareSubModule::new, single -> new FlareSubModule(List.of(single))),
                     subModule -> subModule.templates.size() == 1 ? Either.right(subModule.templates.getFirst()) : Either.left(subModule.templates));
-
+    private final List<ResourceLocation> templates;
+    
+    
     public FlareSubModule(List<ResourceLocation> templates) {
-        this.templates = Collections.unmodifiableList(templates);
+        this.templates = List.copyOf(templates);
     }
-
+    
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick) {
         this.render(host, matrixStack, partialTick, null);
     }
-
+    
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         for (ResourceLocation templateLocation : this.templates) {
             FlareEffectTemplate template = FlareEffectManager.getTemplate(templateLocation);
@@ -45,4 +48,9 @@ public record FlareSubModule(List<ResourceLocation> templates) {
             template.render(host, matrixStack, partialTick, shellOverrides);
         }
     }
+    
+    public List<ResourceLocation> templates() {
+        return templates;
+    }
+    
 }
