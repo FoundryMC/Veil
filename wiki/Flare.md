@@ -79,10 +79,10 @@ and append the result it in a property.
 }
 ```
 
-#### Controllers and Global Controllers
+#### Host-Bound Controllers and Global Controllers
 
 When rendering an effect, an `EffectHost` has to be present,
-controllers collect data from these hosts to use it to evaluate `Property Modifiers`.
+host-bound controllers collect data from these hosts to use it to evaluate `Property Modifiers`.
 To do this, the `EffectHost#getValue` method is called with the name of the controller.
 
 Global controllers on the other hand, do not use a host, they gather their data locally.
