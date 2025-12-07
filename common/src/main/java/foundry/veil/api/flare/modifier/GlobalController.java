@@ -1,16 +1,31 @@
 package foundry.veil.api.flare.modifier;
 
 /**
- * Global controller have no host and collect their value locally.
+ * A controller that collects its value locally.
  *
  * @author GuyApooye
  * @see RandomnessController
  * @since 2.5.0
  */
-public abstract class GlobalController extends Controller {
+public abstract non-sealed class GlobalController implements Controller {
 
+    private final String name;
+    
     public GlobalController(String name) {
-        super(new ControllerIdentifier("global::" + name, "global"), null);
+        this.name = "global::" + name;
     }
-
+    
+    @Override
+    public void update(float partialTick) {
+    }
+    
+    @Override
+    public float getValue() {
+        return this.getUpdatedValue();
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
 }

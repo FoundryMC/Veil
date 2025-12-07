@@ -88,7 +88,8 @@ public abstract class PropertyModifier<T> {
     public PropertyModifierMode mode() {
         return this.mode;
     }
-
+    
+    @ApiStatus.Experimental
     public Optional<List<MolangExpression>> molangExpressions() {
         return this.optionalMolang;
     }
@@ -127,7 +128,7 @@ public abstract class PropertyModifier<T> {
             return;
         }
         for (PropertyModifier<?> modifier : modifiers) {
-            if (clazz != null && Objects.equals(clazz, modifier.clazz)) {
+            if (clazz != null && !Objects.equals(clazz, modifier.clazz)) {
                 continue;
             }
             modifier.apply(host, property);

@@ -3,7 +3,7 @@ package foundry.veil.api.flare.modifier;
 import net.minecraft.util.RandomSource;
 
 /**
- * Controller with a random value each time {@link Controller#getValue()} is called.
+ * Controller with a random value each time {@link HostBoundController#getValue()} is called.
  *
  * @author GuyApooye
  * @since 2.5.0
@@ -19,12 +19,7 @@ public class RandomnessController extends GlobalController {
     }
 
     @Override
-    protected float getUpdatedValue() {
-        return this.value;
-    }
-
-    @Override
-    public float getValue() {
-        return this.value = this.randomSource.nextFloat();
+    public float getUpdatedValue() {
+        return this.randomSource.nextFloat();
     }
 }
