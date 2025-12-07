@@ -9,10 +9,8 @@ import foundry.veil.api.flare.model.BakedShell;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static foundry.veil.Veil.LOGGER;
 

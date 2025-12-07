@@ -3,9 +3,6 @@ package foundry.veil.api.flare.data.model;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import org.joml.Vector3fc;
-
-import java.util.Objects;
 
 /**
  * @since 2.5.0

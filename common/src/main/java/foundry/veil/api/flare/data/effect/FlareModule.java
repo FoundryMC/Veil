@@ -2,9 +2,7 @@ package foundry.veil.api.flare.data.effect;
 
 import com.mojang.serialization.Codec;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @since 2.5.0

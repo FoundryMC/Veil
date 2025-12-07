@@ -1,6 +1,5 @@
 package foundry.veil.api.flare.modifier;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import foundry.veil.VeilClient;
