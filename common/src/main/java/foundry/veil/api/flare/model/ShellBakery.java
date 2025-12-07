@@ -56,7 +56,7 @@ public final class ShellBakery {
             ShellElementRotation rotation) {
         Vector3f normal = facing.step();
         float[] vertexData = makeVertices(face.uv(), normal, facing, setupShape(from, to), rotation);
-        return new FlareBakedQuad(vertexData, normal);
+        return new FlareBakedQuad(vertexData);
     }
 
     private static float[] makeVertices(ShellFaceUV uvs, Vector3f normal, Direction direction, float[] posDiv16, @Nullable ShellElementRotation rotation) {
@@ -72,13 +72,13 @@ public final class ShellBakery {
             rotationMatrix.transformDirection(normal);
         }
         for (int i = 0; i < 4; i++) {
-            bakeVertex(vertexData, i, direction, uvs, posDiv16, rotation, rotationMatrix);
+            bakeVertex(vertexData, i, normal, direction, uvs, posDiv16, rotation, rotationMatrix);
         }
 
         return vertexData;
     }
 
-    private static void bakeVertex(float[] vertexData, int vertexIndex, Direction direction, ShellFaceUV shellFaceUV, float[] posDiv16, @Nullable ShellElementRotation rotation, @Nullable Matrix4f transform) {
+    private static void bakeVertex(float[] vertexData, int vertexIndex, Vector3f normal, Direction direction, ShellFaceUV shellFaceUV, float[] posDiv16, @Nullable ShellElementRotation rotation, @Nullable Matrix4f transform) {
         FaceInfo.VertexInfo vertexInfo = FaceInfo.fromFacing(direction).getVertexInfo(vertexIndex);
         Vector3f pos = new Vector3f(posDiv16[vertexInfo.xFace], posDiv16[vertexInfo.yFace], posDiv16[vertexInfo.zFace]);
         if (rotation != null && transform != null) {
@@ -87,7 +87,7 @@ public final class ShellBakery {
             Vector3f offset = transform.transformPosition(new Vector3f(pos.x() - origin.x(), pos.y() - origin.y(), pos.z() - origin.z()));
             pos.set(offset.x() + origin.x(), offset.y() + origin.y(), offset.z() + origin.z());
         }
-        fillVertex(vertexData, vertexIndex, pos, shellFaceUV);
+        fillVertex(vertexData, vertexIndex, pos, normal, shellFaceUV);
     }
 
     private static float[] setupShape(Vector3fc min, Vector3fc max) {
@@ -102,12 +102,15 @@ public final class ShellBakery {
         return vertexPosition;
     }
 
-    private static void fillVertex(float[] vertexData, int vertexIndex, Vector3f pos, ShellFaceUV shellFaceUV) {
+    private static void fillVertex(float[] vertexData, int vertexIndex, Vector3f pos, Vector3f normal, ShellFaceUV shellFaceUV) {
         int i = vertexIndex * 5;
         vertexData[i] = pos.x();
         vertexData[i + 1] = pos.y();
         vertexData[i + 2] = pos.z();
-        vertexData[i + 3] = shellFaceUV.getU(vertexIndex) / 16.0F;
-        vertexData[i + 4] = shellFaceUV.getV(vertexIndex) / 16.0F;
+        vertexData[i + 3] = normal.z();
+        vertexData[i + 4] = normal.z();
+        vertexData[i + 5] = normal.z();
+        vertexData[i + 6] = shellFaceUV.getU(vertexIndex) / 16.0F;
+        vertexData[i + 7] = shellFaceUV.getV(vertexIndex) / 16.0F;
     }
 }
