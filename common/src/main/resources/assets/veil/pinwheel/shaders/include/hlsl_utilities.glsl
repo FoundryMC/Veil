@@ -1,12 +1,15 @@
 //Utilities for making Flare shaders or for porting HLSL shaders to GLSL.
 
+#include veil:space_helper
+#veil:buffer veil:camera VeilCamera
+
 uniform mat4 ModelToWorld;
 uniform mat4 IModelToWorld;
 
 float saturate(float x) { return clamp(x, 0.0, 1.0); }
-float saturate(vec2 x) { return clamp(x, 0.0, 1.0); }
-float saturate(vec3 x) { return clamp(x, 0.0, 1.0); }
-float saturate(vec4 x) { return clamp(x, 0.0, 1.0); }
+vec2 saturate(vec2 x) { return clamp(x, 0.0, 1.0); }
+vec3 saturate(vec3 x) { return clamp(x, 0.0, 1.0); }
+vec4 saturate(vec4 x) { return clamp(x, 0.0, 1.0); }
 float lerp(float x, float y, float s) { return x + s * (y - x); }
 vec2 lerp(vec2 x, vec2 y, float s) { return x + s * (y - x); }
 vec2 lerp(vec2 x, vec2 y, vec2 s) { return x + s * (y - x); }
@@ -41,7 +44,7 @@ vec4 modelToWorldSpace(vec4 model) {
     return ModelToWorld * model;
 }
 vec4 localToModelSpace(vec4 world) {
-    return IModelToWorld * (world + vec4(VeilCamera.CameraPosition, 1.0));
+    return IModelToWorld * (world + vec4(VeilCamera.CameraPosition, 0.0));
 }
 vec4 modelToLocalSpace(vec4 model) {
     return (ModelToWorld * model) - vec4(VeilCamera.CameraPosition, 0.0);
