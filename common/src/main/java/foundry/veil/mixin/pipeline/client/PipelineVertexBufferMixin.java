@@ -7,6 +7,7 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.ext.VertexBufferExtension;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL40;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -72,7 +73,9 @@ public abstract class PipelineVertexBufferMixin implements VertexBufferExtension
         if (shader != null && shader.hasTesselation() && shader.getProgram() == glGetInteger(GL_CURRENT_PROGRAM)) {
             // Quads are internally switched to triangles with indices in vanilla mc, so just use draw arrays
             // This will be wrong if custom indices are used! (transparent objects)
+            GL40.glPatchParameteri(GL40.GL_PATCH_VERTICES,4);
             glDrawArrays(GL_PATCHES, 0, this.indexCount * 4 / 6);
+            GL40.glPatchParameteri(GL40.GL_PATCH_VERTICES,3);
             ci.cancel();
         }
     }
@@ -98,7 +101,9 @@ public abstract class PipelineVertexBufferMixin implements VertexBufferExtension
             if (shader != null && shader.hasTesselation() && shader.getProgram() == glGetInteger(GL_CURRENT_PROGRAM)) {
                 // Quads are internally switched to triangles with indices in vanilla mc, so just use draw arrays
                 // This will be wrong if custom indices are used! (transparent objects)
+                GL40.glPatchParameteri(GL40.GL_PATCH_VERTICES,4);
                 glDrawArraysInstanced(GL_PATCHES, 0, this.indexCount * 4 / 6, instances);
+                GL40.glPatchParameteri(GL40.GL_PATCH_VERTICES,3);
                 return;
             }
         }
