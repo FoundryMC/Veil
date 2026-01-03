@@ -58,7 +58,7 @@ public class ForgeRenderTypeStageHandler {
                 profiler.push("render_" + VeilRenderType.getName(renderType));
                 if (CUSTOM_BLOCK_LAYERS.contains(renderType)) {
                     Vec3 pos = event.getCamera().getPosition();
-                    ((LevelRendererBlockLayerExtension) event.getLevelRenderer()).veil$drawBlockLayer(renderType, pos.x, pos.y, pos.z, event.getProjectionMatrix(), event.getProjectionMatrix());
+                    ((LevelRendererBlockLayerExtension) event.getLevelRenderer()).veil$drawBlockLayer(renderType, pos.x, pos.y, pos.z, event.getModelViewMatrix(), event.getProjectionMatrix());
                 }
                 bufferSource.endBatch(renderType);
                 profiler.pop();
