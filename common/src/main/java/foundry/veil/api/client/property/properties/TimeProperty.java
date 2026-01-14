@@ -34,8 +34,8 @@ public class TimeProperty extends Property<Vector4f> {
     public void applyValue(String name, ShaderInstance shader) {
         Uniform uniform = shader.getUniform(name);
         if (uniform != null) {
-            float time = Minecraft.getInstance().getFrameTimeNs() * 1e-9f;
-            uniform.set(this.value.set(time / 20.0f, time, 2.0f * time, Mth.sin(time)));
+            float time = System.nanoTime() * 1e-9f;
+            uniform.set(this.value.set(time / 20.0f, time, 2.0f * time, Mth.sin(time % Mth.TWO_PI)));
         }
     }
 

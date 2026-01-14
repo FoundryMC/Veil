@@ -20,10 +20,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
 
 import java.util.List;
 import java.util.Map;
@@ -41,8 +38,9 @@ public class FlareModel {
             CodecUtil.VECTOR3FC_CODEC.fieldOf("scaleOffset").forGetter(FlareModel::getScaleOffset),
             CodecUtil.singleOrList(FlareMaterial.CODEC).fieldOf("materials").forGetter(FlareModel::getMaterials)
     ).apply(instance, FlareModel::new));
-
-    public static final Matrix4f dummyMatrix = new Matrix4f();
+    
+    public static final Matrix4f MODEL_TO_LOCAL_MATRIX = new Matrix4f();
+    public static final Matrix4f MATRIX4F = new Matrix4f();
 
     public static final String POSITION_PROPERTY_NAME = "model::position";
     public static final String ROTATION_PROPERTY_NAME = "model::rotation";
@@ -66,29 +64,31 @@ public class FlareModel {
 
     public void render(EffectHost host, MatrixStack matrixStack, Map<String, List<PropertyModifier<?>>> modifiers, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
         Vector3fc positionOffset = this.positionOffset.getValue();
+        Quaternionfc rotationOffset = this.rotationOffset.getRotation();
         Vector3fc scaleOffset = this.scaleOffset.getValue();
-
-        matrixStack.matrixPush();
-        matrixStack.translate(positionOffset.x(), positionOffset.y(), positionOffset.z());
-        matrixStack.rotate(this.rotationOffset.getRotation());
-        matrixStack.applyScale(scaleOffset.x(), scaleOffset.y(), scaleOffset.z());
+        
+        MODEL_TO_LOCAL_MATRIX.set(matrixStack.position());
+        MODEL_TO_LOCAL_MATRIX.translate(positionOffset.x(), positionOffset.y(), positionOffset.z());
+        MODEL_TO_LOCAL_MATRIX.rotate(rotationOffset);
+        MODEL_TO_LOCAL_MATRIX.scale(scaleOffset.x(), scaleOffset.y(), scaleOffset.z());
+        
+        BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(this.shell)) ?
+                shellOverrides.get(this.shell) :
+                FlareEffectManager.getInstance().getBakedShell(this.shell);
+        
         Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-
+        
         this.modelToWorld.modify(
-                matrixStack.position().translateLocal((float) cameraPos.x, (float) cameraPos.y, (float) cameraPos.z, dummyMatrix),
+                MODEL_TO_LOCAL_MATRIX.translate((float) cameraPos.x, (float) cameraPos.y, (float) cameraPos.z, MATRIX4F),
                 PropertyModifier.PropertyModifierMode.REPLACE,
                 Optional.empty()
         );
 
-        BakedShell bakedShell = (shellOverrides != null && shellOverrides.containsKey(this.shell)) ?
-                shellOverrides.get(this.shell) :
-                FlareEffectManager.getInstance().getBakedShell(this.shell);
-
-        Matrix4fStack stack = RenderSystem.getModelViewStack();
-        stack.pushMatrix();
-        stack.mul(matrixStack.position());
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        MATRIX4F.set(modelViewStack);
+        modelViewStack.mul(MODEL_TO_LOCAL_MATRIX);
         RenderSystem.applyModelViewMatrix();
-
+        
         VertexArray vertexArray = bakedShell.getVertexArray();
         vertexArray.bind();
         for (FlareMaterial material : this.materials) {
@@ -100,9 +100,8 @@ public class FlareModel {
             this.draw(renderType, vertexArray, host, material, modifiers);
         }
         VertexArray.unbind();
-        matrixStack.matrixPop();
-
-        stack.popMatrix();
+        
+        modelViewStack.set(MATRIX4F);
         RenderSystem.applyModelViewMatrix();
     }
 

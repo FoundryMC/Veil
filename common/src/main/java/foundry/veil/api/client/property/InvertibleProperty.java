@@ -4,6 +4,7 @@ import foundry.veil.api.client.registry.PropertyRegistry;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.client.renderer.ShaderInstance;
+import org.jetbrains.annotations.Contract;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,16 +22,24 @@ public abstract class InvertibleProperty<T> extends Property<T> {
 
     public InvertibleProperty(PropertyRegistry.PropertyType<T, ?> type, T value) {
         super(type, value);
-        this.inverseValue = this.calculateInverse(this.cloneValue(value));
-        this.overrideInverseValue = this.cloneValue(value);
+        this.inverseValue = this.invertAndMutate(this.cloneValue(value));
+        this.overrideInverseValue = this.cloneValue(inverseValue);
     }
 
-    protected abstract T calculateInverse(T value);
+    @SuppressWarnings("UnstableApiUsage")
+    @Contract(mutates = "param")
+    protected abstract T invertAndMutate(T value);
 
     @Override
     public final void modify(T value, PropertyModifier.PropertyModifierMode mode, Optional<List<MolangExpression>> optionalMolang) {
         this.modifyPreInvert(value, mode, optionalMolang);
-        this.overrideInverseValue = this.calculateInverse(value);
+        
+        T originalOverrideValue = this.overrideValue;
+        this.overrideValue = overrideInverseValue;
+        this.modifyPreInvert(originalOverrideValue, PropertyModifier.PropertyModifierMode.REPLACE, Optional.empty());
+        this.overrideValue = originalOverrideValue;
+        
+        this.invertAndMutate(this.overrideInverseValue);
     }
 
     public abstract void modifyPreInvert(T value, PropertyModifier.PropertyModifierMode mode, Optional<List<MolangExpression>> optionalMolang);
@@ -44,7 +53,10 @@ public abstract class InvertibleProperty<T> extends Property<T> {
 
     @Override
     public void resetOverrideValue() {
-        super.resetOverrideValue();
-        this.overrideInverseValue = this.inverseValue;
+        this.modifyPreInvert(this.value, PropertyModifier.PropertyModifierMode.REPLACE, Optional.empty());
+        T originalOverrideValue = this.overrideValue;
+        this.overrideValue = overrideInverseValue;
+        this.modifyPreInvert(this.inverseValue, PropertyModifier.PropertyModifierMode.REPLACE, Optional.empty());
+        this.overrideValue = originalOverrideValue;
     }
 }

@@ -21,11 +21,12 @@ import java.util.Optional;
 @InapplicableProperty
 public class RotationModelProperty extends Vec3ModelProperty {
     private final Quaternionfc rotation;
-    private final Quaternionf overrideRotation = new Quaternionf();
+    private final Quaternionf overrideRotation;
 
     public RotationModelProperty(Vector3f value) {
         super(value);
-        rotation =  new Quaternionf().rotationXYZ(value.x() * Mth.DEG_TO_RAD, value.y() * Mth.DEG_TO_RAD, value.z() * Mth.DEG_TO_RAD);
+        this.rotation = new Quaternionf().rotationXYZ(value.x() * Mth.DEG_TO_RAD, value.y() * Mth.DEG_TO_RAD, value.z() * Mth.DEG_TO_RAD);
+        this.overrideRotation = new Quaternionf(this.rotation);
     }
 
     @Override

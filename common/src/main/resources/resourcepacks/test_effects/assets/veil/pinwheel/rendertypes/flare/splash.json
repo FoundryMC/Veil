@@ -21,11 +21,11 @@
     {
       "type": "minecraft:write_mask",
       "color": true,
-      "depth": false
+      "depth": true
     },
     {
       "type": "minecraft:cull",
-      "face": "none"
+      "face": "back"
     }
   ]
 }

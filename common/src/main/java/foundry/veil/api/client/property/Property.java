@@ -50,7 +50,7 @@ public abstract class Property<T> {
     protected abstract T cloneValue(T value);
 
     public void resetOverrideValue() {
-        this.overrideValue = this.cloneValue(this.value);
+        this.modify(this.value, PropertyModifier.PropertyModifierMode.REPLACE, Optional.empty());
     }
 
     public PropertyRegistry.PropertyType<T, ? extends Property<T>> getType() {

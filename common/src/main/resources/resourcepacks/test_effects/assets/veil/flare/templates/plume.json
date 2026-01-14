@@ -3,7 +3,7 @@
     "name": "plume",
     "model": {
       "path": "veil:cylinder",
-      "positionOffset": [0, -9, 0],
+      "positionOffset": [0, 0, 0],
       "rotationOffset": [0, 0, 0],
       "scaleOffset": [2, 2, 2],
       "materials": {
@@ -106,8 +106,8 @@
           ],
           [
             {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
-            {"time": 0.05, "value": 1.8, "easing": "ease_out_quad"},
-            {"time": 1.0, "value": 9.0, "easing": "linear"}
+            {"time": 0.05, "value": 0.0, "easing": "ease_out_quad"},
+            {"time": 1.0, "value": 0.0, "easing": "linear"}
           ],
           [
             {"time": 0.0, "value": 0.0, "easing": "linear"},

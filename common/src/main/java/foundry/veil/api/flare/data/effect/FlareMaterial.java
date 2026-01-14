@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public final class FlareMaterial {
         this.clazz = clazz;
         this.renderTypeLocation = renderTypeLocation;
         this.randomizeSeed = randomizeSeed;
-        this.properties = Map.copyOf(properties);
+        this.properties = new HashMap<>(properties);
     }
     
     public void applyProperties(EffectHost host, @Nullable ShaderInstance shader, Map<String, List<PropertyModifier<?>>> modifiers) {

@@ -7,6 +7,7 @@ import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.client.renderer.ShaderInstance;
+import org.jetbrains.annotations.Contract;
 import org.joml.Matrix3f;
 import org.joml.Matrix3fc;
 
@@ -46,9 +47,11 @@ public class Mat3Property extends InvertibleProperty<Matrix3f> {
     protected Matrix3f cloneValue(Matrix3f value) {
         return new Matrix3f(value);
     }
-
+    
+    @SuppressWarnings("UnstableApiUsage")
+    @Contract(mutates = "param")
     @Override
-    protected Matrix3f calculateInverse(Matrix3f value) {
+    protected Matrix3f invertAndMutate(Matrix3f value) {
         return value.invert();
     }
 }

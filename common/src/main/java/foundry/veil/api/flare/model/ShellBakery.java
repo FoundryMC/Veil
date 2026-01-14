@@ -60,7 +60,7 @@ public final class ShellBakery {
     }
 
     private static float[] makeVertices(ShellFaceUV uvs, Vector3f normal, Direction direction, float[] posDiv16, @Nullable ShellElementRotation rotation) {
-        float[] vertexData = new float[20];
+        float[] vertexData = new float[32];
         Matrix4f rotationMatrix = null;
         if (rotation != null) {
             float angle = rotation.angle() * Mth.DEG_TO_RAD;
@@ -103,12 +103,12 @@ public final class ShellBakery {
     }
 
     private static void fillVertex(float[] vertexData, int vertexIndex, Vector3f pos, Vector3f normal, ShellFaceUV shellFaceUV) {
-        int i = vertexIndex * 5;
+        int i = vertexIndex * 8;
         vertexData[i] = pos.x();
         vertexData[i + 1] = pos.y();
         vertexData[i + 2] = pos.z();
-        vertexData[i + 3] = normal.z();
-        vertexData[i + 4] = normal.z();
+        vertexData[i + 3] = normal.x();
+        vertexData[i + 4] = normal.y();
         vertexData[i + 5] = normal.z();
         vertexData[i + 6] = shellFaceUV.getU(vertexIndex) / 16.0F;
         vertexData[i + 7] = shellFaceUV.getV(vertexIndex) / 16.0F;

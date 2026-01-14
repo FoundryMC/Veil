@@ -128,7 +128,7 @@ public abstract class PropertyModifier<T> {
             return;
         }
         for (PropertyModifier<?> modifier : modifiers) {
-            if (clazz != null && !Objects.equals(clazz, modifier.clazz)) {
+            if (clazz != null && modifier.clazz != null && !modifier.clazz.equals(clazz)) {
                 continue;
             }
             modifier.apply(host, property);

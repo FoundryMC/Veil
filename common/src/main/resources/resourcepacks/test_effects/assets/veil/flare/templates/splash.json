@@ -47,9 +47,9 @@
             [
               {"time": 0.0, "value": 0.0, "easing": "ease_in_quad"},
               {"time": 0.5, "value": 1.5, "easing": "ease_in_quad"},
-              {"time": 0.75, "value": 1.25, "easing": "ease_in_quad"},
-              {"time": 0.8, "value": 1.0, "easing": "ease_in_quad"},
-              {"time": 1.0, "value": 0.0, "easing": "ease_in_quad"}
+              {"time": 0.6, "value": 1.5, "easing": "ease_in_quad"},
+              {"time": 0.8, "value": 0.75, "easing": "ease_out_quad"},
+              {"time": 0.9, "value": 0.0, "easing": "ease_in_quad"}
             ],
             [
               {"time": 0.0, "value": 1.0, "easing": "ease_out_quad"}

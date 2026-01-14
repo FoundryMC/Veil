@@ -10,11 +10,14 @@ in vec2 texCoord0;
 in vec4 vertexColor;
 in vec3 vertexNormal;
 
+in vec2 texCoord1;
+
 out vec4 fragColor;
 
 void main() {
-    float uvTime = _Time.x * Speed * 1000.0;
+    float uvTime = _Time.y * Speed;
     fragColor = vec4(texCoord0.y * 0.5 / (1.0 - texCoord0.y)) * ColorMultiplier;
-    fragColor *= texture(Noise, vec2(texCoord0.x * 0.5 * ColorMultiplier.a,texCoord0.y * 0.1 + uvTime)).a;
+//    fragColor *= texture(Noise, vec2(texCoord1.x * 0.5 * ColorMultiplier.a,texCoord0.y * 0.1 + uvTime)).a;
+    fragColor *= texture(Noise, vec2(texCoord1.x * 0.5 * ColorMultiplier.a, texCoord1.y * 0.041 + uvTime)).a;
 }
 

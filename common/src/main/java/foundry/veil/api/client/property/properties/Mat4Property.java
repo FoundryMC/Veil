@@ -7,6 +7,7 @@ import foundry.veil.api.flare.modifier.PropertyModifier;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import net.minecraft.client.renderer.ShaderInstance;
+import org.jetbrains.annotations.Contract;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
@@ -46,9 +47,11 @@ public class Mat4Property extends InvertibleProperty<Matrix4f> {
     protected Matrix4f cloneValue(Matrix4f value) {
         return new Matrix4f(value);
     }
-
+    
+    @SuppressWarnings("UnstableApiUsage")
+    @Contract(mutates = "param")
     @Override
-    protected Matrix4f calculateInverse(Matrix4f value) {
+    protected Matrix4f invertAndMutate(Matrix4f value) {
         return value.invert();
     }
 }
