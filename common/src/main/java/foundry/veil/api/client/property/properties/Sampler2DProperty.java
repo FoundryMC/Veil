@@ -20,13 +20,13 @@ public class Sampler2DProperty extends Property<AbstractTexture> {
     public static final MapCodec<Sampler2DProperty> CODEC = ResourceLocation.CODEC.fieldOf("value").xmap(Sampler2DProperty::new, property -> property.source);
 
     public Sampler2DProperty(ResourceLocation value) {
-        super(PropertyRegistry.SAMPLER2D.get(), Minecraft.getInstance().getTextureManager().getTexture(value));
+        super(PropertyRegistry.SAMPLER2D.get(), null);
         this.source = value;
     }
 
     @Override
     public void applyValue(String name, ShaderInstance shader) {
-        shader.setSampler(name, this.overrideValue.getId());
+        shader.setSampler(name, Minecraft.getInstance().getTextureManager().getTexture(source).getId());
         // Shader must be re-applied for the sampler to take effect
         shader.apply();
     }
