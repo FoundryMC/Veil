@@ -91,12 +91,15 @@ public class FlareModel {
         
         VertexArray vertexArray = bakedShell.getVertexArray();
         vertexArray.bind();
-        for (FlareMaterial material : this.materials) {
+        
+        List<FlareMaterial> flareMaterials = this.materials;
+        for (int i = 0, size = flareMaterials.size(); i < size; i++) {
+            FlareMaterial material = flareMaterials.get(i);
             RenderType renderType = VeilRenderType.get(material.renderTypeLocation());
             if (renderType == null) {
                 continue;
             }
-
+            
             this.draw(renderType, vertexArray, host, material, modifiers);
         }
         VertexArray.unbind();
@@ -122,7 +125,9 @@ public class FlareModel {
         vertexArray.clear(renderType);
 
         if (renderType instanceof VeilRenderType.LayeredRenderType layeredRenderType) {
-            for (RenderType layer : layeredRenderType.getLayers()) {
+            List<RenderType> layers = layeredRenderType.getLayers();
+            for (int i = 0, size = layers.size(); i < size; i++) {
+                RenderType layer = layers.get(i);
                 vertexArray.setup(layer);
                 currentShader = RenderSystem.getShader();
                 material.applyProperties(host, currentShader, modifiers);

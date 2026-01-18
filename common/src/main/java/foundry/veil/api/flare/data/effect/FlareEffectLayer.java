@@ -77,7 +77,10 @@ public class FlareEffectLayer {
         }
 
         ControllerManager controllerManager = FlareEffectManager.getInstance().getControllerManager();
-        for (PropertyModifier<?> modifier : this.originalModifiers) {
+        
+        List<PropertyModifier<?>> size = this.originalModifiers;
+        for (int i = 0, propertyModifiersSize = size.size(); i < propertyModifiersSize; i++) {
+            PropertyModifier<?> modifier = size.get(i);
             controllerManager.getOrCreateController(modifier.inputControllerName(), host).update(partialTick);
         }
 

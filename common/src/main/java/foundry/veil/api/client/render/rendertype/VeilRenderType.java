@@ -281,15 +281,15 @@ public final class VeilRenderType extends RenderType {
         public void draw(@NotNull MeshData meshData) {
             super.draw(meshData);
             if (BufferUploader.lastImmediateBuffer != null) {
-                ShaderInstance shader = RenderSystem.getShader();
-                if (shader == null) {
-                    return;
-                }
 
                 Matrix4f modelViewMatrix = RenderSystem.getModelViewMatrix();
                 Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
                 for (RenderType layer : this.layers) {
                     layer.setupRenderState();
+                    ShaderInstance shader = RenderSystem.getShader();
+                    if (shader == null) {
+                        return;
+                    }
                     BufferUploader.lastImmediateBuffer.drawWithShader(modelViewMatrix, projectionMatrix, shader);
                     layer.clearRenderState();
                 }

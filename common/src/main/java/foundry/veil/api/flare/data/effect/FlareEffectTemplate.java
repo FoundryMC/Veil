@@ -33,7 +33,9 @@ public final class FlareEffectTemplate {
     }
     
     public void render(EffectHost host, MatrixStack matrixStack, float partialTick, @Nullable Map<ResourceLocation, BakedShell> shellOverrides) {
-        for (FlareEffectLayer effectLayer : this.effectLayers) {
+        List<FlareEffectLayer> layers = this.effectLayers;
+        for (int i = 0, size = layers.size(); i < size; i++) {
+            FlareEffectLayer effectLayer = layers.get(i);
             effectLayer.render(host, matrixStack, partialTick, shellOverrides);
         }
     }

@@ -13,11 +13,11 @@ import foundry.veil.api.flare.EffectHost;
 import foundry.veil.api.flare.modifier.PropertyModifier;
 import foundry.veil.api.util.CodecUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +41,8 @@ public final class FlareMaterial {
     private final String clazz;
     private final ResourceLocation renderTypeLocation;
     private final boolean randomizeSeed;
-    private final Map<String, Property<?>> properties;
+    private final Object2ObjectArrayMap<String, Property<?>> properties;
+    private final List<Object2ObjectMap.Entry<String, Property<?>>> propertyEntries;
     
     
     public FlareMaterial(String clazz, ResourceLocation renderTypeLocation, boolean randomizeSeed, Map<String, Property<?>> properties) {
@@ -52,14 +53,17 @@ public final class FlareMaterial {
         this.clazz = clazz;
         this.renderTypeLocation = renderTypeLocation;
         this.randomizeSeed = randomizeSeed;
-        this.properties = new HashMap<>(properties);
+        this.properties = new Object2ObjectArrayMap<>(properties);
+        this.propertyEntries = this.properties.object2ObjectEntrySet().stream().toList();
     }
     
     public void applyProperties(EffectHost host, @Nullable ShaderInstance shader, Map<String, List<PropertyModifier<?>>> modifiers) {
         if (shader == null) {
             return;
         }
-        for (Map.Entry<String, Property<?>> entry : this.properties.entrySet()) {
+        List<Object2ObjectMap.Entry<String, Property<?>>> entries = this.propertyEntries;
+        for (int i = 0, size = entries.size(); i < size; i++) {
+            Map.Entry<String, Property<?>> entry = entries.get(i);
             Property<?> property = entry.getValue();
             Class<?> propertyClass = property.getClass();
             
@@ -83,7 +87,10 @@ public final class FlareMaterial {
         if (shader == null) {
             return;
         }
-        for (Property<?> property : this.properties.values()) {
+        List<Object2ObjectMap.Entry<String, Property<?>>> entries = this.propertyEntries;
+        for (int i = 0, size = entries.size(); i < size; i++) {
+            Object2ObjectMap.Entry<String, Property<?>> entry = entries.get(i);
+            Property<?> property = entry.getValue();
             if (property.getClass().getAnnotation(ModelProperty.class) != null) {
                 continue;
             }
