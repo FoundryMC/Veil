@@ -17,6 +17,4 @@ void main() {
     float cosT = cos(time - 10.0 * texCoord0.y);
     float sinT = sin(time - 10.0 * texCoord0.y);
     fragColor = vec4(1+cosT, 1.0 + sinT*cosT, 1.0+sinT, texCoord0.y * 0.1 / (1.0 - texCoord0.y)) * ColorMultiplier;
-//    fragColor = vec4(1.0, 1.0, 1.0, 1.0) * ColorMultiplier;
-//    fragColor *= 1 - texCoord0.y;
 }

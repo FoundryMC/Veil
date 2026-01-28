@@ -3,8 +3,6 @@ uniform mat4 ModelToWorld;
 uniform mat4 IModelToWorld;
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
-uniform mat3 NormalMat;
-uniform mat3 IViewMat;
 
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec4 Color;
