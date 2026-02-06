@@ -276,6 +276,36 @@ Enables/disables the overlay texture. By default, this layer enables the overlay
 }
 ```
 
+
+### Bloom
+
+Adds a bloom effect to your Render Type
+
+```json5
+{
+  "layers": [
+    [
+      // Your Default layer
+      {
+        "type": "veil:shader",
+        "name": "veil:test_shader"
+      }
+    ],
+    [
+      // Bloom
+      {
+        "type": "veil:shader",
+        "name": "veil:test_bloom_shader"
+      },
+      {
+        "type": "minecraft:output",
+        "framebuffer": "veil:bloom"
+      }
+    ]
+  ]
+}
+```
+
 ### Layering
 
 Specifies the layering mode. This works by adding a small offset in view or polygon space to prevent Z-fighting in
