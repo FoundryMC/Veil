@@ -2,12 +2,14 @@
 #include veil:space_helper
 #include veil:color_utilities
 #include veil:light
+#include veil:voxel_shadow
 
 in mat4 lightMat;
 in vec3 lightColor;
 in vec2 size;
 in float maxAngle;
 in float maxDistance;
+in float occluded;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
@@ -69,10 +71,13 @@ void main() {
     float angleFalloff = clamp(angle, 0.0, maxAngle) / maxAngle;
     angleFalloff = smoothstep(1.0, 0.0, angleFalloff);
     diffuse *= angleFalloff;
+    if (occluded > 0.5) {
+        vec3 normalWS = normalize((VeilCamera.IViewMat * vec4(normalVS, 0.0)).xyz);
+        diffuse *= voxelshadowVisibility(pos + normalWS * 0.01, lightPos);
+    }
 
     float reflectivity = 0.05;
     vec3 diffuseColor = diffuse * lightColor;
 
     fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, 1.0);
 }
-
