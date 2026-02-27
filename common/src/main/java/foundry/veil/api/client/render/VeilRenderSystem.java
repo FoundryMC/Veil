@@ -40,6 +40,7 @@ import foundry.veil.impl.client.render.pipeline.VeilShaderBlockState;
 import foundry.veil.impl.client.render.pipeline.VeilShaderBufferCache;
 import foundry.veil.impl.client.render.profiler.VeilRenderProfilerImpl;
 import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
+import foundry.veil.impl.client.render.light.VoxelShadowGrid;
 import foundry.veil.mixin.pipeline.accessor.PipelineBufferSourceAccessor;
 import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.Util;
@@ -1241,6 +1242,8 @@ public final class VeilRenderSystem {
         if (renderer != null) {
             renderer.free();
         }
+        VoxelShadowGrid.close();
+        VeilMultiBind.clearTargetCache();
         glDeleteVertexArrays(screenQuadVao);
         MemoryUtil.memFree(emptySamplers);
         SHADER_BUFFER_CACHE.free();
@@ -1276,6 +1279,8 @@ public final class VeilRenderSystem {
             AdvancedFbo.unbind();
             return false;
         }
+
+        VoxelShadowGrid.beforeRenderLights();
 
         VeilDebug debug = VeilDebug.get();
         debug.pushDebugGroup("Veil Draw Lights");
@@ -1322,5 +1327,6 @@ public final class VeilRenderSystem {
     @ApiStatus.Internal
     public static void clearLevel() {
         NecromancerRenderDispatcher.delete();
+        VoxelShadowGrid.clearLevel();
     }
 }
