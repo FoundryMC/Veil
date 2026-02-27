@@ -31,6 +31,7 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
 
     protected float angle;
     protected float distance;
+    protected boolean occluded;
 
     public AreaLightData() {
         this.matrix = new Matrix4d();
@@ -41,6 +42,16 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
 
         this.angle = (float) Math.toRadians(45);
         this.distance = 1.0F;
+        this.occluded = false;
+    }
+
+    public boolean isOccluded() {
+        return this.occluded;
+    }
+
+    public AreaLightData setOccluded(boolean occluded) {
+        this.occluded = occluded;
+        return this;
     }
 
     protected void updateMatrix() {
@@ -163,6 +174,7 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
 
         buffer.putShort((short) Mth.clamp((int) (this.angle * MAX_ANGLE_SIZE), 0, 65535));
         buffer.putFloat(this.distance);
+        buffer.putFloat(this.occluded ? 1.0F : 0.0F);
     }
 
     @Override
@@ -201,6 +213,7 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
 
         float[] editAngle = new float[]{this.angle};
         float[] editDistance = new float[]{this.distance};
+        imgui.type.ImBoolean editOccluded = new imgui.type.ImBoolean(this.occluded);
 
         if (ImGui.dragFloat2("size", editSize, 0.02F, 0.0001F)) {
             this.setSize(editSize[0], editSize[1]);
@@ -249,6 +262,10 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
 
         if (ImGui.dragScalar("distance", editDistance, 0.02F, 0.0F)) {
             this.setDistance(editDistance[0]);
+        }
+
+        if (ImGui.checkbox("occluded", editOccluded)) {
+            this.occluded = editOccluded.get();
         }
     }
 }

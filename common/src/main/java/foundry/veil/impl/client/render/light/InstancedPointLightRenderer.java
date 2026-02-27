@@ -25,7 +25,7 @@ public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLig
     private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/point");
 
     public InstancedPointLightRenderer() {
-        super(Float.BYTES * 7);
+        super(Float.BYTES * 8);
     }
 
     @Override
@@ -40,6 +40,7 @@ public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLig
         builder.setVertexAttribute(1, 2, 3, VertexArrayBuilder.DataType.FLOAT, false, 0);
         builder.setVertexAttribute(2, 2, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 3);
         builder.setVertexAttribute(3, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 6);
+        builder.setVertexAttribute(4, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 7);
     }
 
     @Override
