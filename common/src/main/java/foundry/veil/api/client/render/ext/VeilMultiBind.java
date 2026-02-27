@@ -3,6 +3,7 @@ package foundry.veil.api.client.render.ext;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import org.lwjgl.opengl.ARBMultiBind;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -144,10 +145,28 @@ public enum VeilMultiBind {
             GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
     };
 
+    private static final Int2IntOpenHashMap TARGET_CACHE = new Int2IntOpenHashMap();
+    private static final int MISSING_TARGET = Integer.MIN_VALUE;
+
+    static {
+        TARGET_CACHE.defaultReturnValue(MISSING_TARGET);
+    }
+
     private static int getTarget(int texture) {
+        if (texture == 0) {
+            return GL_TEXTURE_2D;
+        }
+
+        int cached = TARGET_CACHE.get(texture);
+        if (cached != MISSING_TARGET) {
+            return cached;
+        }
+
         GLCapabilities caps = GL.getCapabilities();
         if (caps.glGetTextureParameteriv != 0L && caps.OpenGL45) { // Last ditch effort if the platform has the method anyways
-            return glGetTextureParameteri(texture, GL_TEXTURE_TARGET);
+            int target = glGetTextureParameteri(texture, GL_TEXTURE_TARGET);
+            TARGET_CACHE.put(texture, target);
+            return target;
         }
         // Nothing else I can do, so do the dirty hack to figure out the target
 
@@ -161,12 +180,14 @@ public enum VeilMultiBind {
             glBindTexture(target, texture);
             if (glGetError() == GL_NO_ERROR) {
                 glBindTexture(target, old);
+                TARGET_CACHE.put(texture, target);
                 return target;
             }
             glBindTexture(target, old);
         }
 
         // Should never happen
+        TARGET_CACHE.put(texture, GL_TEXTURE_2D);
         return GL_TEXTURE_2D;
     }
 
@@ -220,5 +241,9 @@ public enum VeilMultiBind {
             }
         }
         return multiBind;
+    }
+
+    public static void clearTargetCache() {
+        TARGET_CACHE.clear();
     }
 }
