@@ -4,10 +4,12 @@ layout (location = 0) in vec3 Position;
 layout (location = 1) in vec3 LightPosition;
 layout (location = 2) in vec3 Color;
 layout (location = 3) in float Distance;
+layout (location = 4) in float Occluded;
 
 out vec3 lightPos;
 out vec3 lightColor;
 out float radius;
+out float occluded;
 
 void main() {
     vec3 size = Position * Distance;
@@ -19,4 +21,5 @@ void main() {
     lightPos = LightPosition;
     lightColor = Color;
     radius = Distance;
+    occluded = Occluded;
 }

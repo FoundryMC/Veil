@@ -6,12 +6,14 @@ layout (location = 5) in vec3 Color;
 layout (location = 6) in vec2 Size;
 layout (location = 7) in float NormalizedAngle;
 layout (location = 8) in float Distance;
+layout (location = 9) in float Occluded;
 
 out mat4 lightMat;
 out vec3 lightColor;
 out vec2 size;
 out float maxAngle;
 out float maxDistance;
+out float occluded;
 
 void main() {
     vec3 vertexPos = Position;
@@ -34,4 +36,5 @@ void main() {
     size = Size;
     maxAngle = Angle;
     maxDistance = Distance;
+    occluded = Occluded;
 }

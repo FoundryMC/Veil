@@ -23,10 +23,21 @@ public class PointLightData extends LightData implements IndirectLightData, Edit
 
     protected final Vector3d position;
     protected float radius;
+    protected boolean occluded;
 
     public PointLightData() {
         this.position = new Vector3d();
         this.radius = 1.0F;
+        this.occluded = false;
+    }
+
+    public boolean isOccluded() {
+        return this.occluded;
+    }
+
+    public PointLightData setOccluded(boolean occluded) {
+        this.occluded = occluded;
+        return this;
     }
 
     @Override
@@ -97,6 +108,7 @@ public class PointLightData extends LightData implements IndirectLightData, Edit
         buffer.putFloat(this.color.green() * this.brightness);
         buffer.putFloat(this.color.blue() * this.brightness);
         buffer.putFloat(this.radius);
+        buffer.putFloat(this.occluded ? 1.0F : 0.0F);
     }
 
     @Override
@@ -118,6 +130,7 @@ public class PointLightData extends LightData implements IndirectLightData, Edit
         double[] editZ = new double[]{this.position.z()};
 
         float[] editRadius = new float[]{this.radius};
+        imgui.type.ImBoolean editOccluded = new imgui.type.ImBoolean(this.occluded);
 
         float totalWidth = ImGui.calcItemWidth();
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
@@ -139,6 +152,10 @@ public class PointLightData extends LightData implements IndirectLightData, Edit
 
         if (ImGui.dragScalar("radius", editRadius, 0.02F, 0.0F)) {
             this.setRadius(editRadius[0]);
+        }
+
+        if (ImGui.checkbox("occluded", editOccluded)) {
+            this.occluded = editOccluded.get();
         }
     }
 }
