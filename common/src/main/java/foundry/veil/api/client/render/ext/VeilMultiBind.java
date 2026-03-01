@@ -146,6 +146,10 @@ public enum VeilMultiBind {
             GL_TEXTURE_2D_MULTISAMPLE,
             GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
     };
+    private static final Cache<Integer, Integer> TEXTURE_TARGET_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterAccess(10, TimeUnit.SECONDS)
+            .build();
 
     private static final Cache<Integer, Integer> TEXTURE_TARGET_CACHE = CacheBuilder.newBuilder()
             .maximumSize(100)
@@ -164,6 +168,7 @@ public enum VeilMultiBind {
             TEXTURE_TARGET_CACHE.put(texture, target);
             return target;
         }
+
         // Nothing else I can do, so do the dirty hack to figure out the target
 
         // Clear errors
