@@ -2,49 +2,64 @@ package foundry.veil.impl.client.render.light;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
+import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.ext.VeilMultiBind;
+import foundry.veil.api.client.render.light.data.AreaLightData;
+import foundry.veil.api.client.render.light.data.PointLightData;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
+import foundry.veil.api.client.render.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
+import static org.lwjgl.opengl.GL30C.GL_R8;
 
 public final class VoxelShadowGrid {
 
     public static final int GRID_SIZE = 64;
     private static final int HALF = GRID_SIZE / 2;
-    private static final double REBUILD_THRESHOLD_SQ = 12.0 * 12.0;
+    private static final int GRID_VOLUME = GRID_SIZE * GRID_SIZE * GRID_SIZE;
+    private static final int SLICE_AREA = GRID_SIZE * GRID_SIZE;
+
+    private static final int MAX_SLICE_UPDATES_PER_FRAME = 2;
+    private static final long BUILD_BUDGET_NS = 2_000_000L;
+    private static final int MAX_DIRTY_UPDATES_PER_FRAME = 512;
+    private static final int MAX_DIRTY_BACKLOG = 16384;
 
     private static final ResourceLocation POINT_SHADER = Veil.veilPath("light/point");
     private static final ResourceLocation AREA_SHADER = Veil.veilPath("light/area");
 
     private static int textureId;
-    private static Vec3 gridCenter;
 
-    private static volatile int generation;
-    private static volatile Vec3 pendingCenter;
-    private static volatile ResourceKey<Level> pendingDimension;
-    private static volatile ByteBuffer pendingBuffer;
-    private static volatile boolean rebuilding;
+    private static ResourceKey<Level> gridDimension;
+    private static int originX, originY, originZ;
+    private static ByteBuffer gridBuffer;
 
-    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(r -> {
-        Thread t = new Thread(r, "veil-voxel-shadow-grid");
-        t.setDaemon(true);
-        return t;
-    });
+    private static ResourceKey<Level> buildDimension;
+    private static int buildOriginX, buildOriginY, buildOriginZ;
+    private static int buildIndex;
+    private static ByteBuffer buildBuffer;
+
+    private static final Object DIRTY_LOCK = new Object();
+    private static final LongArrayFIFOQueue DIRTY_QUEUE = new LongArrayFIFOQueue();
+    private static final LongOpenHashSet DIRTY_SET = new LongOpenHashSet();
+    private static final long[] DRAIN_SCRATCH = new long[MAX_DIRTY_UPDATES_PER_FRAME];
+    private static boolean rebuildRequested;
 
     private VoxelShadowGrid() {
     }
@@ -59,150 +74,340 @@ public final class VoxelShadowGrid {
         }
 
         ensureTexture();
-        uploadPending(level);
-        queueRebuildIfNeeded(level, client.gameRenderer.getMainCamera().getPosition());
-        pushUniforms();
+
+        if (gridDimension != null && !Objects.equals(gridDimension, level.dimension())) {
+            clearLevel();
+        }
+
+        Vec3 cameraPos = client.gameRenderer.getMainCamera().getPosition();
+        int cx = (int) Math.floor(cameraPos.x);
+        int cy = (int) Math.floor(cameraPos.y);
+        int cz = (int) Math.floor(cameraPos.z);
+
+        if (hasOccludedLights()) {
+            if (rebuildRequested) {
+                rebuildRequested = false;
+                clearDirty();
+                startFullBuild(level, cx, cy, cz);
+            } else if (buildBuffer != null) {
+                int maxDelta = Math.max(
+                    Math.abs(cx - (buildOriginX + HALF)),
+                    Math.max(Math.abs(cy - (buildOriginY + HALF)), Math.abs(cz - (buildOriginZ + HALF)))
+                );
+                if (!Objects.equals(buildDimension, level.dimension()) || maxDelta >= HALF) {
+                    startFullBuild(level, cx, cy, cz);
+                }
+            } else if (gridBuffer == null) {
+                startFullBuild(level, cx, cy, cz);
+            }
+
+            if (buildBuffer != null) {
+                continueFullBuild(level);
+            } else {
+                shiftTowards(level, cx, cy, cz);
+            }
+        }
+
+        if (applyDirtyUpdates(level)) {
+            uploadBuffer(gridBuffer);
+        }
+
+        pushUniforms(level, cx, cy, cz);
+    }
+
+    public static void markBlockDirty(BlockPos pos) {
+        long packed = pos.asLong();
+        synchronized (DIRTY_LOCK) {
+            if (!DIRTY_SET.add(packed)) {
+                return;
+            }
+            DIRTY_QUEUE.enqueue(packed);
+            if (DIRTY_QUEUE.size() > MAX_DIRTY_BACKLOG) {
+                rebuildRequested = true;
+                clearDirty();
+            }
+        }
     }
 
     public static void clearLevel() {
         RenderSystem.assertOnRenderThreadOrInit();
 
-        generation++;
-        gridCenter = null;
-        pendingCenter = null;
-        pendingDimension = null;
-        rebuilding = false;
-
-        ByteBuffer buffer = pendingBuffer;
-        pendingBuffer = null;
-        if (buffer != null) {
-            MemoryUtil.memFree(buffer);
+        gridDimension = null;
+        if (gridBuffer != null) {
+            MemoryUtil.memFree(gridBuffer);
+            gridBuffer = null;
         }
+
+        buildDimension = null;
+        buildIndex = 0;
+        if (buildBuffer != null) {
+            MemoryUtil.memFree(buildBuffer);
+            buildBuffer = null;
+        }
+
+        clearDirty();
     }
 
     public static void close() {
         RenderSystem.assertOnRenderThreadOrInit();
-
         clearLevel();
-
         if (textureId != 0) {
             glDeleteTextures(textureId);
             textureId = 0;
         }
-
-        EXECUTOR.shutdownNow();
     }
 
-    private static void queueRebuildIfNeeded(ClientLevel level, Vec3 cameraPos) {
-        Vec3 center = gridCenter;
-        if (center != null && cameraPos.distanceToSqr(center) <= REBUILD_THRESHOLD_SQ) {
+    private static void clearDirty() {
+        synchronized (DIRTY_LOCK) {
+            DIRTY_QUEUE.clear();
+            DIRTY_SET.clear();
+        }
+    }
+
+    private static void startFullBuild(ClientLevel level, int cx, int cy, int cz) {
+        buildDimension = level.dimension();
+        buildOriginX = cx - HALF;
+        buildOriginY = cy - HALF;
+        buildOriginZ = cz - HALF;
+        buildIndex = 0;
+        if (buildBuffer == null) {
+            buildBuffer = MemoryUtil.memAlloc(GRID_VOLUME);
+        }
+    }
+
+    private static void continueFullBuild(ClientLevel level) {
+        if (!Objects.equals(buildDimension, level.dimension())) {
+            MemoryUtil.memFree(buildBuffer);
+            buildBuffer = null;
+            buildDimension = null;
+            buildIndex = 0;
             return;
         }
 
-        if (rebuilding) {
+        long deadline = System.nanoTime() + BUILD_BUDGET_NS;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        while (buildIndex < GRID_VOLUME && System.nanoTime() < deadline) {
+            int lx = buildIndex & 63;
+            int ly = (buildIndex >> 6) & 63;
+            int lz = buildIndex >> 12;
+            pos.set(buildOriginX + lx, buildOriginY + ly, buildOriginZ + lz);
+            BlockState state = level.getBlockState(pos);
+            buildBuffer.put(buildIndex, voxelOccupancy(level, pos, state));
+            buildIndex++;
+        }
+
+        if (buildIndex < GRID_VOLUME) {
             return;
         }
 
-        rebuilding = true;
-        pendingCenter = cameraPos;
-        pendingDimension = level.dimension();
-        int capturedGeneration = generation;
+        if (gridBuffer != null) {
+            MemoryUtil.memFree(gridBuffer);
+        }
+        gridBuffer = buildBuffer;
+        gridDimension = buildDimension;
+        originX = buildOriginX;
+        originY = buildOriginY;
+        originZ = buildOriginZ;
 
-        int cx = (int) Math.floor(cameraPos.x);
-        int cy = (int) Math.floor(cameraPos.y);
-        int cz = (int) Math.floor(cameraPos.z);
+        buildBuffer = null;
+        buildDimension = null;
+        buildIndex = 0;
 
-        ClientLevel capturedLevel = level;
-        ResourceKey<Level> capturedDimension = level.dimension();
-        EXECUTOR.submit(() -> {
-            try {
-                ByteBuffer buffer = buildBuffer(capturedLevel, cx, cy, cz);
-                if (generation != capturedGeneration) {
-                    MemoryUtil.memFree(buffer);
-                    return;
-                }
-                pendingBuffer = buffer;
-                pendingDimension = capturedDimension;
-            } catch (Throwable t) {
-                rebuilding = false;
+        uploadBuffer(gridBuffer);
+    }
+
+    private static void shiftTowards(ClientLevel level, int cx, int cy, int cz) {
+        if (gridBuffer == null || !Objects.equals(gridDimension, level.dimension())) {
+            return;
+        }
+
+        int dx = cx - (originX + HALF);
+        int dy = cy - (originY + HALF);
+        int dz = cz - (originZ + HALF);
+
+        if (Math.max(Math.abs(dx), Math.max(Math.abs(dy), Math.abs(dz))) >= HALF) {
+            startFullBuild(level, cx, cy, cz);
+            return;
+        }
+
+        int steps = 0;
+        boolean changed = false;
+        while (steps < MAX_SLICE_UPDATES_PER_FRAME && (dx != 0 || dy != 0 || dz != 0)) {
+            int ax = Math.abs(dx), ay = Math.abs(dy), az = Math.abs(dz);
+
+            if (dx != 0 && ax >= ay && ax >= az) {
+                if (dx > 0) { shiftXPositive(level); dx--; }
+                else        { shiftXNegative(level); dx++; }
+            } else if (dz != 0 && az >= ay) {
+                if (dz > 0) { shiftZPositive(level); dz--; }
+                else        { shiftZNegative(level); dz++; }
+            } else if (dy != 0) {
+                if (dy > 0) { shiftYPositive(level); dy--; }
+                else        { shiftYNegative(level); dy++; }
+            } else {
+                break;
             }
-        });
-    }
 
-    private static void uploadPending(ClientLevel level) {
-        ByteBuffer buffer = pendingBuffer;
-        if (buffer == null) {
-            return;
+            changed = true;
+            steps++;
         }
 
-        pendingBuffer = null;
-        rebuilding = false;
-
-        if (pendingDimension != null && pendingDimension != level.dimension()) {
-            MemoryUtil.memFree(buffer);
-            pendingCenter = null;
-            pendingDimension = null;
-            return;
+        if (changed) {
+            uploadBuffer(gridBuffer);
         }
-
-        uploadBuffer(buffer);
-        MemoryUtil.memFree(buffer);
-        gridCenter = pendingCenter;
-        pendingCenter = null;
-        pendingDimension = null;
     }
 
-    private static ByteBuffer buildBuffer(ClientLevel level, int cx, int cy, int cz) {
-        int total = GRID_SIZE * GRID_SIZE * GRID_SIZE;
-        ByteBuffer buffer = MemoryUtil.memAlloc(total);
+    private static boolean applyDirtyUpdates(ClientLevel level) {
+        if (gridBuffer == null && buildBuffer == null) {
+            clearDirty();
+            return false;
+        }
 
+        int toDrain;
+        synchronized (DIRTY_LOCK) {
+            toDrain = Math.min(DIRTY_QUEUE.size(), MAX_DIRTY_UPDATES_PER_FRAME);
+            for (int i = 0; i < toDrain; i++) {
+                DRAIN_SCRATCH[i] = DIRTY_QUEUE.dequeueLong();
+                DIRTY_SET.remove(DRAIN_SCRATCH[i]);
+            }
+        }
+
+        boolean updatedGrid = false;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < toDrain; i++) {
+            long packed = DRAIN_SCRATCH[i];
+            int x = BlockPos.getX(packed);
+            int y = BlockPos.getY(packed);
+            int z = BlockPos.getZ(packed);
+            pos.set(x, y, z);
+            byte occupancy = voxelOccupancy(level, pos, level.getBlockState(pos));
+
+            if (buildBuffer != null && Objects.equals(buildDimension, level.dimension())) {
+                int bx = x - buildOriginX, by = y - buildOriginY, bz = z - buildOriginZ;
+                if ((bx | by | bz) >= 0 && bx < GRID_SIZE && by < GRID_SIZE && bz < GRID_SIZE) {
+                    buildBuffer.put(bx + by * GRID_SIZE + bz * SLICE_AREA, occupancy);
+                }
+            }
+
+            if (gridBuffer != null && Objects.equals(gridDimension, level.dimension())) {
+                int gx = x - originX, gy = y - originY, gz = z - originZ;
+                if ((gx | gy | gz) >= 0 && gx < GRID_SIZE && gy < GRID_SIZE && gz < GRID_SIZE) {
+                    gridBuffer.put(gx + gy * GRID_SIZE + gz * SLICE_AREA, occupancy);
+                    updatedGrid = true;
+                }
+            }
+        }
+
+        return updatedGrid;
+    }
+
+    private static void shiftXPositive(ClientLevel level) {
+        originX++;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        for (int z = 0; z < GRID_SIZE; z++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                long row = base + (long) z * SLICE_AREA + (long) y * GRID_SIZE;
+                MemoryUtil.memCopy(row + 1, row, GRID_SIZE - 1);
+            }
+        }
+        fillSliceX(level, GRID_SIZE - 1, originX + GRID_SIZE - 1, base);
+    }
+
+    private static void shiftXNegative(ClientLevel level) {
+        originX--;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        for (int z = 0; z < GRID_SIZE; z++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                long row = base + (long) z * SLICE_AREA + (long) y * GRID_SIZE;
+                MemoryUtil.memCopy(row, row + 1, GRID_SIZE - 1);
+            }
+        }
+        fillSliceX(level, 0, originX, base);
+    }
+
+    private static void fillSliceX(ClientLevel level, int writeX, int worldX, long base) {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int z = 0; z < GRID_SIZE; z++) {
             for (int y = 0; y < GRID_SIZE; y++) {
-                for (int x = 0; x < GRID_SIZE; x++) {
-                    pos.set(cx - HALF + x, cy - HALF + y, cz - HALF + z);
-                    BlockState state = level.getBlockState(pos);
-                    buffer.put(x + y * GRID_SIZE + z * GRID_SIZE * GRID_SIZE, voxelOccupancy(level, pos, state));
-                }
+                pos.set(worldX, originY + y, originZ + z);
+                BlockState state = level.getBlockState(pos);
+                MemoryUtil.memPutByte(base + (long) z * SLICE_AREA + (long) y * GRID_SIZE + writeX, voxelOccupancy(level, pos, state));
             }
         }
+    }
 
-        buffer.rewind();
-        return buffer;
+    private static void shiftYPositive(ClientLevel level) {
+        originY++;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        for (int z = 0; z < GRID_SIZE; z++) {
+            long plane = base + (long) z * SLICE_AREA;
+            MemoryUtil.memCopy(plane + GRID_SIZE, plane, (long) GRID_SIZE * (GRID_SIZE - 1));
+        }
+        fillSliceY(level, GRID_SIZE - 1, originY + GRID_SIZE - 1, base);
+    }
+
+    private static void shiftYNegative(ClientLevel level) {
+        originY--;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        for (int z = 0; z < GRID_SIZE; z++) {
+            long plane = base + (long) z * SLICE_AREA;
+            MemoryUtil.memCopy(plane, plane + GRID_SIZE, (long) GRID_SIZE * (GRID_SIZE - 1));
+        }
+        fillSliceY(level, 0, originY, base);
+    }
+
+    private static void fillSliceY(ClientLevel level, int writeY, int worldY, long base) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int z = 0; z < GRID_SIZE; z++) {
+            long row = base + (long) z * SLICE_AREA + (long) writeY * GRID_SIZE;
+            for (int x = 0; x < GRID_SIZE; x++) {
+                pos.set(originX + x, worldY, originZ + z);
+                BlockState state = level.getBlockState(pos);
+                MemoryUtil.memPutByte(row + x, voxelOccupancy(level, pos, state));
+            }
+        }
+    }
+
+    private static void shiftZPositive(ClientLevel level) {
+        originZ++;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        MemoryUtil.memCopy(base + SLICE_AREA, base, (long) SLICE_AREA * (GRID_SIZE - 1));
+        fillSliceZ(level, GRID_SIZE - 1, originZ + GRID_SIZE - 1, base);
+    }
+
+    private static void shiftZNegative(ClientLevel level) {
+        originZ--;
+        long base = MemoryUtil.memAddress(gridBuffer);
+        MemoryUtil.memCopy(base, base + SLICE_AREA, (long) SLICE_AREA * (GRID_SIZE - 1));
+        fillSliceZ(level, 0, originZ, base);
+    }
+
+    private static void fillSliceZ(ClientLevel level, int writeZ, int worldZ, long base) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        long plane = base + (long) writeZ * SLICE_AREA;
+        for (int y = 0; y < GRID_SIZE; y++) {
+            long row = plane + (long) y * GRID_SIZE;
+            for (int x = 0; x < GRID_SIZE; x++) {
+                pos.set(originX + x, originY + y, worldZ);
+                BlockState state = level.getBlockState(pos);
+                MemoryUtil.memPutByte(row + x, voxelOccupancy(level, pos, state));
+            }
+        }
     }
 
     private static byte voxelOccupancy(ClientLevel level, BlockPos pos, BlockState state) {
-        if (state.isAir()) {
-            return 0;
-        }
-
-        if (!state.getFluidState().isEmpty()) {
-            return 0;
-        }
-
-        Block block = state.getBlock();
-        if (block instanceof SlabBlock) return 0;
-        if (block instanceof StairBlock) return 0;
-        if (block instanceof WallBlock) return 0;
-        if (block instanceof FenceBlock) return 0;
-        if (block instanceof FenceGateBlock) return 0;
-        if (block instanceof CarpetBlock) return 0;
-        if (block instanceof IronBarsBlock) return 0;
-        if (block instanceof DoorBlock) return 0;
-        if (block instanceof TrapDoorBlock) return 0;
-        if (block instanceof LeavesBlock) return 0;
-        if (block instanceof LiquidBlock) return 0;
-
-        if (!state.canOcclude()) {
-            return 0;
-        }
-
+        if (!state.canOcclude()) return 0;
+        if (!state.getFluidState().isEmpty()) return 0;
         return state.isSolidRender(level, pos) ? (byte) 0xFF : 0;
     }
 
     private static void uploadBuffer(ByteBuffer buffer) {
+        if (buffer == null) {
+            return;
+        }
+        buffer.rewind();
         glBindTexture(GL_TEXTURE_3D, textureId);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, GRID_SIZE, GRID_SIZE, GRID_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, GRID_SIZE, GRID_SIZE, GRID_SIZE, GL_RED, GL_UNSIGNED_BYTE, buffer);
         glBindTexture(GL_TEXTURE_3D, 0);
     }
 
@@ -210,44 +415,52 @@ public final class VoxelShadowGrid {
         if (textureId != 0) {
             return;
         }
-
         textureId = glGenTextures();
+        VeilMultiBind.registerTextureTarget(textureId, GL_TEXTURE_3D);
         glBindTexture(GL_TEXTURE_3D, textureId);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        int total = GRID_SIZE * GRID_SIZE * GRID_SIZE;
-        ByteBuffer zeros = MemoryUtil.memCalloc(total);
+        ByteBuffer zeros = MemoryUtil.memCalloc(GRID_VOLUME);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, GRID_SIZE, GRID_SIZE, GRID_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, zeros);
         MemoryUtil.memFree(zeros);
-
         glBindTexture(GL_TEXTURE_3D, 0);
     }
 
-    private static void pushUniforms() {
-        Vec3 center = gridCenter;
-        if (center == null) {
-            center = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+    private static boolean hasOccludedLights() {
+        LightRenderer renderer = VeilRenderSystem.renderer().getLightRenderer();
+        for (LightRenderHandle<PointLightData> handle : renderer.getLights(LightTypeRegistry.POINT.get())) {
+            if (handle.getLightData().isOccluded()) return true;
         }
-
-        float originX = (float) (Math.floor(center.x) - HALF);
-        float originY = (float) (Math.floor(center.y) - HALF);
-        float originZ = (float) (Math.floor(center.z) - HALF);
-
-        pushUniforms(POINT_SHADER, originX, originY, originZ);
-        pushUniforms(AREA_SHADER, originX, originY, originZ);
+        for (LightRenderHandle<AreaLightData> handle : renderer.getLights(LightTypeRegistry.AREA.get())) {
+            if (handle.getLightData().isOccluded()) return true;
+        }
+        return false;
     }
 
-    private static void pushUniforms(ResourceLocation shader, float originX, float originY, float originZ) {
+    private static void pushUniforms(ClientLevel level, int cx, int cy, int cz) {
+        int ox, oy, oz;
+        if (gridBuffer != null && Objects.equals(gridDimension, level.dimension())) {
+            ox = originX;
+            oy = originY;
+            oz = originZ;
+        } else {
+            ox = cx - HALF;
+            oy = cy - HALF;
+            oz = cz - HALF;
+        }
+        pushUniforms(POINT_SHADER, ox, oy, oz);
+        pushUniforms(AREA_SHADER, ox, oy, oz);
+    }
+
+    private static void pushUniforms(ResourceLocation shader, int ox, int oy, int oz) {
         ShaderProgram program = VeilRenderSystem.renderer().getShaderManager().getShader(shader);
         if (program == null || !program.isValid()) {
             return;
         }
-
         program.setSampler("BlockGrid", textureId);
-        program.getUniformSafe("GridOrigin").setVector(originX, originY, originZ);
+        program.getUniformSafe("GridOrigin").setVector(ox, oy, oz);
     }
 }
