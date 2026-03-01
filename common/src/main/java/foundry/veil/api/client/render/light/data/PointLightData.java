@@ -154,7 +154,7 @@ public class PointLightData extends LightData implements IndirectLightData, Edit
             this.setRadius(editRadius[0]);
         }
 
-        if (ImGui.checkbox("occluded", editOccluded)) {
+        if (ImGui.checkbox("Occluded", editOccluded)) {
             this.occluded = editOccluded.get();
         }
     }

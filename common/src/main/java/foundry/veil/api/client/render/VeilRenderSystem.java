@@ -1243,7 +1243,6 @@ public final class VeilRenderSystem {
             renderer.free();
         }
         VoxelShadowGrid.close();
-        VeilMultiBind.clearTargetCache();
         glDeleteVertexArrays(screenQuadVao);
         MemoryUtil.memFree(emptySamplers);
         SHADER_BUFFER_CACHE.free();

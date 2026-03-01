@@ -243,13 +243,4 @@ public enum VeilMultiBind {
         return multiBind;
     }
 
-    public static void clearTargetCache() {
-        TARGET_CACHE.clear();
-    }
-
-    public static void registerTextureTarget(int textureId, int target) {
-        if (textureId != 0) {
-            TARGET_CACHE.put(textureId, target);
-        }
-    }
 }

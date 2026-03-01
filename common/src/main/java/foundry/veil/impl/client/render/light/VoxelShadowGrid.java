@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.ext.VeilMultiBind;
 import foundry.veil.api.client.render.light.data.AreaLightData;
 import foundry.veil.api.client.render.light.data.PointLightData;
 import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
@@ -416,7 +415,6 @@ public final class VoxelShadowGrid {
             return;
         }
         textureId = glGenTextures();
-        VeilMultiBind.registerTextureTarget(textureId, GL_TEXTURE_3D);
         glBindTexture(GL_TEXTURE_3D, textureId);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

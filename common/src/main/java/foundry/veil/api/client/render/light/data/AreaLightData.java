@@ -264,7 +264,7 @@ public class AreaLightData extends LightData implements InstancedLightData, Edit
             this.setDistance(editDistance[0]);
         }
 
-        if (ImGui.checkbox("occluded", editOccluded)) {
+        if (ImGui.checkbox("Occluded", editOccluded)) {
             this.occluded = editOccluded.get();
         }
     }
