@@ -1,14 +1,16 @@
 package foundry.veil.api.client.render.ext;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import foundry.veil.Veil;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import org.lwjgl.opengl.ARBMultiBind;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
 import java.nio.IntBuffer;
+import java.util.concurrent.TimeUnit;
 
 import static org.lwjgl.opengl.ARBMultiBind.glBindSamplers;
 import static org.lwjgl.opengl.ARBMultiBind.glBindTextures;
@@ -145,27 +147,21 @@ public enum VeilMultiBind {
             GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
     };
 
-    private static final Int2IntOpenHashMap TARGET_CACHE = new Int2IntOpenHashMap();
-    private static final int MISSING_TARGET = Integer.MIN_VALUE;
-
-    static {
-        TARGET_CACHE.defaultReturnValue(MISSING_TARGET);
-    }
+    private static final Cache<Integer, Integer> TEXTURE_TARGET_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterAccess(10, TimeUnit.SECONDS)
+            .build();
 
     private static int getTarget(int texture) {
-        if (texture == 0) {
-            return GL_TEXTURE_2D;
-        }
-
-        int cached = TARGET_CACHE.get(texture);
-        if (cached != MISSING_TARGET) {
+        Integer cached = TEXTURE_TARGET_CACHE.getIfPresent(texture);
+        if (cached != null) {
             return cached;
         }
 
         GLCapabilities caps = GL.getCapabilities();
         if (caps.glGetTextureParameteriv != 0L && caps.OpenGL45) { // Last ditch effort if the platform has the method anyways
             int target = glGetTextureParameteri(texture, GL_TEXTURE_TARGET);
-            TARGET_CACHE.put(texture, target);
+            TEXTURE_TARGET_CACHE.put(texture, target);
             return target;
         }
         // Nothing else I can do, so do the dirty hack to figure out the target
@@ -179,15 +175,15 @@ public enum VeilMultiBind {
             int old = glGetInteger(CHECK_BINDINGS[i]);
             glBindTexture(target, texture);
             if (glGetError() == GL_NO_ERROR) {
+                TEXTURE_TARGET_CACHE.put(texture, target);
                 glBindTexture(target, old);
-                TARGET_CACHE.put(texture, target);
                 return target;
             }
             glBindTexture(target, old);
         }
 
         // Should never happen
-        TARGET_CACHE.put(texture, GL_TEXTURE_2D);
+        TEXTURE_TARGET_CACHE.put(texture, GL_TEXTURE_2D);
         return GL_TEXTURE_2D;
     }
 
