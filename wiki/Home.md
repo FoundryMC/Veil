@@ -12,6 +12,9 @@ directly from [Jared's Maven](https://maven.blamejared.com/foundry/veil/).
 
 ### Neoforge
 
+<details>
+  <summary>Click to expand</summary>
+
 ```groovy
 repositories {
     maven {
@@ -28,7 +31,12 @@ dependencies {
 }
 ```
 
+</details>
+
 ### Fabric
+
+<details>
+  <summary>Click to expand</summary>
 
 ```groovy
 repositories {
@@ -46,7 +54,12 @@ dependencies {
 }
 ```
 
+</details>
+
 ### Common
+
+<details>
+  <summary>Click to expand</summary>
 
 ```groovy
 repositories {
@@ -63,6 +76,8 @@ dependencies {
     }
 }
 ```
+
+</details>
 
 # Veil Features
 

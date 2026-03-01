@@ -33,20 +33,30 @@ public class VeilPackResources implements NativeResource {
     }
 
     public @Nullable VeilResource<?> getVeilResource(String namespace, String path) {
-        VeilResourceFolder folder = this.root.getFolder(namespace);
-        if (folder == null) {
-            return null;
-        }
-
-        String[] parts = path.split("/");
-        for (int i = 0; i < parts.length - 1; i++) {
-            folder = folder.getFolder(parts[i]);
-            if (folder == null) {
-                return null;
+        VeilResourceFolder rootFolder = this.root.getFolder(namespace);
+        if (rootFolder != null) {
+            VeilResource<?> resource = rootFolder.getResource(path);
+            if (resource != null) {
+                return resource;
             }
         }
 
-        return folder.getResource(parts[parts.length - 1]);
+        for (PackType value : PackType.values()) {
+            VeilResourceFolder packFolder = this.root.getFolder(value.getDirectory());
+            if (packFolder == null) {
+                continue;
+            }
+
+            VeilResourceFolder namespaceFolder = packFolder.getFolder(namespace);
+            if (namespaceFolder != null) {
+                VeilResource<?> rootResource = namespaceFolder.getResource(path);
+                if (rootResource != null) {
+                    return rootResource;
+                }
+            }
+        }
+
+        return null;
     }
 
     public void loadIcon(NativeImage image, boolean blur) {

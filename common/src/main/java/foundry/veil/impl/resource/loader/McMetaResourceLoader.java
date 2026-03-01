@@ -26,13 +26,14 @@ public class McMetaResourceLoader implements VeilResourceLoader {
 
     @Override
     public VeilResource<?> load(VeilResourceManager resourceManager, ResourceProvider provider, PackType packType, ResourceLocation location, @Nullable Path filePath, @Nullable Path modResourcePath) throws IOException {
-        Optional<Resource> optional = provider.getResource(location.withPath(s -> s.substring(0, s.length() - 7)));
+        ResourceLocation basePath = location.withPath(s -> s.substring(0, s.length() - 7));
+        Optional<Resource> optional = provider.getResource(basePath);
         if (optional.isPresent()) {
-            return new McMetaResource(new VeilResourceInfo(packType, location, filePath, modResourcePath, true), optional.get().metadata());
+            return new McMetaResource(new VeilResourceInfo(packType, location, filePath, modResourcePath, true), basePath, optional.get().metadata());
         }
 
         try (InputStream stream = provider.open(location)) {
-            return new McMetaResource(new VeilResourceInfo(packType, location, filePath, modResourcePath, false), ResourceMetadata.fromJsonStream(stream));
+            return new McMetaResource(new VeilResourceInfo(packType, location, filePath, modResourcePath, false), null, ResourceMetadata.fromJsonStream(stream));
         }
     }
 }

@@ -1,10 +1,7 @@
 package foundry.veil.api.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Quaterniondc;
-import org.joml.Quaternionfc;
+import org.joml.*;
 
 /**
  * Utility extension for {@link PoseStack} with extra utilities.
@@ -19,6 +16,26 @@ public interface MatrixStack {
      * Clears all transformations.
      */
     void clear();
+
+    /**
+     * Translates the position by the specified amount.
+     *
+     * @param offset The amount
+     * @since 3.2.0
+     */
+    default void translate(Vector3dc offset) {
+        this.translate(offset.x(), offset.y(), offset.z());
+    }
+
+    /**
+     * Translates the position by the specified amount.
+     *
+     * @param offset The amount
+     * @since 3.2.0
+     */
+    default void translate(Vector3fc offset) {
+        this.translate(offset.x(), offset.y(), offset.z());
+    }
 
     /**
      * Translates the position by the specified amount.
@@ -137,6 +154,26 @@ public interface MatrixStack {
      * @param z        The rotation point Z
      */
     void rotateAround(Quaternionfc rotation, float x, float y, float z);
+
+    /**
+     * Scales the position and normal by the specified amount.
+     *
+     * @param scale The scale factor
+     * @since 3.2.0
+     */
+    default void applyScale(Vector3dc scale) {
+        this.applyScale(scale.x(), scale.y(), scale.z());
+    }
+
+    /**
+     * Scales the position and normal by the specified amount.
+     *
+     * @param scale The scale factor
+     * @since 3.2.0
+     */
+    default void applyScale(Vector3fc scale) {
+        this.applyScale(scale.x(), scale.y(), scale.z());
+    }
 
     /**
      * Scales the position and normal by the specified amount in the x, y, and z.

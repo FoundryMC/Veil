@@ -5,18 +5,15 @@ import org.jetbrains.annotations.ApiStatus;
 /**
  * A change in the currently active dynamic buffers
  *
+ * @param previouslyEnabledBuffersMask A mask representing the enabled state of every dynamic buffer
+ * @param enabledBuffersMask           A mask representing the previous enabled state of every dynamic buffer
  * @author RyanH
  * @since 2.3.0
  */
-public class DynamicBuffersChange {
-
-    private final int previouslyEnabledBuffersMask;
-    private final int enabledBuffersMask;
+public record DynamicBuffersChange(int previouslyEnabledBuffersMask, int enabledBuffersMask) {
 
     @ApiStatus.Internal
-    public DynamicBuffersChange(final int previouslyEnabledBuffersMask, final int enabledBuffersMask) {
-        this.previouslyEnabledBuffersMask = previouslyEnabledBuffersMask;
-        this.enabledBuffersMask = enabledBuffersMask;
+    public DynamicBuffersChange {
     }
 
     /**
@@ -40,14 +37,20 @@ public class DynamicBuffersChange {
 
     /**
      * @return a mask representing the enabled state of every dynamic buffer
+     * @deprecated Use {@link #enabledBuffersMask()} instead
      */
+    @ApiStatus.ScheduledForRemoval(inVersion = "4.0.0")
+    @Deprecated
     public int getPreviouslyEnabledBuffersMask() {
         return this.previouslyEnabledBuffersMask;
     }
 
     /**
      * @return a mask representing the previous enabled state of every dynamic buffer
+     * @deprecated Use {@link #enabledBuffersMask()} instead
      */
+    @ApiStatus.ScheduledForRemoval(inVersion = "4.0.0")
+    @Deprecated
     public int getEnabledBuffersMask() {
         return this.enabledBuffersMask;
     }

@@ -85,11 +85,29 @@ public class VeilResourceFolder {
         return this.name;
     }
 
-    public @Nullable VeilResourceFolder getFolder(String name) {
-        return this.subFolders.get(name);
+    public @Nullable VeilResourceFolder getFolder(String path) {
+        VeilResourceFolder folder = this;
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length - 1; i++) {
+            folder = folder.subFolders.get(parts[i]);
+            if (folder == null) {
+                return null;
+            }
+        }
+
+        return folder.subFolders.get(path);
     }
 
-    public @Nullable VeilResource<?> getResource(String name) {
-        return this.resources.get(name);
+    public @Nullable VeilResource<?> getResource(String path) {
+        VeilResourceFolder folder = this;
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length - 1; i++) {
+            folder = folder.subFolders.get(parts[i]);
+            if (folder == null) {
+                return null;
+            }
+        }
+
+        return folder.resources.get(parts[parts.length - 1]);
     }
 }

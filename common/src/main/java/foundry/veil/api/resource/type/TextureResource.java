@@ -95,27 +95,31 @@ public record TextureResource(VeilResourceInfo resourceInfo) implements VeilReso
         AtlasSet atlases = ((ResourceModelManagerAccessor) modelManager).getAtlases();
         ResourceLocation id = SpriteSource.TEXTURE_ID_CONVERTER.fileToId(location);
 
-        boolean reloadRequired = false;
-        for (Map.Entry<ResourceLocation, AtlasSet.AtlasEntry> entry : ((ResourceAtlasSetAccessor) atlases).getAtlases().entrySet()) {
-            if (((TextureAtlasExtension) entry.getValue().atlas()).veil$hasTexture(id)) {
-                reloadRequired = true;
-                break;
+        boolean reloadRequired = ((TextureAtlasExtension) client.getGuiSprites()).veil$hasTexture(id);
+        if (!reloadRequired) {
+            for (Map.Entry<ResourceLocation, AtlasSet.AtlasEntry> entry : ((ResourceAtlasSetAccessor) atlases).getAtlases().entrySet()) {
+                if (((TextureAtlasExtension) entry.getValue().atlas()).veil$hasTexture(id)) {
+                    reloadRequired = true;
+                    break;
+                }
             }
+        }
+
+        if (!reloadRequired) {
+            return;
         }
 
         // FIXME fluids and item models still retain the old sprite objects, so they don't animate after this
         if (SodiumCompat.INSTANCE != null) {
             // The model manager has to be reloaded to make sure the sprites are correctly updated on Sodium
-            if (reloadRequired) {
-                CompositeReloadListener.of(modelManager, client.getBlockRenderer(), client.getItemRenderer()).reload(
-                        CompletableFuture::completedFuture,
-                        resources,
-                        InactiveProfiler.INSTANCE,
-                        InactiveProfiler.INSTANCE,
-                        Util.backgroundExecutor(),
-                        client
-                ).thenRunAsync(VeilRenderSystem::rebuildChunks, VeilRenderSystem.renderThreadExecutor());
-            }
+            CompositeReloadListener.of(modelManager, client.getBlockRenderer(), client.getItemRenderer(), client.getGuiSprites()).reload(
+                    CompletableFuture::completedFuture,
+                    resources,
+                    InactiveProfiler.INSTANCE,
+                    InactiveProfiler.INSTANCE,
+                    Util.backgroundExecutor(),
+                    client
+            ).thenRunAsync(VeilRenderSystem::rebuildChunks, VeilRenderSystem.renderThreadExecutor());
         } else {
             for (Map.Entry<ResourceLocation, AtlasSet.AtlasEntry> entry : ((ResourceAtlasSetAccessor) atlases).getAtlases().entrySet()) {
                 TextureAtlas atlas = entry.getValue().atlas();
@@ -129,6 +133,17 @@ public record TextureResource(VeilResourceInfo resourceInfo) implements VeilReso
                                 VeilRenderSystem.rebuildChunks();
                             }, VeilRenderSystem.renderThreadExecutor());
                 }
+            }
+
+            if (((TextureAtlasExtension) client.getGuiSprites()).veil$hasTexture(id)) {
+                client.getGuiSprites().reload(
+                        CompletableFuture::completedFuture,
+                        resources,
+                        InactiveProfiler.INSTANCE,
+                        InactiveProfiler.INSTANCE,
+                        Util.backgroundExecutor(),
+                        client
+                );
             }
         }
     }

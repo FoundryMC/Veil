@@ -1148,7 +1148,7 @@ public final class VeilRenderSystem {
         });
         VeilEventPlatform.INSTANCE.onVeilDynamicBuffersChanged(change -> {
             if (SodiumCompat.INSTANCE != null) {
-                SodiumCompat.INSTANCE.setActiveBuffers(change.getEnabledBuffersMask());
+                SodiumCompat.INSTANCE.setActiveBuffers(change.enabledBuffersMask());
             }
 
             // This rebuild all chunks in view without clearing them if normals need to be corrected
