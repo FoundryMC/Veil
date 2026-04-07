@@ -4,7 +4,7 @@ populates the frames between keyframes using the easing methods defined when cre
 
 ## Keyframes
 
-Keyframs are the core to Veil's animation system, even though they are extremely simple. Keyframes require a Position (
+Keyframes are the core to Veil's animation system, even though they are extremely simple. Keyframes require a Position (
 Vec3), Rotation (Vec3), Scale (Vec3), Duration (in ticks) and an Easing.
 
 ## Paths
