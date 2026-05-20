@@ -78,7 +78,7 @@ public class LightInspector extends SingleWindowInspector {
         ImGui.sameLine();
         ImGui.beginDisabled(lightType == null);
         if (ImGui.button(REMOVE.getString()) && lightType != null) {
-            for (LightRenderHandle<?> handle : lightRenderer.getLights(lightType)) {
+            for (LightRenderHandle<?> handle : List.copyOf(lightRenderer.getLights(lightType))) {
                 handle.free();
             }
         }
@@ -101,7 +101,7 @@ public class LightInspector extends SingleWindowInspector {
             if (ImGui.beginTabItem(id.toString())) {
                 this.selectedTab = key;
                 int i = 0;
-                Collection<? extends LightRenderHandle<?>> lightData = lightRenderer.getLights(LightTypeRegistry.REGISTRY.get(key));
+                List<? extends LightRenderHandle<?>> lightData = List.copyOf(lightRenderer.getLights(LightTypeRegistry.REGISTRY.get(key)));
                 for (LightRenderHandle<?> handle : lightData) {
                     ImGui.pushID("light" + i);
                     renderLightComponents(handle);

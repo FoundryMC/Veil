@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15C.*;
@@ -33,6 +33,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
 
     private final List<LightHandle> lights;
     private final List<LightHandle> visibleLights;
+    private final List<LightHandle> lastVisibleLights;
     private final VertexArray vertexArray;
     private final int instancedVbo;
 
@@ -46,8 +47,9 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
     public InstancedLightRenderer(int lightSize) {
         this.lightSize = lightSize;
         this.maxLights = 0;
-        this.lights = new LinkedList<>();
-        this.visibleLights = new LinkedList<>();
+        this.lights = new ArrayList<>();
+        this.visibleLights = new ArrayList<>();
+        this.lastVisibleLights = new ArrayList<>();
         this.vertexArray = VertexArray.create();
 
         MeshData mesh = this.createMesh();
@@ -85,6 +87,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
             for (LightHandle handle : this.visibleLights) {
                 dataBuffer.position((pointer++) * this.lightSize);
                 handle.data.store(dataBuffer);
+                handle.uploadedRevision = handle.data.getRevision();
                 if (pointer >= MAX_UPLOADS) {
                     dataBuffer.rewind();
                     glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
@@ -98,6 +101,39 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
                 nglBufferSubData(GL_ARRAY_BUFFER, offset, (long) pointer * this.lightSize, memAddress(dataBuffer));
             }
         }
+    }
+
+    private void updateDirtyLights() {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer dataBuffer = stack.malloc(this.lightSize);
+            for (int i = 0; i < this.visibleLights.size(); i++) {
+                LightHandle handle = this.visibleLights.get(i);
+                int revision = handle.data.getRevision();
+                if (handle.uploadedRevision == revision) {
+                    continue;
+                }
+
+                dataBuffer.clear();
+                handle.data.store(dataBuffer);
+                dataBuffer.rewind();
+                nglBufferSubData(GL_ARRAY_BUFFER, (long) i * this.lightSize, this.lightSize, memAddress(dataBuffer));
+                handle.uploadedRevision = revision;
+            }
+        }
+    }
+
+    private boolean visibleLightsChanged() {
+        if (this.visibleLights.size() != this.lastVisibleLights.size()) {
+            return true;
+        }
+
+        for (int i = 0; i < this.visibleLights.size(); i++) {
+            if (this.visibleLights.get(i) != this.lastVisibleLights.get(i)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -139,6 +175,8 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
 
         RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
+        boolean resized = false;
+
         // If there is no space, then resize
         if (this.visibleLights.size() > this.maxLights) {
             if (this.maxLights < 100) {
@@ -147,10 +185,16 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
                 this.maxLights = (int) Math.max(Math.ceil(this.maxLights / 2.0), this.visibleLights.size() * 1.5);
             }
             glBufferData(GL_ARRAY_BUFFER, (long) this.maxLights * this.lightSize, GL_STREAM_DRAW);
+            resized = true;
         }
 
-        // Since culling is done CPU-side, the lights that need to be rendered changes every frame
-        this.updateAllLights();
+        if (resized || this.visibleLightsChanged()) {
+            this.updateAllLights();
+            this.lastVisibleLights.clear();
+            this.lastVisibleLights.addAll(this.visibleLights);
+        } else {
+            this.updateDirtyLights();
+        }
 
         this.vertexArray.bind();
         this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
@@ -175,9 +219,11 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
     private class LightHandle implements LightRenderHandle<T> {
 
         private final T data;
+        private int uploadedRevision;
 
         private LightHandle(T data) {
             this.data = data;
+            this.uploadedRevision = data.getRevision() - 1;
         }
 
         @Override
@@ -187,6 +233,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
 
         @Override
         public void markDirty() {
+            this.data.markDirty();
         }
 
         @Override
@@ -197,6 +244,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         @Override
         public void free() {
             InstancedLightRenderer.this.lights.remove(this);
+            InstancedLightRenderer.this.lastVisibleLights.remove(this);
         }
     }
 }

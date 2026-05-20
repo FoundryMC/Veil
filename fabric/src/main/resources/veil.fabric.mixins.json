@@ -27,6 +27,7 @@
     "client.stage.vanilla.LevelRendererMixin",
     "compat.cameratweaks.CameraTweaksCameraMixin",
     "compat.flashback.ExportJobMixin",
+    "compat.imguimc.ImGuiRendererGL33Mixin",
     "compat.imguimc.KeyboardHandlerMixin",
     "compat.imguimc.MouseHandlerMixin",
     "compat.iris.IrisRenderingPipelineAccessor",

@@ -49,21 +49,25 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
 
     public PointLightData setPosition(Vector3dc pos) {
         this.position.set(pos);
+        this.markDirty();
         return this;
     }
 
     public PointLightData setPosition(double x, double y, double z) {
         this.position.set(x, y, z);
+        this.markDirty();
         return this;
     }
 
     public PointLightData setRadius(float radius) {
         this.radius = radius;
+        this.markDirty();
         return this;
     }
 
     public PointLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
         return this;
     }
 
@@ -117,6 +121,7 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
     public PointLightData setTo(Camera camera) {
         Vec3 pos = camera.getPosition();
         this.position.set(pos.x, pos.y, pos.z);
+        this.markDirty();
         return this;
     }
 
@@ -137,14 +142,17 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
         if (ImGui.dragScalar("##x", editX, 0.02F)) {
             this.position.x = editX[0];
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.dragScalar("##y", editY, 0.02F)) {
             this.position.y = editY[0];
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.dragScalar("##z", editZ, 0.02F)) {
             this.position.z = editZ[0];
+            this.markDirty();
         }
 
         ImGui.popItemWidth();
@@ -157,6 +165,7 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
 
         if (ImGui.checkbox("Occluded", this.occlusionEnabled)) {
             this.occlusionEnabled = !this.occlusionEnabled;
+            this.markDirty();
         }
     }
 }

@@ -30,8 +30,8 @@ bool testSphere(float x, float y, float z, float r) {
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-    uint lightId = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * Width;
-    uint lightDataIndex = lightId * LightSize;
+    int lightId = int(gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * uint(Width));
+    int lightDataIndex = lightId * LightSize;
 
     float x = data[lightDataIndex + PositionOffset];
     float y = data[lightDataIndex + PositionOffset + 1];
@@ -43,12 +43,12 @@ void main() {
 
     bool visible = testSphere(dx, dy, dz, range * 1.414);
     if (visible) {
-        uint i = atomicCounterIncrement(VeilLightCount) * 5;
+        int i = int(atomicCounterIncrement(VeilLightCount)) * 5;
         bool highRes = dx * dx + dy * dy + dz * dz <= range * range;
         commands[i] = highRes ? HighResSize : LowResSize;
         commands[i + 1] = 1;
         commands[i + 2] = highRes ? 0 : HighResSize;
         commands[i + 3] = 0;
-        commands[i + 4] = int(lightId);
+        commands[i + 4] = lightId;
     }
 }

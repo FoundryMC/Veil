@@ -424,10 +424,17 @@ public final class VoxelShadowGrid {
         if (buffer == null) {
             return;
         }
-        buffer.rewind();
+
+        ByteBuffer upload = buffer.duplicate();
+        upload.position(0);
+        upload.limit(GRID_VOLUME);
+
+        int unpackAlignment = glGetInteger(GL_UNPACK_ALIGNMENT);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glBindTexture(GL_TEXTURE_3D, textureId);
-        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, GRID_SIZE, GRID_SIZE, GRID_SIZE, GL_RED, GL_UNSIGNED_BYTE, buffer);
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, GRID_SIZE, GRID_SIZE, GRID_SIZE, GL_RED, GL_UNSIGNED_BYTE, upload);
         glBindTexture(GL_TEXTURE_3D, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
     }
 
     private static void ensureTexture() {

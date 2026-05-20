@@ -17,10 +17,25 @@ public abstract class LightData {
 
     protected final Color color;
     protected float brightness;
+    private int revision;
 
     public LightData() {
         this.color = new Color(Color.WHITE);
         this.brightness = 1.0F;
+    }
+
+    /**
+     * Marks this light as changed so renderer-side buffers can be refreshed lazily.
+     */
+    public void markDirty() {
+        this.revision++;
+    }
+
+    /**
+     * @return The current mutation revision of this light.
+     */
+    public int getRevision() {
+        return this.revision;
     }
 
     /**
@@ -64,6 +79,7 @@ public abstract class LightData {
      */
     public LightData setColor(float red, float green, float blue) {
         this.color.set(red, green, blue);
+        this.markDirty();
         return this;
     }
 
@@ -74,6 +90,7 @@ public abstract class LightData {
      */
     public LightData setColor(int color) {
         this.color.setRGB(color);
+        this.markDirty();
         return this;
     }
 
@@ -84,6 +101,7 @@ public abstract class LightData {
      */
     public LightData setBrightness(float brightness) {
         this.brightness = brightness;
+        this.markDirty();
         return this;
     }
 

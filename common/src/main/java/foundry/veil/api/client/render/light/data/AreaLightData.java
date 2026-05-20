@@ -105,6 +105,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
      */
     public AreaLightData setSize(double x, double y) {
         this.size.set(x, y);
+        this.markDirty();
         return this;
     }
 
@@ -115,6 +116,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
      */
     public AreaLightData setAngle(float angle) {
         this.angle = angle;
+        this.markDirty();
         return this;
     }
 
@@ -125,11 +127,13 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
      */
     public AreaLightData setDistance(float distance) {
         this.distance = distance;
+        this.markDirty();
         return this;
     }
 
     public AreaLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
         return this;
     }
 
@@ -197,6 +201,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         Vec3 pos = camera.getPosition();
         this.position.set(pos.x, pos.y, pos.z);
         this.orientation.identity().lookAlong(camera.getLookVector().mul(-1), camera.getUpVector());
+        this.markDirty();
         return this;
     }
 
@@ -225,14 +230,17 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
         if (ImGui.dragScalar("##x", editX, 0.02F)) {
             this.position.x = editX[0];
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.dragScalar("##y", editY, 0.02F)) {
             this.position.y = editY[0];
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.dragScalar("##z", editZ, 0.02F)) {
             this.position.z = editZ[0];
+            this.markDirty();
         }
 
         ImGui.popItemWidth();
@@ -242,14 +250,17 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
         if (ImGui.sliderAngle("##xrot", editXRot)) {
             this.orientation.identity().rotationXYZ(editXRot[0], orientationAngles.y(), orientationAngles.z());
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.sliderAngle("##yrot", editYRot)) {
             this.orientation.identity().rotationXYZ(orientationAngles.x(), editYRot[0], orientationAngles.z());
+            this.markDirty();
         }
         ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.sliderAngle("##zrot", editZRot)) {
             this.orientation.identity().rotationXYZ(orientationAngles.x(), orientationAngles.y(), editZRot[0]);
+            this.markDirty();
         }
 
         ImGui.popItemWidth();
@@ -268,6 +279,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
         if (ImGui.checkbox("Occluded", this.occlusionEnabled)) {
             this.occlusionEnabled = !this.occlusionEnabled;
+            this.markDirty();
         }
     }
 }

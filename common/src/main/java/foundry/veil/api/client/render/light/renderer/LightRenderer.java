@@ -68,15 +68,16 @@ public final class LightRenderer implements NativeResource {
             }
 
             if (!hasRendered) {
+                if (renderer.enableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL)) {
+                    return false;
+                }
+
                 lightFbo.bind(true);
                 lightFbo.clear(GL_COLOR_BUFFER_BIT);
                 AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
 
             hasRendered = true;
-            if (renderer.enableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL)) {
-                break;
-            }
 
             // Decide if the DDA needs to be updated
             if (lightRenderer instanceof DDALightRenderer<?> ddalightRenderer) {
