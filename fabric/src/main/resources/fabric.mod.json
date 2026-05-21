@@ -6,10 +6,10 @@
   "description": "${description}",
   "icon": "icon.png",
   "authors": [
-    "${mod_author}"
+    ${mod_authors}
   ],
   "contributors": [
-    "${mod_contributor}"
+    ${mod_contributors}
   ],
   "contact": {
     "homepage": "https://modrinth.com/project/veil",

@@ -108,7 +108,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
             ByteBuffer dataBuffer = stack.malloc(this.lightSize);
             for (int i = 0; i < this.visibleLights.size(); i++) {
                 LightHandle handle = this.visibleLights.get(i);
-                int revision = handle.data.getRevision();
+                long revision = handle.data.getRevision();
                 if (handle.uploadedRevision == revision) {
                     continue;
                 }
@@ -219,7 +219,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
     private class LightHandle implements LightRenderHandle<T> {
 
         private final T data;
-        private int uploadedRevision;
+        private long uploadedRevision;
 
         private LightHandle(T data) {
             this.data = data;

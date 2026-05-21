@@ -17,7 +17,7 @@ public abstract class LightData {
 
     protected final Color color;
     protected float brightness;
-    private int revision;
+    private long revision;
 
     public LightData() {
         this.color = new Color(Color.WHITE);
@@ -34,7 +34,7 @@ public abstract class LightData {
     /**
      * @return The current mutation revision of this light.
      */
-    public int getRevision() {
+    public long getRevision() {
         return this.revision;
     }
 

@@ -24,7 +24,6 @@
     "client.perspective.sodium.RenderSectionMixin",
     "client.perspective.sodium.SodiumWorldRendererMixin",
     "client.perspective.vanilla.LevelRendererMixin",
-    "compat.imguimc.ImGuiRendererGL33Mixin",
     "compat.iris.IrisRenderingPipelineAccessor",
     "compat.iris.IrisRenderingPipelineMixin",
     "compat.iris.IrisRenderTargetMixin",
