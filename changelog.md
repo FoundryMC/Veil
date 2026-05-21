@@ -1,3 +1,1 @@
-- Fix vertex format. ([#117](https://github.com/FoundryMC/Veil/issues/117))
-- Cast gl_InstanceID to uint. ([#133](https://github.com/FoundryMC/Veil/issues/133))
-- Fix refmap console spam. ([#140](https://github.com/FoundryMC/Veil/issues/140))
+- Fix ImGuiMC, Light Buffer Startup, NVIDIA Shader Issues, and Sodium 0.8.13 Issues ([#142](https://github.com/FoundryMC/Veil/pull/142))

@@ -9,8 +9,8 @@ import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.light.data.LightData;
-import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.client.render.vertex.VertexArray;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.impl.client.render.light.VoxelShadowGrid;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.resources.ResourceLocation;
@@ -51,6 +51,7 @@ public final class LightRenderer implements NativeResource {
     /**
      * Draws the lights to the specified framebuffer.
      *
+     * @param frustum  The cull frustum
      * @param lightFbo The framebuffer to render lights into
      * @return If any lights were actually rendered
      */
@@ -65,7 +66,6 @@ public final class LightRenderer implements NativeResource {
             for (LightTypeRenderer<?> lightRenderer : this.renderers.values()) {
                 lightRenderer.prepareLights(this, frustum);
 
-                // If there are no visible lights, then don't render anything
                 if (lightRenderer.getVisibleLights() <= 0) {
                     continue;
                 }
@@ -77,19 +77,21 @@ public final class LightRenderer implements NativeResource {
 
                     lightFbo.bind(true);
                     lightFbo.clear(GL_COLOR_BUFFER_BIT);
-                    VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer()).resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+                    AdvancedFbo mainFbo = VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer());
+                    mainFbo.resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
                 }
 
                 hasRendered = true;
 
-                // Decide if the DDA needs to be updated
-                if (lightRenderer instanceof DDALightRenderer<?> ddalightRenderer) {
+                if (lightRenderer instanceof DDALightRenderer<?> ddaLightRenderer) {
                     if (!setupDDA) {
                         VoxelShadowGrid.setup();
                         setupDDA = true;
                     }
-                    ddalightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
+                    ddaLightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
                 }
+
                 lightRenderer.renderLights(this);
             }
 
