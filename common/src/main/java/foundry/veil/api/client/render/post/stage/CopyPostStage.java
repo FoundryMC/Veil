@@ -7,6 +7,7 @@ import foundry.veil.api.client.registry.PostPipelineStageRegistry;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.post.PostPipeline;
+import foundry.veil.api.compat.VeilVRCompat;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -51,6 +52,8 @@ public class CopyPostStage extends FramebufferPostStage {
 
     @Override
     public void apply(PostPipeline.Context context) {
+        VeilVRCompat.warnIfSharedBuffer(this.getIn(), "copy input");
+        VeilVRCompat.warnIfSharedBuffer(this.getOut(), "copy output");
         AdvancedFbo in = context.getFramebuffer(this.getIn());
         AdvancedFbo out = context.getFramebuffer(this.getOut());
         if (in != null && out != null) {

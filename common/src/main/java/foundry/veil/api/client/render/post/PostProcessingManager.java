@@ -21,6 +21,7 @@ import foundry.veil.api.client.render.post.stage.CompositePostPipeline;
 import foundry.veil.api.client.render.profiler.RenderProfilerCounter;
 import foundry.veil.api.client.render.profiler.VeilRenderProfiler;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
 import foundry.veil.platform.VeilClientPlatform;
@@ -165,6 +166,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
 
     private void setup() {
         VeilRenderProfiler.get().push("veil_post", RenderProfilerCounter.FRAGMENT_SHADER_INVOCATIONS);
+        VeilVRCompat.pushVrRenderState();
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(GL_ALWAYS);
         RenderSystem.depthMask(false);
@@ -181,6 +183,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
         FramebufferStack.pop(POST);
+        VeilVRCompat.popVrRenderState();
         VeilRenderProfiler.get().pop();
     }
 
@@ -204,9 +207,9 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         }
 
         VeilRenderer renderer = VeilRenderSystem.renderer();
-        AdvancedFbo postFramebuffer = renderer.getFramebufferManager().getFramebuffer(VeilFramebuffers.POST);
         VeilClientPlatform platform = VeilClient.clientPlatform();
         this.context.begin();
+        AdvancedFbo postFramebuffer = this.context.getFramebuffer(VeilFramebuffers.POST);
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
@@ -282,6 +285,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         }
 
         this.context.begin();
+        AdvancedFbo postFramebuffer = resolvePost ? this.context.getFramebuffer(VeilFramebuffers.POST) : null;
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
@@ -296,7 +300,6 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.clear();
         this.context.end();
 
-        AdvancedFbo postFramebuffer = resolvePost ? renderer.getFramebufferManager().getFramebuffer(VeilFramebuffers.POST) : null;
         if (postFramebuffer != null) {
             postFramebuffer.resolveToRenderTarget(
                     Minecraft.getInstance().getMainRenderTarget(),
@@ -323,7 +326,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
      */
     public static void resolvePost(@Nullable AdvancedFbo framebuffer, int mask) {
         if (framebuffer != null) {
-            AdvancedFbo postFramebuffer = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.POST);
+            AdvancedFbo postFramebuffer = VeilVRCompat.getPostFramebufferOrDefault(VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.POST));
             if (postFramebuffer != null) {
                 postFramebuffer.resolveToAdvancedFbo(
                         framebuffer,

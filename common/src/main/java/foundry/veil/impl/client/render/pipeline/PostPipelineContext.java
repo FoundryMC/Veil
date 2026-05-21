@@ -5,6 +5,7 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.program.TextureUniformAccess;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.impl.client.render.shader.program.ShaderTextureCache;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -41,6 +42,7 @@ public class PostPipelineContext implements PostPipeline.Context {
      */
     public void begin() {
         VeilRenderSystem.renderer().getFramebufferManager().getFramebuffers().forEach(this::setFramebuffer);
+        VeilVRCompat.setupPostContext(this);
     }
 
     /**

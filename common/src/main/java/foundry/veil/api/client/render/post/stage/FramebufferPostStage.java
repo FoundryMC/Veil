@@ -4,6 +4,7 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
+import foundry.veil.api.compat.VeilVRCompat;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,12 +43,17 @@ public abstract class FramebufferPostStage implements PostPipeline {
         AdvancedFbo in = this.in != null ? context.getFramebuffer(this.in) : null;
         AdvancedFbo out = context.getFramebufferOrDraw(this.out);
 
+        if (this.in != null) {
+            VeilVRCompat.warnIfSharedBuffer(this.in, "input");
+        }
+        VeilVRCompat.warnIfSharedBuffer(this.out, "output");
+
         if (in != null) {
             shader.setFramebufferSamplers(in);
         }
 
         out.bind(true);
-        if (this.clear) {
+        if (this.clear && !VeilVRCompat.shouldSkipAlphaUnsafeClear(this.out)) {
             out.clear();
         }
 

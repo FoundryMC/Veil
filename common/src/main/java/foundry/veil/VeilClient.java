@@ -3,11 +3,13 @@ package foundry.veil;
 import foundry.veil.api.client.registry.*;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.registry.EmitterShapeRegistry;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
+import foundry.veil.impl.client.VeilClientConfig;
 import foundry.veil.impl.client.imgui.VeilImGuiCompat;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferShard;
@@ -29,6 +31,8 @@ public class VeilClient {
     private static final VeilResourceManagerImpl RESOURCE_MANAGER = new VeilResourceManagerImpl();
 
     public static void init() {
+        VeilClientConfig.load();
+        VeilVRCompat.init();
         VeilRenderSystem.bootstrap();
         QuasarParticleHandler.init();
         QuasarParticles.bootstrap();

@@ -14,6 +14,7 @@ import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.shader.ShaderManager;
 import foundry.veil.api.client.render.shader.ShaderModificationManager;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRegisterInspectorsEvent;
 import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
@@ -103,6 +104,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         consumer.accept(ChatFormatting.UNDERLINE + "Veil");
 
         this.lightRenderer.addDebugInfo(consumer);
+        VeilVRCompat.addDebugInfo(consumer);
         int mask = this.dynamicBufferManager.getActiveBuffers();
         if (mask != 0) {
             String buffers = Arrays.stream(DynamicBufferType.decode(mask)).map(DynamicBufferType::getName).collect(Collectors.joining(", "));
@@ -281,6 +283,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     @ApiStatus.Internal
     public void endFrame() {
         this.framebufferManager.clear();
+        VeilVRCompat.endFrame();
         this.dynamicBufferManager.endFrame();
         this.postProcessingManager.endFrame();
     }
@@ -291,6 +294,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         this.shaderManager.close();
         this.framebufferManager.free();
         this.postProcessingManager.free();
+        VeilVRCompat.free();
         this.quasarParticleManager.clear();
         this.flareEffectManager.getShellManager().free();
         this.lightRenderer.free();

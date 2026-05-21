@@ -9,6 +9,7 @@ import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.light.data.LightData;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.impl.client.render.light.VoxelShadowGrid;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -55,48 +56,53 @@ public final class LightRenderer implements NativeResource {
      */
     @ApiStatus.Internal
     public boolean render(CullFrustum frustum, AdvancedFbo lightFbo) {
-        boolean hasRendered = false;
-        boolean setupDDA = false;
-        VeilRenderer renderer = VeilRenderSystem.renderer();
+        VeilVRCompat.pushVrRenderState();
+        try {
+            boolean hasRendered = false;
+            boolean setupDDA = false;
+            VeilRenderer renderer = VeilRenderSystem.renderer();
 
-        for (LightTypeRenderer<?> lightRenderer : this.renderers.values()) {
-            lightRenderer.prepareLights(this, frustum);
+            for (LightTypeRenderer<?> lightRenderer : this.renderers.values()) {
+                lightRenderer.prepareLights(this, frustum);
 
-            // If there are no visible lights, then don't render anything
-            if (lightRenderer.getVisibleLights() <= 0) {
-                continue;
+                // If there are no visible lights, then don't render anything
+                if (lightRenderer.getVisibleLights() <= 0) {
+                    continue;
+                }
+
+                if (!hasRendered) {
+                    if (renderer.enableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL)) {
+                        return false;
+                    }
+
+                    lightFbo.bind(true);
+                    lightFbo.clear(GL_COLOR_BUFFER_BIT);
+                    VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer()).resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                }
+
+                hasRendered = true;
+
+                // Decide if the DDA needs to be updated
+                if (lightRenderer instanceof DDALightRenderer<?> ddalightRenderer) {
+                    if (!setupDDA) {
+                        VoxelShadowGrid.setup();
+                        setupDDA = true;
+                    }
+                    ddalightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
+                }
+                lightRenderer.renderLights(this);
             }
 
             if (!hasRendered) {
-                if (renderer.enableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL)) {
-                    return false;
-                }
-
-                lightFbo.bind(true);
-                lightFbo.clear(GL_COLOR_BUFFER_BIT);
-                AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
+                return false;
             }
 
-            hasRendered = true;
-
-            // Decide if the DDA needs to be updated
-            if (lightRenderer instanceof DDALightRenderer<?> ddalightRenderer) {
-                if (!setupDDA) {
-                    VoxelShadowGrid.setup();
-                    setupDDA = true;
-                }
-                ddalightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
-            }
-            lightRenderer.renderLights(this);
+            VertexArray.unbind();
+            return true;
+        } finally {
+            VeilVRCompat.popVrRenderState();
         }
-
-        if (!hasRendered) {
-            renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
-            return false;
-        }
-
-        VertexArray.unbind();
-        return true;
     }
 
     /**

@@ -8,8 +8,10 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferDefinition;
 import foundry.veil.api.client.render.post.PostPipeline;
+import foundry.veil.api.client.render.shader.texture.FramebufferSource;
 import foundry.veil.api.client.render.shader.texture.ShaderTextureSource;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.impl.client.render.shader.program.ShaderProgramImpl;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
@@ -53,6 +55,7 @@ public final class CompositePostPipeline implements PostPipeline {
     private final Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions;
     private final VeilRenderLevelStageEvent.Stage renderStage;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
+    private final Map<ResourceLocation, AdvancedFbo>[] vrFramebuffers;
     private final Map<String, ShaderUniformAccess> uniforms;
     private final DynamicBufferType[] dynamicBuffers;
     private final int dynamicBuffersMask;
@@ -61,7 +64,10 @@ public final class CompositePostPipeline implements PostPipeline {
 
     private int screenWidth = -1;
     private int screenHeight = -1;
+    private final int[] vrScreenWidths;
+    private final int[] vrScreenHeights;
 
+    @SuppressWarnings("unchecked")
     private CompositePostPipeline(PostPipeline[] stages, Map<String, ShaderTextureSource> samplers, Map<ResourceLocation, FramebufferDefinition> framebufferDefinitions, @Nullable VeilRenderLevelStageEvent.Stage renderStage, int dynamicBuffers, int priority, boolean replace) {
         this.stages = stages;
         this.textureSources = Collections.unmodifiableMap(samplers);
@@ -74,11 +80,14 @@ public final class CompositePostPipeline implements PostPipeline {
         this.framebufferDefinitions = Collections.unmodifiableMap(framebufferDefinitions);
         this.renderStage = renderStage;
         this.framebuffers = new Object2ObjectArrayMap<>();
+        this.vrFramebuffers = new Map[]{new Object2ObjectArrayMap<>(), new Object2ObjectArrayMap<>()};
         this.uniforms = new Object2ObjectArrayMap<>();
         this.dynamicBuffers = DynamicBufferType.decode(dynamicBuffers);
         this.dynamicBuffersMask = dynamicBuffers;
         this.priority = priority;
         this.replace = replace;
+        this.vrScreenWidths = new int[]{-1, -1};
+        this.vrScreenHeights = new int[]{-1, -1};
     }
 
     /**
@@ -97,33 +106,56 @@ public final class CompositePostPipeline implements PostPipeline {
     @Override
     public void apply(Context context) {
         AdvancedFbo main = context.getDrawFramebuffer();
-        if (this.screenWidth != main.getWidth() || this.screenHeight != main.getHeight()) {
-            this.screenWidth = main.getWidth();
-            this.screenHeight = main.getHeight();
-            this.framebuffers.values().forEach(AdvancedFbo::free);
-            this.framebuffers.clear();
+        Map<ResourceLocation, AdvancedFbo> activeFramebuffers = this.getActiveFramebuffers(main);
 
-            MolangRuntime runtime = MolangRuntime.runtime()
-                    .setQuery("screen_width", this.screenWidth)
-                    .setQuery("screen_height", this.screenHeight)
-                    .create();
-            this.framebufferDefinitions.forEach((name, definition) -> this.framebuffers.put(name, definition.createBuilder(runtime)
-                    .setDebugLabel("Temp " + name)
-                    .build(true)));
-        }
-
-        this.framebuffers.forEach(context::setFramebuffer);
+        activeFramebuffers.forEach(context::setFramebuffer);
         for (DynamicBufferType buffer : this.dynamicBuffers) {
             context.setTexture(buffer.getSourceName(), GL_TEXTURE_2D, VeilRenderSystem.renderer().getDynamicBufferManger().getBufferTexture(buffer), 0);
         }
         for (Map.Entry<String, ShaderProgramImpl.ShaderTexture> entry : this.samplers.entrySet()) {
             ShaderProgramImpl.ShaderTexture texture = entry.getValue();
             ShaderTextureSource source = texture.textureSource();
+            if (source instanceof FramebufferSource framebufferSource) {
+                VeilVRCompat.warnIfSharedBuffer(framebufferSource.name(), "texture " + entry.getKey());
+            }
             context.setTexture(entry.getKey(), source.getTarget(context), source.getId(context), texture.samplerId());
         }
         for (PostPipeline pipeline : this.stages) {
             pipeline.apply(context);
         }
+    }
+
+    private Map<ResourceLocation, AdvancedFbo> getActiveFramebuffers(AdvancedFbo main) {
+        if (VeilVRCompat.usesPerEyePostProcessing()) {
+            int eye = VeilVRCompat.getActiveEyeIndex();
+            Map<ResourceLocation, AdvancedFbo> framebuffers = this.vrFramebuffers[eye];
+            if (this.vrScreenWidths[eye] != main.getWidth() || this.vrScreenHeights[eye] != main.getHeight()) {
+                this.vrScreenWidths[eye] = main.getWidth();
+                this.vrScreenHeights[eye] = main.getHeight();
+                this.resizeFramebuffers(framebuffers, main.getWidth(), main.getHeight());
+            }
+            return framebuffers;
+        }
+
+        if (this.screenWidth != main.getWidth() || this.screenHeight != main.getHeight()) {
+            this.screenWidth = main.getWidth();
+            this.screenHeight = main.getHeight();
+            this.resizeFramebuffers(this.framebuffers, this.screenWidth, this.screenHeight);
+        }
+        return this.framebuffers;
+    }
+
+    private void resizeFramebuffers(Map<ResourceLocation, AdvancedFbo> framebuffers, int width, int height) {
+        framebuffers.values().forEach(AdvancedFbo::free);
+        framebuffers.clear();
+
+        MolangRuntime runtime = MolangRuntime.runtime()
+                .setQuery("screen_width", width)
+                .setQuery("screen_height", height)
+                .create();
+        this.framebufferDefinitions.forEach((name, definition) -> framebuffers.put(name, definition.createBuilder(runtime)
+                .setDebugLabel("Temp " + name)
+                .build(true)));
     }
 
     @Override
@@ -133,6 +165,10 @@ public final class CompositePostPipeline implements PostPipeline {
         }
         this.framebuffers.values().forEach(AdvancedFbo::free);
         this.framebuffers.clear();
+        for (Map<ResourceLocation, AdvancedFbo> framebuffers : this.vrFramebuffers) {
+            framebuffers.values().forEach(AdvancedFbo::free);
+            framebuffers.clear();
+        }
     }
 
     @Override

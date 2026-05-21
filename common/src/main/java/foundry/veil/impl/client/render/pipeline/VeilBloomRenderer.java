@@ -8,6 +8,7 @@ import foundry.veil.api.client.render.framebuffer.FramebufferStack;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.compat.IrisCompat;
+import foundry.veil.api.compat.VeilVRCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -24,6 +25,8 @@ public final class VeilBloomRenderer {
     private static boolean enabled;
     private static boolean rendered;
     private static AdvancedFbo bloom;
+    private static final boolean[] vrRendered = new boolean[2];
+    private static final AdvancedFbo[] vrBloom = new AdvancedFbo[2];
 
     public static void tryEnable() {
         boolean wasEnabled = enabled;
@@ -52,20 +55,25 @@ public final class VeilBloomRenderer {
         int w = mainRenderTarget.getWidth();
         int h = mainRenderTarget.getHeight();
         int framebufferTexture = mainRenderTarget.getDepthTextureAttachment().getId();
-        if (bloom == null || bloom.getWidth() != w || bloom.getHeight() != h) {
-            free();
-            bloom = AdvancedFbo.withSize(w, h)
+        int eye = getActiveEye();
+        AdvancedFbo activeBloom = getBloom(eye);
+        if (activeBloom == null || activeBloom.getWidth() != w || activeBloom.getHeight() != h) {
+            freeBloom(eye);
+            activeBloom = AdvancedFbo.withSize(w, h)
                     .setFormat(FramebufferAttachmentDefinition.Format.RGBA16F)
                     .addColorTextureBuffer()
                     .setDepthTextureWrapper(framebufferTexture)
                     .setDebugLabel("Veil Bloom")
                     .build(true);
+            setBloom(eye, activeBloom);
+        } else if (activeBloom.isDepthMutableTextureAttachment()) {
+            activeBloom.setDepthAttachmentTexture(framebufferTexture);
         }
 
         FramebufferStack.push(null);
-        VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(VeilFramebuffers.BLOOM, bloom);
-        bloom.bind(true);
-        rendered = true;
+        VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(VeilFramebuffers.BLOOM, activeBloom);
+        activeBloom.bind(true);
+        setRendered(eye, true);
     }
 
     public static void clearRenderState() {
@@ -89,15 +97,16 @@ public final class VeilBloomRenderer {
     }
 
     public static boolean hasRendered() {
-        return rendered && enabled;
+        return getRendered(getActiveEye()) && enabled;
     }
 
     public static void flush() {
-        if (!rendered || !enabled) {
+        int eye = getActiveEye();
+        if (!getRendered(eye) || !enabled) {
             return;
         }
 
-        rendered = false;
+        setRendered(eye, false);
         PostPipeline pipeline = getPipeline();
         if (pipeline == null) {
             enabled = false;
@@ -109,17 +118,57 @@ public final class VeilBloomRenderer {
 
         FramebufferStack.push(null);
         VeilRenderSystem.renderer().getPostProcessingManager().runPipeline(pipeline);
-        bloom.clear(GL_COLOR_BUFFER_BIT);
+        AdvancedFbo activeBloom = getBloom(eye);
+        if (activeBloom != null) {
+            activeBloom.clear(GL_COLOR_BUFFER_BIT);
+        }
         FramebufferStack.pop(null);
 
         profiler.pop();
     }
 
     public static void free() {
-        if (bloom != null) {
-            VeilRenderSystem.renderer().getFramebufferManager().removeFramebuffer(VeilFramebuffers.BLOOM);
-            bloom.free();
-            bloom = null;
+        VeilRenderSystem.renderer().getFramebufferManager().removeFramebuffer(VeilFramebuffers.BLOOM);
+        freeBloom(-1);
+        for (int i = 0; i < vrBloom.length; i++) {
+            freeBloom(i);
         }
+    }
+
+    private static int getActiveEye() {
+        return VeilVRCompat.usesPerEyePostProcessing() ? VeilVRCompat.getActiveEyeIndex() : -1;
+    }
+
+    private static AdvancedFbo getBloom(int eye) {
+        return eye >= 0 ? vrBloom[eye] : bloom;
+    }
+
+    private static void setBloom(int eye, AdvancedFbo framebuffer) {
+        if (eye >= 0) {
+            vrBloom[eye] = framebuffer;
+        } else {
+            bloom = framebuffer;
+        }
+    }
+
+    private static boolean getRendered(int eye) {
+        return eye >= 0 ? vrRendered[eye] : rendered;
+    }
+
+    private static void setRendered(int eye, boolean rendered) {
+        if (eye >= 0) {
+            vrRendered[eye] = rendered;
+        } else {
+            VeilBloomRenderer.rendered = rendered;
+        }
+    }
+
+    private static void freeBloom(int eye) {
+        AdvancedFbo framebuffer = getBloom(eye);
+        if (framebuffer != null) {
+            framebuffer.free();
+            setBloom(eye, null);
+        }
+        setRendered(eye, false);
     }
 }

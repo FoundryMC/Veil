@@ -27,6 +27,7 @@ import foundry.veil.api.client.render.shader.block.ShaderBlock;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.texture.VeilPreloadedTexture;
 import foundry.veil.api.compat.SodiumCompat;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.api.flare.modifier.RandomnessController;
 import foundry.veil.ext.LevelRendererExtension;
@@ -1278,7 +1279,7 @@ public final class VeilRenderSystem {
     @ApiStatus.Internal
     public static boolean drawLights(ProfilerFiller profiler, CullFrustum cullFrustum) {
         FramebufferManager framebufferManager = renderer.getFramebufferManager();
-        AdvancedFbo lightFbo = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
+        AdvancedFbo lightFbo = VeilVRCompat.getFramebufferOrDefault(VeilFramebuffers.LIGHT, framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT));
         if (lightFbo == null) {
             AdvancedFbo.unbind();
             return false;

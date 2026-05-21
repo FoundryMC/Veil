@@ -1,6 +1,8 @@
 Post-pipelines are created through a custom JSON structure that links shader files together. This is similar to the
 vanilla mc post-chain, but with a lot more features.
 
+For Vivecraft/headset support, see [VR Shader Compatibility](VRShaderCompatibility).
+
 ## Syntax
 
 ```json5

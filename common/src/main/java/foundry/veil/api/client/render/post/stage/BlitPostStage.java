@@ -14,6 +14,7 @@ import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.uniform.UniformValue;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import foundry.veil.api.compat.VeilVRCompat;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,6 +81,7 @@ public class BlitPostStage extends FramebufferPostStage {
         for (Map.Entry<String, UniformValue> entry : this.uniforms.entrySet()) {
             entry.getValue().apply(shader.getUniform(entry.getKey()));
         }
+        VeilVRCompat.applyPostUniforms(shader, context.getFramebufferOrDraw(this.getOut()));
         VeilRenderSystem.drawScreenQuad();
         context.clearSamplers(shader);
     }

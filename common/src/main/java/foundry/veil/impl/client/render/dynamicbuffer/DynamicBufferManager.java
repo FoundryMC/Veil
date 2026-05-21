@@ -10,8 +10,10 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBuffersChange;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
+import foundry.veil.impl.client.VeilClientConfig;
 import foundry.veil.mixin.dynamicbuffer.accessor.DynamicBufferGameRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -44,44 +46,144 @@ public class DynamicBufferManager implements NativeResource {
     private boolean enabled;
     private final int[] clearBuffers;
     private final Map<ResourceLocation, AdvancedFbo> framebuffers;
+    private final Map<ResourceLocation, AdvancedFbo>[] vrFramebuffers;
     private final List<AdvancedFbo> dynamicFramebuffers;
+    private final List<AdvancedFbo>[] vrDynamicFramebuffers;
     private final EnumMap<DynamicBufferType, DynamicBuffer> dynamicBuffers;
+    private final EnumMap<DynamicBufferType, DynamicBuffer>[] vrDynamicBuffers;
+    private int dynamicBufferWidth;
+    private int dynamicBufferHeight;
+    private final int[] vrDynamicBufferWidths;
+    private final int[] vrDynamicBufferHeights;
     private final Set<ShaderInstance> swapShaders;
     private int dynamicFboPointer;
+    private final int[] vrDynamicFboPointers;
 
+    @SuppressWarnings("unchecked")
     public DynamicBufferManager(int width, int height) {
         this.activeBuffers = 0;
         this.activeBufferLayers = new Object2IntArrayMap<>();
         this.enabled = false;
         this.clearBuffers = Arrays.stream(DynamicBufferType.values()).mapToInt(type -> GL_COLOR_ATTACHMENT1 + type.ordinal()).toArray();
         this.framebuffers = new HashMap<>();
+        this.vrFramebuffers = new Map[]{new HashMap<>(), new HashMap<>()};
         this.dynamicFramebuffers = new ArrayList<>();
-        this.dynamicBuffers = new EnumMap<>(DynamicBufferType.class);
+        this.vrDynamicFramebuffers = new List[]{new ArrayList<>(), new ArrayList<>()};
+        this.dynamicBuffers = this.createDynamicBuffers(width, height);
+        this.vrDynamicBuffers = new EnumMap[]{this.createDynamicBuffers(width, height), this.createDynamicBuffers(width, height)};
+        this.dynamicBufferWidth = width;
+        this.dynamicBufferHeight = height;
+        this.vrDynamicBufferWidths = new int[]{width, width};
+        this.vrDynamicBufferHeights = new int[]{height, height};
         this.swapShaders = new HashSet<>();
+        this.vrDynamicFboPointers = new int[2];
+    }
 
+    private EnumMap<DynamicBufferType, DynamicBuffer> createDynamicBuffers(int width, int height) {
+        EnumMap<DynamicBufferType, DynamicBuffer> buffers = new EnumMap<>(DynamicBufferType.class);
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer textures = stack.mallocInt(DynamicBufferType.values().length);
+            IntBuffer textures = stack.mallocInt(BUFFERS.length);
             glGenTextures(textures);
-            for (DynamicBufferType value : DynamicBufferType.values()) {
+            for (DynamicBufferType value : BUFFERS) {
                 DynamicBuffer buffer = new DynamicBuffer(value, textures.get(value.ordinal()));
                 buffer.init(width, height);
-                this.dynamicBuffers.put(value, buffer);
+                buffers.put(value, buffer);
             }
+        }
+        return buffers;
+    }
+
+    private int getActiveEyeIndex() {
+        return VeilVRCompat.usesPerEyePostProcessing() ? VeilVRCompat.getActiveEyeIndex() : -1;
+    }
+
+    private Map<ResourceLocation, AdvancedFbo> getFramebuffers() {
+        int eye = this.getActiveEyeIndex();
+        return eye >= 0 ? this.vrFramebuffers[eye] : this.framebuffers;
+    }
+
+    private List<AdvancedFbo> getDynamicFramebuffers() {
+        int eye = this.getActiveEyeIndex();
+        return eye >= 0 ? this.vrDynamicFramebuffers[eye] : this.dynamicFramebuffers;
+    }
+
+    private EnumMap<DynamicBufferType, DynamicBuffer> getDynamicBuffers() {
+        int eye = this.getActiveEyeIndex();
+        return eye >= 0 ? this.vrDynamicBuffers[eye] : this.dynamicBuffers;
+    }
+
+    private int getDynamicFboPointer() {
+        int eye = this.getActiveEyeIndex();
+        return eye >= 0 ? this.vrDynamicFboPointers[eye] : this.dynamicFboPointer;
+    }
+
+    private void setDynamicFboPointer(int pointer) {
+        int eye = this.getActiveEyeIndex();
+        if (eye >= 0) {
+            this.vrDynamicFboPointers[eye] = pointer;
+        } else {
+            this.dynamicFboPointer = pointer;
         }
     }
 
     private void deleteFramebuffers() {
         FramebufferManager framebufferManager = VeilRenderSystem.renderer().getFramebufferManager();
-        for (Map.Entry<ResourceLocation, AdvancedFbo> entry : this.framebuffers.entrySet()) {
+        this.deleteFramebufferMap(framebufferManager, this.framebuffers);
+        for (Map<ResourceLocation, AdvancedFbo> framebuffers : this.vrFramebuffers) {
+            this.deleteFramebufferMap(framebufferManager, framebuffers);
+        }
+
+        this.deleteDynamicFramebufferList(this.dynamicFramebuffers);
+        for (List<AdvancedFbo> framebuffers : this.vrDynamicFramebuffers) {
+            this.deleteDynamicFramebufferList(framebuffers);
+        }
+        this.dynamicFboPointer = 0;
+        Arrays.fill(this.vrDynamicFboPointers, 0);
+    }
+
+    private void deleteFramebuffers(int eye) {
+        FramebufferManager framebufferManager = VeilRenderSystem.renderer().getFramebufferManager();
+        if (eye >= 0) {
+            this.deleteFramebufferMap(framebufferManager, this.vrFramebuffers[eye]);
+            this.deleteDynamicFramebufferList(this.vrDynamicFramebuffers[eye]);
+            this.vrDynamicFboPointers[eye] = 0;
+            return;
+        }
+
+        this.deleteFramebufferMap(framebufferManager, this.framebuffers);
+        this.deleteDynamicFramebufferList(this.dynamicFramebuffers);
+        this.dynamicFboPointer = 0;
+    }
+
+    private void deleteFramebufferMap(FramebufferManager framebufferManager, Map<ResourceLocation, AdvancedFbo> framebuffers) {
+        for (Map.Entry<ResourceLocation, AdvancedFbo> entry : framebuffers.entrySet()) {
             entry.getValue().free();
             framebufferManager.removeFramebuffer(entry.getKey());
         }
-        this.framebuffers.clear();
-        for (AdvancedFbo fbo : this.dynamicFramebuffers) {
+        framebuffers.clear();
+    }
+
+    private void deleteDynamicFramebufferList(List<AdvancedFbo> framebuffers) {
+        for (AdvancedFbo fbo : framebuffers) {
             fbo.free();
         }
-        this.dynamicFramebuffers.clear();
-        this.dynamicFboPointer = 0;
+        framebuffers.clear();
+    }
+
+    private void removeFramebuffer(ResourceLocation name) {
+        FramebufferManager framebufferManager = VeilRenderSystem.renderer().getFramebufferManager();
+        framebufferManager.removeFramebuffer(name);
+        this.removeFramebuffer(name, this.framebuffers);
+        for (Map<ResourceLocation, AdvancedFbo> framebuffers : this.vrFramebuffers) {
+            this.removeFramebuffer(name, framebuffers);
+        }
+    }
+
+    private void removeFramebuffer(ResourceLocation name, Map<ResourceLocation, AdvancedFbo> framebuffers) {
+        AdvancedFbo fbo = framebuffers.remove(name);
+        if (fbo != null) {
+            fbo.free();
+        }
     }
 
     public int getActiveBuffers(ResourceLocation name) {
@@ -99,7 +201,7 @@ public class DynamicBufferManager implements NativeResource {
             if (texture != 0) {
                 return texture;
             }
-            return this.dynamicBuffers.get(buffer).textureId;
+            return this.getDynamicBuffers().get(buffer).textureId;
         }
         return MissingTextureAtlasSprite.getTexture().getId();
     }
@@ -170,15 +272,59 @@ public class DynamicBufferManager implements NativeResource {
     @Override
     public void free() {
         this.deleteFramebuffers();
+        this.deleteDynamicBuffers(this.dynamicBuffers);
+        for (EnumMap<DynamicBufferType, DynamicBuffer> buffers : this.vrDynamicBuffers) {
+            this.deleteDynamicBuffers(buffers);
+        }
+    }
+
+    private void deleteDynamicBuffers(EnumMap<DynamicBufferType, DynamicBuffer> buffers) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer textures = stack.mallocInt(this.dynamicBuffers.size());
-            for (DynamicBuffer buffer : this.dynamicBuffers.values()) {
+            IntBuffer textures = stack.mallocInt(buffers.size());
+            for (DynamicBuffer buffer : buffers.values()) {
                 textures.put(buffer.textureId);
             }
             textures.rewind();
             glDeleteTextures(textures);
         }
-        this.dynamicBuffers.clear();
+        buffers.clear();
+    }
+
+    private void ensureDynamicBuffersSize(int width, int height) {
+        int eye = this.getActiveEyeIndex();
+        if (eye >= 0) {
+            if (this.vrDynamicBufferWidths[eye] == width && this.vrDynamicBufferHeights[eye] == height) {
+                return;
+            }
+
+            this.resizeDynamicBuffers(this.vrDynamicBuffers[eye], width, height);
+            this.vrDynamicBufferWidths[eye] = width;
+            this.vrDynamicBufferHeights[eye] = height;
+            this.deleteFramebuffers(eye);
+            this.logDynamicBufferResize(eye, width, height);
+            return;
+        }
+
+        if (this.dynamicBufferWidth == width && this.dynamicBufferHeight == height) {
+            return;
+        }
+
+        this.resizeDynamicBuffers(this.dynamicBuffers, width, height);
+        this.dynamicBufferWidth = width;
+        this.dynamicBufferHeight = height;
+        this.deleteFramebuffers(-1);
+    }
+
+    private void resizeDynamicBuffers(EnumMap<DynamicBufferType, DynamicBuffer> buffers, int width, int height) {
+        for (DynamicBuffer buffer : buffers.values()) {
+            buffer.resize(width, height);
+        }
+    }
+
+    private void logDynamicBufferResize(int eye, int width, int height) {
+        if (VeilClientConfig.get().debugVREyeBuffers) {
+            Veil.LOGGER.info("Veil VR dynamic buffers resized: eye={} size={}x{}", eye == 0 ? "LEFT" : "RIGHT", width, height);
+        }
     }
 
     /**
@@ -194,21 +340,24 @@ public class DynamicBufferManager implements NativeResource {
         }
 
         if (renderTarget == null) {
-            VeilRenderSystem.renderer().getFramebufferManager().removeFramebuffer(name);
-            AdvancedFbo fbo = this.framebuffers.remove(name);
-            if (fbo != null) {
-                fbo.free();
-            }
+            this.removeFramebuffer(name);
             // If the buffer doesn't exist, then try to bind the main framebuffer
             this.setupRenderState(MAIN_WRAPPER, Objects.requireNonNull(Minecraft.getInstance().getMainRenderTarget()), setViewport);
             return;
         }
 
-        AdvancedFbo fbo = this.framebuffers.get(name);
+        if (MAIN_WRAPPER.equals(name)) {
+            renderTarget = Objects.requireNonNull(VeilVRCompat.getCurrentRenderTargetOrDefault(renderTarget));
+        }
+        this.ensureDynamicBuffersSize(renderTarget.width, renderTarget.height);
+
+        Map<ResourceLocation, AdvancedFbo> framebuffers = this.getFramebuffers();
+        EnumMap<DynamicBufferType, DynamicBuffer> dynamicBuffers = this.getDynamicBuffers();
+        AdvancedFbo fbo = framebuffers.get(name);
         if (fbo == null) {
             AdvancedFbo.Builder builder = AdvancedFbo.withSize(renderTarget.width, renderTarget.height);
             builder.addColorTextureWrapper(renderTarget.getColorTextureId());
-            for (Map.Entry<DynamicBufferType, DynamicBuffer> entry : this.dynamicBuffers.entrySet()) {
+            for (Map.Entry<DynamicBufferType, DynamicBuffer> entry : dynamicBuffers.entrySet()) {
                 DynamicBufferType type = entry.getKey();
                 if ((this.activeBuffers & type.getMask()) != 0) {
                     builder.setName(type.getSourceName()).addColorTextureWrapper(entry.getValue().textureId);
@@ -217,7 +366,7 @@ public class DynamicBufferManager implements NativeResource {
             builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
-            this.framebuffers.put(name, fbo);
+            framebuffers.put(name, fbo);
         }
 
         VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(name, fbo);
@@ -240,11 +389,14 @@ public class DynamicBufferManager implements NativeResource {
         }
 
         int colorTexture = framebuffer.getColorTextureAttachment(0).getId();
+        List<AdvancedFbo> dynamicFramebuffers = this.getDynamicFramebuffers();
+        EnumMap<DynamicBufferType, DynamicBuffer> dynamicBuffers = this.getDynamicBuffers();
+        int dynamicFboPointer = this.getDynamicFboPointer();
 
-        if (this.dynamicFboPointer < this.dynamicFramebuffers.size()) {
-            AdvancedFbo fbo = this.dynamicFramebuffers.get(this.dynamicFboPointer);
+        if (dynamicFboPointer < dynamicFramebuffers.size()) {
+            AdvancedFbo fbo = dynamicFramebuffers.get(dynamicFboPointer);
             if (fbo.getWidth() == framebuffer.getWidth() && fbo.getHeight() == framebuffer.getHeight()) {
-                this.dynamicFboPointer++;
+                this.setDynamicFboPointer(dynamicFboPointer + 1);
                 fbo.setColorAttachmentTexture(0, colorTexture);
                 if (framebuffer.isDepthTextureAttachment()) {
                     fbo.setDepthAttachmentTexture(framebuffer.getDepthTextureAttachment().getId());
@@ -252,13 +404,13 @@ public class DynamicBufferManager implements NativeResource {
                 fbo.clear(GL_COLOR_BUFFER_BIT, this.clearBuffers);
                 return fbo;
             }
-            this.dynamicFramebuffers.remove(this.dynamicFboPointer);
+            dynamicFramebuffers.remove(dynamicFboPointer);
             fbo.free();
         }
 
         AdvancedFbo.Builder builder = AdvancedFbo.withSize(framebuffer.getWidth(), framebuffer.getHeight());
         builder.addColorTextureWrapper(colorTexture);
-        for (Map.Entry<DynamicBufferType, DynamicBuffer> entry : this.dynamicBuffers.entrySet()) {
+        for (Map.Entry<DynamicBufferType, DynamicBuffer> entry : dynamicBuffers.entrySet()) {
             DynamicBufferType type = entry.getKey();
             if ((this.activeBuffers & type.getMask()) != 0) {
 //                if (createTextures) {
@@ -279,8 +431,8 @@ public class DynamicBufferManager implements NativeResource {
         builder.setDebugLabel(framebuffer.getDebugLabel());
         AdvancedFbo fbo = builder.build(true);
 
-        this.dynamicFramebuffers.add(this.dynamicFboPointer, fbo);
-        this.dynamicFboPointer++;
+        dynamicFramebuffers.add(dynamicFboPointer, fbo);
+        this.setDynamicFboPointer(dynamicFboPointer + 1);
 
         return fbo;
     }
@@ -293,15 +445,12 @@ public class DynamicBufferManager implements NativeResource {
     }
 
     public void endFrame() {
-        for (AdvancedFbo framebuffer : this.framebuffers.values()) {
-            framebuffer.clear(0.0F, 0.0F, 0.0F, 0.0F, GL_COLOR_BUFFER_BIT, this.clearBuffers);
-        }
-        ListIterator<AdvancedFbo> iterator = this.dynamicFramebuffers.listIterator(this.dynamicFboPointer);
-        while (iterator.hasNext()) {
-            iterator.next().free();
-            iterator.remove();
-        }
+        this.endFrame(this.framebuffers, this.dynamicFramebuffers, this.dynamicFboPointer);
         this.dynamicFboPointer = 0;
+        for (int i = 0; i < this.vrFramebuffers.length; i++) {
+            this.endFrame(this.vrFramebuffers[i], this.vrDynamicFramebuffers[i], this.vrDynamicFboPointers[i]);
+            this.vrDynamicFboPointers[i] = 0;
+        }
 
         if (this.swapShaders.isEmpty()) {
             return;
@@ -334,15 +483,28 @@ public class DynamicBufferManager implements NativeResource {
         }
     }
 
+    private void endFrame(Map<ResourceLocation, AdvancedFbo> framebuffers, List<AdvancedFbo> dynamicFramebuffers, int dynamicFboPointer) {
+        for (AdvancedFbo framebuffer : framebuffers.values()) {
+            framebuffer.clear(0.0F, 0.0F, 0.0F, 0.0F, GL_COLOR_BUFFER_BIT, this.clearBuffers);
+        }
+        ListIterator<AdvancedFbo> iterator = dynamicFramebuffers.listIterator(dynamicFboPointer);
+        while (iterator.hasNext()) {
+            iterator.next().free();
+            iterator.remove();
+        }
+    }
+
     public void markRecompiled(ShaderInstance shaderInstance) {
         this.swapShaders.add(shaderInstance);
     }
 
     public void resizeFramebuffers(int width, int height) {
         this.deleteFramebuffers();
-        for (DynamicBuffer buffer : this.dynamicBuffers.values()) {
-            buffer.resize(width, height);
-        }
+        this.resizeDynamicBuffers(this.dynamicBuffers, width, height);
+        this.dynamicBufferWidth = width;
+        this.dynamicBufferHeight = height;
+        Arrays.fill(this.vrDynamicBufferWidths, -1);
+        Arrays.fill(this.vrDynamicBufferHeights, -1);
     }
 
     private record DynamicBuffer(DynamicBufferType type, int textureId) {
