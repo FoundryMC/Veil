@@ -115,10 +115,12 @@ public final class CompositePostPipeline implements PostPipeline {
         for (Map.Entry<String, ShaderProgramImpl.ShaderTexture> entry : this.samplers.entrySet()) {
             ShaderProgramImpl.ShaderTexture texture = entry.getValue();
             ShaderTextureSource source = texture.textureSource();
+            int target = source.getTarget(context);
+            int id = source.getId(context);
             if (source instanceof FramebufferSource framebufferSource) {
                 VeilVRCompat.warnIfSharedBuffer(framebufferSource.name(), "texture " + entry.getKey());
             }
-            context.setTexture(entry.getKey(), source.getTarget(context), source.getId(context), texture.samplerId());
+            context.setTexture(entry.getKey(), target, id, texture.samplerId());
         }
         for (PostPipeline pipeline : this.stages) {
             pipeline.apply(context);
@@ -130,9 +132,12 @@ public final class CompositePostPipeline implements PostPipeline {
             int eye = VeilVRCompat.getActiveEyeIndex();
             Map<ResourceLocation, AdvancedFbo> framebuffers = this.vrFramebuffers[eye];
             if (this.vrScreenWidths[eye] != main.getWidth() || this.vrScreenHeights[eye] != main.getHeight()) {
+                if (this.vrScreenWidths[eye] != -1 || this.vrScreenHeights[eye] != -1) {
+                    VeilVRCompat.recordVrFramebufferResize(eye);
+                }
                 this.vrScreenWidths[eye] = main.getWidth();
                 this.vrScreenHeights[eye] = main.getHeight();
-                this.resizeFramebuffers(framebuffers, main.getWidth(), main.getHeight());
+                this.resizeFramebuffers(framebuffers, main.getWidth(), main.getHeight(), eye);
             }
             return framebuffers;
         }
@@ -140,14 +145,17 @@ public final class CompositePostPipeline implements PostPipeline {
         if (this.screenWidth != main.getWidth() || this.screenHeight != main.getHeight()) {
             this.screenWidth = main.getWidth();
             this.screenHeight = main.getHeight();
-            this.resizeFramebuffers(this.framebuffers, this.screenWidth, this.screenHeight);
+            this.resizeFramebuffers(this.framebuffers, this.screenWidth, this.screenHeight, -1);
         }
         return this.framebuffers;
     }
 
-    private void resizeFramebuffers(Map<ResourceLocation, AdvancedFbo> framebuffers, int width, int height) {
+    private void resizeFramebuffers(Map<ResourceLocation, AdvancedFbo> framebuffers, int width, int height, int eye) {
         framebuffers.values().forEach(AdvancedFbo::free);
         framebuffers.clear();
+        if (this.framebufferDefinitions.isEmpty()) {
+            return;
+        }
 
         MolangRuntime runtime = MolangRuntime.runtime()
                 .setQuery("screen_width", width)
@@ -156,6 +164,11 @@ public final class CompositePostPipeline implements PostPipeline {
         this.framebufferDefinitions.forEach((name, definition) -> framebuffers.put(name, definition.createBuilder(runtime)
                 .setDebugLabel("Temp " + name)
                 .build(true)));
+        if (eye >= 0) {
+            for (int i = 0; i < this.framebufferDefinitions.size(); i++) {
+                VeilVRCompat.recordVrFramebufferCreation(eye);
+            }
+        }
     }
 
     @Override

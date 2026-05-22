@@ -85,7 +85,12 @@ public class PostPipelineContext implements PostPipeline.Context {
 
     @Override
     public @Nullable AdvancedFbo getFramebuffer(ResourceLocation name) {
-        return this.framebuffers.get(name);
+        AdvancedFbo framebuffer = this.framebuffers.get(name);
+        AdvancedFbo vrFramebuffer = VeilVRCompat.getFramebufferOrDefault(name, framebuffer);
+        if (vrFramebuffer != framebuffer && vrFramebuffer != null) {
+            this.framebuffers.put(name, vrFramebuffer);
+        }
+        return vrFramebuffer;
     }
 
     @Override

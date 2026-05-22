@@ -301,6 +301,7 @@ public class DynamicBufferManager implements NativeResource {
             this.vrDynamicBufferWidths[eye] = width;
             this.vrDynamicBufferHeights[eye] = height;
             this.deleteFramebuffers(eye);
+            VeilVRCompat.recordVrFramebufferResize(eye);
             this.logDynamicBufferResize(eye, width, height);
             return;
         }
@@ -355,6 +356,7 @@ public class DynamicBufferManager implements NativeResource {
         EnumMap<DynamicBufferType, DynamicBuffer> dynamicBuffers = this.getDynamicBuffers();
         AdvancedFbo fbo = framebuffers.get(name);
         if (fbo == null) {
+            int eye = this.getActiveEyeIndex();
             AdvancedFbo.Builder builder = AdvancedFbo.withSize(renderTarget.width, renderTarget.height);
             builder.addColorTextureWrapper(renderTarget.getColorTextureId());
             for (Map.Entry<DynamicBufferType, DynamicBuffer> entry : dynamicBuffers.entrySet()) {
@@ -367,6 +369,9 @@ public class DynamicBufferManager implements NativeResource {
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
             framebuffers.put(name, fbo);
+            if (eye >= 0) {
+                VeilVRCompat.recordVrFramebufferCreation(eye);
+            }
         }
 
         VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(name, fbo);
@@ -388,10 +393,13 @@ public class DynamicBufferManager implements NativeResource {
             return framebuffer;
         }
 
+        this.ensureDynamicBuffersSize(framebuffer.getWidth(), framebuffer.getHeight());
+
         int colorTexture = framebuffer.getColorTextureAttachment(0).getId();
         List<AdvancedFbo> dynamicFramebuffers = this.getDynamicFramebuffers();
         EnumMap<DynamicBufferType, DynamicBuffer> dynamicBuffers = this.getDynamicBuffers();
         int dynamicFboPointer = this.getDynamicFboPointer();
+        int eye = this.getActiveEyeIndex();
 
         if (dynamicFboPointer < dynamicFramebuffers.size()) {
             AdvancedFbo fbo = dynamicFramebuffers.get(dynamicFboPointer);
@@ -406,6 +414,9 @@ public class DynamicBufferManager implements NativeResource {
             }
             dynamicFramebuffers.remove(dynamicFboPointer);
             fbo.free();
+            if (eye >= 0) {
+                VeilVRCompat.recordVrFramebufferResize(eye);
+            }
         }
 
         AdvancedFbo.Builder builder = AdvancedFbo.withSize(framebuffer.getWidth(), framebuffer.getHeight());
@@ -433,6 +444,9 @@ public class DynamicBufferManager implements NativeResource {
 
         dynamicFramebuffers.add(dynamicFboPointer, fbo);
         this.setDynamicFboPointer(dynamicFboPointer + 1);
+        if (eye >= 0) {
+            VeilVRCompat.recordVrFramebufferCreation(eye);
+        }
 
         return fbo;
     }
@@ -448,7 +462,7 @@ public class DynamicBufferManager implements NativeResource {
         this.endFrame(this.framebuffers, this.dynamicFramebuffers, this.dynamicFboPointer);
         this.dynamicFboPointer = 0;
         for (int i = 0; i < this.vrFramebuffers.length; i++) {
-            this.endFrame(this.vrFramebuffers[i], this.vrDynamicFramebuffers[i], this.vrDynamicFboPointers[i]);
+            this.endFrame(this.vrFramebuffers[i], this.vrDynamicFramebuffers[i], this.vrDynamicFboPointers[i], true);
             this.vrDynamicFboPointers[i] = 0;
         }
 
@@ -484,8 +498,17 @@ public class DynamicBufferManager implements NativeResource {
     }
 
     private void endFrame(Map<ResourceLocation, AdvancedFbo> framebuffers, List<AdvancedFbo> dynamicFramebuffers, int dynamicFboPointer) {
+        this.endFrame(framebuffers, dynamicFramebuffers, dynamicFboPointer, false);
+    }
+
+    private void endFrame(Map<ResourceLocation, AdvancedFbo> framebuffers, List<AdvancedFbo> dynamicFramebuffers, int dynamicFboPointer, boolean keepUnusedFramebuffers) {
         for (AdvancedFbo framebuffer : framebuffers.values()) {
             framebuffer.clear(0.0F, 0.0F, 0.0F, 0.0F, GL_COLOR_BUFFER_BIT, this.clearBuffers);
+        }
+        if (keepUnusedFramebuffers) {
+            // VR eye switches can make the dynamic FBO count fluctuate between passes. Keep the per-eye
+            // wrappers pooled so Sodium/Vivecraft do not see allocation/free churn every other eye.
+            return;
         }
         ListIterator<AdvancedFbo> iterator = dynamicFramebuffers.listIterator(dynamicFboPointer);
         while (iterator.hasNext()) {

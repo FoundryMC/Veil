@@ -25,7 +25,6 @@ import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.impl.client.render.pipeline.PostPipelineContext;
 import foundry.veil.platform.VeilClientPlatform;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -233,19 +232,18 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
                 }
 
                 platform.preVeilPostProcessing(id, pipeline, this.context);
+                long start = System.nanoTime();
                 try {
                     pipeline.apply(this.context);
                     this.clearPipeline();
                     // Resolve back to main for the next pipeline
                     if (postFramebuffer != null) {
-                        postFramebuffer.resolveToRenderTarget(
-                                Minecraft.getInstance().getMainRenderTarget(),
-                                GL_COLOR_BUFFER_BIT,
-                                GL_NEAREST
-                        );
+                        resolvePostFramebufferToMain(postFramebuffer);
                     }
                 } catch (Exception e) {
                     Veil.LOGGER.error("Error running pipeline {}", id, e);
+                } finally {
+                    VeilVRCompat.recordVrPostPassTime(System.nanoTime() - start);
                 }
                 platform.postVeilPostProcessing(id, pipeline, this.context);
             }
@@ -289,11 +287,14 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.setup();
         int activeTexture = GlStateManager._getActiveTexture();
 
+        long start = System.nanoTime();
         try {
             pipeline.apply(this.context);
             this.clearPipeline();
         } catch (Exception e) {
             Veil.LOGGER.error("Error running pipeline {}", pipeline, e);
+        } finally {
+            VeilVRCompat.recordVrPostPassTime(System.nanoTime() - start);
         }
 
         RenderSystem.activeTexture(activeTexture);
@@ -301,12 +302,23 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
         this.context.end();
 
         if (postFramebuffer != null) {
-            postFramebuffer.resolveToRenderTarget(
-                    Minecraft.getInstance().getMainRenderTarget(),
-                    GL_COLOR_BUFFER_BIT,
-                    GL_NEAREST
-            );
+            resolvePostFramebufferToMain(postFramebuffer);
         }
+    }
+
+    private static void resolvePostFramebufferToMain(AdvancedFbo postFramebuffer) {
+        // In VR, Minecraft's main target can be a desktop mirror while Vivecraft owns the active eye FBO.
+        // Resolve through the compat wrapper so Sodium/Vivecraft target ownership stays stable.
+        AdvancedFbo target = VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer());
+        if (postFramebuffer.getId() == target.getId()) {
+            return;
+        }
+        postFramebuffer.resolveToRenderTarget(
+                target.toRenderTarget(),
+                GL_COLOR_BUFFER_BIT,
+                GL_NEAREST
+        );
+        VeilVRCompat.recordVrBlitCopy();
     }
 
     /**
@@ -332,6 +344,7 @@ public class PostProcessingManager extends CodecReloadListener<CompositePostPipe
                         framebuffer,
                         mask,
                         GL_NEAREST);
+                VeilVRCompat.recordVrBlitCopy();
             }
         }
     }

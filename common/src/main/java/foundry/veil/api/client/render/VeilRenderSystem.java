@@ -1198,6 +1198,7 @@ public final class VeilRenderSystem {
 //        VeilImGuiImpl.get().beginFrame();
 
         SHADER_BUFFER_CACHE.bind();
+        VeilVRCompat.beginFrame();
     }
 
     @ApiStatus.Internal

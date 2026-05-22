@@ -61,10 +61,12 @@ public final class LightRenderer implements NativeResource {
         try {
             boolean hasRendered = false;
             boolean setupDDA = false;
+            int totalLights = 0;
             VeilRenderer renderer = VeilRenderSystem.renderer();
 
             for (LightTypeRenderer<?> lightRenderer : this.renderers.values()) {
                 lightRenderer.prepareLights(this, frustum);
+                totalLights += lightRenderer.getLights().size();
 
                 if (lightRenderer.getVisibleLights() <= 0) {
                     continue;
@@ -80,23 +82,30 @@ public final class LightRenderer implements NativeResource {
 
                     AdvancedFbo mainFbo = VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer());
                     mainFbo.resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                    VeilVRCompat.recordVrBlitCopy();
                 }
 
                 hasRendered = true;
 
                 if (lightRenderer instanceof DDALightRenderer<?> ddaLightRenderer) {
-                    if (!setupDDA) {
+                    if (!setupDDA && ddaLightRenderer.hasOccludedLights()) {
                         VoxelShadowGrid.setup();
                         setupDDA = true;
                     }
-                    ddaLightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
+                    if (setupDDA) {
+                        ddaLightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
+                    }
                 }
 
                 lightRenderer.renderLights(this);
             }
 
             if (!hasRendered) {
-                renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
+                // Keep light dynamic buffers warm while lights exist. Toggling them as the player looks
+                // toward/away from lights can recompile/swap vanilla shaders and cause very visible VR spikes.
+                if (totalLights <= 0) {
+                    renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
+                }
                 return false;
             }
 

@@ -9,6 +9,7 @@ import foundry.veil.api.client.render.framebuffer.FramebufferAttachmentDefinitio
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
+import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import net.minecraft.client.Minecraft;
@@ -30,7 +31,7 @@ public final class VeilFirstPersonRenderer {
     public static void bind(int mask) {
         VeilDebug.get().pushDebugGroup("Veil First Person");
 
-        AdvancedFbo mainRenderTarget = AdvancedFbo.getMainFramebuffer();
+        AdvancedFbo mainRenderTarget = VeilVRCompat.getMainFramebufferOrDefault(AdvancedFbo.getMainFramebuffer());
         int w = mainRenderTarget.getWidth();
         int h = mainRenderTarget.getHeight();
         int framebufferTexture = mainRenderTarget.getColorTextureAttachment(0).getId();
@@ -51,6 +52,9 @@ public final class VeilFirstPersonRenderer {
         dynamicBufferManager.setEnabled(false);
 
         VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(VeilFramebuffers.FIRST_PERSON, fbo);
+        // First-person rendering shares the main color texture but uses an isolated depth buffer.
+        // Bloom capture needs that same depth target so glowing held items are not clipped by world depth in desktop or VR.
+        VeilBloomRenderer.setSourceFramebuffer(fbo);
         fbo.clear(mask);
         fbo.bind(false);
         // This redirects calls to the vanilla framebuffer to the first person buffer instead
@@ -60,12 +64,18 @@ public final class VeilFirstPersonRenderer {
     public static void unbind() {
         // TODO update projection/modelview matrix
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        boolean rendered = VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum());
-        ((RenderTargetExtension) Minecraft.getInstance().getMainRenderTarget()).veil$setWrapper(null);
+        boolean rendered;
+        try {
+            rendered = VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum());
+        } finally {
+            VeilBloomRenderer.setSourceFramebuffer(null);
+            ((RenderTargetExtension) Minecraft.getInstance().getMainRenderTarget()).veil$setWrapper(null);
+        }
 
         if (rendered) {
             VeilRenderSystem.compositeLights(profiler);
         }
+        VeilBloomRenderer.flush();
 
         VeilRenderer renderer = VeilRenderSystem.renderer();
         PostProcessingManager postProcessingManager = renderer.getPostProcessingManager();
@@ -85,6 +95,7 @@ public final class VeilFirstPersonRenderer {
     }
 
     public static void free() {
+        VeilBloomRenderer.setSourceFramebuffer(null);
         if (firstPerson != null) {
             VeilRenderSystem.renderer().getFramebufferManager().removeFramebuffer(VeilFramebuffers.FIRST_PERSON);
             firstPerson.free();

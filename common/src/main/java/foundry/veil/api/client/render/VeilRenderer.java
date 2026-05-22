@@ -33,10 +33,8 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Manages the render pipeline for Veil.
@@ -104,12 +102,6 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         consumer.accept(ChatFormatting.UNDERLINE + "Veil");
 
         this.lightRenderer.addDebugInfo(consumer);
-        VeilVRCompat.addDebugInfo(consumer);
-        int mask = this.dynamicBufferManager.getActiveBuffers();
-        if (mask != 0) {
-            String buffers = Arrays.stream(DynamicBufferType.decode(mask)).map(DynamicBufferType::getName).collect(Collectors.joining(", "));
-            consumer.accept("Active Buffers: " + buffers);
-        }
     }
 
     /**

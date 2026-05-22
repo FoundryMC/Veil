@@ -119,6 +119,41 @@ When drawing during a Vivecraft eye pass, use the active eye render target as th
 target can be a mirror/desktop-sized target and is not necessarily the framebuffer currently being submitted to the
 headset.
 
+Veil keeps per-eye post, dynamic, bloom, and temporary composite framebuffers cached until the active eye size changes.
+If you create custom buffers in mod code, follow the same rule: resize only when the eye target size actually changes,
+and keep left/right history resources separate.
+
+## Debug And Performance Config
+
+The VR path is quiet by default. For diagnosis, enable these options in `config/veil-client.json`:
+
+```json
+{
+  "debugVREyeBuffers": true,
+  "debugVRPerformance": true,
+  "vrDebugLogInterval": 120,
+  "logVrSharedBufferWarnings": true,
+  "saveVRFrameTimeHistory": false,
+  "vrFrameTimeHistoryInterval": 1,
+  "vrFrameTimeHistoryFile": "logs/veil-vr-frame-times.csv",
+  "useSodiumCompatibleVrFallback": true,
+  "optimizeVrPerformance": true,
+  "vrPostQuality": 0.6,
+  "vrBloomQuality": 0.35,
+  "vrLightQuality": 0.5
+}
+```
+
+`debugVRPerformance` periodically logs per-eye post time, framebuffer resize/creation counts, blit/copy counts, and
+Sodium-compatible fallback usage. It also prints rolling frame time as last/average/min/max milliseconds and estimated
+FPS. Keep it off during normal gameplay.
+
+`saveVRFrameTimeHistory` writes frame time samples to `vrFrameTimeHistoryFile`. Use `vrFrameTimeHistoryInterval: 1` for
+every VR frame, or a higher value to sample less often. The CSV columns are `epochMillis,sample,frameMs,fps`.
+
+`optimizeVrPerformance` caps the effective VR post, bloom, and light-buffer scales to performance-friendly values. Turn
+it off only when you want to test the exact quality values from `vrPostQuality`, `vrBloomQuality`, and `vrLightQuality`.
+
 ## Temporal Effects
 
 Temporal effects need one history per eye. Do not keep one global "previous frame" texture and sample it from both eyes.
