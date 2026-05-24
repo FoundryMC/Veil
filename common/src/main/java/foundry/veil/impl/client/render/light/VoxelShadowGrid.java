@@ -24,6 +24,8 @@ import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
+import static org.lwjgl.opengl.GL15C.*;
+import static org.lwjgl.opengl.GL21C.GL_PIXEL_UNPACK_BUFFER;
 import static org.lwjgl.opengl.GL30C.GL_R8;
 
 @ApiStatus.Internal
@@ -41,6 +43,7 @@ public final class VoxelShadowGrid {
 
     private static final Vector3f uniformGridPos = new Vector3f();
     private static int textureId;
+    private static int pboId;
 
     private static ResourceKey<Level> gridDimension;
     private static int originX, originY, originZ;
@@ -151,6 +154,10 @@ public final class VoxelShadowGrid {
     public static void close() {
         RenderSystem.assertOnRenderThreadOrInit();
         clearLevel();
+        if (pboId != 0) {
+            glDeleteBuffers(pboId);
+            pboId = 0;
+        }
         if (textureId != 0) {
             glDeleteTextures(textureId);
             textureId = 0;
@@ -421,19 +428,23 @@ public final class VoxelShadowGrid {
     }
 
     private static void uploadBuffer(ByteBuffer buffer) {
-        if (buffer == null) {
+        if (buffer == null || pboId == 0) {
             return;
         }
 
-        ByteBuffer upload = buffer.duplicate();
-        upload.position(0);
-        upload.limit(GRID_VOLUME);
+        buffer.position(0);
+        buffer.limit(GRID_VOLUME);
 
         int unpackAlignment = glGetInteger(GL_UNPACK_ALIGNMENT);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, buffer, GL_STREAM_DRAW);
+
         glBindTexture(GL_TEXTURE_3D, textureId);
-        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, GRID_SIZE, GRID_SIZE, GRID_SIZE, GL_RED, GL_UNSIGNED_BYTE, upload);
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, GRID_SIZE, GRID_SIZE, GRID_SIZE, GL_RED, GL_UNSIGNED_BYTE, 0L);
         glBindTexture(GL_TEXTURE_3D, 0);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
     }
 
@@ -452,6 +463,11 @@ public final class VoxelShadowGrid {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, GRID_SIZE, GRID_SIZE, GRID_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, zeros);
         MemoryUtil.memFree(zeros);
         glBindTexture(GL_TEXTURE_3D, 0);
+
+        pboId = glGenBuffers();
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, GRID_VOLUME, GL_STREAM_DRAW);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
 
     private static boolean hasOccludedLights() {
