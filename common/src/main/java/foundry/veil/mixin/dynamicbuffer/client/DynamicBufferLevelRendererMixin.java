@@ -3,8 +3,8 @@ package foundry.veil.mixin.dynamicbuffer.client;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.veil.Veil;
+import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferShard;
@@ -36,16 +36,20 @@ public abstract class DynamicBufferLevelRendererMixin {
     // Make sure the correct dynamic buffer state is set
     @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
     public void setupState(RenderStateShard.OutputStateShard instance, Operation<Void> original) {
-        if ("weather_target".equals(VeilRenderType.getName(instance))) {
+        if (!veil$shouldUseDynamicBufferState()) {
+            original.call(instance);
+        } else if ("weather_target".equals(VeilRenderType.getName(instance))) {
             this.veil$weatherBufferShard.setupRenderState();
         } else if (!"particles_target".equals(VeilRenderType.getName(instance))) {
             original.call(instance);
         }
     }
 
-    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;setupRenderState()V"))
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderStateShard$OutputStateShard;clearRenderState()V"))
     public void clearState(RenderStateShard.OutputStateShard instance, Operation<Void> original) {
-        if ("weather_target".equals(VeilRenderType.getName(instance))) {
+        if (!veil$shouldUseDynamicBufferState()) {
+            original.call(instance);
+        } else if ("weather_target".equals(VeilRenderType.getName(instance))) {
             this.veil$weatherBufferShard.clearRenderState();
         } else if (!"particles_target".equals(VeilRenderType.getName(instance))) {
             original.call(instance);
@@ -66,5 +70,12 @@ public abstract class DynamicBufferLevelRendererMixin {
     @Inject(method = "renderLevel", at = @At("TAIL"))
     public void blit(CallbackInfo ci) {
         VeilRenderSystem.renderer().getDynamicBufferManger().setEnabled(false);
+    }
+
+    @Unique
+    private static boolean veil$shouldUseDynamicBufferState() {
+        return !Veil.platform().hasErrors() &&
+                !VeilLevelPerspectiveRenderer.isRenderingPerspective() &&
+                VeilRenderSystem.renderer().getDynamicBufferManger().isEnabled();
     }
 }
