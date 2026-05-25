@@ -33,12 +33,6 @@ public final class VeilClientConfig {
     public float vrLightQuality = 0.5F;
     public boolean useSodiumCompatibleVrFallback = true;
     public boolean logVrSharedBufferWarnings = true;
-    public boolean debugVREyeBuffers = false;
-    public boolean debugVRPerformance = false;
-    public int vrDebugLogInterval = 120;
-    public boolean saveVRFrameTimeHistory = false;
-    public int vrFrameTimeHistoryInterval = 1;
-    public String vrFrameTimeHistoryFile = "logs/veil-vr-frame-times.csv";
 
     private VeilClientConfig() {
     }
@@ -97,29 +91,9 @@ public final class VeilClientConfig {
             if (!json.has("logVrSharedBufferWarnings")) {
                 INSTANCE.logVrSharedBufferWarnings = defaults.logVrSharedBufferWarnings;
             }
-            if (!json.has("debugVREyeBuffers")) {
-                INSTANCE.debugVREyeBuffers = defaults.debugVREyeBuffers;
-            }
-            if (!json.has("debugVRPerformance")) {
-                INSTANCE.debugVRPerformance = defaults.debugVRPerformance;
-            }
-            if (!json.has("vrDebugLogInterval") || INSTANCE.vrDebugLogInterval <= 0) {
-                INSTANCE.vrDebugLogInterval = defaults.vrDebugLogInterval;
-            }
-            if (!json.has("saveVRFrameTimeHistory")) {
-                INSTANCE.saveVRFrameTimeHistory = defaults.saveVRFrameTimeHistory;
-            }
-            if (!json.has("vrFrameTimeHistoryInterval") || INSTANCE.vrFrameTimeHistoryInterval <= 0) {
-                INSTANCE.vrFrameTimeHistoryInterval = defaults.vrFrameTimeHistoryInterval;
-            }
-            if (!json.has("vrFrameTimeHistoryFile") || INSTANCE.vrFrameTimeHistoryFile == null || INSTANCE.vrFrameTimeHistoryFile.isBlank()) {
-                INSTANCE.vrFrameTimeHistoryFile = defaults.vrFrameTimeHistoryFile;
-            }
             INSTANCE.vrPostQuality = Math.max(0.25F, Math.min(1.0F, INSTANCE.vrPostQuality));
             INSTANCE.vrBloomQuality = Math.max(0.25F, Math.min(1.0F, INSTANCE.vrBloomQuality));
             INSTANCE.vrLightQuality = Math.max(0.25F, Math.min(1.0F, INSTANCE.vrLightQuality));
-            INSTANCE.vrDebugLogInterval = Math.max(20, INSTANCE.vrDebugLogInterval);
-            INSTANCE.vrFrameTimeHistoryInterval = Math.max(1, INSTANCE.vrFrameTimeHistoryInterval);
         } catch (Exception e) {
             Veil.LOGGER.warn("Failed to load Veil client config. Using defaults.", e);
             INSTANCE = new VeilClientConfig();

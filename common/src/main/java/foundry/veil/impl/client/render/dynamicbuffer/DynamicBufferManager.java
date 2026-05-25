@@ -13,7 +13,6 @@ import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.compat.VeilVRCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
-import foundry.veil.impl.client.VeilClientConfig;
 import foundry.veil.mixin.dynamicbuffer.accessor.DynamicBufferGameRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -302,7 +301,6 @@ public class DynamicBufferManager implements NativeResource {
             this.vrDynamicBufferHeights[eye] = height;
             this.deleteFramebuffers(eye);
             VeilVRCompat.recordVrFramebufferResize(eye);
-            this.logDynamicBufferResize(eye, width, height);
             return;
         }
 
@@ -319,12 +317,6 @@ public class DynamicBufferManager implements NativeResource {
     private void resizeDynamicBuffers(EnumMap<DynamicBufferType, DynamicBuffer> buffers, int width, int height) {
         for (DynamicBuffer buffer : buffers.values()) {
             buffer.resize(width, height);
-        }
-    }
-
-    private void logDynamicBufferResize(int eye, int width, int height) {
-        if (VeilClientConfig.get().debugVREyeBuffers) {
-            Veil.LOGGER.info("Veil VR dynamic buffers resized: eye={} size={}x{}", eye == 0 ? "LEFT" : "RIGHT", width, height);
         }
     }
 

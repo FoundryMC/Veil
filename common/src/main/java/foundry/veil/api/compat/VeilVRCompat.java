@@ -2,7 +2,6 @@ package foundry.veil.api.compat;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import foundry.veil.Veil;
-import foundry.veil.api.client.render.CameraMatrices;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
@@ -13,28 +12,19 @@ import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.impl.client.VeilClientConfig;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Deque;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.GL11C.GL_SCISSOR_TEST;
 import static org.lwjgl.opengl.GL11C.GL_STENCIL_TEST;
@@ -53,32 +43,23 @@ public final class VeilVRCompat {
 
     private static final EyeFramebuffer[] POST_FRAMEBUFFERS = new EyeFramebuffer[]{new EyeFramebuffer("Left"), new EyeFramebuffer("Right")};
     private static final Map<ResourceLocation, IsolatedFramebuffer>[] ISOLATED_FRAMEBUFFERS = new Map[]{new HashMap<>(), new HashMap<>()};
-    private static final VrEyeStats[] EYE_STATS = new VrEyeStats[]{new VrEyeStats(), new VrEyeStats()};
-    private static final FrameTimeStats FRAME_STATS = new FrameTimeStats();
     private static final Set<ResourceLocation> WARNED_SHARED_BUFFERS = new HashSet<>();
     private static final Set<ResourceLocation> WARNED_ALPHA_CLEARS = new HashSet<>();
     private static final Deque<VrGlState> VR_GL_STATES = new ArrayDeque<>();
     private static AdvancedFbo vrMainFramebuffer;
-    private static @Nullable BufferedWriter frameTimeWriter;
 
     private static boolean initialized;
     private static boolean vivecraftDetected;
-    private static boolean sodiumDetected;
-    private static boolean irisDetected;
-    private static boolean embeddiumDetected;
     private static boolean vivecraftApiAvailable;
-    private static boolean loggedVrInitialized;
-    private static boolean lastVrInitialized;
-    private static boolean loggedVrActive;
-    private static boolean lastVrActive;
+    private static boolean loggedVrStatus;
+    private static boolean lastStatusDetected;
+    private static boolean lastStatusInitialized;
+    private static boolean lastStatusActive;
+    private static String lastStatusDevice = "";
     private static boolean loggedSodiumFallback;
     private static boolean cachedVrState;
     private static boolean cachedVrInitialized;
     private static boolean cachedVrActive;
-    private static boolean warnedFrameTimeSave;
-    private static long frameStartNanos;
-    private static int debugFrameCounter;
-    private static int lastLoggedEye = Integer.MIN_VALUE;
 
     private static Object vrClientApi;
     private static Method isVrInitializedMethod;
@@ -90,9 +71,13 @@ public final class VeilVRCompat {
     private static Field vrRunningField;
     private static Method clientDataHolderGetInstanceMethod;
     private static Field currentPassField;
+    private static Field vrField;
     private static Field vrRendererField;
     private static Field framebufferEye0Field;
     private static Field framebufferEye1Field;
+    private static Method getVrProviderNameMethod;
+    private static Method getVrRuntimeNameMethod;
+    private static Field detectedHardwareField;
     private static Method getWorldRenderPassMethod;
     private static Field worldRenderPassTargetField;
     private static Field currentWorldRenderPassField;
@@ -107,11 +92,7 @@ public final class VeilVRCompat {
         }
         initialized = true;
         vivecraftDetected = Veil.platform().isModLoaded("vivecraft");
-        sodiumDetected = Veil.platform().isModLoaded("sodium");
-        irisDetected = Veil.platform().isModLoaded("iris");
-        embeddiumDetected = Veil.platform().isModLoaded("embeddium");
         Veil.LOGGER.info("Vivecraft detected: {}", vivecraftDetected);
-        Veil.LOGGER.info("VR render optimizer detection: Sodium={}, Iris={}, Embeddium={}", sodiumDetected, irisDetected, embeddiumDetected);
         if (!vivecraftDetected) {
             return;
         }
@@ -140,7 +121,14 @@ public final class VeilVRCompat {
             Class<?> holderClass = Class.forName("org.vivecraft.client_vr.ClientDataHolderVR");
             clientDataHolderGetInstanceMethod = holderClass.getMethod("getInstance");
             currentPassField = holderClass.getField("currentPass");
+            vrField = holderClass.getField("vr");
             vrRendererField = holderClass.getField("vrRenderer");
+
+            Class<?> vrClass = Class.forName("org.vivecraft.client_vr.provider.MCVR");
+            getVrProviderNameMethod = vrClass.getMethod("getName");
+            getVrRuntimeNameMethod = vrClass.getMethod("getRuntimeName");
+            detectedHardwareField = vrClass.getDeclaredField("detectedHardware");
+            detectedHardwareField.setAccessible(true);
 
             Class<?> vrRendererClass = Class.forName("org.vivecraft.client_vr.provider.VRRenderer");
             framebufferEye0Field = vrRendererClass.getField("framebufferEye0");
@@ -195,8 +183,6 @@ public final class VeilVRCompat {
     @ApiStatus.Internal
     public static void beginFrame() {
         cachedVrState = false;
-        VeilClientConfig config = VeilClientConfig.get();
-        frameStartNanos = config.debugVRPerformance || config.saveVRFrameTimeHistory ? System.nanoTime() : 0L;
     }
 
     private static void refreshVrState() {
@@ -209,8 +195,7 @@ public final class VeilVRCompat {
             cachedVrInitialized = false;
             cachedVrActive = false;
             cachedVrState = true;
-            logVrInitialized(false);
-            logVrActive(false);
+            logVrStatus();
             return;
         }
 
@@ -236,8 +221,7 @@ public final class VeilVRCompat {
 
         cachedVrActive = Boolean.TRUE.equals(active);
         cachedVrState = true;
-        logVrInitialized(cachedVrInitialized);
-        logVrActive(cachedVrActive);
+        logVrStatus();
     }
 
     /**
@@ -305,7 +289,6 @@ public final class VeilVRCompat {
         AdvancedFbo post = getPostFramebuffer();
         if (post != null) {
             context.setFramebuffer(VeilFramebuffers.POST, post);
-            logCurrentEye();
         }
     }
 
@@ -408,14 +391,11 @@ public final class VeilVRCompat {
             return null;
         }
 
-        // Sodium-like renderers can replace or wrap parts of the vanilla target flow. Falling back to
+        // Render optimizers can replace or wrap parts of the vanilla target flow. Falling back to
         // Vivecraft's own eye FBO avoids assuming the Minecraft main target owns the current stereo image.
-        if ((sodiumDetected || embeddiumDetected) && !loggedSodiumFallback) {
+        if (!loggedSodiumFallback) {
             loggedSodiumFallback = true;
-            Veil.LOGGER.info("Using Vivecraft eye framebuffer fallback for Sodium/Embeddium-compatible VR rendering.");
-        }
-        if (sodiumDetected || embeddiumDetected) {
-            recordVrSodiumFallback();
+            Veil.LOGGER.info("Using Vivecraft eye framebuffer fallback for VR rendering.");
         }
 
         return getVrRendererEyeTarget(getActiveEyeIndex());
@@ -578,16 +558,9 @@ public final class VeilVRCompat {
     @ApiStatus.Internal
     public static void applyPostUniforms(ShaderProgram shader, AdvancedFbo viewport) {
         boolean vr = isVrActive();
-        int eyeIndex = getActiveEyeIndex();
-        CameraMatrices matrices = VeilRenderSystem.renderer().getCameraMatrices();
 
         shader.getUniformSafe("VeilIsVR").setInt(vr ? 1 : 0);
-        shader.getUniformSafe("VeilEyeIndex").setInt(eyeIndex);
-        shader.getUniformSafe("VeilViewMatrix").setMatrix(matrices.getViewMatrix());
-        shader.getUniformSafe("VeilProjectionMatrix").setMatrix(matrices.getProjectionMatrix());
-        shader.getUniformSafe("VeilInverseViewMatrix").setMatrix(matrices.getInverseViewMatrix());
-        shader.getUniformSafe("VeilInverseProjectionMatrix").setMatrix(matrices.getInverseProjectionMatrix());
-        shader.getUniformSafe("VeilCameraPosition").setVector(matrices.getCameraPosition());
+        shader.getUniformSafe("VeilEyeIndex").setInt(getActiveEyeIndex());
         shader.getUniformSafe("VeilViewportSize").setVector(viewport.getWidth(), viewport.getHeight());
 
         applyVrSafetyUniforms(shader, vr);
@@ -595,43 +568,18 @@ public final class VeilVRCompat {
 
     @ApiStatus.Internal
     public static void recordVrPostPassTime(long nanos) {
-        VrEyeStats stats = getActiveStats();
-        if (stats != null) {
-            stats.postPassNanos += nanos;
-            stats.postPasses++;
-        }
     }
 
     @ApiStatus.Internal
     public static void recordVrFramebufferResize(int eye) {
-        VrEyeStats stats = getStats(eye);
-        if (stats != null) {
-            stats.framebufferResizes++;
-        }
     }
 
     @ApiStatus.Internal
     public static void recordVrFramebufferCreation(int eye) {
-        VrEyeStats stats = getStats(eye);
-        if (stats != null) {
-            stats.framebufferCreations++;
-        }
     }
 
     @ApiStatus.Internal
     public static void recordVrBlitCopy() {
-        VrEyeStats stats = getActiveStats();
-        if (stats != null) {
-            stats.blitCopies++;
-        }
-    }
-
-    @ApiStatus.Internal
-    public static void recordVrSodiumFallback() {
-        VrEyeStats stats = getActiveStats();
-        if (stats != null) {
-            stats.sodiumFallbacks++;
-        }
     }
 
     /**
@@ -662,32 +610,12 @@ public final class VeilVRCompat {
     }
 
     @ApiStatus.Internal
-    public static void addDebugInfo(Consumer<String> consumer) {
-        consumer.accept("Vivecraft Detected: " + isVivecraftDetected());
-        consumer.accept("Sodium/Iris/Embeddium: " + sodiumDetected + " / " + irisDetected + " / " + embeddiumDetected);
-        consumer.accept("VR Initialized: " + isVrInitialized());
-        consumer.accept("VR Active: " + isVrActive());
-        consumer.accept("VR Quality Post/Bloom/Light: " + getVrPostQuality() + " / " + getVrBloomQuality() + " / " + getVrLightQuality());
-        consumer.accept("VR Frame Time: " + FRAME_STATS.summary());
-        if (isVrActive()) {
-            consumer.accept("VR Pass: " + getCurrentPassName());
-            consumer.accept("VR Eye: " + getEyeName(getActiveEyeIndex()));
-        }
-        consumer.accept("VR Stats L/R: " + EYE_STATS[LEFT_EYE].summary() + " / " + EYE_STATS[RIGHT_EYE].summary());
-        if (!WARNED_SHARED_BUFFERS.isEmpty()) {
-            consumer.accept(ChatFormatting.YELLOW + "VR Shared Buffer Warnings: " + WARNED_SHARED_BUFFERS.size());
-        }
-    }
-
-    @ApiStatus.Internal
     public static void endFrame() {
-        recordFrameTime();
         for (Map<ResourceLocation, IsolatedFramebuffer> framebuffers : ISOLATED_FRAMEBUFFERS) {
             for (IsolatedFramebuffer framebuffer : framebuffers.values()) {
                 framebuffer.clearIfUsed();
             }
         }
-        logPerformanceStats();
     }
 
     @ApiStatus.Internal
@@ -702,10 +630,6 @@ public final class VeilVRCompat {
         VR_GL_STATES.clear();
         WARNED_SHARED_BUFFERS.clear();
         WARNED_ALPHA_CLEARS.clear();
-        EYE_STATS[LEFT_EYE].reset();
-        EYE_STATS[RIGHT_EYE].reset();
-        FRAME_STATS.resetAll();
-        closeFrameTimeWriter();
     }
 
     private static void applyVrSafetyUniforms(ShaderProgram shader, boolean vr) {
@@ -756,132 +680,62 @@ public final class VeilVRCompat {
         return eye >= 0 && ISOLATED_FRAMEBUFFERS[eye].containsKey(name);
     }
 
-    private static void logVrActive(boolean active) {
-        if (!loggedVrActive || active != lastVrActive) {
-            loggedVrActive = true;
-            lastVrActive = active;
-            Veil.LOGGER.info("Vivecraft VR active: {}", active);
+    private static void logVrStatus() {
+        String device = getVrDeviceName();
+        if (!loggedVrStatus || vivecraftDetected != lastStatusDetected || cachedVrInitialized != lastStatusInitialized || cachedVrActive != lastStatusActive || !device.equals(lastStatusDevice)) {
+            loggedVrStatus = true;
+            lastStatusDetected = vivecraftDetected;
+            lastStatusInitialized = cachedVrInitialized;
+            lastStatusActive = cachedVrActive;
+            lastStatusDevice = device;
+            Veil.LOGGER.info("Veil VR status: Vivecraft={}, initialized={}, active={}, device={}",
+                    yesNo(vivecraftDetected),
+                    yesNo(cachedVrInitialized),
+                    yesNo(cachedVrActive),
+                    device);
         }
     }
 
-    private static void logVrInitialized(boolean initialized) {
-        if (!loggedVrInitialized || initialized != lastVrInitialized) {
-            loggedVrInitialized = true;
-            lastVrInitialized = initialized;
-            Veil.LOGGER.info("Vivecraft VR initialized: {}", initialized);
-        }
-    }
-
-    private static void logCurrentEye() {
-        if (!VeilClientConfig.get().debugVREyeBuffers) {
-            return;
-        }
-
-        int eye = getActiveEyeIndex();
-        if (eye != lastLoggedEye) {
-            lastLoggedEye = eye;
-            Veil.LOGGER.info("Veil VR post-processing eye: {}", getEyeName(eye));
-        }
-    }
-
-    private static void logPerformanceStats() {
-        VeilClientConfig config = VeilClientConfig.get();
-        if (!config.debugVRPerformance || !isVrActive()) {
-            return;
-        }
-
-        debugFrameCounter++;
-        if (debugFrameCounter % config.vrDebugLogInterval != 0) {
-            return;
-        }
-
-        Veil.LOGGER.info("Veil VR perf frame={} L/R: {} / {}", FRAME_STATS.summary(), EYE_STATS[LEFT_EYE].summary(), EYE_STATS[RIGHT_EYE].summary());
-        FRAME_STATS.resetWindow();
-        EYE_STATS[LEFT_EYE].reset();
-        EYE_STATS[RIGHT_EYE].reset();
-    }
-
-    private static void recordFrameTime() {
-        if (frameStartNanos == 0L) {
-            return;
-        }
-
-        long nanos = System.nanoTime() - frameStartNanos;
-        frameStartNanos = 0L;
-        VeilClientConfig config = VeilClientConfig.get();
-        if (!isVrActive()) {
-            return;
-        }
-
-        FRAME_STATS.record(nanos);
-        if (config.saveVRFrameTimeHistory && FRAME_STATS.samples() % config.vrFrameTimeHistoryInterval == 0) {
-            saveFrameTimeSample(nanos);
-        }
-    }
-
-    private static void saveFrameTimeSample(long nanos) {
-        try {
-            BufferedWriter writer = getFrameTimeWriter();
-            if (writer == null) {
-                return;
+    private static String getVrDeviceName() {
+        Object holder = invokeObject(null, clientDataHolderGetInstanceMethod);
+        Object vr = null;
+        if (holder != null && vrField != null) {
+            try {
+                vr = vrField.get(holder);
+            } catch (Throwable ignored) {
+                vr = null;
             }
+        }
+        if (vr == null) {
+            return "unknown";
+        }
 
-            double frameMs = nanos / 1_000_000.0;
-            double fps = nanos > 0L ? 1_000_000_000.0 / nanos : 0.0;
-            writer.write(String.format(Locale.ROOT, "%d,%d,%.4f,%.2f%n",
-                    System.currentTimeMillis(),
-                    FRAME_STATS.samples(),
-                    frameMs,
-                    fps));
-            writer.flush();
-        } catch (IOException e) {
-            if (!warnedFrameTimeSave) {
-                warnedFrameTimeSave = true;
-                Veil.LOGGER.warn("Failed to save Veil VR frame time history.", e);
+        String provider = stringOrUnknown(invokeObject(vr, getVrProviderNameMethod));
+        String runtime = stringOrUnknown(invokeObject(vr, getVrRuntimeNameMethod));
+        String hardware = "unknown";
+        if (detectedHardwareField != null) {
+            try {
+                Object value = detectedHardwareField.get(vr);
+                if (value != null) {
+                    hardware = String.valueOf(value);
+                }
+            } catch (Throwable ignored) {
+                hardware = "unknown";
             }
-            closeFrameTimeWriter();
         }
+
+        if ("unknown".equals(runtime) && "unknown".equals(hardware)) {
+            return provider;
+        }
+        return provider + " / runtime=" + runtime + " / hardware=" + hardware;
     }
 
-    private static @Nullable BufferedWriter getFrameTimeWriter() throws IOException {
-        if (frameTimeWriter != null) {
-            return frameTimeWriter;
-        }
-
-        Path path = Minecraft.getInstance().gameDirectory.toPath()
-                .resolve(VeilClientConfig.get().vrFrameTimeHistoryFile)
-                .normalize();
-        Files.createDirectories(path.getParent());
-        boolean writeHeader = Files.notExists(path) || Files.size(path) == 0L;
-        frameTimeWriter = Files.newBufferedWriter(path,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND);
-        if (writeHeader) {
-            frameTimeWriter.write("epochMillis,sample,frameMs,fps\n");
-            frameTimeWriter.flush();
-        }
-        return frameTimeWriter;
+    private static String stringOrUnknown(@Nullable Object value) {
+        return value != null ? String.valueOf(value) : "unknown";
     }
 
-    private static void closeFrameTimeWriter() {
-        if (frameTimeWriter == null) {
-            return;
-        }
-
-        try {
-            frameTimeWriter.close();
-        } catch (IOException ignored) {
-        }
-        frameTimeWriter = null;
-    }
-
-    private static @Nullable VrEyeStats getActiveStats() {
-        return getStats(getActiveEyeIndex());
-    }
-
-    private static @Nullable VrEyeStats getStats(int eye) {
-        return eye == LEFT_EYE || eye == RIGHT_EYE ? EYE_STATS[eye] : null;
+    private static String yesNo(boolean value) {
+        return value ? "yes" : "no";
     }
 
     private static String getEyeName(int eye) {
@@ -1018,91 +872,6 @@ public final class VeilVRCompat {
 
         private void free() {
             this.framebuffer.free();
-        }
-    }
-
-    private static final class VrEyeStats {
-
-        private long postPassNanos;
-        private int postPasses;
-        private int framebufferResizes;
-        private int framebufferCreations;
-        private int blitCopies;
-        private int sodiumFallbacks;
-
-        private String summary() {
-            double postMs = this.postPassNanos / 1_000_000.0;
-            return String.format("post=%.2fms/%d resize=%d create=%d blit=%d fallback=%d",
-                    postMs,
-                    this.postPasses,
-                    this.framebufferResizes,
-                    this.framebufferCreations,
-                    this.blitCopies,
-                    this.sodiumFallbacks);
-        }
-
-        private void reset() {
-            this.postPassNanos = 0L;
-            this.postPasses = 0;
-            this.framebufferResizes = 0;
-            this.framebufferCreations = 0;
-            this.blitCopies = 0;
-            this.sodiumFallbacks = 0;
-        }
-    }
-
-    private static final class FrameTimeStats {
-
-        private long samples;
-        private long lastNanos;
-        private long windowSamples;
-        private long windowNanos;
-        private long windowMinNanos = Long.MAX_VALUE;
-        private long windowMaxNanos;
-
-        private void record(long nanos) {
-            this.samples++;
-            this.lastNanos = nanos;
-            this.windowSamples++;
-            this.windowNanos += nanos;
-            this.windowMinNanos = Math.min(this.windowMinNanos, nanos);
-            this.windowMaxNanos = Math.max(this.windowMaxNanos, nanos);
-        }
-
-        private long samples() {
-            return this.samples;
-        }
-
-        private String summary() {
-            if (this.windowSamples == 0L) {
-                return "no samples";
-            }
-
-            double lastMs = this.lastNanos / 1_000_000.0;
-            double avgNanos = (double) this.windowNanos / this.windowSamples;
-            double avgMs = avgNanos / 1_000_000.0;
-            double minMs = this.windowMinNanos / 1_000_000.0;
-            double maxMs = this.windowMaxNanos / 1_000_000.0;
-            double fps = avgNanos > 0.0 ? 1_000_000_000.0 / avgNanos : 0.0;
-            return String.format(Locale.ROOT, "last=%.2fms avg=%.2fms min=%.2fms max=%.2fms fps=%.1f",
-                    lastMs,
-                    avgMs,
-                    minMs,
-                    maxMs,
-                    fps);
-        }
-
-        private void resetWindow() {
-            this.windowSamples = 0L;
-            this.windowNanos = 0L;
-            this.windowMinNanos = Long.MAX_VALUE;
-            this.windowMaxNanos = 0L;
-        }
-
-        private void resetAll() {
-            this.samples = 0L;
-            this.lastNanos = 0L;
-            this.resetWindow();
         }
     }
 
