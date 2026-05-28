@@ -25,6 +25,7 @@ import static org.lwjgl.opengl.ARBDirectStateAccess.glBlitNamedFramebuffer;
 import static org.lwjgl.opengl.ARBDirectStateAccess.glClearNamedFramebufferfv;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL30C.GL_DRAW_FRAMEBUFFER_BINDING;
 
 @Mixin(RenderTarget.class)
 public abstract class PerformanceRenderTargetMixin implements PerformanceRenderTargetExtension {
@@ -145,8 +146,10 @@ public abstract class PerformanceRenderTargetMixin implements PerformanceRenderT
         if (disableBlend && VeilRenderSystem.directStateAccessSupported()) {
             ci.cancel();
             RenderSystem.assertOnRenderThread();
+            // Make sure the buffer is drawn into the correct buffer
+            final int drawFramebuffer = glGetInteger(GL_DRAW_FRAMEBUFFER_BINDING);
             GlStateManager._colorMask(true, true, true, false);
-            glBlitNamedFramebuffer(this.frameBufferId, 0, 0, 0, this.width, this.height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitNamedFramebuffer(this.frameBufferId, drawFramebuffer, 0, 0, this.width, this.height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         } else {
             ShaderProgram shader = VeilRenderSystem.setShader(veil$BLIT_SHADER);
             if (shader == null) {
