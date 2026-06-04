@@ -7,10 +7,10 @@ import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.light.DDALightData;
 import foundry.veil.api.client.render.light.InstancedLightData;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import net.minecraft.client.Camera;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
 
 import java.lang.Math;
@@ -47,6 +47,11 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         this.occlusionEnabled = false;
     }
 
+    /**
+     * @deprecated No longer used
+     */
+    @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+    @Deprecated
     protected void updateMatrix() {
         Quaternionfc orientation = this.getOrientation();
         this.matrix.rotation(orientation).translate(this.position);
