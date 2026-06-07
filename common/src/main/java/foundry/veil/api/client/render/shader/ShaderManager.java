@@ -146,7 +146,7 @@ public class ShaderManager implements PreparableReloadListener, Closeable {
         processorList.addPreprocessor(new ShaderBufferProcessor());
         processorList.addPreprocessor(new ShaderBindingProcessor());
         processorList.addPreprocessor(new ShaderVersionProcessor(), false);
-        processorList.addPreprocessor(new ShaderModifyProcessor(), false);
+        processorList.addPreprocessor(new ShaderInjectProcessor(), false);
         processorList.addPreprocessor(new DynamicBufferProcessor(), false);
         processorList.addPreprocessor(new ShaderFeatureProcessor(), false);
         VeilClient.clientPlatform().onRegisterShaderPreProcessors(provider, processorList);

@@ -5,7 +5,7 @@ import foundry.veil.VeilClient;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.shader.processor.ShaderImporter;
-import foundry.veil.api.client.render.shader.processor.ShaderModifyProcessor;
+import foundry.veil.api.client.render.shader.processor.ShaderInjectProcessor;
 import foundry.veil.api.client.render.shader.processor.ShaderPreProcessor;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferProcessor;
 import io.github.ocelot.glslprocessor.api.GlslParser;
@@ -32,7 +32,7 @@ public class VanillaShaderProcessor {
 
     public static void setup(ResourceProvider provider) {
         ShaderProcessorList list = new ShaderProcessorList(provider);
-        list.addPreprocessor(new ShaderModifyProcessor(), false);
+        list.addPreprocessor(new ShaderInjectProcessor(), false);
         list.addPreprocessor(new DynamicBufferProcessor(), false);
         VeilClient.clientPlatform().onRegisterShaderPreProcessors(provider, list);
         PROCESSOR.set(list);

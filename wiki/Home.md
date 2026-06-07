@@ -83,7 +83,7 @@ dependencies {
 
 - [Veil Events](Events)
 - [Better Vertex Buffers](VertexArray)
-- [Shader Modifications](ShaderModification)
+- [Shader Inject](ShaderInject)
 - [Dynamic Buffers](DynamicBuffer.md)
 - [Custom Shaders](Shader)
 - [Custom Framebuffers](Framebuffer)
