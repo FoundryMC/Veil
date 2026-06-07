@@ -38,7 +38,11 @@ public abstract class DynamicBufferLevelRendererMixin {
     public void setupState(RenderStateShard.OutputStateShard instance, Operation<Void> original) {
         if ("weather_target".equals(VeilRenderType.getName(instance))) {
             this.veil$weatherBufferShard.setupRenderState();
-        } else if (!"particles_target".equals(VeilRenderType.getName(instance))) {
+        } else if ("particles_target".equals(VeilRenderType.getName(instance))) {
+            if (!VeilRenderSystem.renderer().getDynamicBufferManger().isEnabled()) {
+                original.call(instance);
+            }
+        } else {
             original.call(instance);
         }
     }
@@ -47,7 +51,11 @@ public abstract class DynamicBufferLevelRendererMixin {
     public void clearState(RenderStateShard.OutputStateShard instance, Operation<Void> original) {
         if ("weather_target".equals(VeilRenderType.getName(instance))) {
             this.veil$weatherBufferShard.clearRenderState();
-        } else if (!"particles_target".equals(VeilRenderType.getName(instance))) {
+        } else if ("particles_target".equals(VeilRenderType.getName(instance))) {
+            if (!VeilRenderSystem.renderer().getDynamicBufferManger().isEnabled()) {
+                original.call(instance);
+            }
+        } else {
             original.call(instance);
         }
     }
