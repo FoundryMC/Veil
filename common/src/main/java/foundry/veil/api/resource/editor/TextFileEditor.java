@@ -4,6 +4,7 @@ import foundry.veil.api.resource.VeilEditorEnvironment;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.api.resource.type.VeilTextResource;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,6 +17,8 @@ public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
     private final VeilTextResource<?> resource;
 //    private final CodeEditor editor;
 
+    private final ImBoolean open = new ImBoolean(true);
+
     public TextFileEditor(VeilEditorEnvironment environment, VeilTextResource<?> resource) {
 //        this.editor = new CodeEditor(SAVE);
 //        this.editor.show(resource.resourceInfo().fileName(), "");
@@ -27,6 +30,11 @@ public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
 
     @Override
     public void render() {
+        if (ImGui.begin("Info", this.open)) {
+            ImGui.text("Text Editing is disabled for now. Use an external editor with hotswapping until re-implemented.");
+        }
+        ImGui.end();
+
 //        this.editor.renderWindow();
         if (ImGui.beginPopupModal("###open_failed")) {
             ImGui.text("Failed to open file");
@@ -74,7 +82,7 @@ public class TextFileEditor implements ResourceFileEditor<VeilTextResource<?>> {
 
     @Override
     public boolean isClosed() {
-        return true;
+        return !this.open.get();
 //        return !this.editor.isOpen();
     }
 

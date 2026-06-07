@@ -1,1 +1,3 @@
-- Fix ImGuiMC, Light Buffer Startup, NVIDIA Shader Issues, and Sodium 0.8.13 Issues ([#142](https://github.com/FoundryMC/Veil/pull/142))
+- Fix crash when drawing quasar trails
+- Allow trail texture to be null for no texture
+- Fix correct a_VeilNormal type casting and decoding ([#150](https://github.com/FoundryMC/Veil/pull/150))

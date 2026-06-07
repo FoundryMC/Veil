@@ -68,7 +68,7 @@ public class SodiumShaderPreProcessor implements ShaderPreProcessor {
                             treeBody.add(GlslInjectionPoint.BEFORE_MAIN, GlslParser.parseExpression("uniform mat3 VeilNormalMatrix"));
                         }
                         treeBody.add(GlslInjectionPoint.BEFORE_MAIN, GlslParser.parseExpression("out vec3 PassVeilNormal"));
-                        mainBody.add(GlslParser.parseExpression("PassVeilNormal = %s * %s".formatted(iris ? "iris_NormalMatrix" : "VeilNormalMatrix", iris ? "iris_Normal" : "vec3(a_VeilNormal.xyz * vec3(0.007874016))")));
+                        mainBody.add(GlslParser.parseExpression("PassVeilNormal = %s * %s".formatted(iris ? "iris_NormalMatrix" : "VeilNormalMatrix", iris ? "iris_Normal" : "(vec3(ivec3(a_VeilNormal.xyz)) * 0.007874016)")));
                         modified = true;
                     }
 

@@ -12,6 +12,7 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.vertex.VeilVertexFormat;
 import foundry.veil.api.event.VeilRegisterFixedBuffersEvent;
 import foundry.veil.impl.client.render.pipeline.CullFaceShard;
+import foundry.veil.impl.client.render.rendertype.WhiteTextureStateShard;
 import foundry.veil.mixin.rendertype.accessor.RenderStateShardAccessor;
 import foundry.veil.mixin.rendertype.accessor.RenderTypeAccessor;
 import net.minecraft.Util;
@@ -48,6 +49,7 @@ public final class VeilRenderType extends RenderType {
     public static final RenderStateShard CULL_BACK = new CullFaceShard(GL_BACK);
     public static final RenderStateShard CULL_FRONT_AND_BACK = new CullFaceShard(GL_FRONT_AND_BACK);
     public static final RenderStateShard.WriteMaskStateShard NO_WRITE = new RenderStateShard.WriteMaskStateShard(false, false);
+    public static final RenderStateShard.EmptyTextureStateShard WHITE_TEXTURE = new WhiteTextureStateShard();
 
     private static final EnumMap<GlStateManager.LogicOp, ColorLogicStateShard> COLOR_LOGIC_SHARDS = new EnumMap<>(GlStateManager.LogicOp.class);
 
@@ -83,13 +85,27 @@ public final class VeilRenderType extends RenderType {
                 .createCompositeState(false);
         return RenderType.create(Veil.MODID + ":quasar_trail", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLE_STRIP, TRANSIENT_BUFFER_SIZE, false, false, state);
     });
+    private static final RenderType NO_TEXTURE_QUASAR_TRAIL = RenderType.create(
+            Veil.MODID + ":quasar_trail",
+            DefaultVertexFormat.NEW_ENTITY,
+            VertexFormat.Mode.TRIANGLE_STRIP,
+            TRANSIENT_BUFFER_SIZE,
+            false,
+            false,
+            CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                    .setTextureState(WHITE_TEXTURE)
+                    .setTransparencyState(ADDITIVE_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setCullState(NO_CULL)
+                    .createCompositeState(false));
 
     public static RenderType quasarParticle(ResourceLocation texture, boolean additive) {
         return QUASAR_PARTICLE.apply(texture, additive);
     }
 
-    public static RenderType quasarTrail(ResourceLocation texture) {
-        return QUASAR_TRAIL.apply(texture);
+    public static RenderType quasarTrail(@Nullable ResourceLocation texture) {
+        return texture != null ? QUASAR_TRAIL.apply(texture) : NO_TEXTURE_QUASAR_TRAIL;
     }
 
     public static TransparencyStateShard noTransparencyShard() {

@@ -2,18 +2,18 @@ package foundry.veil.api.quasar.fx;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.quasar.emitters.module.render.TrailSettings;
+import foundry.veil.api.util.EnumCodec;
 import foundry.veil.impl.quasar.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.Locale;
 import java.util.function.Function;
 
 public class Trail {
@@ -23,14 +23,9 @@ public class Trail {
         STRETCH,
         REPEAT;
 
-        public static final Codec<TilingMode> CODEC = Codec.STRING.flatXmap(name -> {
-            for (TilingMode value : TilingMode.values()) {
-                if (value.name().equalsIgnoreCase(name)) {
-                    return DataResult.success(value);
-                }
-            }
-            return DataResult.error(() -> "Unknown Tiling Mode");
-        }, tilingMode1 -> DataResult.success(tilingMode1.name().toLowerCase(Locale.ROOT)));
+        public static final Codec<TilingMode> CODEC = EnumCodec.<TilingMode>builder("Tiling Mode")
+                .values(values())
+                .build();
     }
 
     private Vec3[] points;
@@ -111,7 +106,7 @@ public class Trail {
         this.widthFunction = widthFunction;
     }
 
-    public ResourceLocation getTexture() {
+    public @Nullable ResourceLocation getTexture() {
         return this.texture;
     }
 
@@ -210,6 +205,11 @@ public class Trail {
     }
 
     public void render(MatrixStack stack, VertexConsumer consumer, int light) {
+        // Not enough geometry to render anything
+        if (this.points.length < 1) {
+            return;
+        }
+
         Vector3f[][] corners = new Vector3f[this.points.length][2];
         for (int i = 0; i < this.points.length; i++) {
             if (i % this.frequency != 0) {

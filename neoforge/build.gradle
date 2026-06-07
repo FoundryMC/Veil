@@ -23,15 +23,18 @@ neoForge {
         clientAuth {
             client()
             devLogin = true
+            gameDirectory = file('runs/client')
         }
         client {
             client()
+            gameDirectory = file('runs/client')
         }
         data {
             data()
         }
         server {
             server()
+            gameDirectory = file('runs/server')
         }
     }
     mods {
