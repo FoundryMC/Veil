@@ -23,7 +23,7 @@ public class CachedBufferSource implements MultiBufferSource, NativeResource {
     private RenderType lastSharedType;
 
     private void clearBuffers() {
-        this.buffers.values().forEach(ByteBufferBuilder::clear);
+        this.buffers.values().forEach(ByteBufferBuilder::close);
         this.buffers.clear();
     }
 
