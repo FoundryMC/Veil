@@ -1,17 +1,16 @@
 package foundry.veil.impl.client.render.shader.injection;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class InjectionBodyParser {
+@ApiStatus.Internal
+public final class InjectionBodyParser {
 
-    private static final Pattern VERSION_PATTERN = Pattern.compile(
-            "^\\s*#version\\s+(\\d+)\\s*.*$", Pattern.MULTILINE);
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^\\s*#version\\s+(\\d+)\\s*.*$", Pattern.MULTILINE);
 
-    record Result(String body, String globals, boolean isHead, int version) {
-    }
-
-    static Result parse(String code) {
+    public static Result parse(String code) {
         int version = parseVersion(code);
         String trimmed = code.trim();
         int funcStart = -1;
@@ -49,7 +48,10 @@ final class InjectionBodyParser {
         for (int i = bracePos; i < trimmed.length(); i++) {
             char c = trimmed.charAt(i);
             int skip = skipIfCommentOrString(trimmed, i);
-            if (skip >= 0) { i = skip; continue; }
+            if (skip >= 0) {
+                i = skip;
+                continue;
+            }
             if (c == '{') {
                 if (depth == 0) bodyStart = i + 1;
                 depth++;
@@ -118,5 +120,8 @@ final class InjectionBodyParser {
             if (n == '*') return skipBlockComment(s, i);
         }
         return -1;
+    }
+
+    public record Result(String body, String globals, boolean isHead, int version) {
     }
 }

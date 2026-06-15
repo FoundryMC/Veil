@@ -4,6 +4,7 @@ import foundry.veil.impl.client.render.shader.injection.util.Diagnostic;
 import foundry.veil.impl.client.render.shader.injection.util.Severity;
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjectionDefinition;
 import foundry.veil.impl.client.render.shader.injection.util.ValidationResult;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
  *
  * @author Vowxky
  */
+@ApiStatus.Internal
 public final class ShaderInjectionValidator {
 
     public static ValidationResult validate(ShaderInjectionDefinition injection) {

@@ -1,11 +1,12 @@
 package foundry.veil.api.client.render.shader.processor;
 
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.shader.ShaderInjectionManager;
+import foundry.veil.impl.client.render.shader.injection.ShaderInjectionManager;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.node.GlslTree;
 import io.github.ocelot.glslprocessor.lib.anarres.cpp.LexerException;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import java.util.Set;
  * @author Ocelot
  * @deprecated Use {@link ShaderInjectProcessor} instead.
  */
+@ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
 @Deprecated(forRemoval = true)
 public class ShaderModifyProcessor implements ShaderPreProcessor {
 
@@ -24,7 +26,7 @@ public class ShaderModifyProcessor implements ShaderPreProcessor {
     private final Set<ResourceLocation> appliedModifications;
 
     public ShaderModifyProcessor() {
-        this.shaderInjectionManager = VeilRenderSystem.renderer().getShaderModificationManager();
+        this.shaderInjectionManager = VeilRenderSystem.renderer().getShaderInjectionManager();
         this.appliedModifications = new HashSet<>();
     }
 

@@ -8,6 +8,8 @@ import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.Reader;
 import java.util.*;
@@ -18,13 +20,14 @@ import java.util.*;
  *
  * @author Vowxky
  */
+@ApiStatus.Internal
 public final class ShaderInjectionLoader {
 
     public static final FileToIdConverter INJECTION_LISTER = new FileToIdConverter("pinwheel/shader_injection", ".json");
     private static final Gson GSON = ShaderInjectionDefinition.createGson();
 
     public static LoadedPatches load(ResourceManager resourceManager) {
-        List<LoadedPatch> patches = new ArrayList<>();
+        List<LoadedPatch> patches = new LinkedList<>();
         Map<ResourceLocation, List<LoadedPatch>> byTarget = new LinkedHashMap<>();
 
         for (Map.Entry<ResourceLocation, Resource> entry : INJECTION_LISTER.listMatchingResources(resourceManager).entrySet()) {
@@ -54,8 +57,11 @@ public final class ShaderInjectionLoader {
         return new LoadedPatches(byTarget);
     }
 
-    public record LoadedPatches(Map<ResourceLocation, List<LoadedPatch>> byTarget) {
-        public LoadedPatches { byTarget = Map.copyOf(byTarget); }
+    public record LoadedPatches(@Unmodifiable Map<ResourceLocation, @Unmodifiable List<LoadedPatch>> byTarget) {
+
+        public LoadedPatches {
+            byTarget = Map.copyOf(byTarget);
+        }
     }
 
     public record LoadedPatch(ResourceLocation resourceLocation, ShaderInjectionDefinition definition) {

@@ -1,16 +1,8 @@
 package foundry.veil.impl.client.render.shader.injection.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -19,25 +11,19 @@ import java.util.List;
 
 /**
  * JSON-deserialized model for shader injection definitions.
+ *
  * @author Vowxky
  */
-public record ShaderInjectionDefinition(@Nullable ResourceLocation id,
-                                        List<ResourceLocation> targets,
-                                        List<ResourceLocation> redirects,
-                                        int priority,
-                                        @Nullable ResourceLocation replace,
-                                        boolean debug) {
+@ApiStatus.Internal
+public record ShaderInjectionDefinition(
+        @Nullable ResourceLocation id,
+        List<ResourceLocation> targets,
+        List<ResourceLocation> redirects,
+        int priority,
+        @Nullable ResourceLocation replace,
+        boolean debug) {
 
     public static final int DEFAULT_PRIORITY = 1000;
-
-    public ShaderInjectionDefinition(@Nullable ResourceLocation id,
-                                     @Nullable ResourceLocation target,
-                                     List<ResourceLocation> redirects,
-                                     int priority,
-                                     @Nullable ResourceLocation replace,
-                                     boolean debug) {
-        this(id, target != null ? List.of(target) : List.of(), redirects, priority, replace, debug);
-    }
 
     public ShaderInjectionDefinition {
         if (priority == 0) {

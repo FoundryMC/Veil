@@ -1,14 +1,18 @@
 package foundry.veil.impl.client.render.shader.injection.util;
 
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-public record Diagnostic(@Nullable String resourcePath,
-                         @Nullable ResourceLocation injectionId,
-                         @Nullable ResourceLocation target,
-                         @Nullable String field,
-                         String message,
-                         Severity severity) {
+@ApiStatus.Internal
+public record Diagnostic(
+        @Nullable String resourcePath,
+        @Nullable ResourceLocation injectionId,
+        @Nullable ResourceLocation target,
+        @Nullable String field,
+        String message,
+        Severity severity
+) {
 
     @Override
     public String toString() {

@@ -2,8 +2,8 @@ package foundry.veil.api.client.render.shader.processor;
 
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.impl.client.render.shader.injection.ShaderInjectionManager;
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjection;
-import foundry.veil.api.client.render.shader.ShaderInjectionManager;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.node.GlslTree;
 import io.github.ocelot.glslprocessor.lib.anarres.cpp.LexerException;
@@ -26,7 +26,7 @@ public class ShaderInjectProcessor implements ShaderPreProcessor {
     private final Set<ResourceLocation> appliedModifications;
 
     public ShaderInjectProcessor() {
-        this.shaderInjectionManager = VeilRenderSystem.renderer().getShaderModificationManager();
+        this.shaderInjectionManager = VeilRenderSystem.renderer().getShaderInjectionManager();
         this.appliedModifications = new HashSet<>();
     }
 

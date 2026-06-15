@@ -1,13 +1,13 @@
 package foundry.veil.impl.client.render.shader.injection;
 
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjection;
+import foundry.veil.impl.client.render.shader.injection.util.ShaderInjectionFunction;
 import io.github.ocelot.glslprocessor.api.GlslParser;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.grammar.GlslVersionStatement;
 import io.github.ocelot.glslprocessor.api.node.GlslNode;
 import io.github.ocelot.glslprocessor.api.node.GlslTree;
 import io.github.ocelot.glslprocessor.api.node.function.GlslFunctionNode;
-import foundry.veil.impl.client.render.shader.injection.util.ShaderInjectionFunction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,8 +49,12 @@ public class SimpleShaderInjection implements ShaderInjection {
         for (ShaderInjectionFunction function : this.functions) {
             String name = function.name();
             List<GlslNode> body = tree.functions().filter(definition -> {
-                        if (definition == null || definition.getBody() == null) return false;
-                        if (!name.equals(definition.getName())) return false;
+                        if (definition == null || definition.getBody() == null) {
+                            return false;
+                        }
+                        if (!name.equals(definition.getName())) {
+                            return false;
+                        }
                         int paramCount = function.parameters();
                         return paramCount == -1 || definition.getHeader().getParameters().size() == paramCount;
                     })
@@ -64,12 +68,11 @@ public class SimpleShaderInjection implements ShaderInjection {
                         return new IOException("Unknown function with " + paramCount + " parameters: " + name);
                     });
 
-            try {
-                GlslNode node = GlslParser.parseExpression(function.code());
-                if (function.head()) body.addFirst(node); else body.add(node);
-            } catch (Exception e) {
-                for (GlslNode node : GlslParser.parseExpressionList(function.code())) {
-                    if (function.head()) body.addFirst(node); else body.add(node);
+            for (GlslNode node : GlslParser.parseExpressionList(function.code())) {
+                if (function.head()) {
+                    body.addFirst(node);
+                } else {
+                    body.add(node);
                 }
             }
         }

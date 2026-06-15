@@ -4,12 +4,18 @@ import foundry.veil.Veil;
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjection;
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjectionDefinition;
 import foundry.veil.impl.client.render.shader.injection.util.ShaderInjectionFunction;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,17 +25,20 @@ import java.util.regex.Pattern;
  *
  * @author Vowxky
  */
+@ApiStatus.Internal
 public final class ShaderInjectionAdapter {
 
     private static final String DEFAULT_FUNCTION = "main";
     private static final int DEFAULT_PARAM_COUNT = -1;
     private static final Pattern INCLUDE_PATTERN = Pattern.compile("^\\s*#include\\s+[\"<]?([^>\"]+)[>\"]?\\s*$");
+    private static final Pattern DEFINE_PATTERN = Pattern.compile("^\\s*#define\\s+(\\w+)\\s*(.*?)\\s*$");
     private static final FileToIdConverter INCLUDE_LISTER = new FileToIdConverter("pinwheel/shaders/include", ".glsl");
     private static final Set<String> DEBUG_LOGGED = new HashSet<>();
 
     public static List<ShaderInjection> toModifications(ShaderInjectionDefinition definition, ResourceProvider provider) throws IOException {
-        List<ShaderInjection> mods = new ArrayList<>();
-        for (ResourceLocation path : definition.redirects()) {
+        List<ResourceLocation> redirects = definition.redirects();
+        List<ShaderInjection> mods = new ObjectArrayList<>(redirects.size());
+        for (ResourceLocation path : redirects) {
             String code = loadGlsl(path, provider);
             mods.add(buildModification(definition, code));
         }
@@ -69,10 +78,12 @@ public final class ShaderInjectionAdapter {
             return "";
         }
         String source;
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(provider.open(loc), java.nio.charset.StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = provider.openAsReader(loc)) {
             StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = r.readLine()) != null) sb.append(line).append('\n');
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
             source = sb.toString();
         }
 
@@ -90,8 +101,6 @@ public final class ShaderInjectionAdapter {
         return out.toString();
     }
 
-    private static final Pattern DEFINE_PATTERN = Pattern.compile("^\\s*#define\\s+(\\w+)\\s*(.*?)\\s*$");
-
     private static String expandDefines(String source) {
         List<String[]> defines = new ArrayList<>();
         StringBuilder result = new StringBuilder();
@@ -101,7 +110,9 @@ public final class ShaderInjectionAdapter {
             if (m.matches()) {
                 defines.add(new String[]{m.group(1), m.group(2)});
             } else {
-                if (result.length() > 0) result.append('\n');
+                if (!result.isEmpty()) {
+                    result.append('\n');
+                }
                 result.append(line);
             }
         }
