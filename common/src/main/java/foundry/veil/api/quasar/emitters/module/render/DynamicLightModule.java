@@ -85,7 +85,6 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
         if (this.lightHandle == null) {
             this.lightHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(this.light);
         }
-        this.lastBrightness = brightness;
     }
 
     @Override
