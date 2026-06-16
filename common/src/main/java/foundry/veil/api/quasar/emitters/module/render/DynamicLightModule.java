@@ -46,8 +46,14 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
             this.renderColor.set(this.color);
         }
 
+        if (this.constantBrightness) {
+            this.brightness = data.brightness().getConstant();
+            this.lastBrightness = this.brightness;
+        }
+
         if (this.constantRadius) {
             this.radius = data.radius().getConstant();
+            this.lastRadius = this.radius;
         }
         
         this.light.setBrightness(this.brightness * this.renderColor.alpha());
