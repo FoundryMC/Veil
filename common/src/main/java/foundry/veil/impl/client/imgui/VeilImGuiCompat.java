@@ -41,7 +41,8 @@ public final class VeilImGuiCompat {
 
             // Debug editors
             registry.registerInspector(new DeviceInfoViewer());
-            registry.registerInspector(new PipelineStatisticsViewer());
+            // TODO fix
+//            registry.registerInspector(new PipelineStatisticsViewer());
             registry.registerInspector(new PostInspector());
             registry.registerInspector(new ShaderInspector());
             registry.registerInspector(new TextureInspector());
