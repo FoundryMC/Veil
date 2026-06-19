@@ -6,7 +6,10 @@ import org.jetbrains.annotations.Nullable;
 
 public interface VeilTextResource<T extends VeilTextResource<?>> extends VeilResource<T> {
 
-    // TODO re-implement
+    /**
+     * @return The text language definition for this resource or <code>null</code> to disable syntax highlighting
+     * @since 4.3.0
+     */
     @Nullable
     default TextEditorLanguage languageDefinition() {
         return null;
