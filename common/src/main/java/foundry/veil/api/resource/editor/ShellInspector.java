@@ -10,6 +10,7 @@ import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
+import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.flare.data.model.FlareShell;
 import foundry.veil.api.flare.model.BakedShell;
 import foundry.veil.api.resource.VeilEditorEnvironment;
@@ -104,8 +105,9 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 RenderSystem.backupProjectionMatrix();
                 RenderSystem.setProjectionMatrix(projMat, VertexSorting.ORTHOGRAPHIC_Z);
 
-                shell.getVertexArray().bind();
-                shell.getVertexArray().drawWithRenderType(renderType);
+                this.shell.getVertexArray().bind();
+                this.shell.getVertexArray().drawWithRenderType(renderType);
+                VertexArray.unbind();
 
                 stack.popMatrix();
                 RenderSystem.restoreProjectionMatrix();
@@ -116,7 +118,7 @@ public class ShellInspector implements ResourceFileEditor<ShellResource> {
                 if (ImGui.isWindowHovered()) {
                     this.applyCameraChanges();
                 }
-                ImGui.image(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.1F);
+                ImGui.imageWithBg(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.1F);
             }
             ImGui.endChild();
         }

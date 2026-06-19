@@ -1,5 +1,6 @@
 package foundry.veil.api.resource.type;
 
+import imgui.extension.texteditor.TextEditorLanguage;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -10,8 +11,8 @@ public interface VeilShaderResource<T extends VeilShaderResource<?>> extends Vei
         return 0xECD1; // Code file icon
     }
 
-//    @Override
-//    default @Nullable TextEditorLanguageDefinition languageDefinition() {
-//        return VeilLanguageDefinitions.glsl();
-//    }
+    @Override
+    default TextEditorLanguage languageDefinition() {
+        return TextEditorLanguage.Glsl();
+    }
 }

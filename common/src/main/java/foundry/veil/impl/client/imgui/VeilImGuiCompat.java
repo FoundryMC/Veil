@@ -6,6 +6,10 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.impl.client.editor.*;
 import foundry.veil.platform.VeilEventPlatform;
+import imgui.ImGui;
+import imgui.ImGuiViewport;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiDockNodeFlags;
 import net.minecraft.client.KeyMapping;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -18,12 +22,13 @@ public final class VeilImGuiCompat {
     }
 
     public static void load() {
-        ImGuiMCEvents.INSTANCE.preRenderImGuiEvents(() -> {
+        ImGuiMCEvents.INSTANCE.imGuiLoadPre(() -> ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable));
+        ImGuiMCEvents.INSTANCE.preRenderImGuiEvent(() -> {
             VeilImGuiStylesheet.initStyles();
             AdvancedFboImGuiAreaImpl.begin();
             VeilRenderSystem.renderer().getEditorManager().render();
         });
-        ImGuiMCEvents.INSTANCE.postRenderImGuiEvents(() -> {
+        ImGuiMCEvents.INSTANCE.postRenderImGuiEvent(() -> {
             VeilImGuiStylesheet.initStyles();
             VeilRenderSystem.renderer().getEditorManager().renderLast();
             AdvancedFboImGuiAreaImpl.end();

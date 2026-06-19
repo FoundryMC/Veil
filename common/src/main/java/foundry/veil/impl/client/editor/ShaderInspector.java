@@ -1,6 +1,7 @@
 package foundry.veil.impl.client.editor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowInspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
@@ -163,7 +164,7 @@ public class ShaderInspector extends SingleWindowInspector implements ResourceMa
         this.removedDefinitions.clear();
 
         ImGui.beginChild("##shader_programs", ImGui.getContentRegionAvailX() * 2 / 3, 0);
-        VeilImGuiUtil.component(SHADER_PROGRAMS);
+        ImGuiMC.component(SHADER_PROGRAMS);
 
         TabSource[] sources = TabSource.values();
         if (ImGui.beginTabBar("##controls")) {
@@ -237,7 +238,7 @@ public class ShaderInspector extends SingleWindowInspector implements ResourceMa
         ImGui.sameLine();
         if (ImGui.beginChild("##panel", 0, ImGui.getContentRegionAvailY())) {
             if (ImGui.beginChild("##open_source", 0, ImGui.getContentRegionAvailY() / 2)) {
-                VeilImGuiUtil.component(OPEN_SOURCE);
+                ImGuiMC.component(OPEN_SOURCE);
 
                 this.openShaderButton(GL_FRAGMENT_SHADER);
                 this.openShaderButton(GL_VERTEX_SHADER);
@@ -255,7 +256,7 @@ public class ShaderInspector extends SingleWindowInspector implements ResourceMa
             ImGui.endChild();
 
             if (ImGui.beginChild("##shader_definitions", 0, ImGui.getContentRegionAvailY())) {
-                VeilImGuiUtil.component(SHADER_DEFINITIONS);
+                ImGuiMC.component(SHADER_DEFINITIONS);
                 ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
                 if (ImGui.inputTextWithHint("##add_definition", SHADER_DEFINITIONS_HINT.getString(), this.addDefinitionText, ImGuiInputTextFlags.EnterReturnsTrue)) {
                     String[] parts = this.addDefinitionText.get().split("=", 2);

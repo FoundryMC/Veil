@@ -1,6 +1,7 @@
 package foundry.veil.impl.client.editor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowInspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
@@ -13,6 +14,8 @@ import foundry.veil.api.client.util.TextureDownloader;
 import foundry.veil.api.compat.IrisCompat;
 import foundry.veil.ext.iris.IrisRenderTargetExtension;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -175,7 +178,7 @@ public class FramebufferInspector extends SingleWindowInspector {
                     ImGui.beginGroup();
                     AdvancedFboTextureAttachment attachment = buffer.getColorTextureAttachment(i);
                     ImGui.text(getAttachmentName(i, attachment.getId(), attachment.getName()));
-                    ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.5F);
+                    ImGuiMC.image(ImGuiMC.getTexture(attachment), width, height, 0, 1, 1, 0);
                     ImGui.endGroup();
                 }
 
@@ -186,7 +189,7 @@ public class FramebufferInspector extends SingleWindowInspector {
                     ImGui.beginGroup();
                     AdvancedFboTextureAttachment attachment = buffer.getDepthTextureAttachment();
                     ImGui.text(getAttachmentName(-1, attachment.getId(), attachment.getName()));
-                    ImGui.image(attachment.getId(), width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.5F);
+                    ImGuiMC.image(ImGuiMC.getTexture(attachment), width, height, 0, 1, 1, 0);
                     ImGui.endGroup();
                 }
 
@@ -213,7 +216,7 @@ public class FramebufferInspector extends SingleWindowInspector {
                 int texture = this.showAlt.get() ? renderTarget.veil$getAltTexture() : renderTarget.veil$getMainTexture();
                 ImGui.beginGroup();
                 ImGui.text(getAttachmentName(0, texture, this.showAlt.get() ? "Alt" : "Main"));
-                ImGui.image(texture, width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.5F);
+                ImGui.imageWithBg(texture, width, height, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 0.5F);
                 ImGui.endGroup();
 
                 if (saveCallback != null && ImGui.button(SAVE.getString(), ImGui.getContentRegionAvailX() - 4, 0)) {

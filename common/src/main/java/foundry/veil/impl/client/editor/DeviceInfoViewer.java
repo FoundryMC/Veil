@@ -1,6 +1,7 @@
 package foundry.veil.impl.client.editor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.api.client.editor.SingleWindowInspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -62,12 +63,12 @@ public class DeviceInfoViewer extends SingleWindowInspector {
                     .map(value -> value instanceof MutableComponent c ? c.withStyle(style -> style.withColor(0xFFFFFFFF)) : Component.literal(value.toString()).withStyle(style -> style.withColor(0xFFFFFFFF)))
                     .toArray();
             if (valueComponents.length == 0) {
-                VeilImGuiUtil.component(Component.translatable(key, UNSUPPORTED).withStyle(style -> style.withColor(VeilImGuiUtil.getColor(ImGuiCol.TextDisabled))));
+                ImGuiMC.component(Component.translatable(key, UNSUPPORTED).withStyle(style -> style.withColor(ImGuiMC.getColor(ImGuiCol.TextDisabled))));
             } else {
-                VeilImGuiUtil.component(Component.translatable(key, valueComponents));
+                ImGuiMC.component(Component.translatable(key, valueComponents));
             }
         } else {
-            VeilImGuiUtil.component(Component.translatable(key, UNSUPPORTED).withStyle(style -> style.withColor(VeilImGuiUtil.getColor(ImGuiCol.TextDisabled))));
+            ImGuiMC.component(Component.translatable(key, UNSUPPORTED).withStyle(style -> style.withColor(ImGuiMC.getColor(ImGuiCol.TextDisabled))));
         }
         if (tooltip != null) {
             ImGui.sameLine();
@@ -76,7 +77,7 @@ public class DeviceInfoViewer extends SingleWindowInspector {
     }
 
     private static void flagText(String key, boolean supported, @Nullable String tooltip) {
-        VeilImGuiUtil.component(Component.translatable(key, supported ? YES : NO));
+        ImGuiMC.component(Component.translatable(key, supported ? YES : NO));
         if (tooltip != null) {
             ImGui.sameLine();
             VeilImGuiUtil.tooltip(tooltip);
@@ -85,7 +86,7 @@ public class DeviceInfoViewer extends SingleWindowInspector {
 
     private static void title(Component component) {
         ImGui.pushStyleColor(ImGuiCol.Text, 0xFFFFFFFF);
-        VeilImGuiUtil.component(component);
+        ImGuiMC.component(component);
         ImGui.popStyleColor();
     }
 

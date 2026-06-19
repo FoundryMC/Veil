@@ -77,5 +77,5 @@ description='''${description}'''
 [[dependencies.${mod_id}]]
     modId = "imguimc"
     type = "optional"
-    versionRange = "[${imguimc_version},2.0.0)"
-    reason = "${mod_name} supports imguimc ${imguimc_version} to 2.0.0"
+    versionRange = "[${imguimc_version},3.0.0)"
+    reason = "${mod_name} supports imguimc ${imguimc_version} to 3.0.0"

@@ -1,5 +1,6 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.editor.SingleWindowInspector;
@@ -20,7 +21,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 public class LightInspector extends SingleWindowInspector {
 
@@ -32,7 +36,6 @@ public class LightInspector extends SingleWindowInspector {
     private static final Component REMOVE_ALL_DESC = Component.translatable("inspector.veil.light.button.remove_all.desc");
     private static final Component SET_POSITION = Component.translatable("inspector.veil.light.button.set_position");
     private static final Component ATTRIBUTES = Component.translatable("inspector.veil.light.attributes");
-    private static final Component ENABLE_AO = Component.translatable("inspector.veil.light.toggle.ao");
 
     private final List<ResourceKey<LightTypeRegistry.LightType<?>>> lightTypes = new ArrayList<>();
     private ResourceKey<LightTypeRegistry.LightType<?>> selectedTab;
@@ -78,7 +81,8 @@ public class LightInspector extends SingleWindowInspector {
         ImGui.sameLine();
         ImGui.beginDisabled(lightType == null);
         if (ImGui.button(REMOVE.getString()) && lightType != null) {
-            for (LightRenderHandle<?> handle : List.copyOf(lightRenderer.getLights(lightType))) {
+            List<? extends LightRenderHandle<?>> lights = List.copyOf(lightRenderer.getLights(lightType));
+            for (LightRenderHandle<?> handle : lights) {
                 handle.free();
             }
         }
@@ -156,7 +160,7 @@ public class LightInspector extends SingleWindowInspector {
         }
 
         ImGui.newLine();
-        VeilImGuiUtil.component(ATTRIBUTES);
+        ImGuiMC.component(ATTRIBUTES);
 
         if (lightData instanceof EditorAttributeProvider editorAttributeProvider) {
             editorAttributeProvider.renderImGuiAttributes();

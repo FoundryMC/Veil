@@ -1,5 +1,6 @@
 package foundry.veil.api.resource.editor;
 
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.Veil;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.resource.VeilEditorEnvironment;
@@ -71,11 +72,11 @@ public class ResourceOverrideEditor implements ResourceFileEditor<VeilResource<?
             return;
         }
 
-        VeilImGuiUtil.component(NAME);
+        ImGuiMC.component(NAME);
 
         VeilResourceManager resourceManager = this.environment.getResourceManager();
         for (Path writePath : this.options) {
-            if (ImGui.selectable(writePath.toString(), false, ImGuiSelectableFlags.AllowItemOverlap)) {
+            if (ImGui.selectable(writePath.toString(), false, ImGuiSelectableFlags.AllowOverlap)) {
                 Veil.LOGGER.info("Writing to {}", writePath);
 
                 VeilResourceInfo info = this.veilResource.resourceInfo();

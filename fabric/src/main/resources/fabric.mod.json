@@ -68,11 +68,14 @@
     "minecraft": "~${minecraft_version}",
     "java": ">=${java_version}"
   },
+  "suggests": {
+    "imguimc": ">=${imguimc_version}"
+  },
   "breaks": {
     "sodium": "<${sodium_version}",
     "embeddium": "*",
     "celeritas": "*",
-    "imguimc": ["<${imguimc_version}", ">=2.0.0"]
+    "imguimc": ["<${imguimc_version}", ">=3.0.0"]
   },
   "accessWidener": "veil.accesswidener"
 }

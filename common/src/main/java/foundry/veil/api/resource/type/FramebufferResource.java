@@ -12,6 +12,7 @@ import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.impl.resource.action.FramebufferEditAction;
 import foundry.veil.impl.resource.action.TextEditAction;
+import imgui.extension.texteditor.TextEditorLanguage;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.BufferedReader;
@@ -45,5 +46,10 @@ public record FramebufferResource(VeilResourceInfo resourceInfo) implements Veil
     @Override
     public int getIconCode() {
         return 0xED0F;
+    }
+
+    @Override
+    public TextEditorLanguage languageDefinition() {
+        return TextEditorLanguage.Json();
     }
 }

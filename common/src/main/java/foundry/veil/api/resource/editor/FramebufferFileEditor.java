@@ -295,40 +295,41 @@ public class FramebufferFileEditor implements ResourceFileEditor<FramebufferReso
         BUILDER.setLength(0);
     }
 
+    // TODO re-implement this when fonts can be accessed again
     private static void drawVerticalText(String next) {
-        ImFont font = ImGui.getFont();
-        float pad = ImGui.getStyle().getFramePaddingX();
-        float posX = ImGui.getCursorScreenPosX() + pad;
-        float posY = ImGui.getCursorScreenPosY() + pad;
-
-        ImDrawList drawList = ImGui.getWindowDrawList();
-        int length = next.length();
-        drawList.primReserve(6 * length, 4 * length);
-        for (int i = 0; i < length; i++) {
-            int codePoint = next.codePointAt(i);
-            ImFontGlyph glyph = font.findGlyph(codePoint);
-
-            posY -= font.getCharAdvance(codePoint);
-            drawList.primQuadUV(
-                    (int) (posX + glyph.getY1()),
-                    (int) (posY + glyph.getX0()),
-                    (int) (posX + glyph.getY1()),
-                    (int) (posY + glyph.getX1()),
-                    (int) (posX + glyph.getY0()),
-                    (int) (posY + glyph.getX1()),
-                    (int) (posX + glyph.getY0()),
-                    (int) (posY + glyph.getX0()),
-
-                    glyph.getU1(),
-                    glyph.getV1(),
-                    glyph.getU0(),
-                    glyph.getV1(),
-                    glyph.getU0(),
-                    glyph.getV0(),
-                    glyph.getU1(),
-                    glyph.getV0(),
-                    -1);
-        }
+//        ImFont font = ImGui.getFont();
+//        float pad = ImGui.getStyle().getFramePaddingX();
+//        float posX = ImGui.getCursorScreenPosX() + pad;
+//        float posY = ImGui.getCursorScreenPosY() + pad;
+//
+//        ImDrawList drawList = ImGui.getWindowDrawList();
+//        int length = next.length();
+//        drawList.primReserve(6 * length, 4 * length);
+//        for (int i = 0; i < length; i++) {
+//            int codePoint = next.codePointAt(i);
+//            ImFontGlyph glyph = font.findGlyph(codePoint);
+//
+//            posY -= font.getCharAdvance(codePoint);
+//            drawList.primQuadUV(
+//                    (int) (posX + glyph.getY1()),
+//                    (int) (posY + glyph.getX0()),
+//                    (int) (posX + glyph.getY1()),
+//                    (int) (posY + glyph.getX1()),
+//                    (int) (posX + glyph.getY0()),
+//                    (int) (posY + glyph.getX1()),
+//                    (int) (posX + glyph.getY0()),
+//                    (int) (posY + glyph.getX0()),
+//
+//                    glyph.getU1(),
+//                    glyph.getV1(),
+//                    glyph.getU0(),
+//                    glyph.getV1(),
+//                    glyph.getU0(),
+//                    glyph.getV0(),
+//                    glyph.getU1(),
+//                    glyph.getV0(),
+//                    -1);
+//        }
     }
 
     private void renderFramebufferSettings() {

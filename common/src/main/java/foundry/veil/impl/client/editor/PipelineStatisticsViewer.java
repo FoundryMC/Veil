@@ -1,5 +1,6 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.api.client.editor.Inspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -7,6 +8,7 @@ import foundry.veil.api.client.render.profiler.RenderProfilerCounter;
 import foundry.veil.impl.client.render.profiler.VeilRenderProfilerImpl;
 import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotSpec;
 import imgui.extension.implot.flag.*;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -22,6 +24,8 @@ import java.util.Set;
 
 @ApiStatus.Internal
 public class PipelineStatisticsViewer implements Inspector {
+
+    private static final ImPlotSpec PLOT_SPEC = new ImPlotSpec();
 
     public static final Component TITLE = Component.translatable("inspector.veil.pipeline_statistics.title");
     public static final int HISTORY_LENGTH = 200;
@@ -102,12 +106,13 @@ public class PipelineStatisticsViewer implements Inspector {
                             ImPlot.setupAxesLimits(0, HISTORY_LENGTH, 0, Math.max(max * 1.1, 10), ImPlotCond.Always);
                             ImPlot.setupAxisFormat(ImPlotAxis.Y1, "%3.0f");
 
-                            ImPlot.pushStyleColor(ImPlotCol.Line, VeilImGuiUtil.colorOf(statistic.name()));
+                            // TODO make sure this is correct
+                            final int colors = VeilImGuiUtil.colorOf(statistic.name());
+                            PLOT_SPEC.setLineColor((colors & 0xFF) / 255.0F, ((colors >> 8) & 0xFF) / 255.0F, ((colors >> 16) & 0xFF) / 255.0F, ((colors >> 24) & 0xFF) / 255.0F);
                             ImPlot.pushStyleVar(ImPlotStyleVar.PlotPadding, 0.0F, 0.0F);
                             ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, 0.0F, 0.0F);
-                            ImPlot.plotLine(statistic.name(), values);
+                            ImPlot.plotLine(statistic.name(), values, -1, -1, PLOT_SPEC);
                             ImPlot.popStyleVar();
-                            ImPlot.popStyleColor();
 
                             ImPlot.endPlot();
                         }

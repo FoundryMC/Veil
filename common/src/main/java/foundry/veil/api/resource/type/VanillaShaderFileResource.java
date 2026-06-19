@@ -6,6 +6,7 @@ import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.impl.resource.action.TextEditAction;
 import foundry.veil.mixin.debug.accessor.DebugGameRendererAccessor;
+import imgui.extension.texteditor.TextEditorLanguage;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 

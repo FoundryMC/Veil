@@ -1,6 +1,5 @@
 package foundry.veil.api.client.editor;
 
-import foundry.imgui.api.ImGuiMC;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
 import foundry.veil.api.event.VeilRegisterInspectorsEvent;
@@ -38,7 +37,12 @@ import java.util.function.Predicate;
  */
 public class EditorManager implements VeilEditorEnvironment, PreparableReloadListener {
 
-    public static final ResourceLocation DEFAULT_FONT = Veil.veilPath("jetbrains_mono");
+    /**
+     * @deprecated Use ImGuiMC#DEFAULT_FONT instead
+     */
+    @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+    @Deprecated
+    public static final ResourceLocation DEFAULT_FONT = ResourceLocation.fromNamespaceAndPath("imguimc", "jetbrains_mono");
 
     private final Map<Inspector, ImBoolean> editors;
     private final Map<ResourceLocation, ResourceFileEditor<?>> resourceFileEditors;
@@ -72,8 +76,6 @@ public class EditorManager implements VeilEditorEnvironment, PreparableReloadLis
                     Util.backgroundExecutor(),
                     Minecraft.getInstance());
         }
-
-        ImGui.pushFont(ImGuiMC.getFont(DEFAULT_FONT, false, false));
 
         if (ImGui.beginMainMenuBar()) {
             ImFont font = ImGui.getFont();
@@ -144,8 +146,6 @@ public class EditorManager implements VeilEditorEnvironment, PreparableReloadLis
 
             next.render();
         }
-
-        ImGui.popFont();
     }
 
     @ApiStatus.Internal
@@ -154,8 +154,6 @@ public class EditorManager implements VeilEditorEnvironment, PreparableReloadLis
             return;
         }
 
-        ImGui.pushFont(ImGuiMC.getFont(DEFAULT_FONT, false, false));
-
         for (Map.Entry<Inspector, ImBoolean> entry : this.editors.entrySet()) {
             Inspector inspector = entry.getKey();
             ImBoolean enabled = entry.getValue();
@@ -163,8 +161,6 @@ public class EditorManager implements VeilEditorEnvironment, PreparableReloadLis
                 inspector.renderLast();
             }
         }
-
-        ImGui.popFont();
     }
 
     @ApiStatus.Internal

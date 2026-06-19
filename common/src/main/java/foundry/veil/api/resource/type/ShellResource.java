@@ -6,6 +6,7 @@ import foundry.veil.api.resource.VeilResourceInfo;
 import foundry.veil.api.resource.VeilResourceManager;
 import foundry.veil.impl.resource.action.ShellInspectAction;
 import foundry.veil.impl.resource.action.TextEditAction;
+import imgui.extension.texteditor.TextEditorLanguage;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.InactiveProfiler;
@@ -34,5 +35,10 @@ public record ShellResource(VeilResourceInfo resourceInfo) implements VeilTextRe
     @Override
     public int getIconCode() {
         return 0xEDDF;
+    }
+
+    @Override
+    public TextEditorLanguage languageDefinition() {
+        return TextEditorLanguage.Json();
     }
 }

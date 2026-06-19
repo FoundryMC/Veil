@@ -1,5 +1,6 @@
 package foundry.veil.impl.client.editor;
 
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.SingleWindowInspector;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
@@ -50,7 +51,7 @@ public class PostInspector extends SingleWindowInspector {
 
         ImGui.setNextItemWidth(availableWidth / 2);
         ImGui.beginGroup();
-        VeilImGuiUtil.component(INACTIVE);
+        ImGuiMC.component(INACTIVE);
         if (ImGui.beginListBox("##available_pipelines", availableWidth / 2, 0)) {
             for (ResourceLocation entry : postProcessingManager.getPipelines()) {
                 if (postProcessingManager.isActive(entry) || isInternal(entry)) {
@@ -85,7 +86,7 @@ public class PostInspector extends SingleWindowInspector {
 
         ImGui.setNextItemWidth(availableWidth / 2);
         ImGui.beginGroup();
-        VeilImGuiUtil.component(ACTIVE);
+        ImGuiMC.component(ACTIVE);
 
         if (ImGui.beginListBox("##shaders", availableWidth / 2, 0)) {
             List<PostProcessingManager.ProfileEntry> pipelines = postProcessingManager.getActivePipelines();

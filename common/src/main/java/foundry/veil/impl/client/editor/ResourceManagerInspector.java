@@ -50,7 +50,7 @@ public class ResourceManagerInspector extends SingleWindowInspector {
         ImGui.inputTextWithHint("##search", SEARCH.getString(), this.searchText);
         ImGui.sameLine();
 
-        ImGui.pushFont(ImGuiMC.getFont(VeilImGuiUtil.ICON_FONT, false, false));
+        ImGui.pushFont(ImGuiMC.getFont(VeilImGuiUtil.ICON_FONT, false, false), 0);
 
         // Add button
         ImGui.beginDisabled();
@@ -148,7 +148,7 @@ public class ResourceManagerInspector extends SingleWindowInspector {
                         VeilResource<?> resource = resources.get(index);
 
                         float startX = ImGui.getCursorScreenPosX();
-                        ImGui.selectable("##" + resource.resourceInfo().location(), false, ImGuiSelectableFlags.AllowItemOverlap, ImGui.getContentRegionAvailX(), 22f);
+                        ImGui.selectable("##" + resource.resourceInfo().location(), false, ImGuiSelectableFlags.AllowOverlap, ImGui.getContentRegionAvailX(), 22f);
 
                         ImGui.setNextItemAllowOverlap();
                         ImGui.sameLine();
@@ -206,7 +206,7 @@ public class ResourceManagerInspector extends SingleWindowInspector {
                 VeilResource<?> resource = resources.get(index);
 
                 float startX = ImGui.getCursorScreenPosX();
-                ImGui.selectable("##" + resource.resourceInfo().location(), false, ImGuiSelectableFlags.AllowItemOverlap, ImGui.getContentRegionAvailX(), cellHeight);
+                ImGui.selectable("##" + resource.resourceInfo().location(), false, ImGuiSelectableFlags.AllowOverlap, ImGui.getContentRegionAvailX(), cellHeight);
 
                 ImGui.setNextItemAllowOverlap();
                 ImGui.sameLine();

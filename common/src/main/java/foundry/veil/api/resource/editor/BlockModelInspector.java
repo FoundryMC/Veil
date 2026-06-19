@@ -92,7 +92,7 @@ public class BlockModelInspector implements ResourceFileEditor<BlockModelResourc
 
                 BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-                for (BakedQuad quad : quads) {
+                for (BakedQuad quad : this.quads) {
                     builder.putBulkData(POSE, quad, 1.0F, 1.0F, 1.0F, 1.0F, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
                 }
 
@@ -119,7 +119,7 @@ public class BlockModelInspector implements ResourceFileEditor<BlockModelResourc
             });
 
             if (ImGui.beginChild("3D View", desiredWidth / 2.0F + 2, desiredHeight / 2.0F + 2, false, ImGuiWindowFlags.NoScrollbar)) {
-                ImGui.image(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.1F);
+                ImGui.imageWithBg(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 0.1F, 1.0F, 1.0F, 1.0F, 1.0F);
             }
             ImGui.endChild();
         }
@@ -141,7 +141,7 @@ public class BlockModelInspector implements ResourceFileEditor<BlockModelResourc
         Minecraft client = Minecraft.getInstance();
         this.quads = new ObjectArrayList<>();
 
-        try (Reader reader = resource.resourceInfo().openAsReader(resourceManager)) {
+        try (Reader reader = this.resource.resourceInfo().openAsReader(this.resourceManager)) {
             BlockModel unbaked = BlockModel.fromStream(reader);
 
             unbaked.resolveParents((location) -> {
@@ -161,7 +161,7 @@ public class BlockModelInspector implements ResourceFileEditor<BlockModelResourc
                     Material material = unbaked.getMaterial(blockelementface.texture());
                     TextureAtlasSprite sprite = client.getTextureAtlas(material.atlasLocation()).apply(material.texture());
 
-                    quads.add(FACE_BAKERY.bakeQuad(blockelement.from, blockelement.to, blockelementface, sprite, direction, BlockModelRotation.X0_Y0, blockelement.rotation, blockelement.shade));
+                    this.quads.add(FACE_BAKERY.bakeQuad(blockelement.from, blockelement.to, blockelementface, sprite, direction, BlockModelRotation.X0_Y0, blockelement.rotation, blockelement.shade));
                 }
             }
         } catch (Exception e) {

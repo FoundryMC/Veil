@@ -1,5 +1,6 @@
 package foundry.veil.impl.resource;
 
+import foundry.imgui.api.ImGuiMC;
 import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.resource.VeilResource;
@@ -61,7 +62,7 @@ public class VeilResourceRenderer {
             VeilImGuiUtil.icon(0xEB91);
             ImGui.sameLine();
             ImGui.popStyleVar();
-            VeilImGuiUtil.component(COPY_PATH);
+            ImGuiMC.component(COPY_PATH);
 
             ImGui.beginDisabled(info.isStatic());
             if (ImGui.selectable("##open_folder")) {
@@ -77,7 +78,7 @@ public class VeilResourceRenderer {
             VeilImGuiUtil.icon(0xECAF);
             ImGui.sameLine();
             ImGui.popStyleVar();
-            VeilImGuiUtil.component(OPEN_FOLDER);
+            ImGuiMC.component(OPEN_FOLDER);
             ImGui.endDisabled();
 
             for (int i = 0; i < actions.size(); i++) {
@@ -94,7 +95,7 @@ public class VeilResourceRenderer {
                     ImGui.sameLine();
                 });
                 ImGui.popStyleVar();
-                VeilImGuiUtil.component(action.getName());
+                ImGuiMC.component(action.getName());
             }
 
             ImGui.popStyleVar();

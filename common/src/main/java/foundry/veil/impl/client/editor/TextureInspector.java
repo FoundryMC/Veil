@@ -353,7 +353,7 @@ public class TextureInspector extends SingleWindowInspector {
             float size = ImGui.getContentRegionAvailX();
 
             cubemapStorage.render((int) size, (int) (size / 2.0F));
-            ImGui.image(cubemapStorage.renderedTextureId(), size, size / 2.0F, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+            ImGui.imageWithBg(cubemapStorage.renderedTextureId(), size, size / 2.0F, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
         } else if (target == GL_TEXTURE_2D_ARRAY) {
             TextureStorage storage = this.textureStorage.get(selectedId);
             if (!(storage instanceof ArrayStorage)) {
@@ -371,7 +371,7 @@ public class TextureInspector extends SingleWindowInspector {
 
             arrayStorage.render(selectedId, width, height, depth);
             for (int i = 0; i < depth; i++) {
-                ImGui.image(arrayStorage.renderedTextureId(i), size, size * (float) height / (float) width, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+                ImGui.imageWithBg(arrayStorage.renderedTextureId(i), size, size * (float) height / (float) width, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
             }
         } else if (target == GL_TEXTURE_2D) {
             TextureStorage storage = this.textureStorage.remove(selectedId);
@@ -382,7 +382,7 @@ public class TextureInspector extends SingleWindowInspector {
             int width = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
             int height = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
             float size = ImGui.getContentRegionAvailX();
-            ImGui.image(selectedId, size, size * (float) height / (float) width, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+            ImGui.imageWithBg(selectedId, size, size * (float) height / (float) width, flipX ? 1 : 0, flipY ? 1 : 0, flipX ? 0 : 1, flipY ? 0 : 1, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

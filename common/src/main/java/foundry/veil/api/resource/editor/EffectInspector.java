@@ -138,7 +138,7 @@ public class EffectInspector implements ResourceFileEditor<FlareResource>, Effec
                 if (ImGui.isWindowHovered()) {
                     this.applyCameraChanges();
                 }
-                ImGui.image(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.1F);
+                ImGui.imageWithBg(texture, desiredWidth / 2.0F, desiredHeight / 2.0F, 0, 1, 1, 0, 1.0F, 1.0F, 1.0F, 0.1F, 1.0F, 1.0F, 1.0F, 1.0F);
             }
             ImGui.endChild();
         }
