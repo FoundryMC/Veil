@@ -1,23 +1,30 @@
 # Overview
 
-All veil resources should be located in the `assets/modid/pinwheel` folder. Specific assets are in subfolders of the
+All Veil resources should be located in the `assets/modid/pinwheel` folder. Specific assets are in subfolders of the
 main pinwheel folder.
 
-The exception is Quasar particles, which are located in the `assets/modid/quasar` folder.
+There are two exceptions: [Quasar](Quasar) particles, which are located in the `assets/modid/quasar` folder, and [Flare](Flare) effects, which are located in the `assets/modid/flare` folder.
+
+Within development environments, the mod ImGuiMC is used to view various pieces of information about the game, such as framebuffers or lights. This dependency is not needed prior to Veil `4.0.0`.
 
 # Getting Started
 
-The latest version can be found in the Veil [README](https://github.com/FoundryMC/Veil/blob/1.20/README.md) or
-directly from [Jared's Maven](https://maven.blamejared.com/foundry/veil/).
+The latest version for Veil can be found in the Veil [README](https://github.com/FoundryMC/Veil/blob/1.21/README.md) or directly from [Jared's Maven](https://maven.blamejared.com/foundry/veil/).
 
-### Neoforge
+The latest version for ImGuiMC can be found from [RyanHCode's Maven](https://maven.ryanhcode.dev/#/releases/foundry/imguimc)
+
+### NeoForge
 
 <details>
   <summary>Click to expand</summary>
 
 ```groovy
 repositories {
-    maven {
+    maven { // For ImGuiMC
+        url = "https://maven.ryanhcode.dev/releases"
+        name = "RyanHCode Maven"
+    }
+    maven { // For Veil
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
@@ -28,6 +35,7 @@ dependencies {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
     }
+    implementation("foundry.imguimc:imguimc-neoforge-${project.minecraft_version}:${project.imguimc_version}")
 }
 ```
 
@@ -40,7 +48,11 @@ dependencies {
 
 ```groovy
 repositories {
-    maven {
+    maven { // For ImGuiMC
+        url = "https://maven.ryanhcode.dev/releases"
+        name = "RyanHCode Maven"
+    }
+    maven { // For Veil
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
@@ -51,6 +63,7 @@ dependencies {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
     }
+    modImplementation("foundry.imguimc:imguimc-fabric-${project.minecraft_version}:${project.imguimc_version}")
 }
 ```
 
@@ -63,7 +76,11 @@ dependencies {
 
 ```groovy
 repositories {
-    maven {
+    maven { // For ImGuiMC
+        url = "https://maven.ryanhcode.dev/releases"
+        name = "RyanHCode Maven"
+    }
+    maven { // For Veil
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
@@ -74,6 +91,7 @@ dependencies {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
     }
+    implementation("foundry.imguimc:imguimc-common-${project.minecraft_version}:${project.imguimc_version}")
 }
 ```
 
@@ -81,18 +99,17 @@ dependencies {
 
 # Veil Features
 
-- [Veil Events](Events)
-- [Better Vertex Buffers](VertexArray)
-- [Shader Inject](ShaderInject)
-- [Dynamic Buffers](DynamicBuffer.md)
-- [Custom Shaders](Shader)
-- [Custom Framebuffers](Framebuffer)
-- [Data-Driven Render Types](CustomRenderType)
-- [Render Type Stages](RenderTypeStage)
-- [Post-Processing](PostProcessing)
 - [Animations](Animations)
+- [Better Vertex Buffers](VertexArray)
 - [Colors](Colors)
+- [Custom Framebuffers](Framebuffer)
+- [Custom Shaders](Shader)
+- [Data-Driven Render Types](CustomRenderType)
+- [Dynamic Buffers](DynamicBuffer)
 - [Easings](Easings)
-- [Poses and custom code-based Animations](Poses)
-- [Quasar](Quasar)
-- [Flare](Flare)
+- [Flare (Data-driven Effects)](Flare)
+- [Post-Processing](PostProcessing)
+- [Quasar (Particles)](Quasar)
+- [Render Type Stages](RenderTypeStage)
+- [Shader Inject](ShaderInject)
+- [Veil Events](Events)
