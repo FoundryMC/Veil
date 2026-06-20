@@ -49,18 +49,18 @@ An `Animator` puppeteers a Skeleton, updating the transformations of bones and t
 
 ## Animation
 
-An `Animation` applies a transformation to the bones of a skeleton, using its `apply()` method. Animations should be _statically created_, and shared between animators which utilize them. An animation can be provided to an animator using `animator.addAnimation(animation, priority)` or `animator.addTimedAnimation(animation, priority, length)`. An animation is designed to work procedurally, with custom animations generating their transformations via code.
+An `Animation` applies a transformation to the bones of a skeleton, using its `apply()` method. Animations should be _statically created_, and shared between animators which utilize them. An animation can be provided to an animator using `Animator.addAnimation(animation, priority)` or `Animator.addTimedAnimation(animation, priority, length)`. An animation is designed to work procedurally, with custom animations generating their transformations via code.
 
 ### KeyframedAnimation
 A subclass of `Animation`, which transforms a `Skeleton` based off keyframes. These are currently a work-in-progress!
 
 ### AnimationEntry
 
-Used by the Animator to control attributes of an Animation before applying it to the Skeleton, such as an animation's time or blend factor. Returned by `animator.addAnimation(animation, priority)`. The entry's time is _not_ automatically updated, and must be set by the Animator. For entries with a given length and automatically updated time, see `TimedAnimationEntry`.
+Used by the Animator to control attributes of an Animation before applying it to the Skeleton, such as an animation's time or blend factor. Returned by `Animator.addAnimation(animation, priority)`. The entry's time is _not_ automatically updated, and must be set by the Animator. For entries with a given length and automatically updated time, see `TimedAnimationEntry`.
 
 ### TimedAnimationEntry
 
-A subclass of `AnimationEntry`, these are used to execute one-shot animations with a known length, such as attacks. Returned by `animator.addTimedAnimation(animation, priority, length)`. A TimedAnimationEntry's time variable is automatically updated. 
+A subclass of `AnimationEntry`, these are used to execute one-shot animations with a known length, such as attacks. Returned by `Animator.addTimedAnimation(animation, priority, length)`. A TimedAnimationEntry's time variable is automatically updated. 
 
 ## Constraints
 
