@@ -8,9 +8,13 @@ Dynamic buffers are a custom system that adds some deferred rendering features t
 | Lightmap UV    | `veil:dynamic_buffer/light_uv`    | Lightmap UV coordinates |
 | Lightmap Color | `veil:dynamic_buffer/light_color` | Lightmap color          |
 | Debug          | `veil:dynamic_buffer/debug`       | Unused by Veil          |
-|                |                                   |                         |
 
-%%  %% TODO ## Enabling Buffers
+#### Enabling Buffers
+
+Dynamic buffers are enabled on a per-ID basis. To enable a given set of dynamic buffers, simply call `VeilRenderer#enableBuffers`. Similarly, `VeilRenderer#disableBuffers` is used to disable any active buffers. These functions must be called on the render thread. 
+
+In-game, dynamic buffers can be viewed using the editor menu (default keybind F6) in the Framebuffers section. They can also be enabled using the (client-sided) command `/veilc buffers enable <type>` 
+
 ## Custom Shader Support
 Veil supports outputting to dynamic buffers automatically by adding a small tag to the value in your shader source. All fields support being marked with `// #veil:BUFFER` to automatically output it to the corresponding buffer when enabled.
 
