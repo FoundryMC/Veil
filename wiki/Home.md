@@ -99,7 +99,6 @@ dependencies {
 
 # Veil Features
 
-- [Animations](Animations)
 - [Better Vertex Buffers](VertexArray)
 - [Colors](Colors)
 - [Custom Framebuffers](Framebuffer)
