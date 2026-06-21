@@ -108,7 +108,7 @@ allowed to include code from other include shaders as long as there are no circu
 ### Example
 
 ```glsl
-#include domain:includeid
+#include namespace:path
 
 out vec4 fragColor;
 
@@ -170,13 +170,13 @@ Custom post-shader uniforms can be added by uploading uniforms during the `VeilP
 
 # Uniform Blocks
 
-Veil has an API for creating simple uniform blocks, see `VeilShaderBufferRegistry#REGISTRY`. The data layout can then be
-constructed with `VeilShaderBufferLayout`, see `CameraMatrices` for an example.
+Veil has an API for creating simple uniform blocks, see [`VeilShaderBufferRegistry#REGISTRY`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/registry/VeilShaderBufferRegistry.java#L21). The data layout can then be
+constructed with [`VeilShaderBufferLayout`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/VeilShaderBufferLayout.java), see [`CameraMatrices#createLayout`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/CameraMatrices.java#L43-L55) for an example.
 
 The registry key used for a shader buffer can then be used in any veil shader to import the GLSL code to access that
 block.
 
-Veil fully supports registering custom uniform blocks. See `VeilShaderBufferLayout#Builder` for more details.
+Veil fully supports registering custom uniform blocks. See [`VeilShaderBufferLayout#Builder`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/VeilShaderBufferLayout.java#L98) for more details.
 
 ### Example
 

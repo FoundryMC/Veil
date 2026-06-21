@@ -6,43 +6,49 @@ Quasar is an advanced particle system that is fully data-driven. Instead of defi
 
 ### Particle Emitters
 
-| Folder | `emitters`                                                                                                                           |
-|--------|--------------------------------------------------------------------------------------------------------------------------------------|
-| Codec  | [Github](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleEmitterData.java#L27) |
+- **Folder Path: `emitters`**
+- **[Particle Emitter Codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleEmitterData.java#L27)**
 
 Particle emitters are the starting point for everything related to Quasar's particles. They define a few variables about
-themselves like lifetime and the rate at which they emit particles, but more importantly they hold the links to the
-Particle Data and Shape that each describe specific properties of the spawned particles.
+themselves, like the emitter's lifetime and the rate at which the emitter emits particles. More importantly, they also hold the links to the
+particle data that defines how particles behave and the shape that describes where particles spawn.
 
 Syntax:
 ```json5
 {
-	// Required
-	// How long the emitter emits particles, in ticks
-	"max_lifetime": 20,
-	// Optional
-	// Whether the emitter will reset after max_lifetime ticks
-	"loop": true,
-	// Required
-	// The delay between particles being emitted, in ticks
-	"rate": 5,
-	// Required
-	// How many particles are emitted every [rate] ticks
-	"count": 2,
-	// Required
-	// The settings that define how to emit the particles
-	"emitter_settings": "modid:path/to/emitter/settings",
-	// Required
-	// The data that define how each particle behaves
-	"particle_data": "modid:path/to/particle/data"
+  // Required
+  // How long the emitter emits particles, in ticks
+  "max_lifetime": 20,
+  // Optional
+  // Whether the emitter will reset after max_lifetime ticks
+  "loop": true,
+  // Required
+  // The delay between particles being emitted, in ticks
+  "rate": 5,
+  // Required
+  // How many particles are emitted every [rate] ticks
+  "count": 2,
+  // Required
+  // The settings that define how to emit the particles
+  "emitter_settings": {
+    // Required
+    "shape": "modid:path/to/emitter/shape",
+    // Required
+    "particle_settings": "modid:path/to/particle/settings",
+    // Optional
+    // Forces all particles to be spawned
+    "force_spawn": false
+  },
+  // Required
+  // The data that define how each particle behaves
+  "particle_data": "modid:path/to/particle/data"
 }
 ```
 
-### Emitter Settings
+### Particle Settings
 
-| Folder | `modules/emitter/particle`                                                                                                        |
-|--------|-----------------------------------------------------------------------------------------------------------------------------------|
-| Codec  | [Github](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleSettings.java#L26) |
+- **Folder Path: `modules/emitter/particle`**
+- **[Particle Settings Codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleSettings.java#L26)**
 
 Sets lifetime, size, speed, initial rotation and the ranges for randomizing them.
 
@@ -75,9 +81,9 @@ Syntax (note that all fields are required, none are optional):
 
 ### Emitter Shapes
 
-| Folder | `modules/emitter/shape`                                                                                           |
-|--------|-------------------------------------------------------------------------------------------------------------------|
-| Shapes | [Github](https://github.com/FoundryMC/Veil/tree/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/shape) |
+- **Folder Path: `modules/emitter/shape`**
+- **[Emitter Shape Codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/EmitterShapeSettings.java#L21)**
+- **[Shape Implementations](https://github.com/FoundryMC/Veil/tree/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/shape)**
 
 A shape describes where relative to the location of the Particle Emitter to spawn the individual particles.
 
@@ -106,9 +112,11 @@ Syntax (all fields are required):
 
 ### Modules
 
-| Folder | `modules`                                                                                                      |
-|--------|----------------------------------------------------------------------------------------------------------------|
-| Link   | [Github](https://github.com/FoundryMC/Veil/tree/1.21/common/src/main/java/foundry/veil/api/quasar/data/module) |
+- **Folder Path: `modules`**
+- **Folder Path (Init Modules): `modules/init`**
+- **Folder Path (Update Modules): `modules/update`**
+- **Folder Path (Render Modules): `modules/render`**
+- **[Module Codecs](https://github.com/FoundryMC/Veil/tree/1.21/common/src/main/java/foundry/veil/api/quasar/data/module)**
 
 Modules are the most powerful building block of Quasar. A module is code attached to a particle, where it is executed at
 a specific time, depending on which kind of module it is. They make particles dynamic by defining movement,
@@ -130,9 +138,8 @@ We'll talk more about the individual types of modules later in this article.
 
 ### Particle Data
 
-| Folder | `modules/particle_data`                                                                                                             |
-|--------|-------------------------------------------------------------------------------------------------------------------------------------|
-| Codec  | [Github](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/QuasarParticleData.java#L52) |
+- **Folder Path (Render Modules): `modules/particle_data`**
+- **[Particle Data Codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/QuasarParticleData.java#L52)**
 
 Defines the properties attached to each particles. Includes any modules attached to the particle, how it is rendered, and various other properties. 
 
@@ -144,15 +151,25 @@ Syntax:
   // "BILLBOARD" is meant for particles with textures that always face the player, whereas "CUBE" displays colored, textureless cubes.
   "render_type": "CUBE",
   // Init modules run once on a particle when it is spawned.
-  "init_modules": [],
+  "init_modules": [
+    ...
+  ],
   // Update modules run every tick while the particle is alive.
-  "update_modules": [],
+  "update_modules": [
+    ...
+  ],
   // Collision modules run once when the particle collides with something.
-  "collision_modules": [],
+  "collision_modules": [
+    ...
+  ],
   // Force modules also run every tick while the particle is alive and apply different changes to velocity based on module.
-  "forces": [],
+  "forces": [
+    ...
+  ],
   // Render modules run every frame and can change how the particle appears.
-  "render_modules": [],
+  "render_modules": [
+    ...
+  ],
   // Holds all information related to the sprite
   "sprite_data": {
     // Required
@@ -235,7 +252,7 @@ This will make all particles blow towards the positive X axis, with a strength o
 
 The other module we'll look at is `color`, which adds a color gradient to each particle. Again, please reference the [codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/module/render/ColorParticleModuleData.java#L19-L20) to see how it corresponds to the properties of the module.
 
-This module uses Molang to determine where along the gradient the particle is. Explaining Molang is beyond the scope of this article, but there is a good reference [here](https://bedrock.dev/docs/stable/Molang). You can see a list of available queries [here](https://github.com/FoundryMC/Veil/blob/eb13366df06eda66054ee783f5abf956f4581d1a/common/src/main/java/foundry/veil/api/quasar/particle/QuasarParticle.java#L72-L88).
+This module uses Molang to determine where along the gradient the particle is. Explaining Molang is beyond the scope of this article, but there is a good reference [here](https://bedrock.dev/docs/stable/Molang). You can see a list of available queries [here](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/particle/QuasarParticle.java#L72-L88).
 ```json5
 {
   "module": "color",
@@ -271,29 +288,29 @@ This module uses Molang to determine where along the gradient the particle is. E
 
 ### Creating Custom Modules
 
-In case we've lost you somewhere between Particle Module Data, Module Data and Modules, here's the terminology:
+In case we've lost you somewhere between particle module data, module data and modules, here's the terminology:
 
-**Module Data**: JSON-defined parameters for a specific Module. The corresponding Java record handles applying modules
-to the particle based on the data from the Json.
+**Module data**: JSON-defined parameters for a specific module. The corresponding Java record handles applying modules
+to the particle based on the data from the JSON.
 
-**Module**: Interface-implementing class that takes values from the Module Data to use them in logic executed on the
+**Module**: `ParticleModuleData`-implementing class that takes values from the module data to use them in logic executed on the
 particle (`init`, `update`, `render`).
 
-**Particle Module Data**: Defines the modules to attach to the particle.
+**Particle module data**: Defines the modules to attach to the particle.
 
 ```mermaid
 flowchart
-	emitter[Particle Emitter]
-data[Particle Module data
-=> List of Modules]
-pmodules[Particle Modules
+	emitter[Particle emitter]
+data[Particle module data
+=> List of modules]
+pmodules[Particle modules
 Run every frame/tick]
 particle[Individual Particle]
 shape[Shape]
 modules[Modules]
-moduledata[Module Data
-=> Parameters for the Module]
-settings[Particle Settings
+moduledata[Module data
+=> Parameters for the module]
+settings[Particle settings
 => Lifetime and size]
 emitter--spawns using-->shape-->particle
 emitter--supplies-->settings-->particle
@@ -302,14 +319,13 @@ emitter--uses-->data--to apply-->modules--to -->particle
 particle-->pmodules-->particle
 ```
 
-`ParticleModuleData.addModules` is called on the data of every module applied to each particle when each particle is
-spawned and can be used to add different modules based on the module data. For example, there's only a `LightModuleData`
-which, depending if a color or alpha gradient is defined, either adds a `StaticLightModule` or a `DynamicLightModule` to
+`ParticleModuleData#addModules` is called on the data of every module applied to each particle when each particle is
+spawned and can be used to add different modules based on the module data. For example, there's [`LightModuleData`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/module/init/LightModuleData.java#L26)
+which, depending if any properties of the light vary over time, either adds a [`StaticLightModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/render/StaticLightModule.java) or a [`DynamicLightModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/render/DynamicLightModule.java) to
 the particle to save calculations.
 
-The module itself consists of a class that implements the `ParticleModule` interface for the particle's lifecycle:
-`Init`, `Update`, `Collision`, `Force`, and `Render` and gets passed the values that were defined in its Module Data
-file.
+The module itself consists of a class that implements the [`ParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ParticleModule.java) interface for the particle's lifecycle. Notably, a module that only implements `ParticleModule` will not be able to recieve other lifecycle events.
+Instead, implement one of [`InitParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/InitParticleModule.java), [`ForceParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ForceParticleModule.java), [`UpdateParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/UpdateParticleModule.java), [`CollisionParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/CollisionParticleModule.java), [`RenderParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/RenderParticleModule.java) to recieve lifecycle events of the corresponding type.
 
 Each Module Type has to be registered in the [`ParticleModuleTypeRegistry`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleModuleTypeRegistry.java)
 so that Veil knows how to read it from the Module Data files.
@@ -318,10 +334,10 @@ so that Veil knows how to read it from the Module Data files.
 
 ### Setting up the resource pack
 
-(please note that if you are making a mod, this is unnecessary; you can simply put the quasar folder with all your other assets)
+(please note that if you are making a mod, creating a separate resource pack is unnecessary; you can instead put the `quasar` folder alongside your other assets)
 
 Let's start by creating a resource pack with a folder structure for our particle in the `resourcepacks` folder of a
-Minecraft Instance running Veil:
+Minecraft instance running Veil:
 
 ```markdown
 resourcepacks
@@ -335,12 +351,10 @@ resourcepacks
             |-render
             |-update
             |-init
-            |-force
-            |---collision
-            \-particle_data
-              \-emitter
-                \-particle
-                  \-shape
+            |-particle_data
+            \-emitter
+              |-particle
+              |-shape
 ```
 
 Note that you have to replace `modid` with the ID of the mod you want to add particles for.
@@ -359,9 +373,154 @@ For your pack.mcmeta you can just put something like this where pack format 34 i
 
 ### Making a particle
 
-In this section I would go through all the files of a full particle definition and explain each file on an Example
+❗ Remember, these paths go off of `assets/modid/quasar`.
+
+To begin, let's define the emitter. In the `emitters` folder, create a new file called `burst.json`.
+```json5
+// emitters/burst.json
+{
+  "max_lifetime": 20,
+  "rate": 1,
+  "count": 2,
+  ...
+}
+```
+This makes our emitter emit particle for 20 ticks, or 1 second. As per the `rate` and `count` properties, our emitter will emit 2 particles every tick. Let's now define our emitter settings and particle data.
+```json5
+// emitters/burst.json
+{
+  ...
+  "emitter_settings": {
+    "shape": "modid:burst_shape",
+    "particle_settings": "modid:burst_settings"
+  },
+  "particle_data": "modid:burst_data"
+}
+```
+These properties reference files that will define more information about our emitter and its particles. 
+
+Let's start with the `shape`. In the `modules/emitter/shape` folder, create another file named `burst_shape.json`. This is the file the property `"shape": "modid:burst_shape"` is referencing. For this tutorial, we'll make it emit on the surface of a small sphere.
+```json5
+// modules/emitter/shape/burst_shape.json
+{
+    "shape": "veil:sphere",
+    "dimensions": [
+        0.5,
+        0.5,
+        0.5
+    ],
+    "rotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "from_surface": true
+}
+```
+Next, in the `module/emitter/particle` folder, create `burst_settings.json`. This will define more information about each particle created, such as direction and speed.
+```json5
+// modules/emitter/particle/burst_settings.json
+{
+  "random_speed": true,
+  "random_size": true,
+  "random_lifetime": true,
+  "initial_direction": [
+      1.0,
+      1.0,
+      1.0
+  ],
+  "random_initial_direction": true,
+  "random_initial_rotation": false,
+  "particle_size_variation": 0.15,
+  "particle_lifetime": 40,
+  "particle_lifetime_variation": 20,
+  "particle_speed": 1.0,
+  "base_particle_size": 0.1
+}
+```
+This makes each partile go in a random direction with a speed anywhere from 0.5-1.5, with a lifetime anywhere from 40-60 ticks and a size anywhere from 0.1-0.25.
+
+Finally, for the last file, let's define the data attached to each particle. In the `module/particle_data` folder, let's create a file called `burst_data.json`.
+```json5
+// modules/particle_data/burst_data.json
+{
+  "render_style": "CUBE",
+  "should_collide": true,
+  "face_velocity": true,
+  ...
+}
+```
+This makes the particle appear as a cube rather than a billboarded sprite. It will run collision modules, and will always face the direction of its velocity. Let's now define the modules.
+```json5
+// modules/particle_data/burst_data.json
+{
+  ...
+  "init_modules": [
+    {
+      "module": "light",
+      "gradient": {
+        "color": "0xFFFFFFFF"
+      },
+      "brightness": "3 - q.agePercent * 3",
+      "radius": 5
+    }
+  ],
+  "forces": [
+    {
+      "module": "drag",
+      "strength": 0.9
+    }
+  ],
+  "update_modules": [
+    {
+      "module": "tick_size",
+      "size": "0.1 - q.agePercent * 0.1"
+    }
+  ],
+  "collision_modules": [
+    {
+      "module": "die_on_collision"
+    }
+  ],
+  "render_modules": [
+    {
+      "module": "color",
+      "gradient": {
+        "rgb_points": [
+          {
+            "percent": 0,
+            "color": "0xFF0000"
+          }
+          {
+            "percent": 1,
+            "color": "0x0000FF"
+          }
+        ],
+        "alpha_points": [
+          {
+            "percent": 0,
+            "alpha": 1
+          }
+          {
+            "percent": 1,
+            "alpha": 0
+          }
+        ]
+      },
+      "interpolant": "q.agePercent"
+    }
+  ]
+}
+```
+Let's go through these modules one by one. For brevity, I've defined only one module for each section. For our init module, we have the `light` module. This adds a light of a given brightness and radius with a color. Both brightness and radius are Molang expressions, which allow us to change them over time. I've used a Molang expression for brightness, which makes the brightness fade from 3 to 0 over the span of the particle's lifetime. The rest is fixed: the radius will be 5, and the color will be pure white.
+
+Next, our force module. The one we have is the `drag` module, which continually slows down the particle over time. For the `drag` module, a lower `strength` property means that the particle slows down quicker: think of it as though it is multiplying the particle's velocity by the `strength` property. Our update module changes the size of the particle based on the lifetime. In our Molang environment, `q.agePercent` resolves to a value between 0 and 1 that is representative of how long the particle is along its lifespan. Here we use this to interpolate the size from 0.1 to 0. The collision module has no properties and requires little explanation; it just immediately kills the particle on contact with the world.
+
+Our render module changes the color over time. It uses the same Molang as from the `light` module in the `interpolant` property, which controls where along the color gradient we are. The color gradient consists of two fields, the RGB points and the alpha points. Each point in the RGB points needs a percent and a color. Note how this color string differs from the one in the `light` module: the `light` color is static, and is ARGB as a result. In the `color` module, we use RGB, not ARGB, as alpha is defined elsewhere. The same structure is the same with alpha, with the only difference being that the property is called `alpha` instead of `color`.
 
 ### Spawning particles
+
+Now that we have our particle properly set up, we can spawn it in.
 
 #### Java
 

@@ -48,7 +48,7 @@ location/id. The priority and replace options are used to make it easier to full
 
 Stages are the backbone of the entire pipeline system.
 
-All existing types are listed in `PostPipelineStageRegistry`, and shader stage types are the basic building blocks of
+All existing types are listed in [`PostPipelineStageRegistry`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/registry/PostPipelineStageRegistry.java#L26-L29), and shader stage types are the basic building blocks of
 post processing.
 
 ### Framebuffer Reference
@@ -66,6 +66,7 @@ Any buffers with a custom name defined will also have the shader uniform of the 
 
 ### Stage Types
 
+#### Blit
 Blit is the most basic type that simply draws a quad to the screen with the specified shader.
 
 ```json5
@@ -85,6 +86,7 @@ Blit is the most basic type that simply draws a quad to the screen with the spec
 }
 ```
 
+#### Copy
 Copy is similar to blit, but specifically copies buffers from one framebuffer to another. That means there is no support
 for a shader in this stage.
 
@@ -109,6 +111,7 @@ for a shader in this stage.
 }
 ```
 
+#### Mask
 Mask is sets the color and depth write state for all later stages. By default, post-processing stages have color
 write enabled and depth write disabled.
 
@@ -136,7 +139,8 @@ buffer will be filled with 0.5.
 }
 ```
 
-Depth func sets the depth write function for all later stages. See
+#### Depth Function
+Depth function sets the depth write function for all later stages. See
 the [OpenGL Documentation](https://docs.gl/gl4/glDepthFunc) for more details on depth functions.
 
 ```json5

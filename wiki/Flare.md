@@ -81,7 +81,7 @@ and append the result it in a property.
 
 #### Host-Bound Controllers and Global Controllers
 
-When rendering an effect, an `EffectHost` has to be present,
+When rendering an effect, an [`EffectHost`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/flare/EffectHost.java) has to be present,
 host-bound controllers collect data from these hosts to use it to evaluate `Property Modifiers`.
 To do this, the `EffectHost#getValue` method is called with the name of the controller.
 
@@ -258,7 +258,7 @@ public static void renderEffect(...) {
 
 #### Properties
 
-Materials with the `randomizeSeed"` field set to `true` are added the `_Seed` property,
+Materials with the `randomizeSeed` field set to `true` are added the `_Seed` property,
 a property with a random value from 0..1. This property cannot be modified.
 
 All materials have the `_Time` property added to them.

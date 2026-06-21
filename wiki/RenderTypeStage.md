@@ -1,12 +1,12 @@
 # Render Type Stages
 
-New `RenderStateShard` can be added to any `RenderType` using `RenderTypeStageRegistry`. This allows fully custom or
+New `RenderStateShard`s can be added to any `RenderType` using [`RenderTypeShardRegistry`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/registry/RenderTypeShardRegistry.java). This allows fully custom or
 vanilla render type shards to be added to anything.
 
 ### Example
 
 ```java
-import foundry.veil.api.client.render.RenderTypeStageRegistry;
+import foundry.veil.api.client.registry.RenderTypeShardRegistry;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -15,17 +15,17 @@ public class CoolMod {
 
     public static void initClient() {
         // This adds arbitrary code to setup/clear for the solid render type
-        RenderTypeStageRegistry.addStage(RenderType.solid(), new RenderStateShard("coolmod:debug", () -> System.out.println("Setting up solid blocks"), () -> System.out.println("Clearing up solid blocks")) {
+        RenderTypeShardRegistry.addStage(RenderType.solid(), new RenderStateShard("coolmod:debug", () -> System.out.println("Setting up solid blocks"), () -> System.out.println("Clearing up solid blocks")) {
         });
 
         // Regular states can be added too
-        RenderTypeStageRegistry.addStage(RenderType.cutout(), RenderType.TRANSLUCENT_TARGET);
+        RenderTypeShardRegistry.addStage(RenderType.cutout(), RenderType.TRANSLUCENT_TARGET);
 
         // This adds the particle shader to all render types that don't define a shader
-        RenderTypeStageRegistry.addGenericStage(renderType -> renderType.state().shaderState == RenderType.NO_SHADER, new RenderStateShard.ShaderStateShard(GameRenderer::getParticleShader));
+        RenderTypeShardRegistry.addGenericStage(renderType -> renderType.state().shaderState == RenderType.NO_SHADER, new RenderStateShard.ShaderStateShard(GameRenderer::getParticleShader));
 
         // Other mods can also have their render types modified if a string is used
-        RenderTypeStageRegistry.addStage("coolmod:custom_render_type", RenderType.TRANSLUCENT_TARGET);
+        RenderTypeShardRegistry.addStage("coolmod:custom_render_type", RenderType.TRANSLUCENT_TARGET);
     }
 }
 ```

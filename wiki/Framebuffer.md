@@ -1,4 +1,4 @@
-Framebuffers can be used globally with the `FramebufferManager`, and also with [post-processing](PostProcessing).
+Framebuffers can be used globally with the [`FramebufferManager`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/framebuffer/FramebufferManager.java), and also with [post-processing](PostProcessing).
 Globally scoped framebuffers are located in the `framebuffers` folder in the resource pack. These can be used in post-processing to move data between stages.
 
 # Format

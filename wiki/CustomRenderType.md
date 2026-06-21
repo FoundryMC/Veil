@@ -1,4 +1,4 @@
-Data-driven render types are located in the `rendertypes` folder in the resource pack. Use `VeilRenderType#get` to get a
+Data-driven render types are located in the `rendertypes` folder in the resource pack. Use [`VeilRenderType#get`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/rendertype/VeilRenderType.java#L211) to get a
 data-driven render type by id. Veil automatically caches the render types so there is no issue with putting this in a
 render loop.
 
@@ -193,7 +193,7 @@ The transparency blend mode to use.
 
 Valid modes:
 
-- none // default
+- none (default)
 - additive
 - lightning
 - glint
@@ -219,7 +219,7 @@ Valid modes:
 - never
 - less
 - equal
-- lequal // default
+- lequal (default)
 - greater
 - notequal
 - gequal
@@ -240,7 +240,7 @@ The faces to cull if desired.
 Valid faces:
 
 - front
-- back // default
+- back (default)
 - front_and_back
 - none
 
@@ -313,7 +313,7 @@ meshes.
 Valid modes:
 
 - none
-- polygon_offset // default
+- polygon_offset (default)
 - view_offset
 
 ```json5

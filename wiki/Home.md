@@ -99,16 +99,17 @@ dependencies {
 
 # Veil Features
 
-- [Better Vertex Buffers](VertexArray)
 - [Colors](Colors)
-- [Custom Framebuffers](Framebuffer)
-- [Custom Shaders](Shader)
 - [Data-Driven Render Types](CustomRenderType)
 - [Dynamic Buffers](DynamicBuffer)
 - [Easings](Easings)
+- [Veil Events](Events)
 - [Flare (Data-driven Effects)](Flare)
+- [Custom Framebuffers](Framebuffer)
+- [Necromancer (Animations)](Necromancer)
 - [Post-Processing](PostProcessing)
 - [Quasar (Particles)](Quasar)
 - [Render Type Stages](RenderTypeStage)
-- [Shader Inject](ShaderInject)
-- [Veil Events](Events)
+- [Custom Shaders](Shader)
+- [Shader Injections](ShaderInject)
+- [Better Vertex Buffers](VertexArray)

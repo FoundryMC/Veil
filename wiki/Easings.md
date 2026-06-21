@@ -1,2 +1,2 @@
-Veil provides a utility class implementing all Easings from https://easings.net. To use an easing, simply call
-the `Easing#ease` method. For example: `Easings.Easing.easeOutQuad.ease(float)`
+Veil provides a utility class implementing all easings from https://easings.net. To use an easing, simply call
+the `Easing#ease` method. For example, to apply the ease out quad easing, use [`Easing.EASE_OUT_QUAD.ease(float)`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/util/Easing.java#L20-L24)
