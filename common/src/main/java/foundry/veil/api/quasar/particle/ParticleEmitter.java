@@ -46,7 +46,7 @@ public class ParticleEmitter {
 
     private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
 
-    private final ParticleSystemManager particleManager;
+    protected final ParticleSystemManager particleManager;
     private final ClientLevel level;
     private final ParticleEmitterData emitterData;
     private final List<ParticleModuleData> modules;
@@ -67,11 +67,11 @@ public class ParticleEmitter {
 
     @Nullable
     private Entity attachedEntity;
-    private CompletableFuture<?> spawnTask;
-    private CompletableFuture<?> removeTask;
+    protected CompletableFuture<?> spawnTask;
+    protected CompletableFuture<?> removeTask;
     private boolean removed;
 
-    ParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
+    protected ParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
         this.particleManager = particleManager;
         this.level = level;
         this.emitterData = data;
@@ -87,7 +87,7 @@ public class ParticleEmitter {
         this.count = data.count();
         this.maxParticles = data.maxParticles();
         EmitterSettings emitterSettings = data.emitterSettings();
-        this.emitterShapeSettings = emitterSettings.emitterShapeSettings();
+        this.emitterShapeSettings = new ArrayList<>(emitterSettings.emitterShapeSettings());
         this.particleSettings = emitterSettings.particleSettings();
         this.forceSpawn = emitterSettings.forceSpawn();
         this.particleData = data.particleData();
@@ -108,7 +108,7 @@ public class ParticleEmitter {
         REPORTED_MODULES.clear();
     }
 
-    private void spawn() {
+    protected void spawn() {
         int count = Math.min(this.maxParticles, this.count);
         this.particleManager.reserve(count);
 
@@ -180,7 +180,7 @@ public class ParticleEmitter {
     }
 
     @ApiStatus.Internal
-    void tick() {
+    protected void tick() {
         this.position.set(0);
         if (this.attachedEntity != null) {
             if (this.attachedEntity.isAlive()) {
@@ -299,6 +299,7 @@ public class ParticleEmitter {
         int removeCount;
         Iterator<QuasarParticle> iterator = this.particles.iterator();
         for (removeCount = 0; iterator.hasNext() && removeCount < count; removeCount++) {
+            iterator.next().onRemove();
             iterator.remove();
         }
         return removeCount;

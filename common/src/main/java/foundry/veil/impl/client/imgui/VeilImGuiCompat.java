@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import foundry.imgui.api.ImGuiMCEvents;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.impl.client.editor.*;
 import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.KeyMapping;
@@ -44,6 +43,7 @@ public final class VeilImGuiCompat {
             registry.registerInspector(new LightInspector());
             registry.registerInspector(new FramebufferInspector());
             registry.registerInspector(new ResourceManagerInspector());
+            registry.registerInspector(new ParticleEditorInspector());
         });
     }
 }

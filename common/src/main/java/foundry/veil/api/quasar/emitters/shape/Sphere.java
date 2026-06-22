@@ -12,9 +12,9 @@ public class Sphere implements EmitterShape {
 
     @Override
     public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
-        double x = randomSource.nextDouble() * 2 - 1;
-        double y = randomSource.nextDouble() * 2 - 1;
-        double z = randomSource.nextDouble() * 2 - 1;
+        double x = randomSource.nextDouble() - 0.5;
+        double y = randomSource.nextDouble() - 0.5;
+        double z = randomSource.nextDouble() - 0.5;
         Vector3d normal = new Vector3d(x, y, z).normalize();
         Vector3fc dim = dimensions;
         if (!fromSurface) {
@@ -26,14 +26,19 @@ public class Sphere implements EmitterShape {
                     new Vector3f()
             );
         }
-        Vector3d pos = normal.mul(dim);
-        pos = pos.rotateX((float) Math.toRadians(rotation.x())).rotateY((float) Math.toRadians(rotation.y())).rotateZ((float) Math.toRadians(rotation.z()));
+        Vector3d pos = normal.mul(dim).mul(0.5);
+        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
         return pos.add(position);
     }
 
     @Override
     public void renderShape(PoseStack stack, VertexConsumer consumer, Vector3fc dimensions, Vector3fc rotation) {
-        float radius = dimensions.x();
+        stack.pushPose();
+
+        stack.mulPose(new Quaternionf().rotateX((float) Math.toRadians(rotation.x())).rotateY((float) Math.toRadians(rotation.y())).rotateZ((float) Math.toRadians(rotation.z())));
+        stack.scale(dimensions.x(), dimensions.y(), dimensions.z());
+
+        float radius = 0.5f;
         Matrix4f matrix4f = stack.last().pose();
         for (int i = 0; i < 32; i++) {
             for (int j = 0; j < 32; j++) {
@@ -47,6 +52,8 @@ public class Sphere implements EmitterShape {
                 consumer.addVertex(matrix4f, v4.x(), v4.y(), v4.z()).setColor(0.15f, 0.15f, 1, 1).setNormal(0, 1, 0);
             }
         }
+
+        stack.popPose();
     }
 
     public static Vector3f parametricSphere(float u, float v, float r) {

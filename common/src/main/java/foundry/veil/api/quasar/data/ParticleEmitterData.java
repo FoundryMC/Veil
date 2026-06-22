@@ -29,7 +29,7 @@ public record ParticleEmitterData(int maxLifetime,
             Codec.BOOL.optionalFieldOf("loop", false).forGetter(ParticleEmitterData::loop),
             Codec.INT.fieldOf("rate").forGetter(ParticleEmitterData::rate),
             Codec.INT.fieldOf("count").forGetter(ParticleEmitterData::count),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("count", Integer.MAX_VALUE).forGetter(ParticleEmitterData::maxParticles),
+            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("max_particles", Integer.MAX_VALUE).forGetter(ParticleEmitterData::maxParticles),
             EmitterSettings.CODEC.fieldOf("emitter_settings").forGetter(ParticleEmitterData::emitterSettings),
             QuasarParticleData.CODEC.fieldOf("particle_data").forGetter(ParticleEmitterData::particleDataHolder)
     ).apply(instance, ParticleEmitterData::new));

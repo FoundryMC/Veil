@@ -5,10 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.AABB;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class Cube implements EmitterShape {
 
@@ -29,16 +28,22 @@ public class Cube implements EmitterShape {
                     new Vector3f()
             );
         }
-        Vector3d pos = normal.mul(dim);
-        pos = pos.rotateX((float) Math.toRadians(rotation.x())).rotateY((float) Math.toRadians(rotation.y())).rotateZ((float) Math.toRadians(rotation.z()));
+        Vector3d pos = normal.mul(dim).mul(0.5);
+        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
         return pos.add(position);
     }
 
     @Override
     public void renderShape(PoseStack stack, VertexConsumer consumer, Vector3fc dimensions, Vector3fc rotation) {
-        float x = dimensions.x();
-        float y = dimensions.y();
-        float z = dimensions.z();
+        stack.pushPose();
+
+        stack.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
+
+        float x = dimensions.x() * 0.5f;
+        float y = dimensions.y() * 0.5f;
+        float z = dimensions.z() * 0.5f;
         LevelRenderer.renderLineBox(stack, consumer, new AABB(-x, -y, -z, x, y, z), 0.15f, 0.15f, 1, 1);
+
+        stack.popPose();
     }
 }
