@@ -3,12 +3,15 @@ package foundry.veil.api.quasar.data.module.force;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.ConstantForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
+import foundry.veil.impl.client.editor.ParticleEditorInspector;
+import imgui.ImGui;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
@@ -24,15 +27,27 @@ import org.joml.Vector3dc;
  * The windSpeed parameter determines the speed of the wind.
  * The windSpeed parameter is measured in blocks/tick^2.
  */
-public record WindForceData(Vector3dc windDirection,
-                            float windSpeed,
-                            float strength) implements ParticleModuleData {
+public final class WindForceData implements ParticleModuleData, EditorAttributeProvider {
 
     public static final MapCodec<WindForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             CodecUtil.VECTOR3DC_CODEC.fieldOf("wind_direction").forGetter(WindForceData::windDirection),
             Codec.FLOAT.fieldOf("wind_speed").forGetter(WindForceData::windSpeed),
             Codec.FLOAT.fieldOf("strength").forGetter(WindForceData::strength)
     ).apply(instance, WindForceData::new));
+    private Vector3dc windDirection;
+    private float windSpeed;
+    private float strength;
+
+    /**
+     *
+     */
+    public WindForceData(Vector3dc windDirection,
+                         float windSpeed,
+                         float strength) {
+        this.windDirection = windDirection;
+        this.windSpeed = windSpeed;
+        this.strength = strength;
+    }
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
@@ -42,5 +57,40 @@ public record WindForceData(Vector3dc windDirection,
     @Override
     public ModuleType<?> getType() {
         return ParticleModuleTypeRegistry.WIND;
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        float[] editX = new float[]{(float) windDirection.x()};
+        float[] editY = new float[]{(float) windDirection.y()};
+        float[] editZ = new float[]{(float) windDirection.z()};
+
+        if (ParticleEditorInspector.vec3Field("wind_direction", editX, editY, editZ, 0.01F)) {
+            this.windDirection = new Vector3d(editX[0], editY[0], editZ[0]);
+        }
+
+        float[] editRange = new float[] {windSpeed};
+
+        if (ImGui.dragScalar("wind_speed", editRange, 0.01F)) {
+            this.windSpeed = editRange[0];
+        }
+
+        float[] editStrength = new float[] {strength};
+
+        if (ImGui.dragScalar("strength", editStrength, 0.01F)) {
+            this.strength = editStrength[0];
+        }
+    }
+
+    public Vector3dc windDirection() {
+        return windDirection;
+    }
+
+    public float windSpeed() {
+        return windSpeed;
+    }
+
+    public float strength() {
+        return strength;
     }
 }

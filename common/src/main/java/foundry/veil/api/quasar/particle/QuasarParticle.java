@@ -277,7 +277,7 @@ public class QuasarParticle {
     }
 
     public int getLifetime() {
-        return this.settings.particleLifetime();
+        return this.lifetime;
     }
 
     public AABB getBoundingBox() {

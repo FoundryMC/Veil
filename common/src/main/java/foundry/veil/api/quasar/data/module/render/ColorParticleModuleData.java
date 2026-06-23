@@ -32,6 +32,6 @@ public record ColorParticleModuleData(ColorGradient gradient,
 
     @Override
     public ModuleType<?> getType() {
-        return ParticleModuleTypeRegistry.INIT_COLOR;
+        return ParticleModuleTypeRegistry.COLOR;
     }
 }

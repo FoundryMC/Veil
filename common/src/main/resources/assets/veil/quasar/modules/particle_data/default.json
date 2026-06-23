@@ -2,21 +2,51 @@
     "render_style": "CUBE",
     "should_collide": true,
     "face_velocity": true,
-    "init_modules": [
-    ],
-    "forces": [
+    "modules": [
+        {
+            "module": "light",
+            "brightness": 1,
+            "radius": 5,
+            "gradient": {
+                "color": "0xFFFFFFFF"
+            }
+        },
         {
             "module": "drag",
             "strength": 0.9
-        }
-    ],
-    "update_modules": [
-    ],
-    "collision_modules": [
+        },
+        {
+            "module": "tick_size",
+            "size": "0.1 - q.agePercent * 0.1"
+        },
         {
             "module": "die_on_collision"
+        },
+        {
+            "module": "color",
+            "gradient": {
+                "rgb_points": [
+                    {
+                        "percent": 0,
+                        "color": "0xFF0000"
+                    },
+                    {
+                        "percent": 1,
+                        "color": "0x0000FF"
+                    }
+                ],
+                "alpha_points": [
+                    {
+                        "percent": 0,
+                        "alpha": 1
+                    },
+                    {
+                        "percent": 1,
+                        "alpha": 0
+                    }
+                ]
+            },
+            "interpolant": "q.agePercent"
         }
-    ],
-    "render_modules": [
     ]
 }

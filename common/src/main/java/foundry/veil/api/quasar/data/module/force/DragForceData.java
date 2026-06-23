@@ -2,11 +2,13 @@ package foundry.veil.api.quasar.data.module.force;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.ScaleForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
+import imgui.ImGui;
 
 /**
  * A force that applies a drag force to a particle.
@@ -16,9 +18,17 @@ import foundry.veil.api.quasar.particle.ParticleModuleSet;
  * They are useful for simulating air resistance.
  * The strength of the force is determined by the strength parameter.
  */
-public record DragForceData(double strength) implements ParticleModuleData {
+public final class DragForceData implements ParticleModuleData, EditorAttributeProvider {
 
     public static final MapCodec<DragForceData> CODEC = Codec.DOUBLE.fieldOf("strength").xmap(DragForceData::new, DragForceData::strength);
+    private double strength;
+
+    /**
+     *
+     */
+    public DragForceData(double strength) {
+        this.strength = strength;
+    }
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
@@ -29,4 +39,17 @@ public record DragForceData(double strength) implements ParticleModuleData {
     public ModuleType<?> getType() {
         return ParticleModuleTypeRegistry.DRAG;
     }
+
+    @Override
+    public void renderImGuiAttributes() {
+        double[] editStrength = new double[]{this.strength};
+        if (ImGui.dragScalar("strength", editStrength, 0.01F)) {
+            this.strength = editStrength[0];
+        }
+    }
+
+    public double strength() {
+        return strength;
+    }
+
 }

@@ -24,9 +24,7 @@ import java.util.concurrent.Executor;
 
 public final class QuasarParticles {
 
-    public static final ResourceKey<Registry<ParticleModuleData>> INIT_MODULES = createRegistryKey("quasar/modules/init");
-    public static final ResourceKey<Registry<ParticleModuleData>> UPDATE_MODULES = createRegistryKey("quasar/modules/update");
-    public static final ResourceKey<Registry<ParticleModuleData>> RENDER_MODULES = createRegistryKey("quasar/modules/render");
+    public static final ResourceKey<Registry<ParticleModuleData>> MODULES = createRegistryKey("quasar/modules/module");
     public static final ResourceKey<Registry<QuasarParticleData>> PARTICLE_DATA = createRegistryKey("quasar/modules/particle_data");
     public static final ResourceKey<Registry<ParticleSettings>> PARTICLE_SETTINGS = createRegistryKey("quasar/modules/emitter/particle");
     public static final ResourceKey<Registry<EmitterShapeSettings>> EMITTER_SHAPE_SETTINGS = createRegistryKey("quasar/modules/emitter/shape");
@@ -34,9 +32,7 @@ public final class QuasarParticles {
 
     private static final SuggestionProvider<?> EMITTER_SUGGESTION_PROVIDER = (unused, builder) -> registryAccess().registry(EMITTER).map(registry -> SharedSuggestionProvider.suggestResource(registry.keySet(), builder)).orElseGet(Suggestions::empty);
     private static final List<RegistryDataLoader.RegistryData<?>> REGISTRIES = List.of(
-            new RegistryDataLoader.RegistryData<>(INIT_MODULES, ParticleModuleData.INIT_DIRECT_CODEC, false),
-            new RegistryDataLoader.RegistryData<>(UPDATE_MODULES, ParticleModuleData.UPDATE_DIRECT_CODEC, false),
-            new RegistryDataLoader.RegistryData<>(RENDER_MODULES, ParticleModuleData.RENDER_DIRECT_CODEC, false),
+            new RegistryDataLoader.RegistryData<>(MODULES, ParticleModuleData.DIRECT_CODEC, false),
             new RegistryDataLoader.RegistryData<>(PARTICLE_DATA, QuasarParticleData.DIRECT_CODEC, false),
             new RegistryDataLoader.RegistryData<>(PARTICLE_SETTINGS, ParticleSettings.DIRECT_CODEC, false),
             new RegistryDataLoader.RegistryData<>(EMITTER_SHAPE_SETTINGS, EmitterShapeSettings.DIRECT_CODEC, false),

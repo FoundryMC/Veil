@@ -144,8 +144,8 @@ public class ParticleEmitter {
         }
     }
 
-    private static List<ParticleModuleData> createModuleSet(QuasarParticleData data) {
-        List<Holder<ParticleModuleData>> allModules = data.getAllModules();
+    protected static List<ParticleModuleData> createModuleSet(QuasarParticleData data) {
+        List<Holder<ParticleModuleData>> allModules = data.modules();
         ArrayList<ParticleModuleData> list = new ArrayList<>(allModules.size());
         for (Holder<ParticleModuleData> module : allModules) {
             if (!module.isBound()) {
@@ -342,7 +342,7 @@ public class ParticleEmitter {
         return this.position;
     }
 
-    public ParticleEmitterData getData() {
+    protected ParticleEmitterData getData() {
         return this.emitterData;
     }
 
@@ -461,6 +461,10 @@ public class ParticleEmitter {
 
     public void setParticleData(QuasarParticleData particleData) {
         this.particleData = particleData;
+    }
+
+    public List<ParticleModuleData> getModules() {
+        return modules;
     }
 
     /**

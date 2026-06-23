@@ -109,7 +109,7 @@ public class DynamicLightModule implements UpdateParticleModule, RenderParticleM
 
     @Override
     public void onRemove() {
-        if (this.light != null) {
+        if (this.lightHandle != null) {
             this.lightHandle.free();
             this.lightHandle = null;
         }

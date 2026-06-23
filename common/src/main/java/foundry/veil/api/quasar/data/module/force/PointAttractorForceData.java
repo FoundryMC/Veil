@@ -3,12 +3,16 @@ package foundry.veil.api.quasar.data.module.force;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.PointAttractorForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
+import foundry.veil.impl.client.editor.ParticleEditorInspector;
+import imgui.ImGui;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 /**
@@ -31,12 +35,7 @@ import org.joml.Vector3dc;
  * This allows the point to move.
  * </p>
  */
-public record PointAttractorForceData(Vector3dc position,
-                                      boolean localPosition,
-                                      float range,
-                                      float strength,
-                                      boolean strengthByDistance,
-                                      boolean invertDistanceModifier) implements ParticleModuleData {
+public final class PointAttractorForceData implements ParticleModuleData, EditorAttributeProvider {
 
     public static final MapCodec<PointAttractorForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             CodecUtil.VECTOR3DC_CODEC.fieldOf("position").forGetter(PointAttractorForceData::position),
@@ -46,6 +45,29 @@ public record PointAttractorForceData(Vector3dc position,
             Codec.BOOL.fieldOf("strengthByDistance").forGetter(PointAttractorForceData::strengthByDistance),
             Codec.BOOL.optionalFieldOf("invertDistanceModifier", false).forGetter(PointAttractorForceData::invertDistanceModifier)
     ).apply(instance, PointAttractorForceData::new));
+    private Vector3dc position;
+    private boolean localPosition;
+    private float range;
+    private float strength;
+    private boolean strengthByDistance;
+    private boolean invertDistanceModifier;
+
+    /**
+     *
+     */
+    public PointAttractorForceData(Vector3dc position,
+                                   boolean localPosition,
+                                   float range,
+                                   float strength,
+                                   boolean strengthByDistance,
+                                   boolean invertDistanceModifier) {
+        this.position = position;
+        this.localPosition = localPosition;
+        this.range = range;
+        this.strength = strength;
+        this.strengthByDistance = strengthByDistance;
+        this.invertDistanceModifier = invertDistanceModifier;
+    }
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
@@ -56,4 +78,64 @@ public record PointAttractorForceData(Vector3dc position,
     public ModuleType<?> getType() {
         return ParticleModuleTypeRegistry.POINT_ATTRACTOR;
     }
+
+    @Override
+    public void renderImGuiAttributes() {
+        float[] editX = new float[]{(float) position.x()};
+        float[] editY = new float[]{(float) position.y()};
+        float[] editZ = new float[]{(float) position.z()};
+
+        if (ParticleEditorInspector.vec3Field("position", editX, editY, editZ, 0.01F)) {
+            this.position = new Vector3d(editX[0], editY[0], editZ[0]);
+        }
+
+        if (ImGui.checkbox("local_position", localPosition)) {
+            this.localPosition = !this.localPosition;
+        }
+
+        float[] editRange = new float[] {range};
+
+        if (ImGui.dragScalar("range", editRange, 0.01F)) {
+            this.range = editRange[0];
+        }
+
+        float[] editStrength = new float[] {strength};
+
+        if (ImGui.dragScalar("strength", editStrength, 0.01F)) {
+            this.strength = editStrength[0];
+        }
+
+        if (ImGui.checkbox("strength_by_distance", strengthByDistance)) {
+            this.strengthByDistance = !this.strengthByDistance;
+        }
+
+        if (ImGui.checkbox("invert_distance_modifier", invertDistanceModifier)) {
+            this.invertDistanceModifier = !this.invertDistanceModifier;
+        }
+    }
+
+    public Vector3dc position() {
+        return position;
+    }
+
+    public boolean localPosition() {
+        return localPosition;
+    }
+
+    public float range() {
+        return range;
+    }
+
+    public float strength() {
+        return strength;
+    }
+
+    public boolean strengthByDistance() {
+        return strengthByDistance;
+    }
+
+    public boolean invertDistanceModifier() {
+        return invertDistanceModifier;
+    }
+
 }
