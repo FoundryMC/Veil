@@ -22,7 +22,7 @@ public class QuasarParticleHandler {
     public static void init() {
         VeilEventPlatform.INSTANCE.onFreeNativeResources(QuasarParticleHandler::free);
         VeilEventPlatform.INSTANCE.onVeilRenderLevelStage((stage, levelRenderer, bufferSource, poseStack, modelMatrix, projectionMatrix, renderTick, deltaTracker, camera, frustum) -> {
-            if (stage == VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            if (stage == VeilRenderLevelStageEvent.Stage.AFTER_WEATHER) {
                 if (cachedBufferSource == null) {
                     cachedBufferSource = new CachedBufferSource();
                 }

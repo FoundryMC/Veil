@@ -55,7 +55,7 @@ public record ParticleSettings(float particleSpeed,
     }
 
     public Vector3f particleDirection(RandomSource random) {
-        return this.initialDirection(random).mul(this.particleSpeed(), new Vector3f());
+        return this.initialDirection(random).mul(this.particleSpeed(random), new Vector3f());
     }
 
     public @Nullable ResourceLocation getRegistryId() {

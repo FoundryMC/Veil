@@ -1,0 +1,22 @@
+{
+    "render_style": "CUBE",
+    "should_collide": true,
+    "face_velocity": true,
+    "init_modules": [
+    ],
+    "forces": [
+        {
+            "module": "drag",
+            "strength": 0.9
+        }
+    ],
+    "update_modules": [
+    ],
+    "collision_modules": [
+        {
+            "module": "die_on_collision"
+        }
+    ],
+    "render_modules": [
+    ]
+}
