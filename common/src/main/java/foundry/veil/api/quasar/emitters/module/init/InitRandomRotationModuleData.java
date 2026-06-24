@@ -28,6 +28,6 @@ public record InitRandomRotationModuleData(Vector3fc minDegrees, Vector3fc maxDe
 
     @Override
     public ModuleType<?> getType() {
-        return ParticleModuleTypeRegistry.INIT_RANDOM_ROTATION;
+        return null;
     }
 }

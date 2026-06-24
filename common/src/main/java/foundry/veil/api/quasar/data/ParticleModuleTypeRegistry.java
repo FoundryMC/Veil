@@ -13,7 +13,6 @@ import foundry.veil.api.quasar.data.module.render.ColorParticleModuleData;
 import foundry.veil.api.quasar.data.module.render.TrailParticleModuleData;
 import foundry.veil.api.quasar.data.module.update.TickSizeParticleModuleData;
 import foundry.veil.api.quasar.data.module.update.TickSubEmitterModuleData;
-import foundry.veil.api.quasar.emitters.module.init.InitRandomRotationModuleData;
 import foundry.veil.api.quasar.emitters.module.update.VectorField;
 import foundry.veil.api.util.CodecUtil;
 import foundry.veil.api.util.FastNoiseLite;
@@ -25,7 +24,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -43,9 +41,9 @@ public class ParticleModuleTypeRegistry {
     // INIT
     public static final ModuleType<InitialVelocityModuleData> INITIAL_VELOCITY = registerModule("initial_velocity", InitialVelocityModuleData.CODEC, () -> new InitialVelocityModuleData(new Vector3d(0, 1, 0), false, 1.0F));
     public static final ModuleType<InitSubEmitterModuleData> INIT_SUB_EMITTER = registerModule("init_sub_emitter", InitSubEmitterModuleData.CODEC, () -> new InitSubEmitterModuleData(ResourceLocation.withDefaultNamespace("")));
-    public static final ModuleType<InitSizeParticleModuleData> INIT_SIZE = registerModule("init_size", InitSizeParticleModuleData.CODEC, () -> new InitSizeParticleModuleData(MolangExpression.of(1.0F)));
+    // public static final ModuleType<InitSizeParticleModuleData> INIT_SIZE = registerModule("init_size", InitSizeParticleModuleData.CODEC, () -> new InitSizeParticleModuleData(MolangExpression.of(1.0F)));
     //    ModuleType<InitRandomColorParticleModule> INIT_RANDOM_COLOR = registerInitModule("init_random_color", InitRandomColorParticleModule.CODEC);
-    public static final ModuleType<InitRandomRotationModuleData> INIT_RANDOM_ROTATION = registerModule("init_random_rotation", InitRandomRotationModuleData.CODEC, () -> new InitRandomRotationModuleData(new Vector3f(-180, -180, -180), new Vector3f(180, 180, 180)));
+    // public static final ModuleType<InitRandomRotationModuleData> INIT_RANDOM_ROTATION = registerModule("init_random_rotation", InitRandomRotationModuleData.CODEC, () -> new InitRandomRotationModuleData(new Vector3f(-180, -180, -180), new Vector3f(180, 180, 180)));
     public static final ModuleType<LightModuleData> LIGHT = registerModule("light", LightModuleData.CODEC, () -> new LightModuleData(new ColorGradient(1, 1, 1, 1), MolangExpression.of(1.0F), MolangExpression.of(1.0F)));
     public static final ModuleType<LightmapParticleModuleData> LIGHTMAP = registerModule("lightmap", LightmapParticleModuleData.CODEC, () -> new LightmapParticleModuleData(15728880));
     public static final ModuleType<BlockParticleModuleData> BLOCK_PARTICLE = registerModule("block", BlockParticleModuleData.CODEC, () -> new BlockParticleModuleData(false));
@@ -57,7 +55,7 @@ public class ParticleModuleTypeRegistry {
     //    ModuleType<ColorOverVelocityParticleModule> COLOR_OVER_VELOCITY = registerRenderModule("color_over_velocity", ColorOverVelocityParticleModule.CODEC);
 
     // UPDATE
-    public static final ModuleType<TickSizeParticleModuleData> TICK_SIZE = registerModule("tick_size", TickSizeParticleModuleData.CODEC, () -> new TickSizeParticleModuleData(MolangExpression.of(1)));
+    public static final ModuleType<TickSizeParticleModuleData> TICK_SIZE = registerModule("size", TickSizeParticleModuleData.CODEC, () -> new TickSizeParticleModuleData(MolangExpression.of(1)));
     public static final ModuleType<TickSubEmitterModuleData> TICK_SUB_EMITTER = registerModule("tick_sub_emitter", TickSubEmitterModuleData.CODEC, () -> new TickSubEmitterModuleData(ResourceLocation.withDefaultNamespace(""), 5));
     // UPDATE - COLLISION
     public static final ModuleType<DieOnCollisionModuleData> DIE_ON_COLLISION = registerModule("die_on_collision", DieOnCollisionModuleData.CODEC, DieOnCollisionModuleData::new);

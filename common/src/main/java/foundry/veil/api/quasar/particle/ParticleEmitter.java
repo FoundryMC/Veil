@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -63,7 +64,7 @@ public class ParticleEmitter {
     private List<EmitterShapeSettings> emitterShapeSettings;
     private ParticleSettings particleSettings;
     private boolean forceSpawn;
-    private QuasarParticleData particleData;
+    protected QuasarParticleData particleData;
 
     @Nullable
     private Entity attachedEntity;
@@ -115,6 +116,7 @@ public class ParticleEmitter {
         for (int i = 0; i < count; i++) {
             Vector3dc particlePos = this.emitterShapeSettings.get(i % this.emitterShapeSettings.size()).getPos(this.randomSource, this.position);
             Vector3fc particleDirection = this.particleSettings.particleDirection(this.randomSource);
+            Vector3fc particleRotation = this.particleSettings.initialRotation(this.randomSource).mul(Mth.DEG_TO_RAD, new Vector3f());
 
             // TODO
 //        this.getParticleData().getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
@@ -139,6 +141,7 @@ public class ParticleEmitter {
             QuasarParticle particle = new QuasarParticle(this.level, this.randomSource, this.particleManager.getScheduler(), this.particleData, builder.build(), this.particleSettings, this);
             particle.getPosition().set(particlePos);
             particle.getVelocity().set(particleDirection);
+            particle.getRotation().set(particleRotation);
             particle.init();
             this.particles.add(particle);
         }
@@ -342,7 +345,7 @@ public class ParticleEmitter {
         return this.position;
     }
 
-    protected ParticleEmitterData getData() {
+    public ParticleEmitterData getData() {
         return this.emitterData;
     }
 

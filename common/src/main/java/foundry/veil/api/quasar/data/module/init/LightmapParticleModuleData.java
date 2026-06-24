@@ -4,14 +4,17 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
+import imgui.ImGui;
+import imgui.type.ImInt;
 import net.minecraft.client.renderer.LightTexture;
 
-public record LightmapParticleModuleData(int packedLight) implements ParticleModuleData {
+public final class LightmapParticleModuleData implements ParticleModuleData, EditorAttributeProvider {
 
     public static final MapCodec<LightmapParticleModuleData> CODEC = Codec.mapEither(
             Codec.BOOL.optionalFieldOf("fullbright", false)
@@ -31,6 +34,14 @@ public record LightmapParticleModuleData(int packedLight) implements ParticleMod
         }
         return Either.right(packedLight);
     });
+    private int packedLight;
+
+    private final ImInt blockLight = new ImInt();
+    private final ImInt skyLight = new ImInt();
+
+    public LightmapParticleModuleData(int packedLight) {
+        this.packedLight = packedLight;
+    }
 
     @Override
     public void addModules(ParticleModuleSet.Builder builder) {
@@ -42,5 +53,16 @@ public record LightmapParticleModuleData(int packedLight) implements ParticleMod
     @Override
     public ModuleType<?> getType() {
         return ParticleModuleTypeRegistry.LIGHTMAP;
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        if (ImGui.dragScalar("block", blockLight.getData(), 0.01f, 0, 15) || ImGui.dragScalar("sky", skyLight.getData(), 0.01f, 0, 15)) {
+            packedLight = LightTexture.pack(blockLight.get(), skyLight.get());
+        }
+    }
+
+    public int packedLight() {
+        return packedLight;
     }
 }

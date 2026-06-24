@@ -1,6 +1,10 @@
 package foundry.veil.impl.client.editor;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.serialization.JsonOps;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.editor.SingleWindowInspector;
@@ -13,12 +17,18 @@ import foundry.veil.api.quasar.registry.EmitterShapeRegistry;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import imgui.ImGui;
 import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -27,6 +37,11 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.Math;
+import java.nio.file.Path;
 import java.util.*;
 
 public class ParticleEditorInspector extends SingleWindowInspector {
@@ -44,6 +59,14 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     private final String[] modulesArray;
     private final ImInt selectedModule = new ImInt();
 
+    private final ImBoolean saveWindowOpen = new ImBoolean(false);
+    private final ImString saveName = new ImString();
+    private final ImBoolean saveSeparateSettings = new ImBoolean(false);
+    private final ImBoolean saveSeparateShape = new ImBoolean(false);
+    private final ImBoolean saveSeparateData = new ImBoolean(false);
+
+    private final ImBoolean loadWindowOpen = new ImBoolean(false);
+
     public ParticleEditorInspector() {
         this.shapeKeys = EmitterShapeRegistry.REGISTRY.keySet().stream().map(ResourceLocation::toString).toList();
         this.shapeArray = Arrays.copyOf(shapeKeys.toArray(), shapeKeys.toArray().length, String[].class);
@@ -57,10 +80,9 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
     @Override
     protected void renderComponents() {
-        ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
-        Minecraft minecraft = Minecraft.getInstance();
-
         int[] value = {this.selectedEmitter};
+
+        ImGui.beginDisabled(saveWindowOpen.get() || loadWindowOpen.get());
 
         ImGui.beginDisabled(this.emitters.isEmpty());
         ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() * 0.6f);
@@ -68,6 +90,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             this.selectedEmitter = value[0];
         }
         ImGui.endDisabled();
+
         ImGui.sameLine();
         ImGui.pushButtonRepeat(true);
         ImGui.beginDisabled(this.selectedEmitter <= 0);
@@ -75,6 +98,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             this.selectedEmitter--;
         }
         ImGui.endDisabled();
+
         ImGui.beginDisabled(this.selectedEmitter >= this.emitters.size() - 1);
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.arrowButton("##right", ImGuiDir.Right)) {
@@ -87,22 +111,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (ImGui.button("Create Emitter", ImGui.getContentRegionAvailX() * 0.5f, 0)) {
             ParticleEmitterData data = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(Veil.veilPath("default"))).orElse(null);
             if (data != null) {
-                MutableParticleEmitter emitter = new MutableParticleEmitter(particleManager, particleManager.getLevel(), data);
-                HitResult hitResult = minecraft.hitResult;
-
-                Vec3 position;
-                if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
-                    position = hitResult.getLocation();
-                } else {
-                    position = new Vec3(minecraft.gameRenderer.getMainCamera().getLookVector()).multiply(3, 3, 3).add(minecraft.gameRenderer.getMainCamera().getPosition());
-                }
-
-                emitter.setPosition(position);
-
-                particleManager.addParticleSystem(emitter);
-
-                this.emitters.add(emitter);
-                this.selectedEmitter = this.emitters.size() - 1;
+                createEmitterFromData(data);
             }
 
         }
@@ -119,12 +128,22 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
         ImGui.endDisabled();
 
+        ImGui.pushItemWidth(ImGui.getContentRegionAvailX() * 0.5f);
+        if (ImGui.button("Save")) saveWindowOpen.set(true);
+        ImGui.sameLine();
+        if (ImGui.button("Load")) loadWindowOpen.set(true);
+        ImGui.popItemWidth();
+
+        ImGui.separator();
+
         if (ImGui.beginListBox("Properties", ImGui.getContentRegionAvail())) {
             if (!this.emitters.isEmpty() && this.emitters.get(this.selectedEmitter) != null) {
                 renderParticleAttributes();
             }
             ImGui.endListBox();
         }
+
+        ImGui.endDisabled();
     }
 
     @Override
@@ -132,6 +151,42 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         ImGui.setNextWindowSizeConstraints(300, 500, Float.MAX_VALUE, Float.MAX_VALUE);
 
         super.render();
+
+        if (this.saveWindowOpen.get()) {
+            ImGui.setNextWindowSizeConstraints(300, 300, Float.MAX_VALUE, Float.MAX_VALUE);
+            if (ImGui.begin("Save Emitter", this.saveWindowOpen, ImGuiWindowFlags.NoSavedSettings)) {
+                ImGui.inputText("Filename", saveName);
+
+                ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
+
+                ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
+
+                ImGui.checkbox("Separate Particle Data file", saveSeparateData);
+
+                if (ImGui.button("Save")) {
+                    saveEmitterToFile(this.emitters.get(selectedEmitter), saveName.get());
+                }
+            }
+            ImGui.end();
+        }
+
+        if (this.loadWindowOpen.get()) {
+            ImGui.setNextWindowSizeConstraints(300, 300, Float.MAX_VALUE, Float.MAX_VALUE);
+            if (ImGui.begin("Load Emitter", this.loadWindowOpen, ImGuiWindowFlags.NoSavedSettings)) {
+                if (ImGui.beginListBox("Emitters")) {
+                    Set<ResourceLocation> emitterLocations = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).get().keySet();
+                    for (ResourceLocation emitter : emitterLocations) {
+                        if (ImGui.selectable(emitter.toString())) {
+                            createEmitterFromData(QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).get().get(emitter));
+                            this.loadWindowOpen.set(false);
+                        }
+                    }
+
+                    ImGui.endListBox();
+                }
+            }
+            ImGui.end();
+        }
     }
 
     private void renderParticleAttributes() {
@@ -290,6 +345,14 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         if (ImGui.checkbox("random_initial_rotation", settings.randomInitialRotation())) {
             emitter.toggleRandomRotation();
+        }
+
+        float[] editRotationX = new float[]{settings.initialRotation().x()};
+        float[] editRotationY = new float[]{settings.initialRotation().y()};
+        float[] editRotationZ = new float[]{settings.initialRotation().z()};
+
+        if (vec3Field("initial_rotation", editRotationX, editRotationY, editRotationZ, 0.025F)) {
+            emitter.setParticleRotation(editRotationX[0], editRotationY[0], editRotationZ[0]);
         }
 
         if (ImGui.checkbox("random_speed", settings.randomSpeed())) {
@@ -475,6 +538,48 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         return dirty;
     }
 
+    private void saveEmitterToFile(MutableParticleEmitter emitter, String name) {
+        JsonElement result = ParticleEmitterData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, emitter.dataFromMutable()).getOrThrow();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String prettyJsonString = gson.toJson(result);
+
+        try {
+            String folderPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar").toString();
+            String filePath = folderPath + File.separator + name + ".json";
+            new File(folderPath).mkdir();
+            File emitterFile = new File(filePath);
+            FileWriter emitterWriter = new FileWriter(emitterFile);
+            emitterWriter.write(prettyJsonString);
+            emitterWriter.close();
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter to " + name + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, emitterFile.getAbsolutePath()))));
+        } catch (IOException e) {
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Failed to save emitter! Check logs for details.").withStyle(ChatFormatting.RED));
+            e.printStackTrace();
+        }
+    }
+
+    private void createEmitterFromData(ParticleEmitterData data) {
+        if (data == null) return;
+
+        ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
+        MutableParticleEmitter emitter = new MutableParticleEmitter(particleManager, particleManager.getLevel(), data);
+        HitResult hitResult = Minecraft.getInstance().hitResult;
+
+        Vec3 position;
+        if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+            position = hitResult.getLocation();
+        } else {
+            position = new Vec3(Minecraft.getInstance().gameRenderer.getMainCamera().getLookVector()).multiply(3, 3, 3).add(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+        }
+
+        emitter.setPosition(position);
+
+        particleManager.addParticleSystem(emitter);
+
+        this.emitters.add(emitter);
+        this.selectedEmitter = this.emitters.size() - 1;
+    }
+
     @Override
     public Component getDisplayName() {
         return TITLE;
@@ -490,8 +595,19 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         public boolean renderEmitterShape = false;
         public boolean renderDirection;
 
-        public MutableParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
+        private MutableParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
             super(particleManager, level, data);
+            this.particleData = new QuasarParticleData(this.particleData.shouldCollide(), this.particleData.faceVelocity(), this.particleData.velocityStretchFactor(), this.particleData.modules(), this.particleData.spriteData(), this.particleData.additive(), this.particleData.renderStyle());
+        }
+
+        public ParticleEmitterData dataFromMutable() {
+            QuasarParticleData withModules = new QuasarParticleData(
+                    this.particleData.shouldCollide(), this.particleData.faceVelocity(), this.particleData.velocityStretchFactor(), this.getModules().stream().map(Holder::direct).toList(), this.particleData.spriteData(), this.particleData.additive(), this.particleData.renderStyle()
+            );
+
+            EmitterSettings emitterSettings = new EmitterSettings(getEmitterShapeSettings().stream().map(Holder::direct).toList(), Holder.direct(this.getParticleSettings()), this.isForceSpawn());
+
+            return new ParticleEmitterData(this.getMaxLifetime(), this.isLoop(), this.getRate(), this.getCount(), this.getMaxParticles(), emitterSettings, Holder.direct(withModules));
         }
 
         @Override
@@ -517,9 +633,9 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
                 Matrix4f matrix4f = matrixStack.position();
 
-                debugBuilder.addVertex(matrix4f, 0, 0, 0).setColor(1, 0.15f, 0.15f, 1).setNormal(0, 1, 0);
+                debugBuilder.addVertex(matrix4f, 0, 0, 0).setColor(1, 1f, 1f, 1).setNormal(0, 1, 0);
                 Vector3f direction = getParticleSettings().initialDirection().normalize(new Vector3f()).mul(getParticleSettings().particleSpeed() * 10);
-                debugBuilder.addVertex(matrix4f, direction.x, direction.y, direction.z).setColor(1, 1, 1, 1).setNormal(0, 1, 0);
+                debugBuilder.addVertex(matrix4f, direction.x, direction.y, direction.z).setColor(1f, 0.15f, 0.15f, 1f).setNormal(0, 1, 0);
                 matrixStack.matrixPop();
                 matrixStack.matrixPop();
             }
@@ -612,6 +728,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         public void setParticleSize(float min, float max) {
+            max = Math.max(min, max);
             this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
                     .setParticleSize(min)
                     .setParticleSizeVariation(max - min)
@@ -619,6 +736,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         public void setParticleLifetime(int min, int max) {
+            max = Math.max(min, max);
             this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
                     .setParticleLifetime(min)
                     .setParticleLifetimeVariation(max - min)
@@ -628,6 +746,12 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         public void setParticleDirection(float x, float y, float z) {
             this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
                     .setInitialDirection(new Vector3f(x, y, z))
+                    .build());
+        }
+
+        public void setParticleRotation(float x, float y, float z) {
+            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+                    .setInitialRotation(new Vector3f(x, y, z))
                     .build());
         }
 
@@ -644,6 +768,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             private float particleLifetimeVariation;
             private Vector3fc initialDirection;
             private boolean randomInitialDirection;
+            private Vector3fc initialRotation;
             private boolean randomInitialRotation;
             private boolean randomSpeed;
             private boolean randomSize;
@@ -657,6 +782,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 this.particleLifetimeVariation = from.particleLifetimeVariation();
                 this.initialDirection = from.initialDirection();
                 this.randomInitialDirection = from.randomInitialDirection();
+                this.initialRotation = from.initialRotation();
                 this.randomInitialRotation = from.randomInitialRotation();
                 this.randomSpeed = from.randomSpeed();
                 this.randomSize = from.randomSize();
@@ -698,6 +824,11 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 return this;
             }
 
+            public ParticleSettingsBuilder setInitialRotation(Vector3fc initialRotation) {
+                this.initialRotation = initialRotation;
+                return this;
+            }
+
             public ParticleSettingsBuilder setRandomInitialRotation(boolean randomInitialRotation) {
                 this.randomInitialRotation = randomInitialRotation;
                 return this;
@@ -719,11 +850,8 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             }
 
             public ParticleSettings build() {
-                return new ParticleSettings(particleSpeed, particleSize, particleSizeVariation, particleLifetime, particleLifetimeVariation, initialDirection, randomInitialDirection, randomInitialRotation, randomSpeed, randomSize, randomLifetime
-                );
+                return new ParticleSettings(particleSpeed, particleSize, particleSizeVariation, particleLifetime, particleLifetimeVariation, initialDirection, randomInitialDirection, initialRotation, randomInitialRotation, randomSpeed, randomSize, randomLifetime);
             }
-
-
         }
     }
 }

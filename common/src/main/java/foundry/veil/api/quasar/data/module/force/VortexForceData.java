@@ -70,7 +70,7 @@ public final class VortexForceData implements ParticleModuleData, EditorAttribut
         float[] editAxisY = new float[]{(float) vortexAxis.y()};
         float[] editAxisZ = new float[]{(float) vortexAxis.z()};
 
-        if (ParticleEditorInspector.vec3Field("vortex_center", editAxisX, editAxisY, editAxisZ, 0.01F)) {
+        if (ParticleEditorInspector.vec3Field("vortex_axis", editAxisX, editAxisY, editAxisZ, 0.01F)) {
             this.vortexAxis = new Vector3d(editAxisX[0], editAxisY[0], editAxisZ[0]);
         }
 

@@ -16,19 +16,18 @@ public class Cube implements EmitterShape {
         double x = randomSource.nextDouble() * 2 - 1;
         double y = randomSource.nextDouble() * 2 - 1;
         double z = randomSource.nextDouble() * 2 - 1;
-        double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(z)));
-        Vector3d normal = new Vector3d(x / max, y / max, z / max);
-        Vector3fc dim = dimensions;
-        if (!fromSurface) {
-            normal.mul(randomSource.nextDouble()).normalize();
-            dim = dimensions.mul(
-                    randomSource.nextFloat(),
-                    randomSource.nextFloat(),
-                    randomSource.nextFloat(),
-                    new Vector3f()
-            );
+        if (fromSurface) {
+            int axis = randomSource.nextInt(3);
+            if (axis == 0) {
+                x = 2 * (randomSource.nextInt(2) - 0.5);
+            } else if (axis == 1) {
+                y = 2 * (randomSource.nextInt(2) - 0.5);
+            } else {
+                z = 2 * (randomSource.nextInt(2) - 0.5);
+            }
         }
-        Vector3d pos = normal.mul(dim).mul(0.5);
+        Vector3d normal = new Vector3d(x, y, z);
+        Vector3d pos = normal.mul(dimensions).mul(0.5);
         pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
         return pos.add(position);
     }
