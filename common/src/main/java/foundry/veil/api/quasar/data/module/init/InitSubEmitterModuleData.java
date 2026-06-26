@@ -3,7 +3,6 @@ package foundry.veil.api.quasar.data.module.init;
 import com.mojang.serialization.MapCodec;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.quasar.data.ParticleEmitterData;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.data.module.ModuleType;
@@ -25,6 +24,7 @@ public final class InitSubEmitterModuleData implements ParticleModuleData, Edito
 
     public InitSubEmitterModuleData(ResourceLocation subEmitter) {
         this.subEmitter = subEmitter;
+        textInput.set(subEmitter);
     }
 
     @Override

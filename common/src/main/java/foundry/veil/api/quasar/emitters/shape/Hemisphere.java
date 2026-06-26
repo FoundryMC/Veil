@@ -29,7 +29,7 @@ public class Hemisphere implements EmitterShape {
                     new Vector3f()
             );
         }
-        Vector3d pos = normal.mul(dim);
+        Vector3d pos = normal.mul(dim).mul(0.5);
         pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
         return pos.add(position);
     }
@@ -44,15 +44,12 @@ public class Hemisphere implements EmitterShape {
         float radius = 0.5f;
         Matrix4f matrix4f = stack.last().pose();
         for (int i = 0; i < 32; i++) {
-            for (int j = 0; j < 16; j++) {
+            for (int j = 0; j < 32; j++) {
                 Vector3f v1 = parametricSphere((float) Math.toRadians(i * 11.25f), (float) Math.toRadians(j * 11.25f), radius);
+                if (v1.z < -0.01) continue;
                 Vector3f v2 = parametricSphere((float) Math.toRadians((i + 1) * 11.25f), (float) Math.toRadians(j * 11.25f), radius);
-                Vector3f v3 = parametricSphere((float) Math.toRadians(i * 11.25f), (float) Math.toRadians((j + 1) * 11.25f), radius);
-                Vector3f v4 = parametricSphere((float) Math.toRadians((i + 1) * 11.25f), (float) Math.toRadians((j + 1) * 11.25f), radius);
                 consumer.addVertex(matrix4f, v1.x(), v1.y(), v1.z()).setColor(0.15f, 0.15f, 1, 1).setNormal(0, 1, 0);
                 consumer.addVertex(matrix4f, v2.x(), v2.y(), v2.z()).setColor(0.15f, 0.15f, 1, 1).setNormal(0, 1, 0);
-                consumer.addVertex(matrix4f, v3.x(), v3.y(), v3.z()).setColor(0.15f, 0.15f, 1, 1).setNormal(0, 1, 0);
-                consumer.addVertex(matrix4f, v4.x(), v4.y(), v4.z()).setColor(0.15f, 0.15f, 1, 1).setNormal(0, 1, 0);
             }
         }
 

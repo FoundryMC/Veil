@@ -44,7 +44,7 @@ public final class LightModuleData implements ParticleModuleData, EditorAttribut
             brightnessInput.set(brightnessString);
         }
 
-        String radiusString = this.radiusInput.toString();
+        String radiusString = this.radius.toString();
         if (radiusString.startsWith("return (")) {
             radiusInput.set(radiusString.substring(8, radiusString.length() - 1));
         } else {

@@ -3,7 +3,6 @@ package foundry.veil.api.quasar.data.module.collision;
 import com.mojang.serialization.MapCodec;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.quasar.data.ParticleEmitterData;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.data.module.ModuleType;
@@ -25,6 +24,7 @@ public final class CollisionSubEmitterData implements ParticleModuleData, Editor
 
     public CollisionSubEmitterData(ResourceLocation subEmitter) {
         this.subEmitter = subEmitter;
+        textInput.set(subEmitter.toString());
     }
 
     @Override
@@ -49,9 +49,11 @@ public final class CollisionSubEmitterData implements ParticleModuleData, Editor
     @Override
     public void renderImGuiAttributes() {
         if (ImGui.inputTextWithHint("subemitter", "namespace:path", textInput)) {
-            ResourceLocation location = ResourceLocation.parse(textInput.get());
-            QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(location))
-                    .ifPresent(data -> this.subEmitter = location);
+            try {
+                ResourceLocation location = ResourceLocation.parse(textInput.get());
+                QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(location))
+                        .ifPresent(data -> this.subEmitter = location);
+            } catch (Exception ignored) {}
         }
     }
 
