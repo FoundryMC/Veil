@@ -63,12 +63,12 @@ public class ParticleModuleTypeRegistry {
     //    ModuleType<BounceParticleModule> BOUNCE = registerUpdateModule("bounce", BounceParticleModule.CODEC);
     // UPDATE - FORCES
     public static final ModuleType<GravityForceData> GRAVITY = registerModule("gravity", GravityForceData.CODEC, () -> new GravityForceData(1F));
-    public static final ModuleType<VortexForceData> VORTEX = registerModule("vortex", VortexForceData.CODEC, () -> new VortexForceData(new Vector3d(1, 1, 1), new Vector3d(0.5f, 0.5f, 0.5f), true, 10, 1.0f));
-    public static final ModuleType<PointAttractorForceData> POINT_ATTRACTOR = registerModule("point_attractor", PointAttractorForceData.CODEC, () -> new PointAttractorForceData(new Vector3d(1, 1, 1), true, 20, 1.0f, false, false));
+    public static final ModuleType<VortexForceData> VORTEX = registerModule("vortex", VortexForceData.CODEC, () -> new VortexForceData(new Vector3d(0, 1, 0), new Vector3d(0), true, 10, 1.0f));
+    public static final ModuleType<PointAttractorForceData> POINT_ATTRACTOR = registerModule("point_attractor", PointAttractorForceData.CODEC, () -> new PointAttractorForceData(new Vector3d(0), true, 20, 1.0f, false, false));
     public static final ModuleType<VectorFieldForceData> VECTOR_FIELD = registerModule("vector_field", VectorFieldForceData.CODEC, () -> new VectorFieldForceData(new VectorField(new FastNoiseLite(), 1.0F), 1.0F));
     public static final ModuleType<DragForceData> DRAG = registerModule("drag", DragForceData.CODEC, () -> new DragForceData(0.5f));
     public static final ModuleType<WindForceData> WIND = registerModule("wind", WindForceData.CODEC, () -> new WindForceData(new Vector3d(1, 0, 0), 0.5f, 1.0f));
-    public static final ModuleType<PointForceData> POINT = registerModule("point_force", PointForceData.CODEC, () -> new PointForceData(new Vector3d(1, 1, 1), true, 20, 1.0f));
+    public static final ModuleType<PointForceData> POINT = registerModule("point_force", PointForceData.CODEC, () -> new PointForceData(new Vector3d(0), true, 20, 1.0f));
 
     @ApiStatus.Internal
     public static void bootstrap() {

@@ -2,6 +2,7 @@ package foundry.veil.api.quasar.emitters.module.render;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.fx.Trail;
 import foundry.veil.api.util.CodecUtil;
 import imgui.ImGui;
@@ -18,7 +19,7 @@ import org.joml.Vector4fc;
 
 import java.util.Optional;
 
-public class TrailSettings {
+public class TrailSettings implements EditorAttributeProvider {
 
     public static final Codec<TrailSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.optionalFieldOf("trailFrequency", 1).forGetter(settings -> settings.trailFrequency),
@@ -65,6 +66,10 @@ public class TrailSettings {
         this.tilingMode = tilingMode;
         this.billboard = billboard;
         this.parentRotation = parentRotation;
+    }
+
+    public TrailSettings() {
+        this(1, 20, new Vector4f(1), 1, Optional.empty(), 1, Trail.TilingMode.STRETCH, true, false);
     }
 
     public void setParentRotation(boolean parentRotation) {
@@ -139,26 +144,26 @@ public class TrailSettings {
         return this.trailTexture;
     }
 
-    public void renderImGuiSettings() {
-        ImString trailTextureString = new ImString(this.trailTexture.toString());
-        if (ImGui.inputText("Trail Texture" + this.hashCode(), trailTextureString)) {
+    public void renderImGuiAttributes() {
+        ImString trailTextureString = new ImString(this.trailTexture == null ? "" : this.trailTexture.toString());
+        if (ImGui.inputText("Trail Texture", trailTextureString)) {
             this.trailTexture = trailTextureString.get().isBlank() ? null : ResourceLocation.parse(trailTextureString.get());
         }
 
         ImInt trailFrequencyInt = new ImInt(this.trailFrequency);
-        ImGui.inputInt("Trail Frequency" + this.hashCode(), trailFrequencyInt);
+        ImGui.inputInt("Trail Frequency", trailFrequencyInt);
         this.trailFrequency = trailFrequencyInt.get();
         ImInt trailLengthInt = new ImInt(this.trailLength);
-        ImGui.inputInt("Trail Length" + this.hashCode(), trailLengthInt);
+        ImGui.inputInt("Trail Length", trailLengthInt);
         this.trailLength = trailLengthInt.get();
         float[] trailColorVector4f = new float[]{this.trailColor.x(), this.trailColor.y(), this.trailColor.z(), this.trailColor.w()};
-        ImGui.colorEdit4("Trail Color" + this.hashCode(), trailColorVector4f, ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreview);
+        ImGui.colorEdit4("Trail Color", trailColorVector4f, ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreview);
         this.trailColor = new Vector4f(trailColorVector4f[0], trailColorVector4f[1], trailColorVector4f[2], trailColorVector4f[3]);
-        if (ImGui.beginCombo("Tiling Mode" + this.hashCode(), this.tilingMode.name())) {
+        if (ImGui.beginCombo("Tiling Mode", this.tilingMode.name())) {
             ImGui.pushItemWidth(-1);
             Trail.TilingMode[] tilingModes = Trail.TilingMode.values();
             for (Trail.TilingMode tilingMode : tilingModes) {
-                if (ImGui.selectable(tilingMode.name() + this.hashCode())) {
+                if (ImGui.selectable(tilingMode.name())) {
                     this.tilingMode = tilingMode;
                 }
             }
@@ -166,13 +171,13 @@ public class TrailSettings {
             ImGui.endCombo();
         }
         ImBoolean billboardBoolean = new ImBoolean(this.billboard);
-        ImGui.checkbox("Billboard" + this.hashCode(), billboardBoolean);
+        ImGui.checkbox("Billboard", billboardBoolean);
         this.billboard = billboardBoolean.get();
         ImBoolean parentRotationBoolean = new ImBoolean(this.parentRotation);
-        ImGui.checkbox("Parent Rotation" + this.hashCode(), parentRotationBoolean);
+        ImGui.checkbox("Parent Rotation", parentRotationBoolean);
         this.parentRotation = parentRotationBoolean.get();
         ImFloat trailWidthModifierFloat = new ImFloat(this.trailWidthModifierFloat);
-        ImGui.inputFloat("Trail Width Modifier" + this.hashCode(), trailWidthModifierFloat);
+        ImGui.inputFloat("Trail Width Modifier", trailWidthModifierFloat);
         this.trailWidthModifierFloat = trailWidthModifierFloat.get();
     }
 

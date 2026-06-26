@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.JsonOps;
+import foundry.imgui.api.ImGuiMC;
+import foundry.imgui.api.ImGuiTextureProvider;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.editor.SingleWindowInspector;
@@ -22,6 +24,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -64,7 +67,6 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     private final ImBoolean saveSeparateSettings = new ImBoolean(false);
     private final ImBoolean saveSeparateShape = new ImBoolean(false);
     private final ImBoolean saveSeparateData = new ImBoolean(false);
-
     private final ImBoolean loadWindowOpen = new ImBoolean(false);
 
     public ParticleEditorInspector() {
@@ -157,11 +159,11 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             if (ImGui.begin("Save Emitter", this.saveWindowOpen, ImGuiWindowFlags.NoSavedSettings)) {
                 ImGui.inputText("Filename", saveName);
 
-                ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
+                //ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
 
-                ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
+                //ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
 
-                ImGui.checkbox("Separate Particle Data file", saveSeparateData);
+                //ImGui.checkbox("Separate Particle Data file", saveSeparateData);
 
                 if (ImGui.button("Save")) {
                     saveEmitterToFile(this.emitters.get(selectedEmitter), saveName.get());
@@ -194,12 +196,10 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         ImGui.text("Particles: " + emitter.getParticleCount());
 
-        float[] editPosX = new float[]{(float) emitter.getPosition().x()};
-        float[] editPosY = new float[]{(float) emitter.getPosition().y()};
-        float[] editPosZ = new float[]{(float) emitter.getPosition().z()};
+        float[] editPos = new float[]{(float) emitter.getPosition().x(), (float) emitter.getPosition().y(), (float) emitter.getPosition().z()};
 
-        if (vec3Field("position", editPosX, editPosY, editPosZ, 0.02F)) {
-            emitter.setPosition(editPosX[0], editPosY[0], editPosZ[0]);
+        if (ImGui.dragFloat3("position", editPos, 0.02F)) {
+            emitter.setPosition(editPos[0], editPos[1], editPos[2]);
         }
 
         // General (emitters)
@@ -232,10 +232,10 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (ImGui.collapsingHeader("Emitter Shapes")) {
             shapeInspectorOpen = true;
             ImGui.indent();
-            if (ImGui.beginListBox("##Shapes", ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailY() * 0.5f)) {
+            //if (ImGui.beginListBox("##Shapes", ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailY() * 0.5f)) {
                 renderShapeAttributes(emitter);
-                ImGui.endListBox();
-            }
+                //ImGui.endListBox();
+            //}
             ImGui.unindent();
         }
 
@@ -287,20 +287,14 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 emitter.setShape(i, shape);
             }
 
-            float[] editX = new float[]{shapeSettings.dimensions().x()};
-            float[] editY = new float[]{shapeSettings.dimensions().y()};
-            float[] editZ = new float[]{shapeSettings.dimensions().z()};
-
-            float[] editRotX = new float[]{shapeSettings.rotation().x()};
-            float[] editRotY = new float[]{shapeSettings.rotation().y()};
-            float[] editRotZ = new float[]{shapeSettings.rotation().z()};
-
-            if (vec3Field("dimensions", editX, editY, editZ, 0.01f)) {
-                emitter.setShapeDimensions(i, editX[0], editY[0], editZ[0]);
+            float[] editDimensions = new float[]{shapeSettings.dimensions().x(), shapeSettings.dimensions().y(), shapeSettings.dimensions().z()};
+            if (ImGui.dragFloat3("dimensions", editDimensions, 0.01f)) {
+                emitter.setShapeDimensions(i, editDimensions[0], editDimensions[1], editDimensions[2]);
             }
 
-            if (vec3Field("rotation", editRotX, editRotY, editRotZ, 0.05f)) {
-                emitter.setShapeRotation(i, editRotX[0], editRotY[0], editRotZ[0]);
+            float[] editRotation = new float[]{shapeSettings.rotation().x(), shapeSettings.rotation().y(), shapeSettings.rotation().z()};
+            if (ImGui.dragFloat3("rotation", editRotation, 0.05f)) {
+                emitter.setShapeRotation(i, editRotation[0], editRotation[1], editRotation[2]);
             }
 
             if (ImGui.button("Reset Transform")) {
@@ -335,24 +329,19 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             emitter.toggleRandomDirection();
         }
 
-        float[] editDirectionX = new float[]{settings.initialDirection().x()};
-        float[] editDirectionY = new float[]{settings.initialDirection().y()};
-        float[] editDirectionZ = new float[]{settings.initialDirection().z()};
+        float[] editDirection = new float[]{settings.initialDirection().x(), settings.initialDirection().y(), settings.initialDirection().z()};
 
-        if (vec3Field("initial_direction", editDirectionX, editDirectionY, editDirectionZ, 0.01F)) {
-            emitter.setParticleDirection(editDirectionX[0], editDirectionY[0], editDirectionZ[0]);
+        if (ImGui.dragFloat3("initial_direction", editDirection, 0.01F)) {
+            emitter.setParticleDirection(editDirection[0], editDirection[1], editDirection[2]);
         }
 
         if (ImGui.checkbox("random_initial_rotation", settings.randomInitialRotation())) {
             emitter.toggleRandomRotation();
         }
 
-        float[] editRotationX = new float[]{settings.initialRotation().x()};
-        float[] editRotationY = new float[]{settings.initialRotation().y()};
-        float[] editRotationZ = new float[]{settings.initialRotation().z()};
-
-        if (vec3Field("initial_rotation", editRotationX, editRotationY, editRotationZ, 0.025F)) {
-            emitter.setParticleRotation(editRotationX[0], editRotationY[0], editRotationZ[0]);
+        float[] editRotation = new float[]{settings.initialRotation().x(), settings.initialRotation().y(), settings.initialRotation().z()};
+        if (ImGui.dragFloat3("initial_rotation", editRotation, 0.025F)) {
+            emitter.setParticleRotation(editRotation[0], editRotation[1], editRotation[2]);
         }
 
         if (ImGui.checkbox("random_speed", settings.randomSpeed())) {
@@ -369,16 +358,16 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             emitter.toggleRandomSize();
         }
 
-        float[] editParticleSizeMin = new float[]{settings.particleSize()};
         if (settings.randomSize()) {
-            float[] editParticleSizeMax = new float[]{settings.particleSize() + settings.particleSizeVariation()};
+            float[] editParticleSize = new float[]{settings.particleSize(), settings.particleSize() + settings.particleSizeVariation()};
 
-            if (minMaxField("particle_size", editParticleSizeMin, editParticleSizeMax, 0.01F)) {
-                emitter.setParticleSize(editParticleSizeMin[0], editParticleSizeMax[0]);
+            if (ImGui.dragFloat2("particle_size", editParticleSize, 0.01F, Math.max(editParticleSize[0], 0.001f), editParticleSize[1])) {
+                emitter.setParticleSize(editParticleSize[0], editParticleSize[1]);
             }
         } else {
-            if (ImGui.dragScalar("particle_size", editParticleSizeMin, 0.01F)) {
-                emitter.setParticleSize(editParticleSizeMin[0], 0);
+            float[] editParticleSize = new float[]{settings.particleSize()};
+            if (ImGui.dragScalar("particle_size", editParticleSize, 0.01F)) {
+                emitter.setParticleSize(editParticleSize[0], 0);
             }
         }
 
@@ -386,15 +375,15 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             emitter.toggleParticleHasRandomLifetime();
         }
 
-        int[] editLifetimeMin = new int[]{settings.particleLifetime()};
         if (settings.randomLifetime()) {
-            int[] editParticleLifetimeMax = new int[]{settings.particleLifetime() + (int)settings.particleLifetimeVariation()};
+            int[] editParticleLifetime = new int[]{settings.particleLifetime(), settings.particleLifetime() + (int)settings.particleLifetimeVariation()};
 
-            if (minMaxField("particle_lifetime", editLifetimeMin, editParticleLifetimeMax, 0.015F)) {
-                emitter.setParticleLifetime(editLifetimeMin[0], editParticleLifetimeMax[0]);
+            if (ImGui.dragInt2("particle_lifetime", editParticleLifetime, 0.03F, Math.max(editParticleLifetime[0], 0))) {
+                emitter.setParticleLifetime(editParticleLifetime[0], editParticleLifetime[1]);
             }
         } else {
-            if (ImGui.dragScalar("particle_lifetime", editLifetimeMin, 0.015F)) {
+            int[] editLifetimeMin = new int[]{settings.particleLifetime()};
+            if (ImGui.dragInt("particle_lifetime", editLifetimeMin, 0.03F, 0)) {
                 emitter.setParticleLifetime(editLifetimeMin[0], 0);
             }
         }
@@ -416,6 +405,45 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         // Sprite data (if the render style is billboard)
+        SpriteData spriteData = data.spriteData();
+
+        if (spriteData == null) {
+            if (ImGui.button("Create Sprite Data")) {
+                data.setSpriteData(new SpriteData(ResourceLocation.fromNamespaceAndPath("", ""), 1, 1, 1, 1, false));
+            }
+        } else {
+            if (ImGui.button("Delete Sprite Data")) {
+                data.setSpriteData(null);
+            }
+            ImGuiTextureProvider texture = ImGuiMC.getTexture(Minecraft.getInstance().getTextureManager().getTexture(spriteData.sprite()));
+            ImString value = new ImString(spriteData.sprite().toString(), 256);
+            ImGuiMC.image(texture, 64, 64);
+            ImGui.sameLine();
+            if (ImGui.inputText("sprite", value)) {
+                try {
+                    data.setSpriteData(new SpriteData(ResourceLocation.parse(value.get()), spriteData.frameCount(), spriteData.frameTime(), spriteData.frameWidth(), spriteData.frameHeight(), spriteData.stretchToLifetime()));
+                } catch (ResourceLocationException ignored) {} // in the event of a non a-z0-9/._- character
+            }
+            int[] editFrameCount = new int[]{spriteData.frameCount()};
+            if (ImGui.dragScalar("frame_count", editFrameCount, 0.03F)) {
+                data.setSpriteData(new SpriteData(spriteData.sprite(), editFrameCount[0], spriteData.frameTime(), spriteData.frameWidth(), spriteData.frameHeight(), spriteData.stretchToLifetime()));
+            }
+
+            int[] editFrameSize = new int[]{spriteData.frameWidth(), spriteData.frameHeight()};
+            if (ImGui.dragInt2("size", editFrameSize, 0.03F, 0)) {
+                data.setSpriteData(new SpriteData(spriteData.sprite(), spriteData.frameCount(), spriteData.frameTime(), editFrameSize[0], editFrameSize[1], spriteData.stretchToLifetime()));
+            }
+
+            float[] editFrameTime = new float[]{spriteData.frameTime()};
+            if (ImGui.dragScalar("frame_time", editFrameTime)) {
+                data.setSpriteData(new SpriteData(spriteData.sprite(), spriteData.frameCount(), editFrameTime[0], spriteData.frameWidth(), spriteData.frameHeight(), spriteData.stretchToLifetime()));
+            }
+
+            if (ImGui.checkbox("stretch_to_lifetime", spriteData.stretchToLifetime())) {
+                data.setSpriteData(new SpriteData(spriteData.sprite(), spriteData.frameCount(), spriteData.frameTime(), spriteData.frameWidth(), spriteData.frameHeight(), !spriteData.stretchToLifetime()));
+            }
+        }
+
 
         // Additive
         if (ImGui.checkbox("additive", data.additive())) {
@@ -442,28 +470,27 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
     private void renderModules(MutableParticleEmitter emitter) {
         ImGui.indent();
-        if (ImGui.beginListBox("##module list", ImGui.getContentRegionAvailX(), 400)) {
-            int id = 333;
-            for (ParticleModuleData module : List.copyOf(emitter.getModules())) {
-                ImGui.pushID(id);
-                if (ImGui.collapsingHeader(ParticleModuleTypeRegistry.REGISTRY.getKey(module.getType()).toString())) {
-                    if (ImGui.button("Remove Module")) {
-                        emitter.getModules().remove(module);
-                        ImGui.popID();
-                        continue;
-                    }
-
-                    if (module instanceof EditorAttributeProvider attributeProvider) {
-                        attributeProvider.renderImGuiAttributes();
-                    }
-                    ImGui.separator();
+        int id = 333;
+        for (ParticleModuleData module : List.copyOf(emitter.getModules())) {
+            ImGui.pushID(id);
+            if (ImGui.collapsingHeader(ParticleModuleTypeRegistry.REGISTRY.getKey(module.getType()).toString())) {
+                ImGui.indent();
+                if (module instanceof EditorAttributeProvider attributeProvider) {
+                    attributeProvider.renderImGuiAttributes();
                 }
-
-                ImGui.popID();
-                id++;
+                if (ImGui.button("Remove Module")) {
+                    emitter.getModules().remove(module);
+                    ImGui.unindent();
+                    ImGui.popID();
+                    continue;
+                }
+                ImGui.unindent();
             }
-            ImGui.endListBox();
+            ImGui.popID();
+            id++;
         }
+
+        ImGui.separator();
 
         ImGui.combo("module", selectedModule, modulesArray);
         if (ImGui.button("Add Module")) {
@@ -474,79 +501,15 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         ImGui.unindent();
     }
 
-    public static boolean vec3Field(String label, float[] x, float[] y, float[] z, float vSpeed) {
-        boolean dirty = false;
-
-        float totalWidth = ImGui.calcItemWidth();
-        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
-        if (ImGui.dragScalar("##x" + label, x, vSpeed)) {
-            dirty = true;
-        }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("##y" + label, y, vSpeed)) {
-            dirty = true;
-        }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("##z" + label, z, vSpeed)) {
-            dirty = true;
-        }
-
-        ImGui.popItemWidth();
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text(label);
-
-        return dirty;
-    }
-
-    public static boolean minMaxField(String label, float[] x, float[] y, float vSpeed) {
-        boolean dirty = false;
-
-        float totalWidth = ImGui.calcItemWidth();
-        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
-        if (ImGui.dragScalar("min##x" + label, x, vSpeed)) {
-            dirty = true;
-        }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("max##y" + label, y, vSpeed, x[0])) {
-            dirty = true;
-        }
-
-        ImGui.popItemWidth();
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text(label);
-
-        return dirty;
-    }
-
-    public static boolean minMaxField(String label, int[] x, int[] y, float vSpeed) {
-        boolean dirty = false;
-
-        float totalWidth = ImGui.calcItemWidth();
-        ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
-        if (ImGui.dragScalar("min##x" + label, x, vSpeed)) {
-            dirty = true;
-        }
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        if (ImGui.dragScalar("max##y" + label, y, vSpeed, x[0])) {
-            dirty = true;
-        }
-
-        ImGui.popItemWidth();
-        ImGui.sameLine(0, ImGui.getStyle().getItemInnerSpacingX());
-        ImGui.text(label);
-
-        return dirty;
-    }
-
     private void saveEmitterToFile(MutableParticleEmitter emitter, String name) {
         JsonElement result = ParticleEmitterData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, emitter.dataFromMutable()).getOrThrow();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String prettyJsonString = gson.toJson(result);
 
         try {
-            String folderPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar").toString();
+            String folderPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar/emitters").toString();
             String filePath = folderPath + File.separator + name + ".json";
-            new File(folderPath).mkdir();
+            new File(folderPath).mkdirs();
             File emitterFile = new File(filePath);
             FileWriter emitterWriter = new FileWriter(emitterFile);
             emitterWriter.write(prettyJsonString);
@@ -625,7 +588,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 matrixStack.matrixPop();
             }
             if (renderDirection) {
-                VertexConsumer debugBuilder = bufferSource.getBuffer(RenderType.debugLineStrip(5));
+                VertexConsumer debugBuilder = bufferSource.getBuffer(RenderType.lineStrip());
                 matrixStack.matrixPush();
                 matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
                 matrixStack.matrixPush();
@@ -639,7 +602,6 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 matrixStack.matrixPop();
                 matrixStack.matrixPop();
             }
-
             super.render(matrixStack, bufferSource, camera, partialTicks);
         }
 

@@ -5,11 +5,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.color.Color;
 import foundry.veil.api.client.color.Colorc;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
+import imgui.ImGui;
+import imgui.flag.ImGuiDir;
 import net.minecraft.util.Mth;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class ColorGradient {
+public class ColorGradient implements EditorAttributeProvider {
 
     private static final Codec<Colorc> SINGLE_COLOR_CODEC = Color.ARGB_CODEC.fieldOf("color").codec();
     private static final Codec<ColorGradient> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -27,8 +32,8 @@ public class ColorGradient {
                         return Either.right(gradient);
                     });
 
-    private final RGBPoint[] points;
-    private final AlphaPoint[] alphaPoints;
+    private RGBPoint[] points;
+    private AlphaPoint[] alphaPoints;
 
     public ColorGradient(Colorc color) {
         this(color.red(), color.green(), color.blue(), color.alpha());
@@ -119,6 +124,130 @@ public class ColorGradient {
 
     public List<AlphaPoint> getAlphaPoints() {
         return List.of(this.alphaPoints);
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        ImGui.text("RGB Points");
+        ImGui.indent();
+
+        List<RGBPoint> pointsView = new ArrayList<>(List.of(points));
+        boolean dirty = false;
+
+        for (int i = 0; i < pointsView.size(); i++) {
+            ImGui.pushID(i);
+            ColorGradient.RGBPoint point = pointsView.get(i);
+            ColorGradient.RGBPoint newPoint = renderRGBPoint(point);
+            if (i != 0 && ImGui.arrowButton("##up", ImGuiDir.Up)) {
+                ColorGradient.RGBPoint pointAbove = pointsView.get(i - 1);
+                pointsView.set(i - 1, point);
+                pointsView.set(i, pointAbove);
+                dirty = true;
+            }
+            if (i != 0 && i != pointsView.size() - 1) ImGui.sameLine();
+            if (i != pointsView.size() - 1 && ImGui.arrowButton("##down", ImGuiDir.Down)) {
+                ColorGradient.RGBPoint pointBelow = pointsView.get(i + 1);
+                pointsView.set(i + 1, point);
+                pointsView.set(i, pointBelow);
+                dirty = true;
+            }
+
+            if (newPoint != null) {
+                if (newPoint.percent() == Float.MIN_VALUE) {
+                    pointsView.remove(i--);
+                } else {
+                    pointsView.set(i, newPoint);
+                }
+                dirty = true;
+            }
+            ImGui.separator();
+            ImGui.popID();
+        }
+
+        if (ImGui.button("New RGB Point")) {
+            if (pointsView.isEmpty()) {
+                pointsView.add(new ColorGradient.RGBPoint(0.0f, Color.WHITE));
+            } else {
+                pointsView.add(new ColorGradient.RGBPoint(Math.min(pointsView.getLast().percent() + 0.1f, 1.0f), Color.WHITE));
+            }
+            dirty = true;
+        }
+
+        ImGui.unindent();
+
+        ImGui.text("Alpha Points");
+        ImGui.indent();
+
+        List<AlphaPoint> alphaPointsView = new ArrayList<>(List.of(alphaPoints));
+
+        for (int i = 0; i < alphaPointsView.size(); i++) {
+            ImGui.pushID(i + 999);
+            ColorGradient.AlphaPoint point = alphaPointsView.get(i);
+            ColorGradient.AlphaPoint newPoint = renderAlphaPoint(point);
+            if (newPoint != null) {
+                if (newPoint.percent() == Float.MIN_VALUE) {
+                    alphaPointsView.remove(i--);
+                } else {
+                    alphaPointsView.set(i, newPoint);
+                }
+                dirty = true;
+            }
+            ImGui.popID();
+        }
+
+        if (ImGui.button("New Alpha Point")) {
+            if (alphaPointsView.isEmpty()) {
+                alphaPointsView.add(new ColorGradient.AlphaPoint(0.0f, 1.0f));
+            } else {
+                alphaPointsView.add(new ColorGradient.AlphaPoint(Math.min(alphaPointsView.getLast().percent() + 0.1f, 1.0f), 1.0f));
+            }
+            dirty = true;
+        }
+
+        ImGui.unindent();
+
+        if (dirty) {
+            points = pointsView.toArray(new RGBPoint[0]);
+            alphaPoints = alphaPointsView.toArray(new AlphaPoint[0]);
+        }
+    }
+
+    @Nullable
+    private ColorGradient.RGBPoint renderRGBPoint(ColorGradient.RGBPoint point) {
+        float[] editPercent = new float[]{point.percent()};
+        float[] editColor = new float[]{point.color().red(), point.color().green(), point.color().blue()};
+        boolean percentEdited = ImGui.dragScalar("percent", editPercent, 0.005f, 0, 1);
+        boolean colorEdited = ImGui.colorEdit3("rgb", editColor);
+
+        ColorGradient.RGBPoint toReturn = null;
+
+        if (percentEdited || colorEdited) {
+            toReturn = new ColorGradient.RGBPoint(editPercent[0], new Color(editColor[0], editColor[1], editColor[2]));
+        }
+        if (ImGui.button("Remove Point")) {
+            toReturn = new ColorGradient.RGBPoint(Float.MIN_VALUE, Color.BLACK);
+        }
+
+        return toReturn;
+    }
+
+    @Nullable
+    private ColorGradient.AlphaPoint renderAlphaPoint(ColorGradient.AlphaPoint point) {
+        float[] editPercent = new float[]{point.percent()};
+        float[] editAlpha = new float[]{point.alpha()};
+        boolean percentEdited = ImGui.dragScalar("percent", editPercent, 0.005f, 0, 1);
+        boolean alphaEdited = ImGui.dragScalar("alpha", editAlpha, 0.005f, 0, 1);
+
+        ColorGradient.AlphaPoint toReturn = null;
+
+        if (percentEdited || alphaEdited) {
+            toReturn = new ColorGradient.AlphaPoint(editPercent[0], editAlpha[0]);
+        }
+        if (ImGui.button("Remove Point")) {
+            toReturn = new ColorGradient.AlphaPoint(Float.MIN_VALUE, 0);
+        }
+
+        return toReturn;
     }
 
     public record RGBPoint(float percent, Colorc color) {

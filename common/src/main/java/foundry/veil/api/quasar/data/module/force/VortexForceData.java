@@ -10,7 +10,6 @@ import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.VortexForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
-import foundry.veil.impl.client.editor.ParticleEditorInspector;
 import imgui.ImGui;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -66,20 +65,16 @@ public final class VortexForceData implements ParticleModuleData, EditorAttribut
 
     @Override
     public void renderImGuiAttributes() {
-        float[] editAxisX = new float[]{(float) vortexAxis.x()};
-        float[] editAxisY = new float[]{(float) vortexAxis.y()};
-        float[] editAxisZ = new float[]{(float) vortexAxis.z()};
+        float[] editAxis = new float[]{(float) vortexAxis.x(), (float) vortexAxis.y(), (float) vortexAxis.z()};
 
-        if (ParticleEditorInspector.vec3Field("vortex_axis", editAxisX, editAxisY, editAxisZ, 0.01F)) {
-            this.vortexAxis = new Vector3d(editAxisX[0], editAxisY[0], editAxisZ[0]);
+        if (ImGui.dragFloat3("vortex_axis", editAxis, 0.01F)) {
+            this.vortexAxis = new Vector3d(editAxis[0], editAxis[1], editAxis[2]);
         }
 
-        float[] editX = new float[]{(float) vortexCenter.x()};
-        float[] editY = new float[]{(float) vortexCenter.y()};
-        float[] editZ = new float[]{(float) vortexCenter.z()};
+        float[] editPos = new float[]{(float) vortexCenter.x(), (float) vortexCenter.y(), (float) vortexCenter.z()};
 
-        if (ParticleEditorInspector.vec3Field("vortex_center", editX, editY, editZ, 0.01F)) {
-            this.vortexCenter = new Vector3d(editX[0], editY[0], editZ[0]);
+        if (ImGui.dragFloat3("vortex_center", editPos, 0.01F)) {
+            this.vortexCenter = new Vector3d(editPos[0], editPos[1], editPos[2]);
         }
 
         if (ImGui.checkbox("local_position", localPosition)) {

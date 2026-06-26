@@ -108,6 +108,10 @@ public final class QuasarParticleData {
         return spriteData;
     }
 
+    public void setSpriteData(@Nullable SpriteData data) {
+        this.spriteData = data;
+    }
+
     public boolean additive() {
         return additive;
     }

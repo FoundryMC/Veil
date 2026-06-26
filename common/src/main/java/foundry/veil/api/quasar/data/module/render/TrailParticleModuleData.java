@@ -1,6 +1,7 @@
 package foundry.veil.api.quasar.data.module.render;
 
 import com.mojang.serialization.MapCodec;
+import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
@@ -9,6 +10,7 @@ import foundry.veil.api.quasar.emitters.module.render.TrailParticleModule;
 import foundry.veil.api.quasar.emitters.module.render.TrailSettings;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.quasar.particle.RenderData;
+import imgui.ImGui;
 
 import java.util.List;
 
@@ -20,7 +22,7 @@ import java.util.List;
  * @see RenderData
  * WARNING: Trails add a lot of time to the rendering process, so use them sparingly.
  */
-public record TrailParticleModuleData(List<TrailSettings> settings) implements ParticleModuleData {
+public record TrailParticleModuleData(List<TrailSettings> settings) implements ParticleModuleData, EditorAttributeProvider {
 
     public static final MapCodec<TrailParticleModuleData> CODEC = TrailSettings.CODEC.listOf()
             .fieldOf("settings")
@@ -34,5 +36,19 @@ public record TrailParticleModuleData(List<TrailSettings> settings) implements P
     @Override
     public ModuleType<?> getType() {
         return ParticleModuleTypeRegistry.TRAIL;
+    }
+
+    @Override
+    public void renderImGuiAttributes() {
+        for (TrailSettings setting : settings) {
+            ImGui.pushID(setting.hashCode());
+
+            setting.renderImGuiAttributes();
+
+            ImGui.popID();
+        }
+        if (ImGui.button("Add Trail Settings")) {
+            settings.add(new TrailSettings());
+        }
     }
 }

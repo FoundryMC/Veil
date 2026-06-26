@@ -35,7 +35,7 @@ public class PointForceModule extends SimplePositionedForce {
         }
 
         // apply force to particle to move away from the point
-        particle.getVelocity().add(diff.normalize(this.strength));
+        particle.getVelocity().sub(diff.normalize(this.strength));
     }
 
     public void setRange(double range) {

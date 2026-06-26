@@ -10,7 +10,6 @@ import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
-import foundry.veil.impl.client.editor.ParticleEditorInspector;
 import imgui.ImGui;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -48,12 +47,10 @@ public final class InitialVelocityModuleData implements ParticleModuleData, Edit
 
     @Override
     public void renderImGuiAttributes() {
-        float[] editX = new float[]{(float) velocityDirection.x()};
-        float[] editY = new float[]{(float) velocityDirection.y()};
-        float[] editZ = new float[]{(float) velocityDirection.z()};
+        float[] editDirection = new float[]{(float) velocityDirection.x(), (float) velocityDirection.y(), (float) velocityDirection.z()};
 
-        if (ParticleEditorInspector.vec3Field("direction", editX, editY, editZ, 0.01F)) {
-            this.velocityDirection = new Vector3d(editX[0], editY[0], editZ[0]);
+        if (ImGui.dragFloat3("direction", editDirection, 0.01F)) {
+            this.velocityDirection = new Vector3d(editDirection[0], editDirection[1], editDirection[2]);
         }
 
         if (ImGui.checkbox("takes_parent_rotation", takesParentRotation)) {

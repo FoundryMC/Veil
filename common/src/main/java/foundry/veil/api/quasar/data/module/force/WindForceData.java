@@ -10,7 +10,6 @@ import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.ConstantForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
-import foundry.veil.impl.client.editor.ParticleEditorInspector;
 import imgui.ImGui;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -61,12 +60,10 @@ public final class WindForceData implements ParticleModuleData, EditorAttributeP
 
     @Override
     public void renderImGuiAttributes() {
-        float[] editX = new float[]{(float) windDirection.x()};
-        float[] editY = new float[]{(float) windDirection.y()};
-        float[] editZ = new float[]{(float) windDirection.z()};
+        float[] editDirection = new float[]{(float) windDirection.x(), (float) windDirection.y(), (float) windDirection.z()};
 
-        if (ParticleEditorInspector.vec3Field("wind_direction", editX, editY, editZ, 0.01F)) {
-            this.windDirection = new Vector3d(editX[0], editY[0], editZ[0]);
+        if (ImGui.dragFloat3("wind_direction", editDirection, 0.01F)) {
+            this.windDirection = new Vector3d(editDirection[0], editDirection[1], editDirection[2]);
         }
 
         float[] editRange = new float[] {windSpeed};

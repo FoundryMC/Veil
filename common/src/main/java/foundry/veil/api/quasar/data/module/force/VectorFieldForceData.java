@@ -48,7 +48,7 @@ public final class VectorFieldForceData implements ParticleModuleData, EditorAtt
 
     @Override
     public void renderImGuiAttributes() {
-        // TODO: vector field editor implementation
+        vectorField.renderImGuiAttributes();
 
         float[] editStrength = new float[]{this.strength};
         if (ImGui.dragScalar("strength", editStrength, 0.01F)) {

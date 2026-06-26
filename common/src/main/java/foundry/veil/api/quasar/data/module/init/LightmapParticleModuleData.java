@@ -57,7 +57,10 @@ public final class LightmapParticleModuleData implements ParticleModuleData, Edi
 
     @Override
     public void renderImGuiAttributes() {
-        if (ImGui.dragScalar("block", blockLight.getData(), 0.01f, 0, 15) || ImGui.dragScalar("sky", skyLight.getData(), 0.01f, 0, 15)) {
+        boolean blockLightDirty = ImGui.dragScalar("block", blockLight.getData(), 0.01f, 0, 15);
+        boolean skyLightDirty = ImGui.dragScalar("sky", skyLight.getData(), 0.01f, 0, 15);
+
+        if (blockLightDirty || skyLightDirty) {
             packedLight = LightTexture.pack(blockLight.get(), skyLight.get());
         }
     }

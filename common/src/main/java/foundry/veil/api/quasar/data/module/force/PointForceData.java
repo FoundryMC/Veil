@@ -10,7 +10,6 @@ import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.force.PointForceModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
-import foundry.veil.impl.client.editor.ParticleEditorInspector;
 import imgui.ImGui;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -72,12 +71,10 @@ public final class PointForceData implements ParticleModuleData, EditorAttribute
 
     @Override
     public void renderImGuiAttributes() {
-        float[] editX = new float[]{(float) point.x()};
-        float[] editY = new float[]{(float) point.y()};
-        float[] editZ = new float[]{(float) point.z()};
+        float[] editPos = new float[]{(float) point.x(), (float) point.y(), (float) point.z()};
 
-        if (ParticleEditorInspector.vec3Field("point", editX, editY, editZ, 0.01F)) {
-            this.point = new Vector3d(editX[0], editY[0], editZ[0]);
+        if (ImGui.dragFloat3("point", editPos, 0.01F)) {
+            this.point = new Vector3d(editPos[0], editPos[1], editPos[2]);
         }
 
         if (ImGui.checkbox("local_point", localPoint)) {
