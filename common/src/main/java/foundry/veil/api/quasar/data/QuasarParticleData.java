@@ -10,7 +10,9 @@ import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
@@ -51,6 +53,7 @@ public final class QuasarParticleData {
     private boolean faceVelocity;
     private float velocityStretchFactor;
     private final List<Holder<ParticleModuleData>> modules;
+    private final List<Holder<ParticleModuleData>> modulesView;
     private @Nullable SpriteData spriteData;
     private boolean additive;
     private RenderStyle renderStyle;
@@ -67,6 +70,7 @@ public final class QuasarParticleData {
         this.faceVelocity = faceVelocity;
         this.velocityStretchFactor = velocityStretchFactor;
         this.modules = new ArrayList<>(modules);
+        this.modulesView = Collections.unmodifiableList(modules);
         this.spriteData = spriteData;
         this.additive = additive;
         this.renderStyle = renderStyle;
@@ -77,61 +81,95 @@ public final class QuasarParticleData {
     }
 
     public boolean shouldCollide() {
-        return shouldCollide;
+        return this.shouldCollide;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setShouldCollide(boolean shouldCollide) {
         this.shouldCollide = shouldCollide;
     }
 
     public boolean faceVelocity() {
-        return faceVelocity;
+        return this.faceVelocity;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setFaceVelocity(boolean faceVelocity) {
         this.faceVelocity = faceVelocity;
     }
 
     public float velocityStretchFactor() {
-        return velocityStretchFactor;
+        return this.velocityStretchFactor;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setVelocityStretchFactor(float velocityStretchFactor) {
         this.velocityStretchFactor = velocityStretchFactor;
     }
 
+    /**
+     * @return A list containing all modules in the particle
+     * @since 1.3.0
+     * @deprecated Use {@link #modules()} instead
+     */
+    @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+    @Deprecated
+    public List<Holder<ParticleModuleData>> getAllModules() {
+        return new ArrayList<>(this.modules);
+    }
+
+    @UnmodifiableView
     public List<Holder<ParticleModuleData>> modules() {
-        return modules;
+        return this.modulesView;
     }
 
     public @Nullable SpriteData spriteData() {
-        return spriteData;
+        return this.spriteData;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setSpriteData(@Nullable SpriteData data) {
         this.spriteData = data;
     }
 
     public boolean additive() {
-        return additive;
+        return this.additive;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setAdditive(boolean additive) {
         this.additive = additive;
     }
 
     public RenderStyle renderStyle() {
-        return renderStyle;
+        return this.renderStyle;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public void setRenderStyle(RenderStyle renderStyle) {
         this.renderStyle = renderStyle;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
         var that = (QuasarParticleData) obj;
         return this.shouldCollide == that.shouldCollide &&
                 this.faceVelocity == that.faceVelocity &&
@@ -144,19 +182,27 @@ public final class QuasarParticleData {
 
     @Override
     public int hashCode() {
-        return Objects.hash(shouldCollide, faceVelocity, velocityStretchFactor, modules, spriteData, additive, renderStyle);
+        int result = Boolean.hashCode(this.shouldCollide);
+        result = 31 * result + Boolean.hashCode(this.faceVelocity);
+        result = 31 * result + Float.hashCode(this.velocityStretchFactor);
+        result = 31 * result + this.modules.hashCode();
+        result = 31 * result + this.modulesView.hashCode();
+        result = 31 * result + Objects.hashCode(this.spriteData);
+        result = 31 * result + Boolean.hashCode(this.additive);
+        result = 31 * result + this.renderStyle.hashCode();
+        return result;
     }
 
     @Override
     public String toString() {
         return "QuasarParticleData[" +
-                "shouldCollide=" + shouldCollide + ", " +
-                "faceVelocity=" + faceVelocity + ", " +
-                "velocityStretchFactor=" + velocityStretchFactor + ", " +
-                "modules=" + modules + ", " +
-                "spriteData=" + spriteData + ", " +
-                "additive=" + additive + ", " +
-                "renderStyle=" + renderStyle + ']';
+                "shouldCollide=" + this.shouldCollide + ", " +
+                "faceVelocity=" + this.faceVelocity + ", " +
+                "velocityStretchFactor=" + this.velocityStretchFactor + ", " +
+                "modules=" + this.modules + ", " +
+                "spriteData=" + this.spriteData + ", " +
+                "additive=" + this.additive + ", " +
+                "renderStyle=" + this.renderStyle + ']';
     }
 
 }

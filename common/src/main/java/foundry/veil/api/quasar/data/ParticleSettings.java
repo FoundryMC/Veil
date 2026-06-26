@@ -56,6 +56,9 @@ public record ParticleSettings(float particleSpeed,
         return this.randomInitialDirection ? this.initialDirection.mul(random.nextFloat() * 2 - 1, random.nextFloat() * 2 - 1, random.nextFloat() * 2 - 1, new Vector3f()) : this.initialDirection;
     }
 
+    /**
+     * @since 4.3.0
+     */
     public Vector3fc initialRotation(RandomSource random) {
         return this.randomInitialRotation ? this.initialRotation.mul(random.nextFloat() * 2 - 1, random.nextFloat() * 2 - 1, random.nextFloat() * 2 - 1, new Vector3f()) : this.initialRotation;
     }

@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
@@ -43,6 +44,7 @@ import java.util.concurrent.CompletableFuture;
  *   OPTIONAL OnUpdateAction that can be set to run when a particle is updated
  *   OPTIONAL OnRenderAction that can be set to run when a particle is rendered
  */
+@ApiStatus.NonExtendable
 public class ParticleEmitter {
 
     private static final Set<Holder<ParticleModuleData>> REPORTED_MODULES = new HashSet<>();
@@ -51,6 +53,7 @@ public class ParticleEmitter {
     private final ClientLevel level;
     private final ParticleEmitterData emitterData;
     private final List<ParticleModuleData> modules;
+    private final List<ParticleModuleData> modulesView;
     private final RandomSource randomSource;
     private final Vector3d position;
     private final Vector3d offset;
@@ -77,6 +80,7 @@ public class ParticleEmitter {
         this.level = level;
         this.emitterData = data;
         this.modules = createModuleSet(data.particleData());
+        this.modulesView = Collections.unmodifiableList(this.modules);
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
         this.offset = new Vector3d();
@@ -284,7 +288,27 @@ public class ParticleEmitter {
      * @param module The module to add
      */
     public void addCodeModule(CodeModule module) {
+        this.addModule(module);
+    }
+
+    /**
+     * Adds a new module to this emitter.
+     *
+     * @param module The module to add
+     * @since 4.3.0
+     */
+    public void addModule(ParticleModuleData module) {
         this.modules.add(module);
+    }
+
+    /**
+     * Removes a module from this emitter.
+     *
+     * @param module The module to remove
+     * @since 4.3.0
+     */
+    public void removeModule(ParticleModuleData module) {
+        this.modules.remove(module);
     }
 
     /**
@@ -466,8 +490,12 @@ public class ParticleEmitter {
         this.particleData = particleData;
     }
 
+    /**
+     * @since 4.3.0
+     */
+    @UnmodifiableView
     public List<ParticleModuleData> getModules() {
-        return modules;
+        return this.modulesView;
     }
 
     /**

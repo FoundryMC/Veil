@@ -3,14 +3,21 @@ package foundry.veil.api.quasar.emitters.module.init;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.quasar.data.ParticleModuleTypeRegistry;
+import foundry.veil.api.quasar.data.ParticleSettings;
 import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import foundry.veil.api.util.CodecUtil;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+/**
+ * @deprecated Use {@link ParticleSettings#randomInitialRotation()} instead
+ */
+@ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+@Deprecated
 public record InitRandomRotationModuleData(Vector3fc minDegrees, Vector3fc maxDegrees) implements ParticleModuleData {
 
     public static final MapCodec<InitRandomRotationModuleData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -28,6 +35,6 @@ public record InitRandomRotationModuleData(Vector3fc minDegrees, Vector3fc maxDe
 
     @Override
     public ModuleType<?> getType() {
-        return null;
+        return ParticleModuleTypeRegistry.INIT_RANDOM_ROTATION;
     }
 }

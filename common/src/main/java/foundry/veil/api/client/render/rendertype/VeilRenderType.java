@@ -62,20 +62,6 @@ public final class VeilRenderType extends RenderType {
     private static final ShaderStateShard PARTICLE = VeilRenderBridge.shaderState(Veil.veilPath("quasar/particle"));
     private static final ShaderStateShard PARTICLE_ADDITIVE = VeilRenderBridge.shaderState(Veil.veilPath("quasar/particle_additive"));
 
-    public static final RenderType QUASAR_DEBUG = RenderType.create(
-            Veil.MODID + ":quasar_debug",
-            DefaultVertexFormat.POSITION_COLOR,
-            VertexFormat.Mode.DEBUG_LINE_STRIP,
-            TRANSIENT_BUFFER_SIZE,
-            false,
-            false,
-            CompositeState.builder()
-                    .setShaderState(POSITION_COLOR_SHADER)
-                    .setTransparencyState(NO_TRANSPARENCY)
-                    .setWriteMaskState(COLOR_DEPTH_WRITE)
-                    .setCullState(NO_CULL)
-                    .createCompositeState(false));
-
     private static final BiFunction<ResourceLocation, Boolean, RenderType> QUASAR_PARTICLE = Util.memoize((texture, additive) -> {
         CompositeState state = RenderType.CompositeState.builder()
                 .setShaderState(additive ? PARTICLE_ADDITIVE : PARTICLE)

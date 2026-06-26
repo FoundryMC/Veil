@@ -52,83 +52,83 @@ public final class VectorField implements EditorAttributeProvider {
 
     @Override
     public void renderImGuiAttributes() {
-        float[] editFrequency = new float[]{noise.GetFrequency()};
+        float[] editFrequency = new float[]{this.noise.GetFrequency()};
         if (ImGui.dragFloat("frequency", editFrequency, 0.02f, 0)) {
-            noise.SetFrequency(editFrequency[0]);
+            this.noise.SetFrequency(editFrequency[0]);
         }
 
         if (ImGui.button("Randomize Seed")) {
-            noise.SetSeed((int) (Math.random() * Integer.MAX_VALUE));
+            this.noise.SetSeed((int) (Math.random() * Integer.MAX_VALUE));
         }
         ImGui.sameLine();
-        ImGui.text(String.valueOf(noise.GetSeed()));
+        ImGui.text(String.valueOf(this.noise.GetSeed()));
 
-        FastNoiseLite.FractalType fractalType = enumCombo("fractal_type", FastNoiseLite.FractalType.values(), noise.GetFractalType());
+        FastNoiseLite.FractalType fractalType = enumCombo("fractal_type", FastNoiseLite.FractalType.values(), this.noise.GetFractalType());
         if (fractalType != null) {
-            noise.SetFractalType(fractalType);
+            this.noise.SetFractalType(fractalType);
         }
 
-        int[] editOctaves = new int[]{noise.GetFractalOctaves()};
+        int[] editOctaves = new int[]{this.noise.GetFractalOctaves()};
         if (ImGui.dragInt("octaves", editOctaves, 0.03F)) {
-            noise.SetFractalOctaves(editOctaves[0]);
+            this.noise.SetFractalOctaves(editOctaves[0]);
         }
 
-        float[] editLacunarity = new float[]{noise.GetFractalLacunarity()};
+        float[] editLacunarity = new float[]{this.noise.GetFractalLacunarity()};
         if (ImGui.dragFloat("lacunarity", editLacunarity, 0.01F)) {
-            noise.SetFractalLacunarity(editLacunarity[0]);
+            this.noise.SetFractalLacunarity(editLacunarity[0]);
         }
 
-        float[] editGain = new float[]{noise.GetFractalGain()};
+        float[] editGain = new float[]{this.noise.GetFractalGain()};
         if (ImGui.dragFloat("gain", editGain, 0.015F)) {
-            noise.SetFractalGain(editGain[0]);
+            this.noise.SetFractalGain(editGain[0]);
         }
 
-        FastNoiseLite.CellularDistanceFunction cellularDistanceFunction = enumCombo("cellular_distance_function", FastNoiseLite.CellularDistanceFunction.values(), noise.GetCellularDistanceFunction());
+        FastNoiseLite.CellularDistanceFunction cellularDistanceFunction = enumCombo("cellular_distance_function", FastNoiseLite.CellularDistanceFunction.values(), this.noise.GetCellularDistanceFunction());
         if (cellularDistanceFunction != null) {
-            noise.SetCellularDistanceFunction(cellularDistanceFunction);
+            this.noise.SetCellularDistanceFunction(cellularDistanceFunction);
         }
 
-        FastNoiseLite.CellularReturnType cellularReturnType = enumCombo("cellular_return_type", FastNoiseLite.CellularReturnType.values(), noise.GetCellularReturnType());
+        FastNoiseLite.CellularReturnType cellularReturnType = enumCombo("cellular_return_type", FastNoiseLite.CellularReturnType.values(), this.noise.GetCellularReturnType());
         if (cellularReturnType != null) {
-            noise.SetCellularReturnType(cellularReturnType);
+            this.noise.SetCellularReturnType(cellularReturnType);
         }
 
-        FastNoiseLite.NoiseType noiseType = enumCombo("noise_type", FastNoiseLite.NoiseType.values(), noise.GetNoiseType());
+        FastNoiseLite.NoiseType noiseType = enumCombo("noise_type", FastNoiseLite.NoiseType.values(), this.noise.GetNoiseType());
         if (noiseType != null) {
-            noise.SetNoiseType(noiseType);
+            this.noise.SetNoiseType(noiseType);
         }
 
-        FastNoiseLite.RotationType3D rotationType3D = enumCombo("rotation_type_3d", FastNoiseLite.RotationType3D.values(), noise.GetRotationType3D());
+        FastNoiseLite.RotationType3D rotationType3D = enumCombo("rotation_type_3d", FastNoiseLite.RotationType3D.values(), this.noise.GetRotationType3D());
         if (rotationType3D != null) {
-            noise.SetRotationType3D(rotationType3D);
+            this.noise.SetRotationType3D(rotationType3D);
         }
 
-        FastNoiseLite.DomainWarpType domainWarpType = enumCombo("domain_warp_type", FastNoiseLite.DomainWarpType.values(), noise.GetDomainWarpType());
+        FastNoiseLite.DomainWarpType domainWarpType = enumCombo("domain_warp_type", FastNoiseLite.DomainWarpType.values(), this.noise.GetDomainWarpType());
         if (domainWarpType != null) {
-            noise.SetDomainWarpType(domainWarpType);
+            this.noise.SetDomainWarpType(domainWarpType);
         }
 
-        float[] editDomainWarpAmp = new float[]{noise.GetDomainWarpAmp()};
+        float[] editDomainWarpAmp = new float[]{this.noise.GetDomainWarpAmp()};
         if (ImGui.dragFloat("domain_warp_amp", editDomainWarpAmp, 0.01F)) {
-            noise.SetDomainWarpAmp(editDomainWarpAmp[0]);
+            this.noise.SetDomainWarpAmp(editDomainWarpAmp[0]);
         }
 
-        float[] noiseStrength = new float[]{strength};
+        float[] noiseStrength = new float[]{this.strength};
         if (ImGui.dragFloat("noise_strength", noiseStrength, 0.01F)) {
             this.strength = noiseStrength[0];
         }
     }
 
     public FastNoiseLite noise() {
-        return noise;
+        return this.noise;
     }
 
     public float strength() {
-        return strength;
+        return this.strength;
     }
 
     @Nullable
-    public static <T extends Enum<T>> T enumCombo(String label, T[] enumArray, T currentValue) {
+    private static <T extends Enum<T>> T enumCombo(String label, T[] enumArray, T currentValue) {
         Object[] enumObjectArray = Stream.of(enumArray).map(Enum::name).toArray();
         String[] nameArray = Arrays.copyOf(enumObjectArray, enumObjectArray.length, String[].class);
 
