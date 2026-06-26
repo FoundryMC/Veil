@@ -56,7 +56,7 @@ dependencies {
     jarJar(api(additionalRuntimeClasspath("gg.moonflower:molang-compiler:$molang_compiler_version")))
     jarJar(api(additionalRuntimeClasspath("io.github.ocelot:glsl-processor:${glsl_processor_version}")))
 
-    implementation "foundry.imguimc:imguimc-neoforge-${minecraft_version}:$imguimc_version"
+    compileOnly "foundry.imguimc:imguimc-neoforge-${minecraft_version}:$imguimc_version"
 
     compileOnly "net.caffeinemc:sodium-neoforge-mod:${sodium_version}"
     compileOnly "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
