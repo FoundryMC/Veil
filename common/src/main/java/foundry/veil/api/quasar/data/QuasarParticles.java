@@ -4,6 +4,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.resource.VeilDynamicRegistry;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -75,6 +77,19 @@ public final class QuasarParticles {
                         String msg = VeilDynamicRegistry.printErrors(data.errors());
                         if (msg != null) {
                             Veil.LOGGER.error("Quasar registry loading errors:{}", msg);
+                        }
+
+                        Registry<ParticleModuleData> modulesRegistry = registryAccess.registryOrThrow(MODULES);
+                        for (Map.Entry<ResourceKey<ParticleModuleData>, ParticleModuleData> entry : modulesRegistry.entrySet()) {
+                            ParticleModuleData moduleData = entry.getValue();
+                            ModuleType.DeprecationStatus status = moduleData.getType().deprecationStatus();
+                            if (status != null) {
+                                Veil.LOGGER.error("{} is deprecated and will be removed in {}", entry.getKey(), status.removeVersion());
+                                String reason = status.reason();
+                                if (reason != null) {
+                                    Veil.LOGGER.error("Reason: {}", reason);
+                                }
+                            }
                         }
 
                         Veil.LOGGER.info("Loaded {} quasar particles", registryAccess.registryOrThrow(EMITTER).size());

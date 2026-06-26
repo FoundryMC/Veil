@@ -10,11 +10,16 @@ import foundry.imgui.api.ImGuiTextureProvider;
 import foundry.veil.Veil;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.editor.SingleWindowInspector;
-import foundry.veil.api.client.render.*;
+import foundry.veil.api.client.render.MatrixStack;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.quasar.data.*;
+import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.shape.EmitterShape;
-import foundry.veil.api.quasar.particle.*;
+import foundry.veil.api.quasar.particle.ParticleEmitter;
+import foundry.veil.api.quasar.particle.ParticleSystemManager;
+import foundry.veil.api.quasar.particle.RenderStyle;
+import foundry.veil.api.quasar.particle.SpriteData;
 import foundry.veil.api.quasar.registry.EmitterShapeRegistry;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import imgui.ImGui;
@@ -38,16 +43,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.Math;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public class ParticleEditorInspector extends SingleWindowInspector {
+
     public static final Component TITLE = Component.literal("Particle Editor");
 
     private final List<MutableParticleEmitter> emitters = new ArrayList<>();
@@ -59,6 +69,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     private final List<String> renderStyleKeys;
     private final String[] renderStyleArray;
 
+    private final ResourceLocation[] moduleKeys;
     private final String[] modulesArray;
     private final ImInt selectedModule = new ImInt();
 
@@ -72,20 +83,20 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
     public ParticleEditorInspector() {
         this.shapeKeys = EmitterShapeRegistry.REGISTRY.keySet().stream().map(ResourceLocation::toString).toList();
-        this.shapeArray = Arrays.copyOf(shapeKeys.toArray(), shapeKeys.toArray().length, String[].class);
+        this.shapeArray = Arrays.copyOf(this.shapeKeys.toArray(), this.shapeKeys.toArray().length, String[].class);
 
         this.renderStyleKeys = RenderStyleRegistry.REGISTRY.keySet().stream().map(ResourceLocation::toString).toList();
-        this.renderStyleArray = Arrays.copyOf(renderStyleKeys.toArray(), renderStyleKeys.toArray().length, String[].class);
+        this.renderStyleArray = Arrays.copyOf(this.renderStyleKeys.toArray(), this.renderStyleKeys.toArray().length, String[].class);
 
-        Object[] baseArray = ParticleModuleTypeRegistry.REGISTRY.keySet().stream().map(ResourceLocation::toString).sorted().toArray();
-        this.modulesArray = Arrays.copyOf(baseArray, baseArray.length, String[].class);
+        this.moduleKeys = ParticleModuleTypeRegistry.REGISTRY.keySet().toArray(ResourceLocation[]::new);
+        this.modulesArray = Arrays.stream(this.moduleKeys).map(ResourceLocation::toString).toArray(String[]::new);
     }
 
     @Override
     protected void renderComponents() {
         int[] value = {this.selectedEmitter};
 
-        ImGui.beginDisabled(saveWindowOpen.get() || loadWindowOpen.get());
+        ImGui.beginDisabled(this.saveWindowOpen.get() || this.loadWindowOpen.get());
 
         ImGui.beginDisabled(this.emitters.isEmpty());
         ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() * 0.6f);
@@ -112,7 +123,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.button("Create Emitter", ImGui.getContentRegionAvailX() * 0.5f, 0)) {
-            createEmitterFromData(new ParticleEmitterData(
+            this.createEmitterFromData(new ParticleEmitterData(
                     20,
                     false,
                     1,
@@ -140,16 +151,20 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         ImGui.endDisabled();
 
         ImGui.pushItemWidth(ImGui.getContentRegionAvailX() * 0.5f);
-        if (ImGui.button("Save")) saveWindowOpen.set(true);
+        if (ImGui.button("Save")) {
+            this.saveWindowOpen.set(true);
+        }
         ImGui.sameLine();
-        if (ImGui.button("Load")) loadWindowOpen.set(true);
+        if (ImGui.button("Load")) {
+            this.loadWindowOpen.set(true);
+        }
         ImGui.popItemWidth();
 
         ImGui.separator();
 
         if (ImGui.beginListBox("Properties", ImGui.getContentRegionAvail())) {
             if (!this.emitters.isEmpty() && this.emitters.get(this.selectedEmitter) != null) {
-                renderParticleAttributes();
+                this.renderParticleAttributes();
             }
             ImGui.endListBox();
         }
@@ -166,21 +181,24 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (this.saveWindowOpen.get()) {
             ImGui.setNextWindowSizeConstraints(300, 300, Float.MAX_VALUE, Float.MAX_VALUE);
             if (ImGui.begin("Save Emitter", this.saveWindowOpen, ImGuiWindowFlags.NoSavedSettings)) {
-                if (saveSeparateSettings.get() || saveSeparateShape.get() || saveSeparateData.get()) {
-                    ImGui.inputText("Namespace", saveNamespace);
+                if (this.saveSeparateSettings.get() || this.saveSeparateShape.get() || this.saveSeparateData.get()) {
+                    ImGui.inputText("Namespace", this.saveNamespace);
                 }
-                ImGui.inputText("Filename", savePath);
+                ImGui.inputText("Filename", this.savePath);
 
-                ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
+                ImGui.checkbox("Separate Particle Settings file", this.saveSeparateSettings);
 
-                ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
+                ImGui.checkbox("Separate Emitter Shape file", this.saveSeparateShape);
 
-                ImGui.checkbox("Separate Particle Data file", saveSeparateData);
+                ImGui.checkbox("Separate Particle Data file", this.saveSeparateData);
 
                 if (ImGui.button("Save")) {
                     // Ensure filepath does not have file extension
-                    if (savePath.get().endsWith(".json")) saveEmitterToFile(this.emitters.get(selectedEmitter), savePath.get().substring(0, savePath.get().length() - 5), saveNamespace.get());
-                    else saveEmitterToFile(this.emitters.get(selectedEmitter), savePath.get(), saveNamespace.get());
+                    if (this.savePath.get().endsWith(".json")) {
+                        this.saveEmitterToFile(this.emitters.get(this.selectedEmitter), this.savePath.get().substring(0, this.savePath.get().length() - 5), this.saveNamespace.get());
+                    } else {
+                        this.saveEmitterToFile(this.emitters.get(this.selectedEmitter), this.savePath.get(), this.saveNamespace.get());
+                    }
                 }
             }
             ImGui.end();
@@ -193,7 +211,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                     Set<ResourceLocation> emitterLocations = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).get().keySet();
                     for (ResourceLocation emitter : emitterLocations) {
                         if (ImGui.selectable(emitter.toString())) {
-                            createEmitterFromData(QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).get().get(emitter));
+                            this.createEmitterFromData(QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).get().get(emitter));
                             this.loadWindowOpen.set(false);
                         }
                     }
@@ -246,7 +264,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (ImGui.collapsingHeader("Emitter Shapes")) {
             shapeInspectorOpen = true;
             ImGui.indent();
-            renderShapeAttributes(emitter);
+            this.renderShapeAttributes(emitter);
             ImGui.unindent();
         }
 
@@ -257,7 +275,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             settingsInspectorOpen = true;
             ImGui.indent();
 
-            renderParticleSettings(emitter);
+            this.renderParticleSettings(emitter);
 
             ImGui.unindent();
         }
@@ -270,13 +288,13 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (ImGui.collapsingHeader("Particle Data")) {
             ImGui.indent();
 
-            renderParticleData(emitter);
+            this.renderParticleData(emitter);
 
             ImGui.unindent();
         }
 
         if (ImGui.collapsingHeader("Modules")) {
-            renderModules(emitter);
+            this.renderModules(emitter);
         }
     }
 
@@ -287,13 +305,13 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             ImInt selectedShape = new ImInt();
             for (Map.Entry<ResourceKey<EmitterShape>, EmitterShape> e : EmitterShapeRegistry.REGISTRY.entrySet()) {
                 if (e.getValue().getClass() == shapeSettings.shape().getClass()) {
-                    selectedShape.set(shapeKeys.indexOf(e.getKey().location().toString()));
+                    selectedShape.set(this.shapeKeys.indexOf(e.getKey().location().toString()));
                 }
             }
 
             ImGui.pushID(i);
-            if (ImGui.combo("shape", selectedShape, shapeArray)) {
-                ResourceLocation shapeKey = ResourceLocation.bySeparator(shapeKeys.get(selectedShape.get()), ':');
+            if (ImGui.combo("shape", selectedShape, this.shapeArray)) {
+                ResourceLocation shapeKey = ResourceLocation.bySeparator(this.shapeKeys.get(selectedShape.get()), ':');
                 EmitterShape shape = EmitterShapeRegistry.REGISTRY.get(shapeKey);
                 emitter.setShape(i, shape);
             }
@@ -387,7 +405,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         if (settings.randomLifetime()) {
-            int[] editParticleLifetime = new int[]{settings.particleLifetime(), settings.particleLifetime() + (int)settings.particleLifetimeVariation()};
+            int[] editParticleLifetime = new int[]{settings.particleLifetime(), settings.particleLifetime() + (int) settings.particleLifetimeVariation()};
 
             if (ImGui.dragInt2("particle_lifetime", editParticleLifetime, 0.03F, Math.max(editParticleLifetime[0], 0))) {
                 emitter.setParticleLifetime(editParticleLifetime[0], editParticleLifetime[1]);
@@ -407,12 +425,12 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         ImInt selectedRenderStyle = new ImInt();
         for (Map.Entry<ResourceKey<RenderStyle>, RenderStyle> e : RenderStyleRegistry.REGISTRY.entrySet()) {
             if (e.getValue().getClass() == data.renderStyle().getClass()) {
-                selectedRenderStyle.set(renderStyleKeys.indexOf(e.getKey().location().toString()));
+                selectedRenderStyle.set(this.renderStyleKeys.indexOf(e.getKey().location().toString()));
             }
         }
 
-        if (ImGui.combo("render_style", selectedRenderStyle, renderStyleArray)) {
-            data.setRenderStyle(RenderStyleRegistry.REGISTRY.get(ResourceLocation.parse(renderStyleArray[selectedRenderStyle.get()])));
+        if (ImGui.combo("render_style", selectedRenderStyle, this.renderStyleArray)) {
+            data.setRenderStyle(RenderStyleRegistry.REGISTRY.get(ResourceLocation.parse(this.renderStyleArray[selectedRenderStyle.get()])));
         }
 
         // Sprite data (if the render style is billboard)
@@ -433,7 +451,8 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             if (ImGui.inputText("sprite", value)) {
                 try {
                     data.setSpriteData(new SpriteData(ResourceLocation.parse(value.get()), spriteData.frameCount(), spriteData.frameTime(), spriteData.frameWidth(), spriteData.frameHeight(), spriteData.stretchToLifetime()));
-                } catch (ResourceLocationException ignored) {} // in the event of a non a-z0-9/._- character
+                } catch (ResourceLocationException ignored) {
+                } // in the event of a non a-z0-9/._- character
             }
             int[] editFrameCount = new int[]{spriteData.frameCount()};
             if (ImGui.dragScalar("frame_count", editFrameCount, 0.03F)) {
@@ -471,7 +490,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         // Velocity stretch factor
-        float[] editStretchFactor = new float[] {data.velocityStretchFactor()};
+        float[] editStretchFactor = new float[]{data.velocityStretchFactor()};
 
         if (ImGui.dragScalar("velocity_stretch_factor", editStretchFactor, 0.005f)) {
             data.setVelocityStretchFactor(editStretchFactor[0]);
@@ -483,18 +502,23 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         int id = 333;
         for (ParticleModuleData module : List.copyOf(emitter.getModules())) {
             ImGui.pushID(id);
-            if (ImGui.collapsingHeader(ParticleModuleTypeRegistry.REGISTRY.getKey(module.getType()).toString())) {
+            String name = String.valueOf(ParticleModuleTypeRegistry.REGISTRY.getKey(module.getType()));
+            if (ImGui.collapsingHeader(name)) {
                 ImGui.indent();
                 if (module instanceof EditorAttributeProvider attributeProvider) {
                     attributeProvider.renderImGuiAttributes();
                 }
                 if (ImGui.button("Remove Module")) {
-                    emitter.getModules().remove(module);
+                    emitter.removeModule(module);
                     ImGui.unindent();
                     ImGui.popID();
                     continue;
                 }
                 ImGui.unindent();
+            }
+            ModuleType.DeprecationStatus status = module.getType().deprecationStatus();
+            if (status != null && ImGui.isItemHovered()) {
+                ImGui.setTooltip("%s will be removed in %s".formatted(name, status.removeVersion()));
             }
             ImGui.popID();
             id++;
@@ -502,10 +526,16 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         ImGui.separator();
 
-        ImGui.combo("module", selectedModule, modulesArray);
+        ImGui.combo("module", this.selectedModule, this.modulesArray);
         if (ImGui.button("Add Module")) {
-            ParticleModuleData newModule = ParticleModuleTypeRegistry.REGISTRY.get(ResourceLocation.parse(modulesArray[selectedModule.get()])).defaultValue().get();
-            emitter.getModules().add(newModule);
+            ResourceLocation moduleKey = this.moduleKeys[this.selectedModule.get()];
+            ModuleType<? extends ParticleModuleData> moduleType = ParticleModuleTypeRegistry.REGISTRY.get(moduleKey);
+            if (moduleType != null) {
+                Supplier<? extends ParticleModuleData> factory = moduleType.defaultValue();
+                if (factory != null) {
+                    emitter.addModule(factory.get());
+                }
+            }
         }
 
         ImGui.unindent();
@@ -514,35 +544,35 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     private void saveEmitterToFile(MutableParticleEmitter emitter, String filename, String namespace) {
         ParticleEmitterData data = emitter.dataFromMutable();
         JsonElement result = ParticleEmitterData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
-        if (saveSeparateShape.get()) {
+        if (this.saveSeparateShape.get()) {
             // For some reason, "addProperty" also replaces it if it already exists. Go figure.
             result.getAsJsonObject().get("emitter_settings").getAsJsonObject().addProperty("shape", namespace + ":" + filename);
         }
-        if (saveSeparateSettings.get()) {
+        if (this.saveSeparateSettings.get()) {
             result.getAsJsonObject().get("emitter_settings").getAsJsonObject().addProperty("particle_settings", namespace + ":" + filename);
         }
-        if (saveSeparateData.get()) {
+        if (this.saveSeparateData.get()) {
             result.getAsJsonObject().addProperty("particle_data", namespace + ":" + filename);
         }
 
         Path baseQuasarPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar");
 
         try {
-            writePrettyPrintedJson(result, baseQuasarPath.resolve("emitters").toString(), filename);
+            this.writePrettyPrintedJson(result, baseQuasarPath.resolve("emitters").toString(), filename);
             Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter to quasar/emitters/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("emitters").toAbsolutePath().toString()))));
 
-            if (saveSeparateShape.get()) {
-                writePrettyPrintedJson(EmitterShapeSettings.DIRECT_CODEC.listOf().encodeStart(JsonOps.INSTANCE, data.emitterSettings().emitterShapeSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/shape").toString(), filename);
+            if (this.saveSeparateShape.get()) {
+                this.writePrettyPrintedJson(EmitterShapeSettings.DIRECT_CODEC.listOf().encodeStart(JsonOps.INSTANCE, data.emitterSettings().emitterShapeSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/shape").toString(), filename);
                 Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter shape to quasar/modules/emitter/shape/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/emitter/shape").toAbsolutePath().toString()))));
             }
 
-            if (saveSeparateSettings.get()) {
-                writePrettyPrintedJson(ParticleSettings.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.emitterSettings().particleSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/particle").toString(), filename);
+            if (this.saveSeparateSettings.get()) {
+                this.writePrettyPrintedJson(ParticleSettings.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.emitterSettings().particleSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/particle").toString(), filename);
                 Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter particle settings to quasar/modules/emitter/particle/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/emitter/particle").toAbsolutePath().toString()))));
             }
 
-            if (saveSeparateData.get()) {
-                writePrettyPrintedJson(QuasarParticleData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.particleData()).getOrThrow(), baseQuasarPath.resolve("modules/particle_data").toString(), filename);
+            if (this.saveSeparateData.get()) {
+                this.writePrettyPrintedJson(QuasarParticleData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.particleData()).getOrThrow(), baseQuasarPath.resolve("modules/particle_data").toString(), filename);
                 Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter particle data to quasar/modules/particle_data/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/particle_data").toAbsolutePath().toString()))));
             }
         } catch (IOException e) {
@@ -564,7 +594,9 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     }
 
     private void createEmitterFromData(ParticleEmitterData data) {
-        if (data == null) return;
+        if (data == null) {
+            return;
+        }
 
         ParticleSystemManager particleManager = VeilRenderSystem.renderer().getParticleManager();
         MutableParticleEmitter emitter = new MutableParticleEmitter(particleManager, particleManager.getLevel(), data);
@@ -610,36 +642,36 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                     this.particleData.shouldCollide(), this.particleData.faceVelocity(), this.particleData.velocityStretchFactor(), this.getModules().stream().map(Holder::direct).toList(), this.particleData.spriteData(), this.particleData.additive(), this.particleData.renderStyle()
             );
 
-            EmitterSettings emitterSettings = new EmitterSettings(getEmitterShapeSettings().stream().map(Holder::direct).toList(), Holder.direct(this.getParticleSettings()), this.isForceSpawn());
+            EmitterSettings emitterSettings = new EmitterSettings(this.getEmitterShapeSettings().stream().map(Holder::direct).toList(), Holder.direct(this.getParticleSettings()), this.isForceSpawn());
 
             return new ParticleEmitterData(this.getMaxLifetime(), this.isLoop(), this.getRate(), this.getCount(), this.getMaxParticles(), emitterSettings, Holder.direct(withModules));
         }
 
         @Override
         public void render(MatrixStack matrixStack, MultiBufferSource bufferSource, Camera camera, float partialTicks) {
-            if (renderEmitterShape) {
+            if (this.renderEmitterShape) {
                 VertexConsumer debugBuilder = bufferSource.getBuffer(RenderType.debugLineStrip(1));
                 matrixStack.matrixPush();
                 matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
-                for (EmitterShapeSettings shapeSettings : getEmitterShapeSettings()) {
+                for (EmitterShapeSettings shapeSettings : this.getEmitterShapeSettings()) {
                     matrixStack.matrixPush();
-                    matrixStack.translate(getPosition());
+                    matrixStack.translate(this.getPosition());
                     shapeSettings.shape().renderShape(matrixStack.toPoseStack(), debugBuilder, shapeSettings.dimensions(), shapeSettings.rotation());
                     matrixStack.matrixPop();
                 }
                 matrixStack.matrixPop();
             }
-            if (renderDirection) {
+            if (this.renderDirection) {
                 VertexConsumer debugBuilder = bufferSource.getBuffer(RenderType.lineStrip());
                 matrixStack.matrixPush();
                 matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
                 matrixStack.matrixPush();
-                matrixStack.translate(getPosition());
+                matrixStack.translate(this.getPosition());
 
                 Matrix4f matrix4f = matrixStack.position();
 
                 debugBuilder.addVertex(matrix4f, 0, 0, 0).setColor(1, 1f, 1f, 1).setNormal(0, 1, 0);
-                Vector3f direction = getParticleSettings().initialDirection().normalize(new Vector3f()).mul(getParticleSettings().particleSpeed() * 10);
+                Vector3f direction = this.getParticleSettings().initialDirection().normalize(new Vector3f()).mul(this.getParticleSettings().particleSpeed() * 10);
                 debugBuilder.addVertex(matrix4f, direction.x, direction.y, direction.z).setColor(1f, 0.15f, 0.15f, 1f).setNormal(0, 1, 0);
                 matrixStack.matrixPop();
                 matrixStack.matrixPop();
@@ -651,17 +683,19 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         protected void tick() {
             super.tick();
 
-            if (this.isRemoved() && !forceRemoved) {
+            if (this.isRemoved() && !this.forceRemoved) {
                 this.reset();
-                this.spawnTask = particleManager.getScheduler().scheduleAtFixedRate(this::spawn, 1, this.getRate()).toCompletableFuture();
+                this.spawnTask = this.particleManager.getScheduler().scheduleAtFixedRate(this::spawn, 1, this.getRate()).toCompletableFuture();
             }
         }
 
         public void setRate(int rate) {
             super.setRate(rate);
 
-            if (spawnTask != null) this.spawnTask.cancel(true);
-            this.spawnTask = particleManager.getScheduler().scheduleAtFixedRate(this::spawn, 1, rate).toCompletableFuture();
+            if (this.spawnTask != null) {
+                this.spawnTask.cancel(true);
+            }
+            this.spawnTask = this.particleManager.getScheduler().scheduleAtFixedRate(this::spawn, 1, rate).toCompletableFuture();
             this.reset();
         }
 
@@ -671,69 +705,69 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         public void setShape(int index, EmitterShape shape) {
-            EmitterShapeSettings oldShape = getEmitterShapeSettings().get(index);
-            updateShapeSettings(index, shape, oldShape.dimensions(), oldShape.rotation(), oldShape.fromSurface());
+            EmitterShapeSettings oldShape = this.getEmitterShapeSettings().get(index);
+            this.updateShapeSettings(index, shape, oldShape.dimensions(), oldShape.rotation(), oldShape.fromSurface());
         }
 
         public void setShapeDimensions(int index, float x, float y, float z) {
-            EmitterShapeSettings oldShape = getEmitterShapeSettings().get(index);
-            updateShapeSettings(index, oldShape.shape(), new Vector3f(x, y, z), oldShape.rotation(), oldShape.fromSurface());
+            EmitterShapeSettings oldShape = this.getEmitterShapeSettings().get(index);
+            this.updateShapeSettings(index, oldShape.shape(), new Vector3f(x, y, z), oldShape.rotation(), oldShape.fromSurface());
         }
 
         public void setShapeRotation(int index, float x, float y, float z) {
-            EmitterShapeSettings oldShape = getEmitterShapeSettings().get(index);
-            updateShapeSettings(index, oldShape.shape(), oldShape.dimensions(), new Vector3f(x, y, z), oldShape.fromSurface());
+            EmitterShapeSettings oldShape = this.getEmitterShapeSettings().get(index);
+            this.updateShapeSettings(index, oldShape.shape(), oldShape.dimensions(), new Vector3f(x, y, z), oldShape.fromSurface());
         }
 
         public void setShapeFromSurface(int index, boolean fromSurface) {
-            EmitterShapeSettings oldShape = getEmitterShapeSettings().get(index);
-            updateShapeSettings(index, oldShape.shape(), oldShape.dimensions(), oldShape.rotation(), fromSurface);
+            EmitterShapeSettings oldShape = this.getEmitterShapeSettings().get(index);
+            this.updateShapeSettings(index, oldShape.shape(), oldShape.dimensions(), oldShape.rotation(), fromSurface);
         }
 
         public void resetShapeTransform(int index) {
-            EmitterShapeSettings oldShape = getEmitterShapeSettings().get(index);
-            updateShapeSettings(index, oldShape.shape(), new Vector3f(1, 1, 1), new Vector3f(0, 0, 0), oldShape.fromSurface());
+            EmitterShapeSettings oldShape = this.getEmitterShapeSettings().get(index);
+            this.updateShapeSettings(index, oldShape.shape(), new Vector3f(1, 1, 1), new Vector3f(0, 0, 0), oldShape.fromSurface());
         }
 
         public void setParticleSpeed(float speed) {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
                     .setParticleSpeed(speed)
                     .build());
         }
 
         public void toggleRandomDirection() {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
-                    .setRandomInitialDirection(!getParticleSettings().randomInitialDirection())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
+                    .setRandomInitialDirection(!this.getParticleSettings().randomInitialDirection())
                     .build());
         }
 
         public void toggleRandomRotation() {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
-                    .setRandomInitialRotation(!getParticleSettings().randomInitialRotation())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
+                    .setRandomInitialRotation(!this.getParticleSettings().randomInitialRotation())
                     .build());
         }
 
         public void toggleRandomSize() {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
-                    .setRandomSize(!getParticleSettings().randomSize())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
+                    .setRandomSize(!this.getParticleSettings().randomSize())
                     .build());
         }
 
         public void toggleRandomSpeed() {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
-                    .setRandomSpeed(!getParticleSettings().randomSpeed())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
+                    .setRandomSpeed(!this.getParticleSettings().randomSpeed())
                     .build());
         }
 
         public void toggleParticleHasRandomLifetime() {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
-                    .setRandomLifetime(!getParticleSettings().randomLifetime())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
+                    .setRandomLifetime(!this.getParticleSettings().randomLifetime())
                     .build());
         }
 
         public void setParticleSize(float min, float max) {
             max = Math.max(min, max);
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
                     .setParticleSize(min)
                     .setParticleSizeVariation(max - min)
                     .build());
@@ -741,26 +775,26 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         public void setParticleLifetime(int min, int max) {
             max = Math.max(min, max);
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
                     .setParticleLifetime(min)
                     .setParticleLifetimeVariation(max - min)
                     .build());
         }
 
         public void setParticleDirection(float x, float y, float z) {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
                     .setInitialDirection(new Vector3f(x, y, z))
                     .build());
         }
 
         public void setParticleRotation(float x, float y, float z) {
-            this.setParticleSettings(new ParticleSettingsBuilder(getParticleSettings())
+            this.setParticleSettings(new ParticleSettingsBuilder(this.getParticleSettings())
                     .setInitialRotation(new Vector3f(x, y, z))
                     .build());
         }
 
         public void forceRemove() {
-            forceRemoved = true;
+            this.forceRemoved = true;
             this.remove();
         }
 
@@ -854,7 +888,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             }
 
             public ParticleSettings build() {
-                return new ParticleSettings(particleSpeed, particleSize, particleSizeVariation, particleLifetime, particleLifetimeVariation, initialDirection, randomInitialDirection, initialRotation, randomInitialRotation, randomSpeed, randomSize, randomLifetime);
+                return new ParticleSettings(this.particleSpeed, this.particleSize, this.particleSizeVariation, this.particleLifetime, this.particleLifetimeVariation, this.initialDirection, this.randomInitialDirection, this.initialRotation, this.randomInitialRotation, this.randomSpeed, this.randomSize, this.randomLifetime);
             }
         }
     }
