@@ -51,9 +51,6 @@ public final class PointAttractorForceData implements ParticleModuleData, Editor
     private boolean strengthByDistance;
     private boolean invertDistanceModifier;
 
-    /**
-     *
-     */
     public PointAttractorForceData(Vector3dc position,
                                    boolean localPosition,
                                    float range,

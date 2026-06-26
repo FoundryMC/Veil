@@ -19,9 +19,6 @@ public final class GravityForceData implements ParticleModuleData, EditorAttribu
     public static final MapCodec<GravityForceData> CODEC = Codec.DOUBLE.fieldOf("strength").xmap(GravityForceData::new, GravityForceData::strength);
     private double strength;
 
-    /**
-     *
-     */
     public GravityForceData(double strength) {
         this.strength = strength;
     }

@@ -88,7 +88,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         this.renderStyleKeys = RenderStyleRegistry.REGISTRY.keySet().stream().map(ResourceLocation::toString).toList();
         this.renderStyleArray = Arrays.copyOf(this.renderStyleKeys.toArray(), this.renderStyleKeys.toArray().length, String[].class);
 
-        this.moduleKeys = ParticleModuleTypeRegistry.REGISTRY.keySet().toArray(ResourceLocation[]::new);
+        this.moduleKeys = ParticleModuleTypeRegistry.REGISTRY.keySet().stream().sorted().toArray(ResourceLocation[]::new);
         this.modulesArray = Arrays.stream(this.moduleKeys).map(ResourceLocation::toString).toArray(String[]::new);
     }
 

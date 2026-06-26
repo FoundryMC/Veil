@@ -27,9 +27,6 @@ public final class VectorFieldForceData implements ParticleModuleData, EditorAtt
     private final VectorField vectorField;
     private float strength;
 
-    /**
-     *
-     */
     public VectorFieldForceData(VectorField vectorField,
                                 float strength) {
         this.vectorField = vectorField;

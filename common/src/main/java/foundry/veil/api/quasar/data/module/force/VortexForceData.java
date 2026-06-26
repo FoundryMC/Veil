@@ -38,9 +38,6 @@ public final class VortexForceData implements ParticleModuleData, EditorAttribut
     private double range;
     private float strength;
 
-    /**
-     *
-     */
     public VortexForceData(Vector3dc vortexAxis,
                            Vector3dc vortexCenter,
                            boolean localPosition,

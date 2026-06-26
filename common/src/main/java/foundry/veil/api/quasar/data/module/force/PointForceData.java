@@ -30,9 +30,6 @@ public final class PointForceData implements ParticleModuleData, EditorAttribute
     private float range;
     private float strength;
 
-    /**
-     *
-     */
     public PointForceData(Vector3dc point,
                           boolean localPoint,
                           float range,

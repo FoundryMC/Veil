@@ -11,7 +11,6 @@ import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.emitters.module.InitParticleModule;
 import foundry.veil.api.quasar.particle.ParticleModuleSet;
 import imgui.ImGui;
-import imgui.type.ImInt;
 import net.minecraft.client.renderer.LightTexture;
 
 public final class LightmapParticleModuleData implements ParticleModuleData, EditorAttributeProvider {
@@ -36,9 +35,6 @@ public final class LightmapParticleModuleData implements ParticleModuleData, Edi
     });
     private int packedLight;
 
-    private final ImInt blockLight = new ImInt();
-    private final ImInt skyLight = new ImInt();
-
     public LightmapParticleModuleData(int packedLight) {
         this.packedLight = packedLight;
     }
@@ -57,11 +53,14 @@ public final class LightmapParticleModuleData implements ParticleModuleData, Edi
 
     @Override
     public void renderImGuiAttributes() {
-        boolean blockLightDirty = ImGui.dragScalar("block", blockLight.getData(), 0.01f, 0, 15);
-        boolean skyLightDirty = ImGui.dragScalar("sky", skyLight.getData(), 0.01f, 0, 15);
+        int[] editBlockLight = new int[]{LightTexture.block(packedLight)};
+        int[] editSkyLight = new int[]{LightTexture.sky(packedLight)};
+
+        boolean blockLightDirty = ImGui.dragScalar("block", editBlockLight, 0.01f, 0, 15);
+        boolean skyLightDirty = ImGui.dragScalar("sky", editSkyLight, 0.01f, 0, 15);
 
         if (blockLightDirty || skyLightDirty) {
-            packedLight = LightTexture.pack(blockLight.get(), skyLight.get());
+            packedLight = LightTexture.pack(editBlockLight[0], editSkyLight[0]);
         }
     }
 

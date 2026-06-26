@@ -20,11 +20,8 @@ public final class InitSubEmitterModuleData implements ParticleModuleData, Edito
     public static final MapCodec<InitSubEmitterModuleData> CODEC = ResourceLocation.CODEC.fieldOf("subemitter").xmap(InitSubEmitterModuleData::new, InitSubEmitterModuleData::subEmitter);
     private ResourceLocation subEmitter;
 
-    final ImString textInput = new ImString();
-
     public InitSubEmitterModuleData(ResourceLocation subEmitter) {
         this.subEmitter = subEmitter;
-        textInput.set(subEmitter);
     }
 
     @Override
@@ -48,6 +45,8 @@ public final class InitSubEmitterModuleData implements ParticleModuleData, Edito
 
     @Override
     public void renderImGuiAttributes() {
+        ImString textInput = new ImString(this.subEmitter.toString());
+
         if (ImGui.inputTextWithHint("subemitter", "namespace:path", textInput)) {
             ResourceLocation location = ResourceLocation.parse(textInput.get());
             QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(location))

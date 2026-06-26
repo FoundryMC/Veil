@@ -37,9 +37,6 @@ public final class WindForceData implements ParticleModuleData, EditorAttributeP
     private float windSpeed;
     private float strength;
 
-    /**
-     *
-     */
     public WindForceData(Vector3dc windDirection,
                          float windSpeed,
                          float strength) {

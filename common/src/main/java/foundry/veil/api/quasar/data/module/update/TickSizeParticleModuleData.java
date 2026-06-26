@@ -20,16 +20,8 @@ public final class TickSizeParticleModuleData implements ParticleModuleData, Edi
     public static final MapCodec<TickSizeParticleModuleData> CODEC = MolangExpressionCodec.CODEC.fieldOf("size").xmap(TickSizeParticleModuleData::new, TickSizeParticleModuleData::size);
     private MolangExpression size;
 
-    final ImString textInput = new ImString();
-
     public TickSizeParticleModuleData(MolangExpression size) {
         this.size = size;
-        String sizeText = this.size.toString();
-        if (sizeText.startsWith("return (")) {
-            textInput.set(size.toString().substring(8, this.size.toString().length() - 1));
-        } else {
-            textInput.set(size.toString());
-        }
     }
 
     @Override
@@ -61,6 +53,13 @@ public final class TickSizeParticleModuleData implements ParticleModuleData, Edi
 
     @Override
     public void renderImGuiAttributes() {
+        ImString textInput = new ImString();
+        String sizeText = this.size.toString();
+        if (sizeText.startsWith("return (")) {
+            textInput.set(size.toString().substring(8, this.size.toString().length() - 1));
+        } else {
+            textInput.set(size.toString());
+        }
         if (ImGui.inputText("size", textInput)) {
             try {
                 this.size = VeilMolang.get().compile(textInput.get());

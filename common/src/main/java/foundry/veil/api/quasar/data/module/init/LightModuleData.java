@@ -27,29 +27,12 @@ public final class LightModuleData implements ParticleModuleData, EditorAttribut
     private MolangExpression brightness;
     private MolangExpression radius;
 
-    final ImString brightnessInput = new ImString();
-    final ImString radiusInput = new ImString();
-
     public LightModuleData(ColorGradient color,
                            MolangExpression brightness,
                            MolangExpression radius) {
         this.color = color;
         this.brightness = brightness;
         this.radius = radius;
-
-        String brightnessString = this.brightness.toString();
-        if (brightnessString.startsWith("return (")) {
-            brightnessInput.set(brightnessString.substring(8, brightnessString.length() - 1));
-        } else {
-            brightnessInput.set(brightnessString);
-        }
-
-        String radiusString = this.radius.toString();
-        if (radiusString.startsWith("return (")) {
-            radiusInput.set(radiusString.substring(8, radiusString.length() - 1));
-        } else {
-            radiusInput.set(radiusString);
-        }
     }
 
     @Override
@@ -74,6 +57,23 @@ public final class LightModuleData implements ParticleModuleData, EditorAttribut
         color.renderImGuiAttributes();
 
         ImGui.separator();
+
+        ImString brightnessInput = new ImString();
+        ImString radiusInput = new ImString();
+
+        String brightnessString = this.brightness.toString();
+        if (brightnessString.startsWith("return (")) {
+            brightnessInput.set(brightnessString.substring(8, brightnessString.length() - 1));
+        } else {
+            brightnessInput.set(brightnessString);
+        }
+
+        String radiusString = this.radius.toString();
+        if (radiusString.startsWith("return (")) {
+            radiusInput.set(radiusString.substring(8, radiusString.length() - 1));
+        } else {
+            radiusInput.set(radiusString);
+        }
 
         if (ImGui.inputText("brightness", brightnessInput)) {
             try {

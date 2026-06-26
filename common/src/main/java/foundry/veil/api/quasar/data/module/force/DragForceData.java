@@ -23,9 +23,6 @@ public final class DragForceData implements ParticleModuleData, EditorAttributeP
     public static final MapCodec<DragForceData> CODEC = Codec.DOUBLE.fieldOf("strength").xmap(DragForceData::new, DragForceData::strength);
     private double strength;
 
-    /**
-     *
-     */
     public DragForceData(double strength) {
         this.strength = strength;
     }

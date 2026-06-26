@@ -23,12 +23,9 @@ public final class TickSubEmitterModuleData implements ParticleModuleData, Edito
     private ResourceLocation subEmitter;
     private int frequency;
 
-    final ImString textInput = new ImString();
-
     public TickSubEmitterModuleData(ResourceLocation subEmitter, int frequency) {
         this.subEmitter = subEmitter;
         this.frequency = frequency;
-        textInput.set(subEmitter.toString());
     }
 
     @Override
@@ -43,6 +40,8 @@ public final class TickSubEmitterModuleData implements ParticleModuleData, Edito
 
     @Override
     public void renderImGuiAttributes() {
+        ImString textInput = new ImString(subEmitter.toString(), 256);
+
         if (ImGui.inputTextWithHint("subemitter", "namespace:path", textInput)) {
             try {
                 ResourceLocation location = ResourceLocation.parse(textInput.get());

@@ -25,18 +25,10 @@ public final class ColorParticleModuleData implements ParticleModuleData, Editor
     private final ColorGradient gradient;
     private MolangExpression interpolant;
 
-    final ImString interpolantInput = new ImString();
-
     public ColorParticleModuleData(ColorGradient gradient,
                                    MolangExpression interpolant) {
         this.gradient = gradient;
         this.interpolant = interpolant;
-        String interpolantString = this.interpolant.toString();
-        if (interpolantString.startsWith("return (")) {
-            interpolantInput.set(interpolantString.substring(8, interpolantString.length() - 1));
-        } else {
-            interpolantInput.set(interpolantString);
-        }
     }
 
     @Override
@@ -59,6 +51,13 @@ public final class ColorParticleModuleData implements ParticleModuleData, Editor
 
         ImGui.separator();
 
+        ImString interpolantInput = new ImString();
+        String interpolantString = this.interpolant.toString();
+        if (interpolantString.startsWith("return (")) {
+            interpolantInput.set(interpolantString.substring(8, interpolantString.length() - 1));
+        } else {
+            interpolantInput.set(interpolantString);
+        }
         if (ImGui.inputText("interpolant", interpolantInput)) {
             try {
                 this.interpolant = VeilMolang.get().compile(interpolantInput.get());

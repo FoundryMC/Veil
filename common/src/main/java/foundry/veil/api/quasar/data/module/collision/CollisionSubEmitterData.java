@@ -20,11 +20,8 @@ public final class CollisionSubEmitterData implements ParticleModuleData, Editor
     public static final MapCodec<CollisionSubEmitterData> CODEC = ResourceLocation.CODEC.fieldOf("subemitter").xmap(CollisionSubEmitterData::new, CollisionSubEmitterData::subEmitter);
     private ResourceLocation subEmitter;
 
-    final ImString textInput = new ImString();
-
     public CollisionSubEmitterData(ResourceLocation subEmitter) {
         this.subEmitter = subEmitter;
-        textInput.set(subEmitter.toString());
     }
 
     @Override
@@ -48,6 +45,7 @@ public final class CollisionSubEmitterData implements ParticleModuleData, Editor
 
     @Override
     public void renderImGuiAttributes() {
+        ImString textInput = new ImString(this.subEmitter.toString());
         if (ImGui.inputTextWithHint("subemitter", "namespace:path", textInput)) {
             try {
                 ResourceLocation location = ResourceLocation.parse(textInput.get());
