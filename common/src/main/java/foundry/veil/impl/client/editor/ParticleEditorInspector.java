@@ -63,7 +63,8 @@ public class ParticleEditorInspector extends SingleWindowInspector {
     private final ImInt selectedModule = new ImInt();
 
     private final ImBoolean saveWindowOpen = new ImBoolean(false);
-    private final ImString saveName = new ImString();
+    private final ImString savePath = new ImString();
+    private final ImString saveNamespace = new ImString();
     private final ImBoolean saveSeparateSettings = new ImBoolean(false);
     private final ImBoolean saveSeparateShape = new ImBoolean(false);
     private final ImBoolean saveSeparateData = new ImBoolean(false);
@@ -111,11 +112,19 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         ImGui.sameLine(0.0f, ImGui.getStyle().getItemInnerSpacingX());
         if (ImGui.button("Create Emitter", ImGui.getContentRegionAvailX() * 0.5f, 0)) {
-            ParticleEmitterData data = QuasarParticles.registryAccess().registry(QuasarParticles.EMITTER).map(registry -> registry.get(Veil.veilPath("default"))).orElse(null);
-            if (data != null) {
-                createEmitterFromData(data);
-            }
-
+            createEmitterFromData(new ParticleEmitterData(
+                    20,
+                    false,
+                    1,
+                    1,
+                    Integer.MAX_VALUE,
+                    new EmitterSettings(
+                            List.of(Holder.direct(new EmitterShapeSettings(EmitterShapeRegistry.POINT.get(), new Vector3f(1), new Vector3f(0), true))),
+                            Holder.direct(new ParticleSettings(0.1f, 0.1f, 0, 60, 0, new Vector3f(1), true, new Vector3f(0), false, false, false, false)),
+                            false
+                    ),
+                    Holder.direct(new QuasarParticleData(true, false, 0.0f, List.of(), null, false, RenderStyleRegistry.CUBE.get()))
+            ));
         }
 
         ImGui.beginDisabled(this.emitters.isEmpty());
@@ -157,16 +166,21 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (this.saveWindowOpen.get()) {
             ImGui.setNextWindowSizeConstraints(300, 300, Float.MAX_VALUE, Float.MAX_VALUE);
             if (ImGui.begin("Save Emitter", this.saveWindowOpen, ImGuiWindowFlags.NoSavedSettings)) {
-                ImGui.inputText("Filename", saveName);
+                if (saveSeparateSettings.get() || saveSeparateShape.get() || saveSeparateData.get()) {
+                    ImGui.inputText("Namespace", saveNamespace);
+                }
+                ImGui.inputText("Filename", savePath);
 
-                //ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
+                ImGui.checkbox("Separate Particle Settings file", saveSeparateSettings);
 
-                //ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
+                ImGui.checkbox("Separate Emitter Shape file", saveSeparateShape);
 
-                //ImGui.checkbox("Separate Particle Data file", saveSeparateData);
+                ImGui.checkbox("Separate Particle Data file", saveSeparateData);
 
                 if (ImGui.button("Save")) {
-                    saveEmitterToFile(this.emitters.get(selectedEmitter), saveName.get());
+                    // Ensure filepath does not have file extension
+                    if (savePath.get().endsWith(".json")) saveEmitterToFile(this.emitters.get(selectedEmitter), savePath.get().substring(0, savePath.get().length() - 5), saveNamespace.get());
+                    else saveEmitterToFile(this.emitters.get(selectedEmitter), savePath.get(), saveNamespace.get());
                 }
             }
             ImGui.end();
@@ -232,10 +246,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         if (ImGui.collapsingHeader("Emitter Shapes")) {
             shapeInspectorOpen = true;
             ImGui.indent();
-            //if (ImGui.beginListBox("##Shapes", ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailY() * 0.5f)) {
-                renderShapeAttributes(emitter);
-                //ImGui.endListBox();
-            //}
+            renderShapeAttributes(emitter);
             ImGui.unindent();
         }
 
@@ -444,7 +455,6 @@ public class ParticleEditorInspector extends SingleWindowInspector {
             }
         }
 
-
         // Additive
         if (ImGui.checkbox("additive", data.additive())) {
             data.setAdditive(!data.additive());
@@ -501,24 +511,56 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         ImGui.unindent();
     }
 
-    private void saveEmitterToFile(MutableParticleEmitter emitter, String name) {
-        JsonElement result = ParticleEmitterData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, emitter.dataFromMutable()).getOrThrow();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String prettyJsonString = gson.toJson(result);
+    private void saveEmitterToFile(MutableParticleEmitter emitter, String filename, String namespace) {
+        ParticleEmitterData data = emitter.dataFromMutable();
+        JsonElement result = ParticleEmitterData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
+        if (saveSeparateShape.get()) {
+            // For some reason, "addProperty" also replaces it if it already exists. Go figure.
+            result.getAsJsonObject().get("emitter_settings").getAsJsonObject().addProperty("shape", namespace + ":" + filename);
+        }
+        if (saveSeparateSettings.get()) {
+            result.getAsJsonObject().get("emitter_settings").getAsJsonObject().addProperty("particle_settings", namespace + ":" + filename);
+        }
+        if (saveSeparateData.get()) {
+            result.getAsJsonObject().addProperty("particle_data", namespace + ":" + filename);
+        }
+
+        Path baseQuasarPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar");
 
         try {
-            String folderPath = Path.of(Minecraft.getInstance().gameDirectory.toURI()).resolve("quasar/emitters").toString();
-            String filePath = folderPath + File.separator + name + ".json";
-            new File(folderPath).mkdirs();
-            File emitterFile = new File(filePath);
-            FileWriter emitterWriter = new FileWriter(emitterFile);
-            emitterWriter.write(prettyJsonString);
-            emitterWriter.close();
-            Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter to " + name + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, emitterFile.getAbsolutePath()))));
+            writePrettyPrintedJson(result, baseQuasarPath.resolve("emitters").toString(), filename);
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter to quasar/emitters/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("emitters").toAbsolutePath().toString()))));
+
+            if (saveSeparateShape.get()) {
+                writePrettyPrintedJson(EmitterShapeSettings.DIRECT_CODEC.listOf().encodeStart(JsonOps.INSTANCE, data.emitterSettings().emitterShapeSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/shape").toString(), filename);
+                Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter shape to quasar/modules/emitter/shape/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/emitter/shape").toAbsolutePath().toString()))));
+            }
+
+            if (saveSeparateSettings.get()) {
+                writePrettyPrintedJson(ParticleSettings.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.emitterSettings().particleSettings()).getOrThrow(), baseQuasarPath.resolve("modules/emitter/particle").toString(), filename);
+                Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter particle settings to quasar/modules/emitter/particle/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/emitter/particle").toAbsolutePath().toString()))));
+            }
+
+            if (saveSeparateData.get()) {
+                writePrettyPrintedJson(QuasarParticleData.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, data.particleData()).getOrThrow(), baseQuasarPath.resolve("modules/particle_data").toString(), filename);
+                Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Saved emitter particle data to quasar/modules/particle_data/" + filename + ".json").withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, baseQuasarPath.resolve("modules/particle_data").toAbsolutePath().toString()))));
+            }
         } catch (IOException e) {
             Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Failed to save emitter! Check logs for details.").withStyle(ChatFormatting.RED));
             e.printStackTrace();
         }
+    }
+
+    private void writePrettyPrintedJson(JsonElement element, String folderPath, String filename) throws IOException {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String prettyJsonString = gson.toJson(element);
+
+        new File(folderPath).mkdirs();
+        String emitterFilePath = folderPath + File.separator + filename + ".json";
+        File emitterFile = new File(emitterFilePath);
+        FileWriter emitterWriter = new FileWriter(emitterFile);
+        emitterWriter.write(prettyJsonString);
+        emitterWriter.close();
     }
 
     private void createEmitterFromData(ParticleEmitterData data) {
