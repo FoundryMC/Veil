@@ -97,6 +97,10 @@ public final class VeilRenderType extends RenderType {
         return QUASAR_PARTICLE.apply(texture, additive);
     }
 
+    public static RenderType quasarTrail(@Nullable ResourceLocation texture) {
+        return quasarTrail(texture, true);
+    }
+
     public static RenderType quasarTrail(@Nullable ResourceLocation texture, boolean additive) {
         return texture != null ? QUASAR_TRAIL.apply(texture, additive) : NO_TEXTURE_QUASAR_TRAIL.apply(additive);
     }
