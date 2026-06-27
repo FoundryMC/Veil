@@ -203,6 +203,7 @@ public class ParticleEmitter {
         Iterator<QuasarParticle> iterator = this.particles.iterator();
         while (iterator.hasNext()) {
             QuasarParticle particle = iterator.next();
+            particle.getRenderData().tickTrails();
             particle.tick();
 
             if (particle.isRemoved()) {
@@ -247,7 +248,7 @@ public class ParticleEmitter {
 
             particle.render(partialTicks);
 
-            renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT);
+            renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT, partialTicks);
 
             Vector3dc renderPosition = renderData.getRenderPosition();
             renderOffset.set(

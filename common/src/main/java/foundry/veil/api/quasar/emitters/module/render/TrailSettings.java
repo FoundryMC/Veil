@@ -30,6 +30,7 @@ public class TrailSettings implements EditorAttributeProvider {
             Codec.FLOAT.fieldOf("trailPointModifier").forGetter(settings -> 1.0F),
             Trail.TilingMode.CODEC.optionalFieldOf("tilingMode", Trail.TilingMode.STRETCH).forGetter(settings -> settings.tilingMode),
             Codec.BOOL.optionalFieldOf("billboard", true).forGetter(settings -> settings.billboard),
+            Codec.BOOL.optionalFieldOf("additive", false).forGetter(settings -> settings.additive),
             Codec.BOOL.optionalFieldOf("parentRotation", false).forGetter(settings -> settings.parentRotation)
     ).apply(instance, TrailSettings::new));
 
@@ -41,10 +42,11 @@ public class TrailSettings implements EditorAttributeProvider {
     private ResourceLocation trailTexture;
     private Trail.TilingMode tilingMode;
     private boolean billboard;
+    private boolean additive;
     private boolean parentRotation;
     private float trailWidthModifierFloat = 1f;
 
-    public TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, TrailWidthModifier trailWidthModifier, @Nullable ResourceLocation trailTexture, TrailPointModifier trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {
+    public TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, TrailWidthModifier trailWidthModifier, @Nullable ResourceLocation trailTexture, TrailPointModifier trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean additive, boolean parentRotation) {
         this.trailFrequency = trailFrequency;
         this.trailLength = trailLength;
         this.trailColor = new Vector4f(trailColor);
@@ -53,10 +55,11 @@ public class TrailSettings implements EditorAttributeProvider {
         this.trailPointModifier = trailPointModifier;
         this.tilingMode = tilingMode;
         this.billboard = billboard;
+        this.additive = additive;
         this.parentRotation = parentRotation;
     }
 
-    private TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, float trailWidthModifier, Optional<ResourceLocation> trailTexture, float trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean parentRotation) {
+    private TrailSettings(int trailFrequency, int trailLength, Vector4fc trailColor, float trailWidthModifier, Optional<ResourceLocation> trailTexture, float trailPointModifier, Trail.TilingMode tilingMode, boolean billboard, boolean additive, boolean parentRotation) {
         this.trailFrequency = trailFrequency;
         this.trailLength = trailLength;
         this.trailColor = new Vector4f(trailColor);
@@ -65,11 +68,12 @@ public class TrailSettings implements EditorAttributeProvider {
         this.trailPointModifier = (point, index, velocity) -> point;
         this.tilingMode = tilingMode;
         this.billboard = billboard;
+        this.additive = additive;
         this.parentRotation = parentRotation;
     }
 
     public TrailSettings() {
-        this(1, 20, new Vector4f(1), 1, Optional.empty(), 1, Trail.TilingMode.STRETCH, true, false);
+        this(1, 20, new Vector4f(1), 1, Optional.empty(), 1, Trail.TilingMode.STRETCH, true, false, false);
     }
 
     public void setParentRotation(boolean parentRotation) {
@@ -78,6 +82,14 @@ public class TrailSettings implements EditorAttributeProvider {
 
     public boolean getParentRotation() {
         return this.parentRotation;
+    }
+
+    public boolean getAdditive() {
+        return additive;
+    }
+
+    public void setAdditive(boolean additive) {
+        this.additive = additive;
     }
 
     public void setBillboard(boolean billboard) {
@@ -145,9 +157,18 @@ public class TrailSettings implements EditorAttributeProvider {
     }
 
     public void renderImGuiAttributes() {
-        ImString trailTextureString = new ImString(this.trailTexture == null ? "" : this.trailTexture.toString());
-        if (ImGui.inputText("Trail Texture", trailTextureString)) {
-            this.trailTexture = trailTextureString.get().isBlank() ? null : ResourceLocation.parse(trailTextureString.get());
+        ImString trailTextureString = new ImString(this.trailTexture == null ? "" : this.trailTexture.toString(), 999);
+
+        if (ImGui.inputTextWithHint("Trail Texture", "namespace:path", trailTextureString)) {
+            if (trailTextureString.isEmpty()) {
+                this.trailTexture = null;
+            }
+
+            try {
+                this.trailTexture = ResourceLocation.parse(trailTextureString.get());
+            } catch (Exception ignored) {
+
+            }
         }
 
         ImInt trailFrequencyInt = new ImInt(this.trailFrequency);
@@ -173,6 +194,9 @@ public class TrailSettings implements EditorAttributeProvider {
         ImBoolean billboardBoolean = new ImBoolean(this.billboard);
         ImGui.checkbox("Billboard", billboardBoolean);
         this.billboard = billboardBoolean.get();
+        ImBoolean additiveBoolean = new ImBoolean(this.additive);
+        ImGui.checkbox("Additive", additiveBoolean);
+        this.additive = additiveBoolean.get();
         ImBoolean parentRotationBoolean = new ImBoolean(this.parentRotation);
         ImGui.checkbox("Parent Rotation", parentRotationBoolean);
         this.parentRotation = parentRotationBoolean.get();
