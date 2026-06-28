@@ -4,14 +4,14 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.MatrixStack;
 
 /**
- * Provides extra information for given light data by rendering gizmos into the world.
+ * Provides extra information for given light data by rendering guides into the world.
  *
  * @author Neddslayer
  */
 public interface LightGuideProvider {
 
     /**
-     * Render the light gizmos using the VertexConsumer.
+     * Render the light guides using the VertexConsumer.
      */
-    void renderLightHelper(MatrixStack stack, VertexConsumer consumer);
+    void renderLightGuide(MatrixStack stack, VertexConsumer consumer);
 }

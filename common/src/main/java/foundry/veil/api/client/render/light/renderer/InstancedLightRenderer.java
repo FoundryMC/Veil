@@ -221,7 +221,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
                     RenderType debugRenderType = RenderType.debugLineStrip(1);
                     ByteBufferBuilder bytebufferbuilder = new ByteBufferBuilder(debugRenderType.bufferSize());
                     BufferBuilder builder = new BufferBuilder(bytebufferbuilder, debugRenderType.mode(), debugRenderType.format());
-                    ((LightGuideProvider) handle.getLightData()).renderLightHelper(matrixStack, builder);
+                    ((LightGuideProvider) handle.getLightData()).renderLightGuide(matrixStack, builder);
                     MeshData meshData = builder.build();
                     if (meshData != null) {
                         if (renderType.sortOnUpload()) {

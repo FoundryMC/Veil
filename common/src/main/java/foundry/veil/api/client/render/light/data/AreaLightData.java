@@ -326,7 +326,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     }
 
     @Override
-    public void renderLightHelper(MatrixStack stack, VertexConsumer consumer) {
+    public void renderLightGuide(MatrixStack stack, VertexConsumer consumer) {
         stack.matrixPush();
 
         stack.translate(this.position.x, this.position.y, this.position.z);

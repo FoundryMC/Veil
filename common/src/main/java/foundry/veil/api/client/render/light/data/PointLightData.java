@@ -1,18 +1,21 @@
 package foundry.veil.api.client.render.light.data;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
+import foundry.veil.api.client.editor.LightGuideProvider;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.light.DDALightData;
 import foundry.veil.api.client.render.light.IndirectLightData;
 import imgui.ImGui;
 import net.minecraft.client.Camera;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector3fc;
+import org.joml.*;
 
+import java.lang.Math;
 import java.nio.ByteBuffer;
 
 /**
@@ -20,7 +23,7 @@ import java.nio.ByteBuffer;
  *
  * @since 2.0.0
  */
-public class PointLightData extends LightData implements IndirectLightData, DDALightData, EditorAttributeProvider {
+public class PointLightData extends LightData implements IndirectLightData, DDALightData, EditorAttributeProvider, LightGuideProvider {
 
     protected final Vector3d position;
     protected float radius;
@@ -178,5 +181,32 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
             this.occlusionEnabled = !this.occlusionEnabled;
             this.markDirty();
         }
+    }
+
+    @Override
+    public void renderLightGuide(MatrixStack stack, VertexConsumer consumer) {
+        stack.matrixPush();
+
+        stack.translate(this.position.x, this.position.y, this.position.z);
+
+        Matrix4f pose = stack.position();
+
+        for (int i = -8; i < 25; i++) {
+            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, 0, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        for (int i = -8; i < 25; i++) {
+            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        for (int i = 25; i >= 16; i--) {
+            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        for (int i = -8; i < 25; i++) {
+            consumer.addVertex(pose, 0, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        stack.matrixPop();
     }
 }
