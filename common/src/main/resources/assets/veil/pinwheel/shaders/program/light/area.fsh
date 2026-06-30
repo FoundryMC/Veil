@@ -61,12 +61,12 @@ vec3 volumetric(vec3 camPos, vec3 fragPos, vec3 lightPos, float angle) {
 
         float d = distance(p, lightPos);
         if (d > maxDistance) continue;
-        float a = attenuate_no_cusp(length(lightPos - p), maxDistance);
-        vec3 Lc = normalize(lightPos - p);
-        float cd = dot(-Lc, normalize(lightMat[3].xyz));
-        a *= clamp((cd - size.y + angle) / max(size.x - size.y, 1e-4), 0.0, 1.0);
 
-        scatter += lightColor * a;
+        float angleFalloff = clamp(angle, 0.0, maxAngle) / maxAngle;
+        angleFalloff = smoothstep(1.0, 0.0, angleFalloff);
+        float a = attenuate_no_cusp(length(p - lightPos), maxDistance) * angleFalloff;
+
+        scatter += a;
     }
 
     return clamp(scatter / float(steps) * strength, vec3(0.0), vec3(1.0));
@@ -108,5 +108,6 @@ void main() {
 
     vec3 volu = volumetric(VeilCamera.CameraPosition, pos, lightPos, angle);
 
-    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity + volu, 1.0);
+    //fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity + volu, 1.0);
+    fragColor = vec4(volu, 1.0);
 }
