@@ -45,6 +45,33 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 p
     return AreaLightResult((inverse(planeMatrix) * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
 }
 
+const int steps = 64;
+const float strength = 4.0f;
+
+vec3 volumetric(vec3 camPos, vec3 fragPos, vec3 lightPos, float angle) {
+    vec3 dir = fragPos - camPos;
+    float dirLength = length(dir);
+    float stepSize = dirLength / float(steps);
+
+    float jitter = fract(sin(dot(fragPos.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+    vec3 scatter = vec3(0.0);
+    vec3 p = camPos + jitter * 0.1;
+    for (int s = 0; s < steps; s++) {
+        p += normalize(dir) * stepSize;
+
+        float d = distance(p, lightPos);
+        if (d > maxDistance) continue;
+        float a = attenuate_no_cusp(length(lightPos - p), maxDistance);
+        vec3 Lc = normalize(lightPos - p);
+        float cd = dot(-Lc, normalize(lightMat[3].xyz));
+        a *= clamp((cd - size.y + angle) / max(size.x - size.y, 1e-4), 0.0, 1.0);
+
+        scatter += lightColor * a;
+    }
+
+    return clamp(scatter / float(steps) * strength, vec3(0.0), vec3(1.0));
+}
+
 void main() {
     vec2 screenUv = gl_FragCoord.xy / ScreenSize;
 
@@ -79,5 +106,7 @@ void main() {
     float reflectivity = 0.05;
     vec3 diffuseColor = diffuse * lightColor;
 
-    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, 1.0);
+    vec3 volu = volumetric(VeilCamera.CameraPosition, pos, lightPos, angle);
+
+    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity + volu, 1.0);
 }

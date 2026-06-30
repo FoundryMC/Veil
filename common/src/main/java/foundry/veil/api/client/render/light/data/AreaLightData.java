@@ -341,7 +341,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         consumer.addVertex(pose,  this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         consumer.addVertex(pose, -this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
 
-        Vector3f rotatedSize = new Vector3f(this.size.x + (this.distance * (float)Math.tan(this.angle)), this.size.y + (this.distance * (float)Math.tan(this.angle)), this.distance);
+        Vector3f rotatedSize = new Vector3f(this.size.x + (this.distance * (float)Math.tan(this.angle * 0.5)), this.size.y + (this.distance * (float)Math.tan(this.angle * 0.5)), this.distance);
 
         consumer.addVertex(pose, -rotatedSize.x, -rotatedSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         consumer.addVertex(pose, -rotatedSize.x, rotatedSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
