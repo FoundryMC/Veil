@@ -5,15 +5,19 @@
 #include veil:voxel_shadow
 
 in mat4 lightMat;
+in mat4 inverseLightMat;
 in vec3 lightColor;
 in vec2 size;
 in float maxAngle;
 in float maxDistance;
 in float occluded;
+in float volumetric;
+in vec3 lightOrigin;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
-uniform sampler2D DepthSampler;
+uniform sampler2D WorldDepthSampler;
+uniform sampler2D HandDepthSampler;
 
 uniform vec2 ScreenSize;
 
@@ -29,9 +33,10 @@ float sacos(float x)
 }
 
 struct AreaLightResult { vec3 position; float angle; };
-AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 planeSize) {
+AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, mat4 invPlaneMatrix, vec2 planeSize) {
     // no idea why i need to do this
     planeMatrix[3].xyz *= -1.0;
+    invPlaneMatrix[3].xyz *= -1.0;
     // transform the point to the plane's local space
     vec3 localSpacePoint = (planeMatrix * vec4(point, 1.0)).xyz;
     // clamp position
@@ -42,34 +47,52 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 p
     float angle = sacos(dot(direction, vec3(0.0, 0.0, 1.0)));
 
     // transform back to global space
-    return AreaLightResult((inverse(planeMatrix) * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
+    return AreaLightResult((invPlaneMatrix * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
 }
 
-const int steps = 64;
-const float strength = 4.0f;
+const int steps = 50;
+const float strength = 0.4f;
 
-vec3 volumetric(vec3 camPos, vec3 fragPos, vec3 lightPos, float angle) {
+vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, bool occlude, vec3 normal) {
+    int raymarchSteps = steps;
+    float jitterStrength = 0.1;
     vec3 dir = fragPos - camPos;
     float dirLength = length(dir);
-    float stepSize = dirLength / float(steps);
+    float stepSize = 1.0;
+    if (occlude) {
+        //raymarchSteps /= 4;
+        //stepSize *= 4;
+    }
 
     float jitter = fract(sin(dot(fragPos.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
     vec3 scatter = vec3(0.0);
-    vec3 p = camPos + jitter * 0.1;
-    for (int s = 0; s < steps; s++) {
+    vec3 p = camPos + jitter * jitterStrength;
+    float distanceTraveled = 0.0;
+    for (int s = 0; s < raymarchSteps; s++) {
         p += normalize(dir) * stepSize;
+        distanceTraveled += stepSize;
 
-        float d = distance(p, lightPos);
+        if (distanceTraveled > depth) break;
+
+        float d = distance(p, lightOrigin);
         if (d > maxDistance) continue;
+
+        AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(p, lightMat, inverseLightMat, size);
+        vec3 lightPos = areaLightInfo.position;
+        float angle = areaLightInfo.angle;
 
         float angleFalloff = clamp(angle, 0.0, maxAngle) / maxAngle;
         angleFalloff = smoothstep(1.0, 0.0, angleFalloff);
-        float a = attenuate_no_cusp(length(p - lightPos), maxDistance) * angleFalloff;
 
+        vec3 a = attenuate_no_cusp(length(lightPos - p), maxDistance) * lightColor * angleFalloff;
+
+        if (abs(distanceTraveled - depth) < 2.0) {
+            a *= smoothstep(0.0, 1.0, abs(distanceTraveled - depth) / 2.0);
+        }
         scatter += a;
     }
 
-    return clamp(scatter / float(steps) * strength, vec3(0.0), vec3(1.0));
+    return clamp(scatter / float(raymarchSteps) * strength * volumetric, vec3(0.0), vec3(1.0));
 }
 
 void main() {
@@ -77,15 +100,15 @@ void main() {
 
     vec4 albedoColor = texture(AlbedoSampler, screenUv);
     if (albedoColor.a == 0) {
-        discard;
+        //discard;
     }
 
     vec3 normalVS = texture(NormalSampler, screenUv).xyz;
-    float depth = texture(DepthSampler, screenUv).r;
+    float depth = min(texture(WorldDepthSampler, screenUv).r, texture(HandDepthSampler, screenUv).r);
     vec3 pos = screenToWorldSpace(screenUv, depth).xyz;
 
     // lighting calculation
-    AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(pos, lightMat, size);
+    AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(pos, lightMat, inverseLightMat, size);
     vec3 lightPos = areaLightInfo.position;
     float angle = areaLightInfo.angle;
 
@@ -102,12 +125,13 @@ void main() {
         vec3 normalWS = normalize((VeilCamera.IViewMat * vec4(normalVS, 0.0)).xyz);
         diffuse *= voxelshadowVisibility(pos + normalWS * 0.01, lightPos);
     }
+    vec3 scatter = vec3(0.0);
+    if (volumetric > 0.0) {
+        scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition, pos, linearize_depth(depth), false, vec3(0.0));
+    }
 
     float reflectivity = 0.05;
     vec3 diffuseColor = diffuse * lightColor;
 
-    vec3 volu = volumetric(VeilCamera.CameraPosition, pos, lightPos, angle);
-
-    //fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity + volu, 1.0);
-    fragColor = vec4(volu, 1.0);
+    fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity + scatter, 1.0);
 }

@@ -4,7 +4,11 @@
   "textures": {
     "AlbedoSampler": "veil:dynamic_buffer/albedo",
     "NormalSampler": "veil:dynamic_buffer/normal",
-    "DepthSampler": {
+    "WorldDepthSampler": {
+      "type": "framebuffer",
+      "name": "veil:light:depth"
+    },
+    "HandDepthSampler": {
       "type": "framebuffer",
       "name": "minecraft:main:depth"
     }

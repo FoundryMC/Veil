@@ -1159,6 +1159,9 @@ public final class VeilRenderSystem {
                 NecromancerRenderDispatcher.begin();
             } else if (stage == VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES) {
                 NecromancerRenderDispatcher.end();
+            } else if (stage == VeilRenderLevelStageEvent.Stage.AFTER_WEATHER) {
+                AdvancedFbo lightFbo = renderer().getFramebufferManager().getFramebuffer(VeilFramebuffers.LIGHT);
+                AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
         });
         VeilEventPlatform.INSTANCE.onVeilDynamicBuffersChanged(change -> {

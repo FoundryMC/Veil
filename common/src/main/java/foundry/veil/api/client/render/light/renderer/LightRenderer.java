@@ -74,7 +74,6 @@ public final class LightRenderer implements NativeResource {
 
                 lightFbo.bind(true);
                 lightFbo.clear(GL_COLOR_BUFFER_BIT);
-                AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
 
             hasRendered = true;

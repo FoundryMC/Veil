@@ -37,6 +37,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     protected float angle;
     protected float distance;
     protected boolean occlusionEnabled;
+    protected float scatteringPower;
 
     public AreaLightData() {
         this.matrix = new Matrix4d();
@@ -48,6 +49,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         this.angle = (float) Math.toRadians(45);
         this.distance = 1.0F;
         this.occlusionEnabled = false;
+        this.scatteringPower = 0.0F;
     }
 
     /**
@@ -139,6 +141,10 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         return this.occlusionEnabled;
     }
 
+    public float getScatteringPower() {
+        return this.scatteringPower;
+    }
+
     /**
      * Sets the size of the light's surface
      *
@@ -175,6 +181,12 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
     public AreaLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
+        return this;
+    }
+
+    public AreaLightData setScatteringPower(float scatteringPower) {
+        this.scatteringPower = scatteringPower;
         this.markDirty();
         return this;
     }
@@ -224,6 +236,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         buffer.putShort((short) Mth.clamp((int) (this.angle * MAX_ANGLE_SIZE), 0, 65535));
         buffer.putFloat(this.distance);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
+        buffer.putFloat(this.scatteringPower);
     }
 
     @Override
@@ -321,6 +334,12 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
         if (ImGui.checkbox("Occluded", this.occlusionEnabled)) {
             this.occlusionEnabled = !this.occlusionEnabled;
+            this.markDirty();
+        }
+
+        float[] editScattering = new float[]{this.scatteringPower};
+        if (ImGui.dragScalar("In-scattering", editScattering, 0.01F, 0, Float.MAX_VALUE)) {
+            this.scatteringPower = editScattering[0];
             this.markDirty();
         }
     }

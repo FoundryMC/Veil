@@ -142,3 +142,11 @@ vec4 screenToClipSpace(vec2 uv, float depth) {
 vec3 viewDirFromUv(vec2 uv) {
     return normalize(screenToLocalSpace(uv, 1.0).xyz);
 }
+
+float linearize_depth(float d)
+{
+    float z_n = 2.0 * d - 1.0;
+    float zNear = VeilCamera.NearPlane;
+    float zFar = VeilCamera.FarPlane;
+    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+}
