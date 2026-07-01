@@ -19,19 +19,15 @@ uniform vec2 ScreenSize;
 
 out vec4 fragColor;
 
-const int steps = 50;
-const float strength = 0.4f;
+const int steps = 100;
 
-vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, bool occlude, vec3 normal) {
+vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth) {
     int raymarchSteps = steps;
-    float jitterStrength = 0.25 ;
+    float jitterStrength = 0.25;
     vec3 dir = fragPos - camPos;
     float dirLength = length(dir);
-    float stepSize = 1.0;
-    if (occlude) {
-        //raymarchSteps /= 4;
-        //stepSize *= 4;
-    }
+    // optimization: only sample as much as we need
+    float stepSize = radius * 0.25;
 
     float jitter = fract(sin(dot(fragPos.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
     vec3 scatter = vec3(0.0);
@@ -41,23 +37,24 @@ vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, boo
         p += normalize(dir) * stepSize;
         distanceTraveled += stepSize;
 
-        float d = distance(p, lightPos);
-        if (d > radius) continue;
-        vec3 a = attenuate_no_cusp(length(lightPos - p), radius) * lightColor;
+        if (distanceTraveled > depth) break;
 
-        if (occlude) {
-            a *= voxelshadowVisibility(p + normal, lightPos);
+        float d = distance(p, lightPos);
+        if (d > radius) {
+            // optimization: if scattering has been accumulated, and we're outside the radius
+            // we've likely exited the volume from the other side; exit light calculations
+            if (length(scatter) > 0.0) break;
+            continue;
         }
+        vec3 a = attenuate_no_cusp(length(lightPos - p), radius) * lightColor;
 
         if (abs(distanceTraveled - depth) < 10.0) {
             a *= smoothstep(0.0, 1.0, abs(distanceTraveled - depth) / 10);
         }
         scatter += a;
-
-        if (distanceTraveled > depth) break;
     }
 
-    return clamp(scatter / float(raymarchSteps) * strength * volumetric, vec3(0.0), vec3(1.0));
+    return clamp(scatter / float(raymarchSteps) * volumetric, vec3(0.0), vec3(1.0));
 }
 
 void main() {
@@ -67,9 +64,6 @@ void main() {
     vec3 pos = screenToWorldSpace(screenUv, depth).xyz;
 
     vec4 albedoColor = texture(AlbedoSampler, screenUv);
-    if (albedoColor.a == 0) {
-        //discard;
-    }
 
     // lighting calculation
     vec3 offset = lightPos - pos;
@@ -80,15 +74,14 @@ void main() {
     diffuse = (diffuse + MINECRAFT_AMBIENT_LIGHT) / (1.0 + MINECRAFT_AMBIENT_LIGHT);
     diffuse *= attenuate_no_cusp(length(offset), radius);
 
-    vec3 normalWS;
     if (occluded > 0.5) {
-        normalWS = normalize((VeilCamera.IViewMat * vec4(normalVS, 0.0)).xyz);
+        vec3 normalWS = normalize((VeilCamera.IViewMat * vec4(normalVS, 0.0)).xyz);
         float shadow = voxelshadowVisibility(pos + normalWS * 0.01, lightPos);
         diffuse *= shadow;
     }
     vec3 scatter = vec3(0.0);
-    if (volumetric > 0.0) {
-        scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition + VeilCamera.CameraBobOffset, pos, linearize_depth(depth), occluded > 0.5, normalWS * 0.1);
+    if (volumetric > 0.0 && occluded < 0.5) {
+        scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition + VeilCamera.CameraBobOffset, pos, linearize_depth(depth));
     }
 
     float reflectivity = 0.05;

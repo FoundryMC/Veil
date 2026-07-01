@@ -50,19 +50,14 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, mat4 i
     return AreaLightResult((invPlaneMatrix * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
 }
 
-const int steps = 50;
-const float strength = 0.4f;
+const int steps = 100;
 
-vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, bool occlude, vec3 normal) {
+vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth) {
     int raymarchSteps = steps;
-    float jitterStrength = 0.1;
+    float jitterStrength = 0.05;
     vec3 dir = fragPos - camPos;
     float dirLength = length(dir);
-    float stepSize = 1.0;
-    if (occlude) {
-        //raymarchSteps /= 4;
-        //stepSize *= 4;
-    }
+    float stepSize = maxDistance * 0.1;
 
     float jitter = fract(sin(dot(fragPos.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
     vec3 scatter = vec3(0.0);
@@ -75,7 +70,10 @@ vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, boo
         if (distanceTraveled > depth) break;
 
         float d = distance(p, lightOrigin);
-        if (d > maxDistance) continue;
+        if (d > maxDistance) {
+            if (length(scatter) > 0.0) break;
+            continue;
+        }
 
         AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(p, lightMat, inverseLightMat, size);
         vec3 lightPos = areaLightInfo.position;
@@ -89,10 +87,11 @@ vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth, boo
         if (abs(distanceTraveled - depth) < 2.0) {
             a *= smoothstep(0.0, 1.0, abs(distanceTraveled - depth) / 2.0);
         }
+        if (length(a) <= 0.0 && length(scatter) > 0.0) break;
         scatter += a;
     }
 
-    return clamp(scatter / float(raymarchSteps) * strength * volumetric, vec3(0.0), vec3(1.0));
+    return clamp(scatter / float(raymarchSteps) * volumetric, vec3(0.0), vec3(1.0));
 }
 
 void main() {
@@ -127,7 +126,7 @@ void main() {
     }
     vec3 scatter = vec3(0.0);
     if (volumetric > 0.0) {
-        scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition, pos, linearize_depth(depth), false, vec3(0.0));
+        scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition, pos, linearize_depth(depth));
     }
 
     float reflectivity = 0.05;
