@@ -200,6 +200,10 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
             this.scatteringPower = editScattering[0];
             this.markDirty();
         }
+
+        if (this.occlusionEnabled && this.scatteringPower > 0) {
+            ImGui.textColored(0.914f, 0.835f, 0.008f, 1.0f, "WARNING: Occlusion for in-scattering is not supported!");
+        }
     }
 
     @Override
