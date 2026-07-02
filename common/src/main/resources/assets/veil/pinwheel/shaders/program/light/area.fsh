@@ -55,8 +55,7 @@ const int steps = 100;
 vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth) {
     int raymarchSteps = steps;
     float jitterStrength = 0.05;
-    vec3 dir = fragPos - camPos;
-    float dirLength = length(dir);
+    vec3 dir = normalize(fragPos - camPos);
     float stepSize = maxDistance * 0.1;
 
     float jitter = fract(sin(dot(fragPos.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
@@ -64,10 +63,11 @@ vec3 raymarch_inscattering_fixeddist(vec3 camPos, vec3 fragPos, float depth) {
     vec3 p = camPos + jitter * jitterStrength;
     float distanceTraveled = 0.0;
     for (int s = 0; s < raymarchSteps; s++) {
-        p += normalize(dir) * stepSize;
+        p += dir * stepSize;
         distanceTraveled += stepSize;
 
         if (distanceTraveled > depth) break;
+        if (all(greaterThanEqual(scatter / float(raymarchSteps) * volumetric, vec3(1.0)))) return vec3(1.0);
 
         float d = distance(p, lightOrigin);
         if (d > maxDistance) {
