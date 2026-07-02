@@ -78,7 +78,6 @@ publishMods {
         optional "imguimc"
 
         incompatible "embeddium"
-        incompatible "celeritas"
 
         if (isNeoforge) {
             incompatible "rubidium"
@@ -112,7 +111,6 @@ publishMods {
         optional "imguimc"
 
         incompatible "embeddium"
-        incompatible "celeritas"
 
         if (isNeoforge) {
             incompatible "rubidium"

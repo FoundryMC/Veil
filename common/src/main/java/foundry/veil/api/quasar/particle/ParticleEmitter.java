@@ -247,7 +247,7 @@ public class ParticleEmitter {
 
             particle.render(partialTicks);
 
-            renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT);
+            renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT, partialTicks);
 
             Vector3dc renderPosition = renderData.getRenderPosition();
             renderOffset.set(
