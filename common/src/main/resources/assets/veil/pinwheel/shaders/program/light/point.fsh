@@ -80,7 +80,7 @@ void main() {
         diffuse *= shadow;
     }
     vec3 scatter = vec3(0.0);
-    if (volumetric > 0.0 && occluded < 0.5) {
+    if (volumetric > 0.0) {
         scatter = raymarch_inscattering_fixeddist(VeilCamera.CameraPosition + VeilCamera.CameraBobOffset, pos, linearize_depth(depth));
     }
 
