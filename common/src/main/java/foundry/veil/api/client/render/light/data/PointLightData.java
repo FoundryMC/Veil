@@ -25,11 +25,13 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
     protected final Vector3d position;
     protected float radius;
     protected boolean occlusionEnabled;
+    protected float inscattering;
 
     public PointLightData() {
         this.position = new Vector3d();
         this.radius = 1.0F;
         this.occlusionEnabled = false;
+        this.inscattering = 0.0F;
     }
 
     @Override
@@ -58,6 +60,13 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         return this.occlusionEnabled;
     }
 
+    /**
+     * @return The strength of the light's in-scattering effect.
+     */
+    public float getInscatteringStrength() {
+        return this.inscattering;
+    }
+
     public PointLightData setPosition(Vector3dc pos) {
         this.position.set(pos);
         this.markDirty();
@@ -78,6 +87,12 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
 
     public PointLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
+        return this;
+    }
+
+    public PointLightData setInscatteringStrength(float inscattering) {
+        this.inscattering = inscattering;
         this.markDirty();
         return this;
     }
@@ -126,6 +141,7 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         buffer.putFloat(this.color.blue() * this.brightness);
         buffer.putFloat(this.radius);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
+        buffer.putFloat(this.inscattering);
     }
 
     @Override
@@ -148,6 +164,8 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         double[] editZ = new double[]{this.position.z()};
 
         float[] editRadius = new float[]{this.radius};
+
+        float[] editInscattering = new float[]{this.inscattering};
 
         float totalWidth = ImGui.calcItemWidth();
         ImGui.pushItemWidth(totalWidth / 3.0F - (ImGui.getStyle().getItemInnerSpacingX() * 0.58F));
@@ -175,8 +193,11 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         }
 
         if (ImGui.checkbox("Occluded", this.occlusionEnabled)) {
-            this.occlusionEnabled = !this.occlusionEnabled;
-            this.markDirty();
+            this.setOcclusionEnabled(!this.occlusionEnabled);
+        }
+
+        if (ImGui.dragScalar("In-scattering", editInscattering, 0.01F, 0.0F)) {
+            this.setInscatteringStrength(editInscattering[0]);
         }
     }
 }

@@ -34,6 +34,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     protected float angle;
     protected float distance;
     protected boolean occlusionEnabled;
+    protected float inscattering;
 
     public AreaLightData() {
         this.matrix = new Matrix4d();
@@ -45,6 +46,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         this.angle = (float) Math.toRadians(45);
         this.distance = 1.0F;
         this.occlusionEnabled = false;
+        this.inscattering = 0.0F;
     }
 
     /**
@@ -137,6 +139,13 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     }
 
     /**
+     * @return The strength of the light's in-scattering effect.
+     */
+    public float getInscatteringStrength() {
+        return this.inscattering;
+    }
+
+    /**
      * Sets the size of the light's surface
      *
      * @param x The length, in blocks, of the light's surface.
@@ -172,6 +181,12 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
     public AreaLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
+        return this;
+    }
+
+    public AreaLightData setInscatteringStrength(float inscattering) {
+        this.inscattering = inscattering;
         this.markDirty();
         return this;
     }
@@ -221,6 +236,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         buffer.putShort((short) Mth.clamp((int) (this.angle * MAX_ANGLE_SIZE), 0, 65535));
         buffer.putFloat(this.distance);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
+        buffer.putFloat(this.inscattering);
     }
 
     @Override
@@ -260,6 +276,8 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
         float[] editAngle = new float[]{this.angle};
         float[] editDistance = new float[]{this.distance};
+
+        float[] editInscattering = new float[]{this.inscattering};
 
         if (ImGui.dragFloat2("size", editSize, 0.02F, 0.0001F)) {
             this.setSize(editSize[0], editSize[1]);
@@ -317,8 +335,11 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         }
 
         if (ImGui.checkbox("Occluded", this.occlusionEnabled)) {
-            this.occlusionEnabled = !this.occlusionEnabled;
-            this.markDirty();
+            this.setOcclusionEnabled(!this.occlusionEnabled);
+        }
+
+        if (ImGui.dragScalar("In-scattering", editInscattering, 0.01F, 0.0F)) {
+            this.setInscatteringStrength(editInscattering[0]);
         }
     }
 }

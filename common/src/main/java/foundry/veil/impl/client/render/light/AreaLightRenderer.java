@@ -27,7 +27,7 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> imp
     private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/area");
 
     public AreaLightRenderer() {
-        super(Float.BYTES * 23 + 2);
+        super(Float.BYTES * 24 + 2);
     }
 
     @Override
@@ -47,7 +47,8 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> imp
         builder.setVertexAttribute(6, 2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // size
         builder.setVertexAttribute(7, 2, 1, VertexArrayBuilder.DataType.UNSIGNED_SHORT, true, Float.BYTES * 21); // angle
         builder.setVertexAttribute(8, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2); // distance
-        builder.setVertexAttribute(9, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2 + Float.BYTES);
+        builder.setVertexAttribute(9, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2 + Float.BYTES); // Occlusion
+        builder.setVertexAttribute(10, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2 + Float.BYTES * 2); // In-scattering
     }
 
     @Override
