@@ -16,11 +16,7 @@
     },
     {
       "type": "minecraft:depth_test",
-      "mode": "notequal"
-    },
-    {
-      "type": "minecraft:cull",
-      "face": "back"
+      "mode": "greater"
     },
     {
       "type": "minecraft:transparency",

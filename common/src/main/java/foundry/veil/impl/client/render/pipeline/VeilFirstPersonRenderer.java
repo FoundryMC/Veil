@@ -60,7 +60,7 @@ public final class VeilFirstPersonRenderer {
     public static void unbind() {
         // TODO update projection/modelview matrix
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        boolean rendered = VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum());
+        boolean rendered = VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), false);
         ((RenderTargetExtension) Minecraft.getInstance().getMainRenderTarget()).veil$setWrapper(null);
 
         if (rendered) {

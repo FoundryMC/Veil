@@ -24,7 +24,7 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
  * @param <T> The type of lights to render
  * @author Ocelot
  */
-public abstract class InstancedLightRenderer<T extends LightData & InstancedLightData> implements LightTypeRenderer<T> {
+public abstract class InstancedLightRenderer<T extends LightData & InstancedLightData> implements InscatteringLightRenderer<T> {
 
     private static final int MAX_UPLOADS = 400;
 
@@ -78,6 +78,14 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
      * @return The render type to use
      */
     protected abstract @Nullable RenderType getRenderType(List<? extends LightRenderHandle<T>> lights);
+
+    /**
+     * Calculates the render type to use for the specified lights' in-scattering.
+     *
+     * @param lights All lights in the order they are in the instanced buffer
+     * @return The render type to use for in-scattering
+     */
+    protected abstract @Nullable RenderType getInscatteringRenderType(List<? extends LightRenderHandle<T>> lights);
 
     private void updateAllLights() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -162,17 +170,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         }
     }
 
-    @Override
-    public void renderLights(LightRenderer lightRenderer) {
-        if (this.visibleLights.isEmpty()) {
-            return;
-        }
-
-        RenderType renderType = this.getRenderType(this.visibleLights);
-        if (renderType == null) {
-            return;
-        }
-
+    private void bindRenderQuad() {
         RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
         boolean resized = false;
@@ -197,6 +195,35 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         }
 
         this.vertexArray.bind();
+    }
+
+    @Override
+    public void renderLights(LightRenderer lightRenderer) {
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        RenderType renderType = this.getRenderType(this.visibleLights);
+        if (renderType == null) {
+            return;
+        }
+
+        this.bindRenderQuad();
+        this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
+    }
+
+    @Override
+    public void renderLightInscattering(LightRenderer lightRenderer) {
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        RenderType renderType = this.getInscatteringRenderType(this.visibleLights);
+        if (renderType == null) {
+            return;
+        }
+
+        this.bindRenderQuad();
         this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
     }
 

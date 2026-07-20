@@ -7,10 +7,7 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.light.data.PointLightData;
-import foundry.veil.api.client.render.light.renderer.DDALightRenderer;
-import foundry.veil.api.client.render.light.renderer.InstancedLightRenderer;
-import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
-import foundry.veil.api.client.render.light.renderer.LightTypeRenderer;
+import foundry.veil.api.client.render.light.renderer.*;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
 import net.minecraft.client.renderer.RenderType;
@@ -25,6 +22,7 @@ import java.util.List;
 public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLightData> implements DDALightRenderer<PointLightData> {
 
     private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/point");
+    private static final ResourceLocation INSCATTERING_RENDER_TYPE = Veil.veilPath("light/inscattering/point");
 
     public InstancedPointLightRenderer() {
         super(Float.BYTES * 9);
@@ -49,6 +47,11 @@ public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLig
     @Override
     protected @Nullable RenderType getRenderType(List<? extends LightRenderHandle<PointLightData>> lights) {
         return VeilRenderType.get(RENDER_TYPE);
+    }
+
+    @Override
+    protected @Nullable RenderType getInscatteringRenderType(List<? extends LightRenderHandle<PointLightData>> lights) {
+        return VeilRenderType.get(INSCATTERING_RENDER_TYPE);
     }
 
     @Override

@@ -25,6 +25,7 @@ import java.util.List;
 public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> implements DDALightRenderer<AreaLightData> {
 
     private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/area");
+    private static final ResourceLocation INSCATTERING_RENDER_TYPE = Veil.veilPath("light/inscattering/area");
 
     public AreaLightRenderer() {
         super(Float.BYTES * 24 + 2);
@@ -54,6 +55,11 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> imp
     @Override
     protected @Nullable RenderType getRenderType(List<? extends LightRenderHandle<AreaLightData>> lights) {
         return VeilRenderType.get(RENDER_TYPE);
+    }
+
+    @Override
+    protected @Nullable RenderType getInscatteringRenderType(List<? extends LightRenderHandle<AreaLightData>> lights) {
+        return VeilRenderType.get(INSCATTERING_RENDER_TYPE);
     }
 
     @Override

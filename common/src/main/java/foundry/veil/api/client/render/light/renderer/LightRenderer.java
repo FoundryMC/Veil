@@ -54,7 +54,7 @@ public final class LightRenderer implements NativeResource {
      * @return If any lights were actually rendered
      */
     @ApiStatus.Internal
-    public boolean render(CullFrustum frustum, AdvancedFbo lightFbo) {
+    public boolean render(CullFrustum frustum, AdvancedFbo lightFbo, AdvancedFbo lightInscatteringFbo, boolean renderInscattering) {
         boolean hasRendered = false;
         boolean setupDDA = false;
         VeilRenderer renderer = VeilRenderSystem.renderer();
@@ -88,6 +88,17 @@ public final class LightRenderer implements NativeResource {
                 ddalightRenderer.uploadVoxelGridUniforms(VoxelShadowGrid.getTextureId(), VoxelShadowGrid.getUniformGridPos());
             }
             lightRenderer.renderLights(this);
+
+            if (lightRenderer instanceof InscatteringLightRenderer<?> inscatteringLightRenderer && renderInscattering) {
+                lightInscatteringFbo.bind(true);
+                AdvancedFbo.getMainFramebuffer().resolveToAdvancedFbo(lightInscatteringFbo, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                inscatteringLightRenderer.renderLightInscattering(this);
+                AdvancedFbo.unbind();
+            }
+        }
+
+        if (hasRendered && !renderInscattering) {
+            lightInscatteringFbo.clear(GL_COLOR_BUFFER_BIT);
         }
 
         if (!hasRendered) {

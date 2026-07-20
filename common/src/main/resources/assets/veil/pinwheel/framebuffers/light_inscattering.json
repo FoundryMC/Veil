@@ -1,0 +1,10 @@
+{
+  "width": "q.screen_width / 4.0",
+  "height": "q.screen_height / 4.0",
+  "depth": true,
+  "filter": {
+    "blur": true
+  },
+  "autoClear": false,
+  "format": "RGB16F"
+}

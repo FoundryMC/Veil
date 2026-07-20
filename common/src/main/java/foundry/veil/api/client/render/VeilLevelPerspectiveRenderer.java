@@ -170,7 +170,7 @@ public final class VeilLevelPerspectiveRenderer {
             // Draw lights
             if (drawLights) {
                 ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-                if (VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum())) {
+                if (VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), true)) {
                     VeilRenderSystem.compositeLights(profiler);
                 } else {
                     AdvancedFbo.unbind();
