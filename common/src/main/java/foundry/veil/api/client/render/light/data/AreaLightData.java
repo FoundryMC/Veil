@@ -1,11 +1,14 @@
 package foundry.veil.api.client.render.light.data;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.light.DDALightData;
 import foundry.veil.api.client.render.light.InstancedLightData;
+import foundry.veil.api.client.render.light.LightGuideProvider;
 import imgui.ImGui;
 import net.minecraft.client.Camera;
 import net.minecraft.util.Mth;
@@ -21,7 +24,7 @@ import java.nio.ByteBuffer;
  *
  * @since 2.0.0
  */
-public class AreaLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider {
+public class AreaLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider, LightGuideProvider {
 
     private static final float MAX_ANGLE_SIZE = (float) (65535.0 / 2.0 / Math.PI);
 
@@ -341,5 +344,38 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         if (ImGui.dragScalar("In-scattering", editInscattering, 0.01F, 0.0F)) {
             this.setInscatteringStrength(editInscattering[0]);
         }
+    }
+
+    @Override
+    public void renderLightGuide(MatrixStack stack, VertexConsumer consumer) {
+        stack.matrixPush();
+
+        stack.translate(this.position.x, this.position.y, this.position.z);
+        Vector3f rot = this.orientation.getEulerAnglesXYZ(new Vector3f()).mul(-1);
+        stack.rotate(new Quaternionf().rotateX(rot.x).rotateLocalY(rot.y).rotateLocalZ(rot.z));
+
+        Matrix4f pose = stack.position();
+
+        consumer.addVertex(pose, -this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -this.size.x,  this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose,  this.size.x,  this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose,  this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+
+        Vector3f endSize = new Vector3f(this.size.x + (this.distance * (float)Math.tan(this.angle * 0.5)), this.size.y + (this.distance * (float)Math.tan(this.angle * 0.5)), this.distance);
+
+        consumer.addVertex(pose, -endSize.x, -endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -endSize.x, endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -this.size.x,  this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -endSize.x, endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, endSize.x, endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose,  this.size.x,  this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, endSize.x, endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, endSize.x, -endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose,  this.size.x, -this.size.y, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, endSize.x, -endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        consumer.addVertex(pose, -endSize.x, -endSize.y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+
+        stack.matrixPop();
     }
 }
