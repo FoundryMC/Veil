@@ -58,36 +58,34 @@ float sdSphere( vec3 p, float r )
     return (length(p) - r) / DENSITY + PASSTHROUGH;
 }
 
-vec3 ray(vec3 dir, vec3 pos, vec2 uv, float depth) {
+vec3 ray(vec3 dir, vec3 pos, vec3 fragPos) {
     //Output brightness
     #define BRIGHTNESS 0.004
 
     //Accumulative color
-    vec3 jitter = vec3(random(gl_FragCoord.xy + pos.xx), random(gl_FragCoord.xy + pos.yy), random(gl_FragCoord.xy + pos.zz)) - 0.5;
-    vec3 p = pos + jitter * 0.01;
     vec3 col = vec3(0.0);
     float d = 0;
-    float fov = getFov();
+    float fragDistance = distance(pos, fragPos);
 
     //Glow raymarch loop
     for(float i = 0.0; i<STEPS; i++)
     {
         //Glow density
-        AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(p, lightMat, invLightMat, size);
+        AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(pos, lightMat, invLightMat, size);
         vec3 lightPos = areaLightInfo.position;
         float angle = areaLightInfo.angle;
 
-        float vol = sdSphere(p - lightPos, 1.);
-        d += vol - (fov * pow(2 * length(uv) - 1, 2));
+        float vol = sdSphere(pos - lightPos, 1.);
+        d += vol;
 
-        vec3 offset = lightPos - p;
+        vec3 offset = lightPos - pos;
         float atten = attenuate_no_cusp(length(offset), maxDistance);
         float angleFalloff = clamp(angle, 0.0, maxAngle) / maxAngle;
         angleFalloff = smoothstep(1.0, 0.0, angleFalloff);
         //Step forward
-        p += dir * vol;
-        if ((depth - d) < 1.0) {
-            atten *= smoothstep(0.0, 1.0, (depth - d));
+        pos += dir * vol;
+        if (fragDistance - d < 1.0) {
+            atten *= smoothstep(0.0, 1.0, fragDistance - d);
         }
 
         //Add the sample color
@@ -105,8 +103,8 @@ void main() {
 
     vec3 volume = vec3(0);
     if (inscattering > 0.0) {
-        float d = linearizeDepth(texture(DepthSampler, screenUv).r);
-        volume = ray(viewDirFromUv(screenUv), VeilCamera.CameraPosition + VeilCamera.CameraBobOffset, screenUv, d);
+        float depth = texture(DepthSampler, screenUv).r;
+        volume = ray(viewDirFromUv(screenUv), VeilCamera.CameraPosition + VeilCamera.CameraBobOffset, screenToWorldSpace(screenUv, depth).xyz);
     }
 
     fragColor = vec4(volume, 1.0);
