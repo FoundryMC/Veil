@@ -10,25 +10,31 @@ in vec2 texCoord;
 
 out vec4 fragColor;
 
-// Taken from https://github.com/amilajack/gaussian-blur/tree/master under MIT license
+#define BOXRADIUS 3
 
-vec4 blur9(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
-    vec4 color = vec4(0.0);
-    vec2 off1 = vec2(1.3846153846) * direction;
-    vec2 off2 = vec2(3.2307692308) * direction;
-    color += texture2D(image, uv) * 0.2270270270;
-    color += texture2D(image, uv + (off1 / resolution)) * 0.3162162162;
-    color += texture2D(image, uv - (off1 / resolution)) * 0.3162162162;
-    color += texture2D(image, uv + (off2 / resolution)) * 0.0702702703;
-    color += texture2D(image, uv - (off2 / resolution)) * 0.0702702703;
-    return color;
+vec3 boxBlur(vec2 uv, vec2 size)
+{
+    int kernel_window_size = BOXRADIUS * 2 + 1;
+    int samples = kernel_window_size * kernel_window_size;
+
+    vec3 color = vec3(0);
+
+    float wsum = 0.0;
+    for (int ry = -BOXRADIUS; ry <= BOXRADIUS; ++ry)
+    for (int rx = -BOXRADIUS; rx <= BOXRADIUS; ++rx)
+    {
+        float w = 1.0;
+        wsum += w;
+        color += texture(LightInscatteringSampler, uv + vec2(rx, ry) / size).rgb * w;
+    }
+
+    return color/wsum;
 }
 
 void main() {
     vec4 main = texture(DiffuseSampler0, texCoord);
     float mainDepth = texture(DiffuseDepthSampler, texCoord).r;
-    vec3 light = texture(LightSampler, texCoord).rgb + mix(
-            blur9(LightInscatteringSampler, texCoord, ScreenSize / 4.0, vec2(1, 0)), blur9(LightInscatteringSampler, texCoord, ScreenSize / 4.0, vec2(0, 1)), vec4(0.5)).rgb;
+    vec3 light = texture(LightSampler, texCoord).rgb + boxBlur(texCoord, ScreenSize / 4.0).rgb;
     fragColor = vec4(main.rgb + light, main.a);
     gl_FragDepth = mainDepth;
 }
