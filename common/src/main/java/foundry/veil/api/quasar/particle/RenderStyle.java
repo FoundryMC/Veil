@@ -1,38 +1,75 @@
 package foundry.veil.api.quasar.particle;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.serialization.Codec;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
-import foundry.veil.api.quasar.data.QuasarParticleData;
+import foundry.veil.api.client.render.vertex.VeilVertexFormat;
+import foundry.veil.api.client.render.vertex.VertexArray;
+import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import foundry.veil.api.util.CodecUtil;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
+import org.lwjgl.system.MemoryStack;
+
+import java.lang.Math;
+import java.nio.ByteBuffer;
+import java.util.List;
+
+import static org.lwjgl.opengl.GL15C.*;
+import static org.lwjgl.opengl.GL15C.GL_ARRAY_BUFFER;
+import static org.lwjgl.system.MemoryUtil.memAddress;
 
 /**
  * Defines how a particle emitter renders a set of particles.
  *
  * @author Ocelot, BL
  */
-public interface RenderStyle {
+public abstract class RenderStyle {
 
-    Codec<RenderStyle> CODEC = CodecUtil.registryOrLegacyCodec(RenderStyleRegistry.REGISTRY);
+    public static final Codec<RenderStyle> CODEC = CodecUtil.registryOrLegacyCodec(RenderStyleRegistry.REGISTRY);
+
+    private VertexArray vertexArray;
+    private int instanceVBO;
+    private final int bufferSize;
+    protected int maxParticles;
+
+    public static final int MAX_PARTICLES = 400;
+
+    public RenderStyle(int bufferSize) {
+        this.bufferSize = bufferSize;
+        this.maxParticles = 0;
+    }
+
+    public void init() {
+        if (bufferSize < 0) {
+            return;
+        }
+
+        this.vertexArray = VertexArray.create();
+        this.vertexArray.upload(this.createMesh(), VertexArray.DrawUsage.STATIC);
+        this.instanceVBO = this.vertexArray.getOrCreateBuffer(0);
+
+        VertexArrayBuilder builder = this.vertexArray.editFormat();
+        builder.defineVertexBuffer(0, this.instanceVBO, 0, bufferSize, 1);
+        this.setupBufferState(builder);
+    }
 
     /**
      * Called before rendering any particles. This will not be fired if the emitter has no particles.
      *
-     * @param particleCount The number of particles that will be rendered with {@link #render(MatrixStack, QuasarParticle, RenderData, Vector3fc, VertexConsumer, double, float)}
+     * @param particleCount The number of particles that will be rendered with {@link #render(MatrixStack, List, Vector3fc, VertexConsumer, double, float)}
      * @return Whether the particles are allowed to render
      * @since 1.3.0
      */
-    default boolean setup(int particleCount) {
+    public boolean setup(int particleCount) {
         return true;
     }
 
@@ -41,20 +78,63 @@ public interface RenderStyle {
      *
      * @since 1.3.0
      */
-    default void clear() {
+    public void clear() {
     }
 
     /**
      * Draws a single particle.
      *
      * @param matrixStack  The current stack of matrix transformations
-     * @param particle     The particle to render
-     * @param renderData   The render data associated with that particle
+     * @param particles    A list of currently active particles
      * @param renderOffset The offset from the camera to draw the particle at
      * @param builder      The vertex consumer to draw into
      * @param partialTicks The percentage from last tick to this tick
      */
-    void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks);
+    public void render(MatrixStack matrixStack, List<QuasarParticle> particles, Camera camera, VertexConsumer builder, double ageModifier, float partialTicks) {
+        if (particles.isEmpty()) return;
+
+        RenderType renderType = this.getRenderType(particles.getFirst(), particles.getFirst().getRenderData());
+        if (renderType == null) {
+            return;
+        }
+
+        RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instanceVBO);
+
+        if (particles.size() > this.maxParticles) {
+            if (this.maxParticles < 100) {
+                this.maxParticles = 100;
+            } else {
+                this.maxParticles = (int) Math.max(Math.ceil(this.maxParticles / 2.0), particles.size() * 1.5);
+            }
+            glBufferData(GL_ARRAY_BUFFER, (long) this.maxParticles * this.bufferSize, GL_STREAM_DRAW);
+        }
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            int pointer = 0;
+            long offset = 0;
+            ByteBuffer dataBuffer = stack.malloc(Math.min(MAX_PARTICLES, particles.size()) * this.bufferSize);
+            for (QuasarParticle particle : particles) {
+                dataBuffer.position((pointer++) * this.bufferSize);
+
+                this.putBufferData(particle, camera, dataBuffer);
+
+                if (pointer >= MAX_PARTICLES) {
+                    dataBuffer.rewind();
+                    glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
+                    offset += dataBuffer.capacity();
+                    pointer = 0;
+                }
+            }
+
+            if (pointer > 0) {
+                dataBuffer.rewind();
+                nglBufferSubData(GL_ARRAY_BUFFER, offset, (long) pointer * this.bufferSize, memAddress(dataBuffer));
+            }
+        }
+
+        this.vertexArray.bind();
+        this.vertexArray.drawInstancedWithRenderType(renderType, particles.size());
+    }
 
     /**
      * @return The render type to use for the specified particle.
@@ -62,7 +142,7 @@ public interface RenderStyle {
      * @see RenderData#markDirty()
      * @since 1.3.0
      */
-    default RenderType getRenderType(QuasarParticle particle, RenderData renderData) {
+    public RenderType getRenderType(QuasarParticle particle, RenderData renderData) {
         boolean additive = renderData.isAdditive();
         TextureAtlasSprite atlasSprite = renderData.getAtlasSprite();
         if (atlasSprite != null) {
@@ -77,8 +157,14 @@ public interface RenderStyle {
         return VeilRenderType.quasarParticle(RenderData.BLANK, additive);
     }
 
+    protected abstract MeshData createMesh();
+
+    protected abstract void setupBufferState(VertexArrayBuilder builder);
+
+    protected abstract void putBufferData(QuasarParticle particle, Camera camera, ByteBuffer buffer);
+
     @ApiStatus.Internal
-    final class Cube implements RenderStyle {
+    public static final class Cube extends RenderStyle {
 
         private static final Vector3fc[] CUBE_POSITIONS = {
                 // TOP
@@ -102,12 +188,13 @@ public interface RenderStyle {
         private static final float[] CUBE_NORMALS = {0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 0};
         private static final Vector3f POS = new Vector3f();
 
-        @Override
-        public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
-            Matrix4f matrix4f = matrixStack.position();
-            Vector3fc rotation = renderData.getRenderRotation();
-            SpriteData spriteData = renderData.getSpriteData();
+        public Cube() {
+            super(Float.BYTES * 24 + Short.BYTES * 2);
+        }
 
+        //@Override
+        //public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
+            /*
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 4; j++) {
                     POS.set(CUBE_POSITIONS[i * 4 + j]);
@@ -135,12 +222,89 @@ public interface RenderStyle {
                     builder.setLight(renderData.getPackedLight());
                     builder.setNormal(CUBE_NORMALS[i * 3], CUBE_NORMALS[i * 3 + 1], CUBE_NORMALS[i * 3 + 2]);
                 }
+
             }
+             */
+        //}
+
+        @Override
+        protected MeshData createMesh() {
+            BufferBuilder builder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, VeilVertexFormat.QUASAR_PARTICLE);
+
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 4; j++) {
+                    Vector3fc pos = CUBE_POSITIONS[i * 4 + j];
+
+                    builder.addVertex(pos.x(), pos.y(), pos.z());
+                    builder.setNormal(CUBE_NORMALS[i * 3], CUBE_NORMALS[i * 3 + 1], CUBE_NORMALS[i * 3 + 2]);
+                }
+            }
+
+            return builder.buildOrThrow();
+        }
+
+        @Override
+        protected void setupBufferState(VertexArrayBuilder builder) {
+            builder.setVertexAttribute(2, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
+            builder.setVertexAttribute(3, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
+            builder.setVertexAttribute(4, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
+            builder.setVertexAttribute(5, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
+            builder.setVertexAttribute(6, 0, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // UV0 min
+            builder.setVertexAttribute(7, 0, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 18); // UV0 max
+            builder.setVertexAttribute(8, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 20); // Color
+            builder.setVertexAttribute(9, 0, 2, VertexArrayBuilder.DataType.SHORT, false, Float.BYTES * 24); // UV2 / Light
+        }
+
+        @Override
+        protected void putBufferData(QuasarParticle particle, Camera camera, ByteBuffer buffer) {
+            RenderData renderData = particle.getRenderData();
+            Vector3fc rotation = renderData.getRenderRotation();
+            SpriteData spriteData = renderData.getSpriteData();
+
+            Vec3 projectedView = camera.getPosition();
+            Vector3f renderOffset = new Vector3f();
+            Vector3dc renderPosition = renderData.getRenderPosition();
+            renderOffset.set(
+                    (float) (renderPosition.x()),
+                    (float) (renderPosition.y()),
+                    (float) (renderPosition.z()));
+
+            Matrix4f transformationMatrix = new Matrix4f()
+                    //.rotate(new Quaternionf().rotateLocalX(rotation.x()).rotateLocalY(rotation.y()).rotateLocalZ(rotation.z()))
+                    //.scale(renderData.getRenderRadius())
+                    .translate(renderOffset.x, renderOffset.y, renderOffset.z);
+            transformationMatrix.get(buffer.position(), buffer);
+
+            buffer.position(buffer.position() + Float.BYTES * 16);
+
+            float uMin = 0;
+            float vMin = 0;
+            float uMax = 1;
+            float vMax = 1;
+            if (spriteData != null) {
+                uMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMin);
+                uMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMax);
+                vMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), vMin);
+                vMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), vMax);
+            }
+            buffer.putFloat(uMin);
+            buffer.putFloat(vMin);
+            buffer.putFloat(uMax);
+            buffer.putFloat(vMax);
+
+            buffer.putFloat(renderData.getRed());
+            buffer.putFloat(renderData.getGreen());
+            buffer.putFloat(renderData.getBlue());
+            buffer.putFloat(renderData.getAlpha());
+
+            int packedLight = renderData.getPackedLight();
+            buffer.putShort((short) (packedLight & '\uffff'));
+            buffer.putShort((short) (packedLight >> 16 & '\uffff'));
         }
     }
 
     @ApiStatus.Internal
-    final class Billboard implements RenderStyle {
+    public static final class Billboard extends RenderStyle {
 
         private static final Vector3fc[] PLANE_POSITIONS = {
                 // plane from -1 to 1 on Y axis and -1 to 1 on X axis
@@ -150,56 +314,75 @@ public interface RenderStyle {
         private static final Vector3f POS = new Vector3f();
         private static final Vector3f NORMAL = new Vector3f();
 
+        public Billboard() {
+            super(0);
+        }
+
+        //@Override
+        //public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
+        //    Matrix4f matrix4f = matrixStack.position();
+        //    Vector3fc rotation = renderData.getRenderRotation();
+//
+        //    Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
+        //    SpriteData spriteData = renderData.getSpriteData();
+//
+        //    int red = (int) (renderData.getRed() * 255.0F) & 0xFF;
+        //    int green = (int) (renderData.getGreen() * 255.0F) & 0xFF;
+        //    int blue = (int) (renderData.getBlue() * 255.0F) & 0xFF;
+        //    int alpha = (int) (renderData.getAlpha() * 255.0F) & 0xFF;
+//
+        //    NORMAL.set(0, 0, -1);
+        //    if (particle.getData().faceVelocity()) {
+        //        NORMAL.rotateX(rotation.x())
+        //                .rotateY(rotation.y())
+        //                .rotateZ(rotation.z());
+        //    }
+//
+        //    // turn quat into pitch and yaw
+        //    for (int j = 0; j < 4; j++) {
+        //        POS.set(PLANE_POSITIONS[j]);
+        //        if (particle.getData().velocityStretchFactor() > 0f) {
+        //            POS.set(POS.x * (1 + particle.getData().velocityStretchFactor()), POS.y, POS.z);
+        //        }
+        //        if (particle.getData().faceVelocity()) {
+        //            POS.rotateX(rotation.x())
+        //                    .rotateY(rotation.y())
+        //                    .rotateZ(rotation.z());
+        //        }
+//      //          vec = vec.xRot(lerpedPitch).yRot(lerpedYaw).zRot(lerpedRoll);
+        //        faceCameraRotation.transform(POS).mul((float) (renderData.getRenderRadius() * ageModifier)).add(renderOffset);
+//
+        //        float u = PLANE_UVS[j * 2];
+        //        float v = PLANE_UVS[j * 2 + 1];
+        //        if (spriteData != null) {
+        //            u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
+        //            v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
+        //        }
+//      //              if (particle.sprite != null) {
+//      //                  u1 = u;
+//      //                  v1 = v;
+//      //              }
+        //        builder.addVertex(matrix4f, POS.x, POS.y, POS.z);
+        //        builder.setUv(u, v);
+        //        builder.setColor(red, green, blue, alpha);
+        //        builder.setLight(renderData.getPackedLight());
+        //        builder.setNormal(NORMAL.x, NORMAL.y, NORMAL.z);
+        //    }
+        //}
+
         @Override
-        public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
-            Matrix4f matrix4f = matrixStack.position();
-            Vector3fc rotation = renderData.getRenderRotation();
+        protected MeshData createMesh() {
+            return null;
+        }
 
-            Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
-            SpriteData spriteData = renderData.getSpriteData();
+        @Override
+        protected void setupBufferState(VertexArrayBuilder builder) {
 
-            int red = (int) (renderData.getRed() * 255.0F) & 0xFF;
-            int green = (int) (renderData.getGreen() * 255.0F) & 0xFF;
-            int blue = (int) (renderData.getBlue() * 255.0F) & 0xFF;
-            int alpha = (int) (renderData.getAlpha() * 255.0F) & 0xFF;
+        }
 
-            NORMAL.set(0, 0, -1);
-            if (particle.getData().faceVelocity()) {
-                NORMAL.rotateX(rotation.x())
-                        .rotateY(rotation.y())
-                        .rotateZ(rotation.z());
-            }
+        @Override
+        protected void putBufferData(QuasarParticle particle, Camera camera, ByteBuffer buffer) {
 
-            // turn quat into pitch and yaw
-            for (int j = 0; j < 4; j++) {
-                POS.set(PLANE_POSITIONS[j]);
-                if (particle.getData().velocityStretchFactor() > 0f) {
-                    POS.set(POS.x * (1 + particle.getData().velocityStretchFactor()), POS.y, POS.z);
-                }
-                if (particle.getData().faceVelocity()) {
-                    POS.rotateX(rotation.x())
-                            .rotateY(rotation.y())
-                            .rotateZ(rotation.z());
-                }
-//                vec = vec.xRot(lerpedPitch).yRot(lerpedYaw).zRot(lerpedRoll);
-                faceCameraRotation.transform(POS).mul((float) (renderData.getRenderRadius() * ageModifier)).add(renderOffset);
-
-                float u = PLANE_UVS[j * 2];
-                float v = PLANE_UVS[j * 2 + 1];
-                if (spriteData != null) {
-                    u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
-                    v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
-                }
-//                    if (particle.sprite != null) {
-//                        u1 = u;
-//                        v1 = v;
-//                    }
-                builder.addVertex(matrix4f, POS.x, POS.y, POS.z);
-                builder.setUv(u, v);
-                builder.setColor(red, green, blue, alpha);
-                builder.setLight(renderData.getPackedLight());
-                builder.setNormal(NORMAL.x, NORMAL.y, NORMAL.z);
-            }
         }
     }
 }

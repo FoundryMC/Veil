@@ -23,9 +23,9 @@ public class VeilVertexFormat {
             .build();
     public static final VertexFormat QUASAR_PARTICLE = VertexFormat.builder()
             .add("Position", POSITION)
-            .add("UV0", UV0)
-            .add("Color", COLOR)
-            .add("UV2", UV2)
+            //.add("UV0", UV0)
+            //.add("Color", COLOR)
+            //.add("UV2", UV2)
             .add("Normal", NORMAL)
             .build();
 

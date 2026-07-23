@@ -18,10 +18,15 @@ public class RenderStyleRegistry {
     public static final Registry<RenderStyle> REGISTRY = PROVIDER.asVanillaRegistry();
 
     public static final RegistryObject<RenderStyle.Cube> CUBE = register("cube", new RenderStyle.Cube());
-    public static final RegistryObject<RenderStyle.Billboard> BILLBOARD = register("billboard", new RenderStyle.Billboard());
+    public static final RegistryObject<RenderStyle.Cube> BILLBOARD = register("billboard", new RenderStyle.Cube());
 
     @ApiStatus.Internal
     public static void bootstrap() {
+    }
+
+    @ApiStatus.Internal
+    public static void initRenderStyles() {
+        REGISTRY.entrySet().forEach(e -> e.getValue().init());
     }
 
     private static <T extends RenderStyle> RegistryObject<T> register(String name, T shape) {

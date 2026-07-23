@@ -238,7 +238,6 @@ public class ParticleEmitter {
         }
 
         Vec3 projectedView = camera.getPosition();
-        Vector3f renderOffset = new Vector3f();
         RenderType lastRenderType = null;
         VertexConsumer builder = null;
 
@@ -248,12 +247,6 @@ public class ParticleEmitter {
             particle.render(partialTicks);
 
             renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT, partialTicks);
-
-            Vector3dc renderPosition = renderData.getRenderPosition();
-            renderOffset.set(
-                    (float) (renderPosition.x() - projectedView.x()),
-                    (float) (renderPosition.y() - projectedView.y()),
-                    (float) (renderPosition.z() - projectedView.z()));
 
             RenderType renderType = renderData.getRenderType();
             if (!renderType.equals(lastRenderType)) {
@@ -265,9 +258,9 @@ public class ParticleEmitter {
                     builder = sprite.wrap(builder);
                 }
             }
-
-            renderStyle.render(matrixStack, particle, renderData, renderOffset, builder, 1, partialTicks);
         }
+        renderStyle.render(matrixStack, this.particles, camera, builder, 1, partialTicks);
+
         renderStyle.clear();
     }
 
