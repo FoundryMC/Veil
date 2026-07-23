@@ -7,6 +7,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.light.data.DirectionalLightData;
+import foundry.veil.api.client.render.light.renderer.DDALightRenderer;
 import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import foundry.veil.api.client.render.light.renderer.LightRenderer;
 import foundry.veil.api.client.render.light.renderer.LightTypeRenderer;
@@ -17,13 +18,14 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 @ApiStatus.Internal
-public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLightData> {
+public class DirectionalLightRenderer implements DDALightRenderer<DirectionalLightData> {
 
     private static final Vector3f DIRECTION = new Vector3f();
     private static final ResourceLocation RENDER_TYPE = Veil.veilPath("light/directional");
@@ -115,6 +117,12 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
                 lightDirection.upload();
             }
 
+            Uniform occluded = shader.getUniform("Occluded");
+            if (occluded != null) {
+                occluded.set(light.isOcclusionEnabled() ? 1f : 0f);
+                occluded.upload();
+            }
+
             this.vertexArray.draw();
         }
     }
@@ -133,6 +141,19 @@ public class DirectionalLightRenderer implements LightTypeRenderer<DirectionalLi
     public void free() {
         this.vertexArray.close();
         this.freed = true;
+    }
+
+    @Override
+    public void uploadVoxelGridUniforms(int voxelGridTexture, Vector3fc voxelGridOrigin) {
+        RenderType renderType = VeilRenderType.get(RENDER_TYPE);
+        if (renderType == null) {
+            return;
+        }
+
+        ResourceLocation veilShaderId = VeilRenderType.getShards(renderType).veilShaderId();
+        if (veilShaderId != null) {
+            DDALightRenderer.uploadVoxelGridUniforms(veilShaderId, voxelGridTexture, voxelGridOrigin);
+        }
     }
 
     private class LightHandle implements LightRenderHandle<DirectionalLightData> {
