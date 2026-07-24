@@ -24,15 +24,15 @@ out vec4 vertexColor;
 out vec4 lightmapColor;
 
 void main() {
-    vec4 WorldPosition = (ParticleMat * vec4(Position * Scale, 1.0) + vec4(VeilCamera.CameraBobOffset, 0));
-    gl_Position = ProjMat * ModelViewMat * WorldPosition;
+    vec4 WorldPosition = ModelViewMat * ParticleMat * vec4(Position * Scale, 1.0);
+    gl_Position = ProjMat * WorldPosition;
     vertexDistance = length(WorldPosition.xyz);
     vec2 uvs[4];
     uvs[0] = UV0Min,
     uvs[1] = vec2(UV0Min.x, UV0Max.y),
     uvs[2] = UV0Max,
     uvs[3] = vec2(UV0Max.x, UV0Min.y);
-    texCoord0 = uvs[gl_VertexID];
+    texCoord0 = uvs[gl_VertexID % 4];
     #ifdef VEIL_LIGHT_UV
     // #veil:light_uv
     vec2 texCoord2 = vec2(UV2 / 256.0);
