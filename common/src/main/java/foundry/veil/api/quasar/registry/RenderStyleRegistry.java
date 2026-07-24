@@ -29,6 +29,11 @@ public class RenderStyleRegistry {
         REGISTRY.entrySet().forEach(e -> e.getValue().init());
     }
 
+    @ApiStatus.Internal
+    public static void freeRenderStyles() {
+        REGISTRY.entrySet().forEach(e -> e.getValue().free());
+    }
+
     private static <T extends RenderStyle> RegistryObject<T> register(String name, T shape) {
         return PROVIDER.register(name, () -> shape);
     }

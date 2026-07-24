@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.NativeResource;
 
 import java.lang.Math;
 import java.nio.ByteBuffer;
@@ -32,7 +33,7 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
  *
  * @author Ocelot, BL
  */
-public abstract class RenderStyle {
+public abstract class RenderStyle implements NativeResource {
 
     public static final Codec<RenderStyle> CODEC = CodecUtil.registryOrLegacyCodec(RenderStyleRegistry.REGISTRY);
 
@@ -41,15 +42,18 @@ public abstract class RenderStyle {
     private final int bufferSize;
     protected int maxParticles;
 
-    public static final int MAX_PARTICLES = 400;
+    public static final int MIN_PARTICLES = 400;
 
     public RenderStyle(int bufferSize) {
         this.bufferSize = bufferSize;
         this.maxParticles = 0;
     }
 
+    /**
+     * Called after the Veil renderer is available, sets up anything necessary for rendering.
+     */
     public void init() {
-        if (bufferSize < 0) {
+        if (bufferSize <= 0) {
             return;
         }
 
@@ -107,19 +111,19 @@ public abstract class RenderStyle {
             } else {
                 this.maxParticles = (int) Math.max(Math.ceil(this.maxParticles / 2.0), visibleParticles.size() * 1.5);
             }
-            glBufferData(GL_ARRAY_BUFFER, (long) this.maxParticles * this.bufferSize, GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, (long) this.maxParticles * this.bufferSize, GL_STATIC_DRAW);
         }
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int pointer = 0;
             long offset = 0;
-            ByteBuffer dataBuffer = stack.malloc(Math.min(MAX_PARTICLES, visibleParticles.size()) * this.bufferSize);
+            ByteBuffer dataBuffer = stack.malloc(Math.min(MIN_PARTICLES, visibleParticles.size()) * this.bufferSize);
             for (QuasarParticle particle : visibleParticles) {
                 dataBuffer.position((pointer++) * this.bufferSize);
 
                 this.putBufferData(particle, camera, dataBuffer);
 
-                if (pointer >= MAX_PARTICLES) {
+                if (pointer >= MIN_PARTICLES) {
                     dataBuffer.rewind();
                     glBufferSubData(GL_ARRAY_BUFFER, offset, dataBuffer);
                     offset += dataBuffer.capacity();
@@ -158,15 +162,33 @@ public abstract class RenderStyle {
         return VeilRenderType.quasarParticle(RenderData.BLANK, additive);
     }
 
+    @Override
+    public void free() {
+        this.vertexArray.free();
+
+    }
+
+    /**
+     * @return The MeshData to use for each particle.
+     */
     protected abstract MeshData createMesh();
 
+    /**
+     * Set up the vertex attribute arrays to use for each particle.
+     * @param builder The builder associated with the VertexArray
+     */
     protected abstract void setupBufferState(VertexArrayBuilder builder);
 
+    /**
+     * Put information about each particle into the vertex attribute array.
+     * @param particle The particle being loaded
+     * @param camera The camera rendering the particles
+     * @param buffer The buffer of the current VertexArray
+     */
     protected abstract void putBufferData(QuasarParticle particle, Camera camera, ByteBuffer buffer);
 
     @ApiStatus.Internal
     public static final class Cube extends RenderStyle {
-
         private static final Vector3fc[] CUBE_POSITIONS = {
                 // TOP
                 new Vector3f(1, 1, -1), new Vector3f(1, 1, 1), new Vector3f(-1, 1, 1), new Vector3f(-1, 1, -1),
@@ -184,7 +206,8 @@ public abstract class RenderStyle {
                 new Vector3f(-1, -1, -1), new Vector3f(-1, 1, -1), new Vector3f(-1, 1, 1), new Vector3f(-1, -1, 1),
 
                 // RIGHT
-                new Vector3f(1, -1, 1), new Vector3f(1, 1, 1), new Vector3f(1, 1, -1), new Vector3f(1, -1, -1)};
+                new Vector3f(1, -1, 1), new Vector3f(1, 1, 1), new Vector3f(1, 1, -1), new Vector3f(1, -1, -1)
+        };
         private static final float[] CUBE_NORMALS = {0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 0};
 
         public Cube() {
@@ -209,15 +232,15 @@ public abstract class RenderStyle {
 
         @Override
         protected void setupBufferState(VertexArrayBuilder builder) {
-            builder.setVertexAttribute(2,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
-            builder.setVertexAttribute(3,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
-            builder.setVertexAttribute(4,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
-            builder.setVertexAttribute(5,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
-            builder.setVertexAttribute(6,  2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // Scale
-            builder.setVertexAttribute(7,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 17); // UV0 min
-            builder.setVertexAttribute(8,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // UV0 max
-            builder.setVertexAttribute(9,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21); // Color
-            builder.setVertexIAttribute(10, 2, 2, VertexArrayBuilder.DataType.SHORT, Float.BYTES * 25); // UV2 / Light
+            builder. setVertexAttribute(2,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
+            builder. setVertexAttribute(3,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
+            builder. setVertexAttribute(4,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
+            builder. setVertexAttribute(5,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
+            builder. setVertexAttribute(6,  2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // Scale
+            builder. setVertexAttribute(7,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 17); // UV0 min
+            builder. setVertexAttribute(8,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // UV0 max
+            builder. setVertexAttribute(9,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21); // Color
+            builder.setVertexIAttribute(10, 2, 2, VertexArrayBuilder.DataType.SHORT,                  Float.BYTES * 25); // UV2 / Light
         }
 
         @Override
@@ -248,10 +271,10 @@ public abstract class RenderStyle {
             float uMax = 1;
             float vMax = 1;
             if (spriteData != null) {
-                //uMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMin);
-                //uMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMax);
-                //vMin = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMin);
-                //vMax = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMax);
+                uMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMin);
+                uMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMax);
+                vMin = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMin);
+                vMax = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMax);
             }
             buffer.putFloat(uMin);
             buffer.putFloat(vMin);
@@ -276,65 +299,10 @@ public abstract class RenderStyle {
                 // plane from -1 to 1 on Y axis and -1 to 1 on X axis
                 new Vector3f(1, -1, 0), new Vector3f(1, 1, 0), new Vector3f(-1, 1, 0), new Vector3f(-1, -1, 0),
         };
-        private static final float[] PLANE_UVS = {0, 0, 0, 1, 1, 1, 1, 0};
-        private static final Vector3f POS = new Vector3f();
-        private static final Vector3f NORMAL = new Vector3f();
 
         public Billboard() {
             super(Float.BYTES * 25 + Short.BYTES * 2);
         }
-
-        //@Override
-        //public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
-        //    Matrix4f matrix4f = matrixStack.position();
-        //    Vector3fc rotation = renderData.getRenderRotation();
-//
-        //    Quaternionf faceCameraRotation = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
-        //    SpriteData spriteData = renderData.getSpriteData();
-//
-        //    int red = (int) (renderData.getRed() * 255.0F) & 0xFF;
-        //    int green = (int) (renderData.getGreen() * 255.0F) & 0xFF;
-        //    int blue = (int) (renderData.getBlue() * 255.0F) & 0xFF;
-        //    int alpha = (int) (renderData.getAlpha() * 255.0F) & 0xFF;
-//
-        //    NORMAL.set(0, 0, -1);
-        //    if (particle.getData().faceVelocity()) {
-        //        NORMAL.rotateX(rotation.x())
-        //                .rotateY(rotation.y())
-        //                .rotateZ(rotation.z());
-        //    }
-//
-        //    // turn quat into pitch and yaw
-        //    for (int j = 0; j < 4; j++) {
-        //        POS.set(PLANE_POSITIONS[j]);
-        //        if (particle.getData().velocityStretchFactor() > 0f) {
-        //            POS.set(POS.x * (1 + particle.getData().velocityStretchFactor()), POS.y, POS.z);
-        //        }
-        //        if (particle.getData().faceVelocity()) {
-        //            POS.rotateX(rotation.x())
-        //                    .rotateY(rotation.y())
-        //                    .rotateZ(rotation.z());
-        //        }
-//      //          vec = vec.xRot(lerpedPitch).yRot(lerpedYaw).zRot(lerpedRoll);
-        //        faceCameraRotation.transform(POS).mul((float) (renderData.getRenderRadius() * ageModifier)).add(renderOffset);
-//
-        //        float u = PLANE_UVS[j * 2];
-        //        float v = PLANE_UVS[j * 2 + 1];
-        //        if (spriteData != null) {
-        //            u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
-        //            v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
-        //        }
-//      //              if (particle.sprite != null) {
-//      //                  u1 = u;
-//      //                  v1 = v;
-//      //              }
-        //        builder.addVertex(matrix4f, POS.x, POS.y, POS.z);
-        //        builder.setUv(u, v);
-        //        builder.setColor(red, green, blue, alpha);
-        //        builder.setLight(renderData.getPackedLight());
-        //        builder.setNormal(NORMAL.x, NORMAL.y, NORMAL.z);
-        //    }
-        //}
 
         @Override
         protected MeshData createMesh() {
@@ -352,15 +320,15 @@ public abstract class RenderStyle {
 
         @Override
         protected void setupBufferState(VertexArrayBuilder builder) {
-            builder.setVertexAttribute(2,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
-            builder.setVertexAttribute(3,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
-            builder.setVertexAttribute(4,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
-            builder.setVertexAttribute(5,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
-            builder.setVertexAttribute(6,  2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // Scale
-            builder.setVertexAttribute(7,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 17); // UV0 min
-            builder.setVertexAttribute(8,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // UV0 max
-            builder.setVertexAttribute(9,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21); // Color
-            builder.setVertexIAttribute(10, 2, 2, VertexArrayBuilder.DataType.SHORT, Float.BYTES * 25); // UV2 / Light
+            builder. setVertexAttribute(2,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
+            builder. setVertexAttribute(3,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
+            builder. setVertexAttribute(4,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
+            builder. setVertexAttribute(5,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
+            builder. setVertexAttribute(6,  2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // Scale
+            builder. setVertexAttribute(7,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 17); // UV0 min
+            builder. setVertexAttribute(8,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // UV0 max
+            builder. setVertexAttribute(9,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21); // Color
+            builder.setVertexIAttribute(10, 2, 2, VertexArrayBuilder.DataType.SHORT,        Float.BYTES * 25); // UV2 / Light
         }
 
         @Override
