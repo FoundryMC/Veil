@@ -2,14 +2,13 @@
 #veil:buffer veil:camera VeilCamera
 
 layout(location = 0) in vec3 Position;
-//#ifdef VEIL_NORMAL
 layout(location = 1) in vec3 Normal;
-//#endif
 layout(location = 2) in mat4 ParticleMat;
-layout(location = 6) in vec2 UV0Min;
-layout(location = 7) in vec2 UV0Max;
-layout(location = 8) in vec4 Color;
-layout(location = 9) in ivec2 UV2;
+layout(location = 6) in float Scale;
+layout(location = 7) in vec2 UV0Min;
+layout(location = 8) in vec2 UV0Max;
+layout(location = 9) in vec4 Color;
+layout(location = 10) in ivec2 UV2;
 
 uniform sampler2D Sampler2;
 
@@ -25,8 +24,8 @@ out vec4 vertexColor;
 out vec4 lightmapColor;
 
 void main() {
-    vec4 WorldPosition = VeilCamera.ViewMat * vec4(Position, 1.0);
-    gl_Position = ProjMat * WorldPosition;
+    vec4 WorldPosition = (ParticleMat * vec4(Position * Scale, 1.0) + vec4(VeilCamera.CameraBobOffset, 0));
+    gl_Position = ProjMat * ModelViewMat * WorldPosition;
     vertexDistance = length(WorldPosition.xyz);
     vec2 uvs[4];
     uvs[0] = UV0Min,

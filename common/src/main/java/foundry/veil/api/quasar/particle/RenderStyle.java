@@ -11,7 +11,6 @@ import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
 import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import foundry.veil.api.util.CodecUtil;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.phys.Vec3;
@@ -55,10 +54,10 @@ public abstract class RenderStyle {
 
         this.vertexArray = VertexArray.create();
         this.vertexArray.upload(this.createMesh(), VertexArray.DrawUsage.STATIC);
-        this.instanceVBO = this.vertexArray.getOrCreateBuffer(0);
+        this.instanceVBO = this.vertexArray.getOrCreateBuffer(2);
 
         VertexArrayBuilder builder = this.vertexArray.editFormat();
-        builder.defineVertexBuffer(0, this.instanceVBO, 0, bufferSize, 1);
+        builder.defineVertexBuffer(2, this.instanceVBO, 0, bufferSize, 1);
         this.setupBufferState(builder);
     }
 
@@ -82,15 +81,12 @@ public abstract class RenderStyle {
     }
 
     /**
-     * Draws a single particle.
+     * Draws a list of particles using a batched VertexArray.
      *
-     * @param matrixStack  The current stack of matrix transformations
      * @param particles    A list of currently active particles
-     * @param renderOffset The offset from the camera to draw the particle at
-     * @param builder      The vertex consumer to draw into
-     * @param partialTicks The percentage from last tick to this tick
+     * @param camera       The camera to use to render the particles
      */
-    public void render(MatrixStack matrixStack, List<QuasarParticle> particles, Camera camera, VertexConsumer builder, double ageModifier, float partialTicks) {
+    public void render(List<QuasarParticle> particles, Camera camera) {
         if (particles.isEmpty()) return;
 
         RenderType renderType = this.getRenderType(particles.getFirst(), particles.getFirst().getRenderData());
@@ -184,48 +180,11 @@ public abstract class RenderStyle {
 
                 // RIGHT
                 new Vector3f(1, -1, 1), new Vector3f(1, 1, 1), new Vector3f(1, 1, -1), new Vector3f(1, -1, -1)};
-        private static final float[] CUBE_UVS = {0, 0, 0, 1, 1, 1, 1, 0};
         private static final float[] CUBE_NORMALS = {0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 0};
-        private static final Vector3f POS = new Vector3f();
 
         public Cube() {
-            super(Float.BYTES * 24 + Short.BYTES * 2);
+            super(Float.BYTES * 25 + Short.BYTES * 2);
         }
-
-        //@Override
-        //public void render(MatrixStack matrixStack, QuasarParticle particle, RenderData renderData, Vector3fc renderOffset, VertexConsumer builder, double ageModifier, float partialTicks) {
-            /*
-            for (int i = 0; i < 6; i++) {
-                for (int j = 0; j < 4; j++) {
-                    POS.set(CUBE_POSITIONS[i * 4 + j]);
-                    QuasarParticleData data = particle.getData();
-                    if (POS.z < 0 && data.velocityStretchFactor() != 0.0f) {
-                        POS.z *= 1 + data.velocityStretchFactor();
-                    }
-                    POS.rotateX(rotation.x())
-                            .rotateY(rotation.y())
-                            .rotateZ(rotation.z())
-                            .mul((float) (renderData.getRenderRadius() * ageModifier))
-                            .add(renderOffset);
-
-                    float u = CUBE_UVS[j * 2];
-                    float v = CUBE_UVS[j * 2 + 1];
-
-                    if (spriteData != null) {
-                        u = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), u);
-                        v = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), v);
-                    }
-
-                    builder.addVertex(matrix4f, POS.x, POS.y, POS.z);
-                    builder.setUv(u, v);
-                    builder.setColor(renderData.getRed(), renderData.getGreen(), renderData.getBlue(), renderData.getAlpha());
-                    builder.setLight(renderData.getPackedLight());
-                    builder.setNormal(CUBE_NORMALS[i * 3], CUBE_NORMALS[i * 3 + 1], CUBE_NORMALS[i * 3 + 2]);
-                }
-
-            }
-             */
-        //}
 
         @Override
         protected MeshData createMesh() {
@@ -245,14 +204,15 @@ public abstract class RenderStyle {
 
         @Override
         protected void setupBufferState(VertexArrayBuilder builder) {
-            builder.setVertexAttribute(2, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
-            builder.setVertexAttribute(3, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
-            builder.setVertexAttribute(4, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
-            builder.setVertexAttribute(5, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
-            builder.setVertexAttribute(6, 0, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // UV0 min
-            builder.setVertexAttribute(7, 0, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 18); // UV0 max
-            builder.setVertexAttribute(8, 0, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 20); // Color
-            builder.setVertexAttribute(9, 0, 2, VertexArrayBuilder.DataType.SHORT, false, Float.BYTES * 24); // UV2 / Light
+            builder.setVertexAttribute(2,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, 0               ); // Model Matrix[0]
+            builder.setVertexAttribute(3,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 4 ); // Model Matrix[1]
+            builder.setVertexAttribute(4,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8 ); // Model Matrix[2]
+            builder.setVertexAttribute(5,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 12); // Model Matrix[3]
+            builder.setVertexAttribute(6,  2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // Scale
+            builder.setVertexAttribute(7,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 17); // UV0 min
+            builder.setVertexAttribute(8,  2, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // UV0 max
+            builder.setVertexAttribute(9,  2, 4, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21); // Color
+            builder.setVertexAttribute(10, 2, 2, VertexArrayBuilder.DataType.SHORT, false, Float.BYTES * 25); // UV2 / Light
         }
 
         @Override
@@ -265,17 +225,18 @@ public abstract class RenderStyle {
             Vector3f renderOffset = new Vector3f();
             Vector3dc renderPosition = renderData.getRenderPosition();
             renderOffset.set(
-                    (float) (renderPosition.x()),
-                    (float) (renderPosition.y()),
-                    (float) (renderPosition.z()));
+                    (float) (renderPosition.x() - projectedView.x),
+                    (float) (renderPosition.y() - projectedView.y),
+                    (float) (renderPosition.z() - projectedView.z));
 
-            Matrix4f transformationMatrix = new Matrix4f()
-                    //.rotate(new Quaternionf().rotateLocalX(rotation.x()).rotateLocalY(rotation.y()).rotateLocalZ(rotation.z()))
-                    //.scale(renderData.getRenderRadius())
+            Matrix4f transformationMatrix = new Matrix4f().identity()
+                    .rotate(new Quaternionf().rotateLocalX(rotation.x()).rotateLocalY(rotation.y()).rotateLocalZ(rotation.z()))
                     .translate(renderOffset.x, renderOffset.y, renderOffset.z);
             transformationMatrix.get(buffer.position(), buffer);
 
             buffer.position(buffer.position() + Float.BYTES * 16);
+
+            buffer.putFloat(renderData.getRenderRadius());
 
             float uMin = 0;
             float vMin = 0;
@@ -284,8 +245,8 @@ public abstract class RenderStyle {
             if (spriteData != null) {
                 uMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMin);
                 uMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), uMax);
-                vMin = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), vMin);
-                vMax = spriteData.u(renderData.getRenderAge(), renderData.getAgePercent(), vMax);
+                vMin = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMin);
+                vMax = spriteData.v(renderData.getRenderAge(), renderData.getAgePercent(), vMax);
             }
             buffer.putFloat(uMin);
             buffer.putFloat(vMin);

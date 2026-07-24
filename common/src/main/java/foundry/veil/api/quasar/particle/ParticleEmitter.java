@@ -259,7 +259,7 @@ public class ParticleEmitter {
                 }
             }
         }
-        renderStyle.render(matrixStack, this.particles, camera, builder, 1, partialTicks);
+        renderStyle.render(this.particles, camera);
 
         renderStyle.clear();
     }
