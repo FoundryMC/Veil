@@ -31,7 +31,7 @@ Veil's light editor can be accessed under the "Renderer" menu. Upon clicking the
 To create a light in code, you first must create an instance of the desired light data. For this tutorial, we will be using `PointLightData`
 ```java
 /**
- * Create and remove a light.
+ * Create a light.
  */
 public static void createPointLight(Vector3d position, float radius) {
     PointLightData pointLightData = new PointLightData();
@@ -41,8 +41,12 @@ public static void createPointLight(Vector3d position, float radius) {
     // The handle returned by addLight can be used to modify the data of the light at runtime.
     LightRenderHandle<PointLightData> handle = VeilRenderSystem.renderer().getLightRenderer().addLight(pointLightData);
     handle.getLightData().setColor(Color.RED); // See [Colors](Colors)
-    
-    // The handle is also used to remove the light when necessary.
+}
+```
+
+To remove a light, you can simply call remove on the `LightRenderHandle`.
+```java
+public static void removeLight(LightRenderHandle<?> handle) {
     handle.free();
 }
 ```
