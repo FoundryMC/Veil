@@ -95,6 +95,9 @@ public class DirectionalLightData extends LightData implements EditorAttributePr
         return this;
     }
 
+    /**
+     * @since 4.4.0
+     */
     public DirectionalLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
         this.markDirty();

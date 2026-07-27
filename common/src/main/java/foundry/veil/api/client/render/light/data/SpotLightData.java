@@ -10,7 +10,6 @@ import imgui.ImGui;
 import net.minecraft.client.Camera;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
 
 import java.lang.Math;
@@ -19,7 +18,7 @@ import java.nio.ByteBuffer;
 /**
  * Represents a light emitting quad in the world.
  *
- * @since 2.0.0
+ * @since 4.4.0
  */
 public class SpotLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider {
 
@@ -47,16 +46,6 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
         this.occlusionEnabled = false;
     }
 
-    /**
-     * @deprecated No longer used
-     */
-    @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
-    @Deprecated
-    protected void updateMatrix() {
-        Quaternionfc orientation = this.getOrientation();
-        this.matrix.rotation(orientation).translate(this.position);
-    }
-
     @Override
     public LightTypeRegistry.LightType<?> getType() {
         return LightTypeRegistry.SPOT.get();
@@ -64,9 +53,8 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
 
     /**
      * @return The XYZ position of this light in the world
-     * @apiNote The return type will change to {@link Vector3dc} in 5.0.0. Use {@link #getPositionMutable()} to mutate this
      */
-    public Vector3d getPosition() {
+    public Vector3dc getPosition() {
         return this.position;
     }
 
@@ -74,7 +62,6 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
      * Allows the value to be safely modified.
      *
      * @return The XYZ position of this light in the world
-     * @since 4.3.0
      */
     public Vector3d getPositionMutable() {
         this.markDirty();
@@ -83,9 +70,8 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
 
     /**
      * @return The current orientation of the light
-     * @apiNote The return type will change to {@link Quaternionfc} in 5.0.0. Use {@link #getOrientationMutable()} to mutate this
      */
-    public Quaternionf getOrientation() {
+    public Quaternionfc getOrientation() {
         return this.orientation;
     }
 
@@ -93,15 +79,14 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
      * Allows the value to be safely modified.
      *
      * @return The current orientation of the light
-     * @since 4.3.0
      */
     public Quaternionf getOrientationMutable() {
+        this.markDirty();
         return this.orientation;
     }
 
     /**
      * @return The size of the light's surface
-     * @apiNote The return type will change to {@link Vector2fc} in 5.0.0.
      */
     public float getSize() {
         return this.size;
