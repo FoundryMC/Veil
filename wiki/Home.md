@@ -106,6 +106,7 @@ dependencies {
 - [Veil Events](Events)
 - [Flare (Data-driven Effects)](Flare)
 - [Custom Framebuffers](Framebuffer)
+- [Deferred Lights](Lights)
 - [Necromancer (Animations)](Necromancer)
 - [Post-Processing](PostProcessing)
 - [Quasar (Particles)](Quasar)
