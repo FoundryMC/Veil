@@ -17,6 +17,7 @@ public final class VeilFramebuffers {
     public static final ResourceLocation FIRST_PERSON = buffer("first_person");
     public static final ResourceLocation BLOOM = buffer("bloom");
     public static final ResourceLocation LIGHT = buffer("light");
+    public static final ResourceLocation LIGHT_INSCATTERING = buffer("light_inscattering");
     public static final ResourceLocation POST = buffer("post");
 
     public static final ResourceLocation TRANSLUCENT_TARGET = transparency("translucent");

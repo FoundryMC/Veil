@@ -7,13 +7,16 @@ layout (location = 6) in vec2 Size;
 layout (location = 7) in float NormalizedAngle;
 layout (location = 8) in float Distance;
 layout (location = 9) in float Occluded;
+layout (location = 10) in float Inscattering;
 
 out mat4 lightMat;
+out mat4 invLightMat;
 out vec3 lightColor;
 out vec2 size;
 out float maxAngle;
 out float maxDistance;
 out float occluded;
+out float inscattering;
 
 void main() {
     vec3 vertexPos = Position;
@@ -32,9 +35,11 @@ void main() {
     gl_Position = VeilCamera.ProjMat * VeilCamera.ViewMat * vec4(vertexPos - VeilCamera.CameraPosition, 1.0);
 
     lightMat = LightMatrix;
+    invLightMat = inverse(LightMatrix);
     lightColor = Color;
     size = Size;
     maxAngle = Angle;
     maxDistance = Distance;
     occluded = Occluded;
+    inscattering = Inscattering;
 }

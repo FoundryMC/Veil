@@ -1,14 +1,23 @@
 package foundry.veil.api.client.render.light.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.*;
+import foundry.veil.Veil;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.MatrixStack;
+import foundry.veil.api.client.render.VeilRenderBridge;
+import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.InstancedLightData;
+import foundry.veil.api.client.render.light.LightGuideProvider;
 import foundry.veil.api.client.render.light.data.LightData;
 import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
+import foundry.veil.impl.client.editor.LightInspector;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fStack;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
@@ -24,7 +33,7 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
  * @param <T> The type of lights to render
  * @author Ocelot
  */
-public abstract class InstancedLightRenderer<T extends LightData & InstancedLightData> implements LightTypeRenderer<T> {
+public abstract class InstancedLightRenderer<T extends LightData & InstancedLightData> implements InscatteringLightRenderer<T> {
 
     private static final int MAX_UPLOADS = 400;
 
@@ -78,6 +87,14 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
      * @return The render type to use
      */
     protected abstract @Nullable RenderType getRenderType(List<? extends LightRenderHandle<T>> lights);
+
+    /**
+     * Calculates the render type to use for the specified lights' in-scattering.
+     *
+     * @param lights All lights in the order they are in the instanced buffer
+     * @return The render type to use for in-scattering
+     */
+    protected abstract @Nullable RenderType getInscatteringRenderType(List<? extends LightRenderHandle<T>> lights);
 
     private void updateAllLights() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -162,17 +179,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         }
     }
 
-    @Override
-    public void renderLights(LightRenderer lightRenderer) {
-        if (this.visibleLights.isEmpty()) {
-            return;
-        }
-
-        RenderType renderType = this.getRenderType(this.visibleLights);
-        if (renderType == null) {
-            return;
-        }
-
+    private void bindRenderQuad() {
         RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
         boolean resized = false;
@@ -197,6 +204,69 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         }
 
         this.vertexArray.bind();
+    }
+
+    @Override
+    public void renderLights(LightRenderer lightRenderer) {
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        RenderType renderType = this.getRenderType(this.visibleLights);
+        if (renderType == null) {
+            return;
+        }
+
+        this.bindRenderQuad();
+        this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
+
+        // Render light guides
+        if (Veil.IMGUIMC) {
+            RenderSystem.setProjectionMatrix(VeilRenderSystem.renderer().getCameraMatrices().getProjectionMatrix(), VertexSorting.DISTANCE_TO_ORIGIN);
+            Matrix4fStack stack = RenderSystem.getModelViewStack();
+            stack.pushMatrix();
+            stack.set(VeilRenderSystem.renderer().getCameraMatrices().getViewMatrix());
+            RenderSystem.applyModelViewMatrix();
+            Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+            MatrixStack matrixStack = VeilRenderBridge.create(new PoseStack());
+            matrixStack.matrixPush();
+            matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
+
+            for (LightHandle handle : this.lights) {
+                if (VeilRenderSystem.renderer().getEditorManager().isVisible(i -> i instanceof LightInspector) && handle.getLightData() instanceof LightGuideProvider) {
+                    RenderType debugRenderType = RenderType.debugLineStrip(1);
+                    ByteBufferBuilder bytebufferbuilder = new ByteBufferBuilder(debugRenderType.bufferSize());
+                    BufferBuilder builder = new BufferBuilder(bytebufferbuilder, debugRenderType.mode(), debugRenderType.format());
+                    ((LightGuideProvider) handle.getLightData()).renderLightGuide(matrixStack, builder);
+                    MeshData meshData = builder.build();
+                    if (meshData != null) {
+                        if (renderType.sortOnUpload()) {
+                            ByteBufferBuilder sortBufferBuilder = new ByteBufferBuilder(renderType.bufferSize());
+                            meshData.sortQuads(sortBufferBuilder, RenderSystem.getVertexSorting());
+                        }
+
+                        debugRenderType.draw(meshData);
+                    }
+                }
+            }
+            matrixStack.matrixPop();
+            stack.popMatrix();
+            RenderSystem.applyModelViewMatrix();
+        }
+    }
+
+    @Override
+    public void renderLightInscattering(LightRenderer lightRenderer) {
+        if (this.visibleLights.isEmpty()) {
+            return;
+        }
+
+        RenderType renderType = this.getInscatteringRenderType(this.visibleLights);
+        if (renderType == null) {
+            return;
+        }
+
+        this.bindRenderQuad();
         this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
     }
 

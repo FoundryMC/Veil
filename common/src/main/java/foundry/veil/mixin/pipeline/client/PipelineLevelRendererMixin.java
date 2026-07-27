@@ -113,7 +113,7 @@ public abstract class PipelineLevelRendererMixin implements LevelRendererExtensi
     @Inject(method = "renderLevel", at = @At("TAIL"))
     public void blit(CallbackInfo ci, @Local ProfilerFiller profiler) {
         if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
-            if (VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum())) {
+            if (VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), true)) {
                 VeilRenderSystem.compositeLights(profiler);
             } else {
                 AdvancedFbo.unbind();

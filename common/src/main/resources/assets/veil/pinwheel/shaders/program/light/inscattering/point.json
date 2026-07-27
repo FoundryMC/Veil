@@ -1,0 +1,10 @@
+{
+  "vertex": "veil:light/point",
+  "fragment": "veil:light/inscattering/point",
+  "textures": {
+    "DepthSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main:depth"
+    }
+  }
+}

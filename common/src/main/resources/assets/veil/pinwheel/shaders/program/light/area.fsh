@@ -5,11 +5,13 @@
 #include veil:voxel_shadow
 
 in mat4 lightMat;
+in mat4 invLightMat;
 in vec3 lightColor;
 in vec2 size;
 in float maxAngle;
 in float maxDistance;
 in float occluded;
+in float inscattering;
 
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
@@ -29,9 +31,10 @@ float sacos(float x)
 }
 
 struct AreaLightResult { vec3 position; float angle; };
-AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 planeSize) {
+AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, mat4 invPlaneMatrix, vec2 planeSize) {
     // no idea why i need to do this
     planeMatrix[3].xyz *= -1.0;
+    invPlaneMatrix[3].xyz *= -1.0;
     // transform the point to the plane's local space
     vec3 localSpacePoint = (planeMatrix * vec4(point, 1.0)).xyz;
     // clamp position
@@ -42,7 +45,7 @@ AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, vec2 p
     float angle = sacos(dot(direction, vec3(0.0, 0.0, 1.0)));
 
     // transform back to global space
-    return AreaLightResult((inverse(planeMatrix) * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
+    return AreaLightResult((invPlaneMatrix * vec4(localSpacePointOnPlane, 1.0)).xyz, angle);
 }
 
 void main() {
@@ -52,13 +55,12 @@ void main() {
     if (albedoColor.a == 0) {
         discard;
     }
-
     vec3 normalVS = texture(NormalSampler, screenUv).xyz;
     float depth = texture(DepthSampler, screenUv).r;
     vec3 pos = screenToWorldSpace(screenUv, depth).xyz;
 
     // lighting calculation
-    AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(pos, lightMat, size);
+    AreaLightResult areaLightInfo = closestPointOnPlaneAndAngle(pos, lightMat, invLightMat, size);
     vec3 lightPos = areaLightInfo.position;
     float angle = areaLightInfo.angle;
 
