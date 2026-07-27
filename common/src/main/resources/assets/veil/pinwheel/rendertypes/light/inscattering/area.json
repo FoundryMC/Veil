@@ -8,7 +8,7 @@
   "layers": [
     {
       "type": "veil:shader",
-      "name": "veil:light/area"
+      "name": "veil:light/inscattering/area"
     },
     {
       "type": "minecraft:write_mask",
@@ -16,7 +16,7 @@
     },
     {
       "type": "minecraft:depth_test",
-      "mode": "greater"
+      "mode": "notequal"
     },
     {
       "type": "minecraft:transparency",

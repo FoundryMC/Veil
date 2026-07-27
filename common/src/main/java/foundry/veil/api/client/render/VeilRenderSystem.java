@@ -1278,10 +1278,11 @@ public final class VeilRenderSystem {
     }
 
     @ApiStatus.Internal
-    public static boolean drawLights(ProfilerFiller profiler, CullFrustum cullFrustum) {
+    public static boolean drawLights(ProfilerFiller profiler, CullFrustum cullFrustum, boolean renderInscattering) {
         FramebufferManager framebufferManager = renderer.getFramebufferManager();
         AdvancedFbo lightFbo = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
-        if (lightFbo == null) {
+        AdvancedFbo lightInscatteringFbo = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT_INSCATTERING);
+        if (lightFbo == null || lightInscatteringFbo == null) {
             AdvancedFbo.unbind();
             return false;
         }
@@ -1302,7 +1303,7 @@ public final class VeilRenderSystem {
 
         LightRenderer lightRenderer = renderer.getLightRenderer();
         profiler.push("draw_lights");
-        boolean rendered = lightRenderer.render(cullFrustum, lightFbo);
+        boolean rendered = lightRenderer.render(cullFrustum, lightFbo, lightInscatteringFbo, renderInscattering);
         profiler.pop();
 
         renderProfiler.pop();
