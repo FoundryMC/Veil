@@ -67,6 +67,7 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
 
     /**
      * @return The strength of the light's in-scattering effect.
+     * @since 4.4.0
      */
     public float getInscatteringStrength() {
         return this.inscattering;
@@ -96,6 +97,9 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         return this;
     }
 
+    /**
+     * @since 4.4.0
+     */
     public PointLightData setInscatteringStrength(float inscattering) {
         this.inscattering = inscattering;
         this.markDirty();
@@ -215,19 +219,19 @@ public class PointLightData extends LightData implements IndirectLightData, DDAL
         Matrix4f pose = stack.position();
 
         for (int i = -8; i < 25; i++) {
-            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, 0, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+            consumer.addVertex(pose, (float) Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, 0, (float) Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         }
 
         for (int i = -8; i < 25; i++) {
-            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+            consumer.addVertex(pose, (float) Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float) Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         }
 
         for (int i = 25; i >= 16; i--) {
-            consumer.addVertex(pose, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+            consumer.addVertex(pose, (float) Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float) Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         }
 
         for (int i = -8; i < 25; i++) {
-            consumer.addVertex(pose, 0, (float)Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float)Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+            consumer.addVertex(pose, 0, (float) Math.sin(i / 32.0f * Mth.TWO_PI) * this.radius, (float) Math.cos(i / 32.0f * Mth.TWO_PI) * this.radius).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
         }
 
         stack.matrixPop();

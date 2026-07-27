@@ -6,6 +6,7 @@ import foundry.veil.api.client.render.light.data.LightData;
  * Renders in-scattering for deferred lights.
  *
  * @author Neddslayer
+ * @since 4.4.0
  */
 public interface InscatteringLightRenderer<T extends LightData> extends LightTypeRenderer<T> {
 
@@ -18,5 +19,4 @@ public interface InscatteringLightRenderer<T extends LightData> extends LightTyp
      * @param lightRenderer The light renderer instance
      */
     void renderLightInscattering(LightRenderer lightRenderer);
-
 }

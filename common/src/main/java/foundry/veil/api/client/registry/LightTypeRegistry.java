@@ -44,6 +44,9 @@ public final class LightTypeRegistry {
         return new InstancedPointLightRenderer();
     }, (level, camera) -> new PointLightData().setTo(camera).setRadius(15.0F));
     public static final Supplier<LightType<AreaLightData>> AREA = register("area", AreaLightRenderer::new, (level, camera) -> new AreaLightData().setDistance(15.0F).setTo(camera));
+    /**
+     * @since 4.4.0
+     */
     public static final Supplier<LightType<SpotLightData>> SPOT = register("spot", SpotLightRenderer::new, (level, camera) -> new SpotLightData().setDistance(15.0F).setTo(camera));
 
     private LightTypeRegistry() {

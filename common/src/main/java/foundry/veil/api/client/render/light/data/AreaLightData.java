@@ -101,6 +101,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
      * @since 4.3.0
      */
     public Quaternionf getOrientationMutable() {
+        this.markDirty();
         return this.orientation;
     }
 
@@ -143,6 +144,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
     /**
      * @return The strength of the light's in-scattering effect.
+     * @since 4.4.0
      */
     public float getInscatteringStrength() {
         return this.inscattering;
@@ -188,6 +190,9 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         return this;
     }
 
+    /**
+     * @since 4.4.0
+     */
     public AreaLightData setInscatteringStrength(float inscattering) {
         this.inscattering = inscattering;
         this.markDirty();
