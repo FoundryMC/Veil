@@ -179,7 +179,7 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
         }
     }
 
-    private void bindRenderQuad() {
+    private void updateInstancedData() {
         RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
 
         boolean resized = false;
@@ -217,7 +217,9 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
             return;
         }
 
-        this.bindRenderQuad();
+        RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
+        this.updateInstancedData();
+        this.vertexArray.bind();
         this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
 
         // Render light guides
@@ -266,7 +268,8 @@ public abstract class InstancedLightRenderer<T extends LightData & InstancedLigh
             return;
         }
 
-        this.bindRenderQuad();
+        RenderSystem.glBindBuffer(GL_ARRAY_BUFFER, this.instancedVbo);
+        this.vertexArray.bind();
         this.vertexArray.drawInstancedWithRenderType(renderType, this.visibleLights.size());
     }
 

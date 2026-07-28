@@ -63,10 +63,7 @@ public record ProgramDefinition(@Nullable ResourceLocation vertex,
             if (definition != null) {
                 macros.put(name.toUpperCase(Locale.ROOT), definition);
             } else {
-                String definitionDefault = this.definitionDefaults.get(name);
-                if (definitionDefault != null) {
-                    macros.put(name.toUpperCase(Locale.ROOT), definitionDefault);
-                }
+                macros.put(name.toUpperCase(Locale.ROOT), this.definitionDefaults.getOrDefault(name, "1"));
             }
 
             dependencies.add(name);

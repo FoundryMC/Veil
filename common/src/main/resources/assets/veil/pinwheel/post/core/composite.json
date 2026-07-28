@@ -2,8 +2,80 @@
   "stages": [
     {
       "type": "veil:blit",
+      "shader": "veil:core/blur",
+      "in": "veil:light_inscattering",
+      "out": "layer1",
+      "clear": false
+    },
+    {
+      "type": "veil:blit",
+      "shader": "veil:core/unblur",
+      "in": "layer1",
+      "out": "layer2",
+      "clear": false
+    },
+    {
+      "type": "veil:blit",
+      "shader": "veil:core/unblur",
+      "in": "layer2",
+      "out": "layer3",
+      "clear": false
+    },
+    {
+      "type": "veil:blit",
+      "shader": "veil:core/unblur",
+      "in": "layer3",
+      "out": "layer4",
+      "clear": false
+    },
+    {
+      "type": "veil:blit",
       "shader": "veil:core/composite",
       "in": "minecraft:main"
     }
-  ]
+  ],
+  "framebuffers": {
+    "layer1": {
+      "width": "q.screen_width / 8.0",
+      "height": "q.screen_height / 8.0",
+      "depth": false,
+      "filter": {
+        "blur": true
+      },
+      "format": "RGB16F"
+    },
+    "layer2": {
+      "width": "q.screen_width / 4.0",
+      "height": "q.screen_height / 4.0",
+      "depth": false,
+      "filter": {
+        "blur": true
+      },
+      "format": "RGB16F"
+    },
+    "layer3": {
+      "width": "q.screen_width / 2.0",
+      "height": "q.screen_height / 2.0",
+      "depth": false,
+      "filter": {
+        "blur": true
+      },
+      "format": "RGB16F"
+    },
+    "layer4": {
+      "width": "q.screen_width",
+      "height": "q.screen_height",
+      "depth": false,
+      "filter": {
+        "blur": true
+      },
+      "format": "RGB16F"
+    }
+  },
+  "textures": {
+    "UpscaledLightInscatteringSampler": {
+      "type": "framebuffer",
+      "name": "layer4"
+    }
+  }
 }
