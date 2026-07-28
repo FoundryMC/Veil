@@ -29,7 +29,7 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> imp
     private static final ResourceLocation INSCATTERING_RENDER_TYPE = Veil.veilPath("light/inscattering/area");
 
     public AreaLightRenderer() {
-        super(Float.BYTES * 24 + 2);
+        super(Float.BYTES * 24 + 4);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class AreaLightRenderer extends InstancedLightRenderer<AreaLightData> imp
         builder.setVertexAttribute(5, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // color
         builder.setVertexAttribute(6, VertexArray.INSTANCE_BUFFER, 2, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // size
         builder.setVertexAttribute(7, VertexArray.INSTANCE_BUFFER, 1, VertexArrayBuilder.DataType.UNSIGNED_SHORT, true, Float.BYTES * 21); // angle
-        builder.setVertexAttribute(8, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2); // distance/occlusion/in-scatting
+        builder.setVertexAttribute(8, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 4); // distance/occlusion/in-scatting
     }
 
     @Override

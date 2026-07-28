@@ -242,6 +242,7 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         buffer.position(buffer.position() + Float.BYTES * 2);
 
         buffer.putShort((short) Mth.clamp((int) (this.angle * MAX_ANGLE_SIZE), 0, 65535));
+        buffer.position(buffer.position() + 2); // Padding
         buffer.putFloat(this.distance);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
         buffer.putFloat(this.inscattering);
