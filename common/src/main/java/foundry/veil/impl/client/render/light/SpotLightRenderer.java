@@ -29,7 +29,7 @@ public class SpotLightRenderer extends InstancedLightRenderer<SpotLightData> imp
     private static final ResourceLocation INSCATTERING_RENDER_TYPE = Veil.veilPath("light/inscattering/spot");
 
     public SpotLightRenderer() {
-        super(Float.BYTES * 22 + 2);
+        super(Float.BYTES * 23 + 4);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SpotLightRenderer extends InstancedLightRenderer<SpotLightData> imp
         builder.setVertexAttribute(5, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 16); // color
         builder.setVertexAttribute(6, VertexArray.INSTANCE_BUFFER, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 19); // size
         builder.setVertexAttribute(7, VertexArray.INSTANCE_BUFFER, 1, VertexArrayBuilder.DataType.UNSIGNED_SHORT, true, Float.BYTES * 20); // angle
-        builder.setVertexAttribute(8, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 21 + 2); // distance/occlusion/in-scatting
+        builder.setVertexAttribute(8, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 20 + 4); // distance/occlusion/in-scatting
     }
 
     @Override
