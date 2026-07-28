@@ -9,6 +9,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.light.data.PointLightData;
 import foundry.veil.api.client.render.light.renderer.*;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
+import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -37,11 +38,9 @@ public class InstancedPointLightRenderer extends InstancedLightRenderer<PointLig
 
     @Override
     protected void setupBufferState(VertexArrayBuilder builder) {
-        builder.setVertexAttribute(1, 2, 3, VertexArrayBuilder.DataType.FLOAT, false, 0); // LightPosition
-        builder.setVertexAttribute(2, 2, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 3); // Color
-        builder.setVertexAttribute(3, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 6); // Distance
-        builder.setVertexAttribute(4, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 7); // Occluded
-        builder.setVertexAttribute(5, 2, 1, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 8); // In-scattering
+        builder.setVertexAttribute(1, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, 0); // LightPosition
+        builder.setVertexAttribute(2, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 3); // Color
+        builder.setVertexAttribute(3, VertexArray.INSTANCE_BUFFER, 3, VertexArrayBuilder.DataType.FLOAT, false, Float.BYTES * 6); // distance/occlusion/in-scatting
     }
 
     @Override
