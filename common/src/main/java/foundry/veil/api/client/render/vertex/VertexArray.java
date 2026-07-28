@@ -50,6 +50,10 @@ public abstract class VertexArray implements NativeResource {
 
     public static final int VERTEX_BUFFER = 0;
     public static final int ELEMENT_ARRAY_BUFFER = 1;
+    /**
+     * @since 4.4.0
+     */
+    public static final int INSTANCE_BUFFER = 2;
 
     private static VertexArrayType vertexArrayType;
 

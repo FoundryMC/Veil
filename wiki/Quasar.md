@@ -65,7 +65,7 @@ Syntax (note that all fields are required, none are optional):
   "random_initial_direction": true,
   // Currently unused. Use the init_random_rotation module.
   "random_initial_rotation": false,
-  // The inital direction of each particle, potentially modified by random_direction.
+  // The initial direction of each particle, potentially modified by random_direction.
   "initial_direction": [
     1.0,
     1.0,
@@ -141,7 +141,7 @@ We'll talk more about the individual types of modules later in this article.
 - **Folder Path (Render Modules): `modules/particle_data`**
 - **[Particle Data Codec](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/QuasarParticleData.java#L52)**
 
-Defines the properties attached to each particles. Includes any modules attached to the particle, how it is rendered, and various other properties. 
+Defines the properties attached to each particle. Includes any modules attached to the particle, how it is rendered, and various other properties. 
 
 Syntax:
 ```json5
@@ -150,24 +150,8 @@ Syntax:
   // The render style can be either "CUBE" or "BILLBOARD".
   // "BILLBOARD" is meant for particles with textures that always face the player, whereas "CUBE" displays colored, textureless cubes.
   "render_type": "CUBE",
-  // Init modules run once on a particle when it is spawned.
-  "init_modules": [
-    ...
-  ],
-  // Update modules run every tick while the particle is alive.
-  "update_modules": [
-    ...
-  ],
-  // Collision modules run once when the particle collides with something.
-  "collision_modules": [
-    ...
-  ],
-  // Force modules also run every tick while the particle is alive and apply different changes to velocity based on module.
-  "forces": [
-    ...
-  ],
-  // Render modules run every frame and can change how the particle appears.
-  "render_modules": [
+  // A list of modules that can be used to change the behavior of each particle.
+  "modules": [
     ...
   ],
   // Holds all information related to the sprite
@@ -216,8 +200,10 @@ When you don't know what fields an entry may have, search it up on [Veil's Githu
 
 ### Particle Editor
 
-Not currently finished! Please return at a later point for documentation and use a text editor
-of your choice for now.
+The particle editor is available in version 4.3.0 or later, and provides a GUI to assist creation and realtime inspecting and editing of particle emitters.
+To use the particle editor, ensure that Veil is >=4.3.0 and that ImGuiMC is installed. Press the editor key (F6 by default) to open the Veil menu; the particle editor will be under the "Resources" tab.
+
+The rest of this tutorial does not use the particle editor; it deals with raw JSON files using a text editor.
 
 ### Resource Browser
 
@@ -324,8 +310,8 @@ spawned and can be used to add different modules based on the module data. For e
 which, depending if any properties of the light vary over time, either adds a [`StaticLightModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/render/StaticLightModule.java) or a [`DynamicLightModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/render/DynamicLightModule.java) to
 the particle to save calculations.
 
-The module itself consists of a class that implements the [`ParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ParticleModule.java) interface for the particle's lifecycle. Notably, a module that only implements `ParticleModule` will not be able to recieve other lifecycle events.
-Instead, implement one of [`InitParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/InitParticleModule.java), [`ForceParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ForceParticleModule.java), [`UpdateParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/UpdateParticleModule.java), [`CollisionParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/CollisionParticleModule.java), [`RenderParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/RenderParticleModule.java) to recieve lifecycle events of the corresponding type.
+The module itself consists of a class that implements the [`ParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ParticleModule.java) interface for the particle's lifecycle. Notably, a module that only implements `ParticleModule` will not be able to receive other lifecycle events.
+Instead, implement one of [`InitParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/InitParticleModule.java), [`ForceParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/ForceParticleModule.java), [`UpdateParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/UpdateParticleModule.java), [`CollisionParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/CollisionParticleModule.java), [`RenderParticleModule`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/emitters/module/RenderParticleModule.java) to receive lifecycle events of the corresponding type.
 
 Each Module Type has to be registered in the [`ParticleModuleTypeRegistry`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/quasar/data/ParticleModuleTypeRegistry.java)
 so that Veil knows how to read it from the Module Data files.
@@ -455,7 +441,7 @@ This makes the particle appear as a cube rather than a billboarded sprite. It wi
 // modules/particle_data/burst_data.json
 {
   ...
-  "init_modules": [
+  "modules": [
     {
       "module": "light",
       "gradient": {
@@ -463,26 +449,18 @@ This makes the particle appear as a cube rather than a billboarded sprite. It wi
       },
       "brightness": "3 - q.agePercent * 3",
       "radius": 5
-    }
-  ],
-  "forces": [
+    },
     {
       "module": "drag",
       "strength": 0.9
-    }
-  ],
-  "update_modules": [
+    },
     {
       "module": "tick_size",
       "size": "0.1 - q.agePercent * 0.1"
-    }
-  ],
-  "collision_modules": [
+    },
     {
       "module": "die_on_collision"
-    }
-  ],
-  "render_modules": [
+    },
     {
       "module": "color",
       "gradient": {
@@ -490,7 +468,7 @@ This makes the particle appear as a cube rather than a billboarded sprite. It wi
           {
             "percent": 0,
             "color": "0xFF0000"
-          }
+          },
           {
             "percent": 1,
             "color": "0x0000FF"
@@ -500,7 +478,7 @@ This makes the particle appear as a cube rather than a billboarded sprite. It wi
           {
             "percent": 0,
             "alpha": 1
-          }
+          },
           {
             "percent": 1,
             "alpha": 0
@@ -512,7 +490,7 @@ This makes the particle appear as a cube rather than a billboarded sprite. It wi
   ]
 }
 ```
-Let's go through these modules one by one. For brevity, I've defined only one module for each section. For our init module, we have the `light` module. This adds a light of a given brightness and radius with a color. Both brightness and radius are Molang expressions, which allow us to change them over time. I've used a Molang expression for brightness, which makes the brightness fade from 3 to 0 over the span of the particle's lifetime. The rest is fixed: the radius will be 5, and the color will be pure white.
+Let's go through these modules one by one. For brevity, I've defined only one module of each type. For our init module (the first one in the list), we have the `light` module. This adds a light of a given brightness and radius with a color. Both brightness and radius are Molang expressions, which allow us to change them over time. I've used a Molang expression for brightness, which makes the brightness fade from 3 to 0 over the span of the particle's lifetime. The rest is fixed: the radius will be 5, and the color will be pure white.
 
 Next, our force module. The one we have is the `drag` module, which continually slows down the particle over time. For the `drag` module, a lower `strength` property means that the particle slows down quicker: think of it as though it is multiplying the particle's velocity by the `strength` property. Our update module changes the size of the particle based on the lifetime. In our Molang environment, `q.agePercent` resolves to a value between 0 and 1 that is representative of how long the particle is along its lifespan. Here we use this to interpolate the size from 0.1 to 0. The collision module has no properties and requires little explanation; it just immediately kills the particle on contact with the world.
 

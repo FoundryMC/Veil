@@ -40,6 +40,7 @@ public class VeilClient {
         });
         VeilEventPlatform.INSTANCE.onVeilRendererAvailable(renderer -> {
             RESOURCE_MANAGER.addVeilLoaders(renderer);
+            RenderStyleRegistry.initRenderStyles();
 //            glEnable(GL_DEPTH_CLAMP); // TODO add config option
         });
 

@@ -29,6 +29,7 @@ import foundry.veil.api.client.render.texture.VeilPreloadedTexture;
 import foundry.veil.api.compat.SodiumCompat;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.api.flare.modifier.RandomnessController;
+import foundry.veil.api.quasar.registry.RenderStyleRegistry;
 import foundry.veil.ext.LevelRendererExtension;
 import foundry.veil.ext.TextureManagerExtension;
 import foundry.veil.ext.VertexBufferExtension;
@@ -1251,6 +1252,7 @@ public final class VeilRenderSystem {
         glDeleteVertexArrays(screenQuadVao);
         MemoryUtil.memFree(emptySamplers);
         SHADER_BUFFER_CACHE.free();
+        RenderStyleRegistry.freeRenderStyles();
     }
 
     @ApiStatus.Internal

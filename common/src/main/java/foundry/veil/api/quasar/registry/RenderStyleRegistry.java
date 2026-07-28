@@ -24,6 +24,16 @@ public class RenderStyleRegistry {
     public static void bootstrap() {
     }
 
+    @ApiStatus.Internal
+    public static void initRenderStyles() {
+        REGISTRY.entrySet().forEach(e -> e.getValue().init());
+    }
+
+    @ApiStatus.Internal
+    public static void freeRenderStyles() {
+        REGISTRY.entrySet().forEach(e -> e.getValue().free());
+    }
+
     private static <T extends RenderStyle> RegistryObject<T> register(String name, T shape) {
         return PROVIDER.register(name, () -> shape);
     }

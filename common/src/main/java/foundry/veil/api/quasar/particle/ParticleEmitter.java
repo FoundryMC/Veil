@@ -1,6 +1,5 @@
 package foundry.veil.api.quasar.particle;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.Veil;
 import foundry.veil.api.TickTaskScheduler;
 import foundry.veil.api.client.render.MatrixStack;
@@ -12,8 +11,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -238,9 +235,6 @@ public class ParticleEmitter {
         }
 
         Vec3 projectedView = camera.getPosition();
-        Vector3f renderOffset = new Vector3f();
-        RenderType lastRenderType = null;
-        VertexConsumer builder = null;
 
         for (QuasarParticle particle : this.particles) {
             RenderData renderData = particle.getRenderData();
@@ -248,26 +242,9 @@ public class ParticleEmitter {
             particle.render(partialTicks);
 
             renderData.renderTrails(matrixStack, bufferSource, projectedView, LightTexture.FULL_BRIGHT, partialTicks);
-
-            Vector3dc renderPosition = renderData.getRenderPosition();
-            renderOffset.set(
-                    (float) (renderPosition.x() - projectedView.x()),
-                    (float) (renderPosition.y() - projectedView.y()),
-                    (float) (renderPosition.z() - projectedView.z()));
-
-            RenderType renderType = renderData.getRenderType();
-            if (!renderType.equals(lastRenderType)) {
-                lastRenderType = renderType;
-                builder = bufferSource.getBuffer(renderType);
-
-                TextureAtlasSprite sprite = renderData.getAtlasSprite();
-                if (sprite != null) {
-                    builder = sprite.wrap(builder);
-                }
-            }
-
-            renderStyle.render(matrixStack, particle, renderData, renderOffset, builder, 1, partialTicks);
         }
+        renderStyle.render(this.particles, camera);
+
         renderStyle.clear();
     }
 
