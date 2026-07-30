@@ -1,11 +1,14 @@
 package foundry.veil.api.client.render.light.data;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.color.Colorc;
 import foundry.veil.api.client.editor.EditorAttributeProvider;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.CullFrustum;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.light.DDALightData;
 import foundry.veil.api.client.render.light.InstancedLightData;
+import foundry.veil.api.client.render.light.LightGuideProvider;
 import imgui.ImGui;
 import net.minecraft.client.Camera;
 import net.minecraft.util.Mth;
@@ -20,7 +23,7 @@ import java.nio.ByteBuffer;
  *
  * @since 4.4.0
  */
-public class SpotLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider {
+public class SpotLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider, LightGuideProvider {
 
     private static final float MAX_ANGLE_SIZE = (float) (65535.0 / 2.0 / Math.PI);
 
@@ -33,6 +36,7 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
     protected float angle;
     protected float distance;
     protected boolean occlusionEnabled;
+    protected float inscattering;
 
     public SpotLightData() {
         this.matrix = new Matrix4d();
@@ -44,6 +48,7 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
         this.angle = (float) Math.toRadians(45);
         this.distance = 1.0F;
         this.occlusionEnabled = false;
+        this.inscattering = 0.0F;
     }
 
     @Override
@@ -112,6 +117,14 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
     }
 
     /**
+     * @return The strength of the light's in-scattering effect.
+     * @since 4.4.0
+     */
+    public float getInscatteringStrength() {
+        return this.inscattering;
+    }
+
+    /**
      * Sets the size of the light's surface
      *
      * @param size The size, in blocks, of the light's surface.
@@ -146,6 +159,15 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
 
     public SpotLightData setOcclusionEnabled(boolean occlusionEnabled) {
         this.occlusionEnabled = occlusionEnabled;
+        this.markDirty();
+        return this;
+    }
+
+    /**
+     * @since 4.4.0
+     * */
+    public SpotLightData setInscatteringStrength(float inscattering) {
+        this.inscattering = inscattering;
         this.markDirty();
         return this;
     }
@@ -195,6 +217,7 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
         buffer.position(buffer.position() + 2); // Padding
         buffer.putFloat(this.distance);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
+        buffer.putFloat(this.inscattering);
     }
 
     @Override
@@ -234,6 +257,8 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
 
         float[] editAngle = new float[]{this.angle};
         float[] editDistance = new float[]{this.distance};
+
+        float[] editInscattering = new float[]{this.inscattering};
 
         if (ImGui.sliderAngle("size", editSize, 0.1F, 180.0F, "%.1f")) {
             this.setSize(editSize[0]);
@@ -294,5 +319,40 @@ public class SpotLightData extends LightData implements InstancedLightData, DDAL
             this.occlusionEnabled = !this.occlusionEnabled;
             this.markDirty();
         }
+
+        if (ImGui.dragScalar("In-scattering", editInscattering, 0.01F, 0.0F)) {
+            this.setInscatteringStrength(editInscattering[0]);
+        }
+    }
+
+    @Override
+    public void renderLightGuide(MatrixStack stack, VertexConsumer consumer) {
+        stack.matrixPush();
+
+        stack.translate(this.position.x, this.position.y, this.position.z);
+        Vector3f rot = this.orientation.getEulerAnglesXYZ(new Vector3f()).mul(-1);
+        stack.rotate(new Quaternionf().rotateX(rot.x).rotateLocalY(rot.y).rotateLocalZ(rot.z));
+
+        Matrix4f pose = stack.position();
+
+        float radius = this.distance * (float) Math.tan(this.size);
+
+        for (int i = -8; i < 25; i++) {
+            float x = (float) Math.sin(i / (float) 32 * Mth.TWO_PI) * radius;
+            float y = (float) Math.cos(i / (float) 32 * Mth.TWO_PI) * radius;
+            consumer.addVertex(pose, x, y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        int spokes = 8;
+        for (int i = 0; i < spokes; i++) {
+            float theta = i / (float) spokes * Mth.TWO_PI;
+            float x = (float) Math.sin(theta) * radius;
+            float y = (float) Math.cos(theta) * radius;
+
+            consumer.addVertex(pose, 0, 0, 0).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+            consumer.addVertex(pose, x, y, this.distance).setColor(this.color.red(), this.color.green(), this.color.blue(), this.color.alpha());
+        }
+
+        stack.matrixPop();
     }
 }
