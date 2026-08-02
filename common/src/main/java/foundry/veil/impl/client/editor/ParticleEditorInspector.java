@@ -45,6 +45,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -228,10 +229,17 @@ public class ParticleEditorInspector extends SingleWindowInspector {
 
         ImGui.text("Particles: " + emitter.getParticleCount());
 
+        Vector3f emitterRotationEuler = emitter.getRotationVector().mul(Mth.RAD_TO_DEG, new Vector3f());
+
         float[] editPos = new float[]{(float) emitter.getPosition().x(), (float) emitter.getPosition().y(), (float) emitter.getPosition().z()};
+        float[] editRot = new float[]{emitterRotationEuler.x(), emitterRotationEuler.y(), emitterRotationEuler.z()};
 
         if (ImGui.dragFloat3("position", editPos, 0.02F)) {
             emitter.setPosition(editPos[0], editPos[1], editPos[2]);
+        }
+
+        if (ImGui.dragFloat3("rotation", editRot, 0.1F)) {
+            emitter.setRotation(editRot[0] * Mth.DEG_TO_RAD, editRot[1] * Mth.DEG_TO_RAD, editRot[2] * Mth.DEG_TO_RAD);
         }
 
         // General (emitters)
@@ -632,6 +640,9 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         public boolean renderEmitterShape = false;
         public boolean renderDirection;
 
+        // In order to facilitate an easier use of rotation, we store this as a Vector3f instead of a Quaternion
+        private final Vector3f rotation = new Vector3f();
+
         private MutableParticleEmitter(ParticleSystemManager particleManager, ClientLevel level, ParticleEmitterData data) {
             super(particleManager, level, data);
             this.particleData = new QuasarParticleData(this.particleData.shouldCollide(), this.particleData.faceVelocity(), this.particleData.velocityStretchFactor(), this.particleData.modules(), this.particleData.spriteData(), this.particleData.additive(), this.particleData.renderStyle());
@@ -656,7 +667,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 for (EmitterShapeSettings shapeSettings : this.getEmitterShapeSettings()) {
                     matrixStack.matrixPush();
                     matrixStack.translate(this.getPosition());
-                    shapeSettings.shape().renderShape(matrixStack.toPoseStack(), debugBuilder, shapeSettings.dimensions(), shapeSettings.rotation());
+                    shapeSettings.shape().renderShape(matrixStack.toPoseStack(), debugBuilder, shapeSettings.dimensions(), shapeSettings.rotation().add(this.rotation.mul(Mth.RAD_TO_DEG, new Vector3f()), new Vector3f()));
                     matrixStack.matrixPop();
                 }
                 matrixStack.matrixPop();
@@ -687,6 +698,25 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 this.reset();
                 this.spawnTask = this.particleManager.getScheduler().scheduleAtFixedRate(this::spawn, 1, this.getRate()).toCompletableFuture();
             }
+        }
+
+        public Vector3f getRotationVector() {
+            return this.rotation;
+        }
+
+        @Override
+        public Quaternionf getRotation() {
+            return new Quaternionf().rotationXYZ(this.rotation.x, this.rotation.y, this.rotation.z);
+        }
+
+        @Override
+        public void setRotation(Quaternionf rotation) {
+            this.rotation.set(rotation.getEulerAnglesXYZ(new Vector3f()));
+        }
+
+        @Override
+        public void setRotation(float x, float y, float z) {
+            this.rotation.set(x, y, z);
         }
 
         public void setRate(int rate) {
