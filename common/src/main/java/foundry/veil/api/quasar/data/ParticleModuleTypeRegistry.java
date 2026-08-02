@@ -11,6 +11,7 @@ import foundry.veil.api.quasar.data.module.force.*;
 import foundry.veil.api.quasar.data.module.init.*;
 import foundry.veil.api.quasar.data.module.render.ColorParticleModuleData;
 import foundry.veil.api.quasar.data.module.render.TrailParticleModuleData;
+import foundry.veil.api.quasar.data.module.update.TickRotationParticleModuleData;
 import foundry.veil.api.quasar.data.module.update.TickSizeParticleModuleData;
 import foundry.veil.api.quasar.data.module.update.TickSubEmitterModuleData;
 import foundry.veil.api.quasar.emitters.module.init.InitRandomRotationModuleData;
@@ -137,6 +138,7 @@ public class ParticleModuleTypeRegistry {
 
     // UPDATE
     public static final ModuleType<TickSizeParticleModuleData> TICK_SIZE = registerModule("size", TickSizeParticleModuleData.CODEC, () -> new TickSizeParticleModuleData(MolangExpression.of(1)));
+    public static final ModuleType<TickRotationParticleModuleData> TICK_ROTATION = registerModule("rotation", TickRotationParticleModuleData.CODEC, () -> new TickRotationParticleModuleData(MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO));
     public static final ModuleType<TickSubEmitterModuleData> TICK_SUB_EMITTER = registerModule("tick_sub_emitter", TickSubEmitterModuleData.CODEC, () -> new TickSubEmitterModuleData(ResourceLocation.withDefaultNamespace(""), 5));
     // UPDATE - COLLISION
     public static final ModuleType<DieOnCollisionModuleData> DIE_ON_COLLISION = registerModule("die_on_collision", DieOnCollisionModuleData.CODEC, DieOnCollisionModuleData::new);
