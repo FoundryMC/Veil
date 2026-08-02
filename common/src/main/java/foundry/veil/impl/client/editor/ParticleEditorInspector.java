@@ -41,17 +41,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Math;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
@@ -235,11 +235,46 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         float[] editRot = new float[]{emitterRotationEuler.x(), emitterRotationEuler.y(), emitterRotationEuler.z()};
 
         if (ImGui.dragFloat3("position", editPos, 0.02F)) {
-            emitter.setPosition(editPos[0], editPos[1], editPos[2]);
+            Entity attached = emitter.getAttachedEntity();
+            Vector3f entityPos = attached == null ? new Vector3f() : new Vector3f((float) attached.getX(), (float) attached.getY(), (float) attached.getZ());
+            emitter.setAttachedEntity(null);
+            emitter.setPosition(editPos[0] - entityPos.x, editPos[1] - entityPos.y, editPos[2] - entityPos.z);
+            emitter.setAttachedEntity(attached);
         }
 
         if (ImGui.dragFloat3("rotation", editRot, 0.1F)) {
             emitter.setRotation(editRot[0] * Mth.DEG_TO_RAD, editRot[1] * Mth.DEG_TO_RAD, editRot[2] * Mth.DEG_TO_RAD);
+        }
+
+        if (Minecraft.getInstance().crosshairPickEntity != null) {
+            if (ImGui.button("Attach to entity")) {
+                emitter.setAttachedEntity(Minecraft.getInstance().crosshairPickEntity);
+                emitter.setPosition(Vec3.ZERO);
+            }
+        } else if (Minecraft.getInstance().hitResult != null && Minecraft.getInstance().hitResult.getType() == HitResult.Type.BLOCK) {
+            if (ImGui.button("Place on block")) {
+                emitter.setAttachedEntity(null);
+                BlockHitResult blockHitResult = ((BlockHitResult) Minecraft.getInstance().hitResult);
+                emitter.setPosition(blockHitResult.getBlockPos().getCenter().add(new Vec3(blockHitResult.getDirection().step().mul(0.5f))));
+                emitter.setRotation(blockHitResult.getDirection().getRotation());
+            }
+        } else {
+            if (ImGui.button("Move to view")) {
+                emitter.setAttachedEntity(null);
+                Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+                emitter.setPosition(camera.getPosition().add(new Vec3(camera.getLookVector()).scale(4)));
+            }
+        }
+
+        if (emitter.getAttachedEntity() != null) {
+            ImGui.sameLine();
+            if (ImGui.button("Remove from entity")) {
+                Entity attached = emitter.getAttachedEntity();
+                Vector3d targetPosition = new Vector3d(attached.getX(), attached.getY(), attached.getZ());
+                Vector3d offset = emitter.getPosition().sub(targetPosition, new Vector3d());
+                emitter.setAttachedEntity(null);
+                emitter.setPosition(targetPosition.add(offset));
+            }
         }
 
         // General (emitters)
@@ -678,6 +713,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
                 matrixStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
                 matrixStack.matrixPush();
                 matrixStack.translate(this.getPosition());
+                matrixStack.rotate(this.getRotation());
 
                 Matrix4f matrix4f = matrixStack.position();
 
@@ -710,8 +746,8 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         @Override
-        public void setRotation(Quaternionf rotation) {
-            this.rotation.set(rotation.getEulerAnglesXYZ(new Vector3f()));
+        public void setRotation(Quaternionf newRot) {
+            newRot.getEulerAnglesXYZ(this.rotation);
         }
 
         @Override

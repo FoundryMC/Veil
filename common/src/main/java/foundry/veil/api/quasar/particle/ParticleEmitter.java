@@ -116,7 +116,7 @@ public class ParticleEmitter {
 
         for (int i = 0; i < count; i++) {
             Vector3dc particlePos = this.emitterShapeSettings.get(i % this.emitterShapeSettings.size()).getPos(this.randomSource, this.getPosition(), this.getRotation());
-            Vector3fc particleDirection = this.particleSettings.particleDirection(this.randomSource);
+            Vector3fc particleDirection = this.particleSettings.particleDirection(this.randomSource).rotate(this.getRotation());
             Vector3fc particleRotation = this.particleSettings.initialRotation(this.randomSource).mul(Mth.DEG_TO_RAD, new Vector3f()).add(this.getRotation().getEulerAnglesXYZ(new Vector3f()));
 
             // TODO
