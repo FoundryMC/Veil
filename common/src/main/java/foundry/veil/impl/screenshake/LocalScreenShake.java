@@ -2,6 +2,7 @@ package foundry.veil.impl.screenshake;
 
 import foundry.veil.api.client.util.Easing;
 import gg.moonflower.molangcompiler.api.MolangExpression;
+import gg.moonflower.molangcompiler.api.exception.MolangSyntaxException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -15,6 +16,13 @@ public class LocalScreenShake extends GlobalScreenShake {
     private final float radius;
     private final Easing falloff;
     private final Vec3 position;
+
+    public LocalScreenShake(String expression, Vec3 position, int length, float radius, Easing falloff) throws MolangSyntaxException {
+        super(expression, length);
+        this.radius = radius;
+        this.falloff = falloff;
+        this.position = position;
+    }
 
     public LocalScreenShake(MolangExpression expression, Vec3 position, int length, float radius, Easing falloff) {
         super(expression, length);

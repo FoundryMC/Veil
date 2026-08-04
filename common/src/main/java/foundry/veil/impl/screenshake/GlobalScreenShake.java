@@ -1,9 +1,11 @@
 package foundry.veil.impl.screenshake;
 
 import com.google.common.base.Suppliers;
+import foundry.veil.api.molang.VeilMolang;
 import foundry.veil.api.screenshake.type.ScreenShakeType;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
+import gg.moonflower.molangcompiler.api.exception.MolangSyntaxException;
 import net.minecraft.util.RandomSource;
 
 import java.util.function.Supplier;
@@ -16,13 +18,17 @@ public class GlobalScreenShake extends ScreenShakeType {
     private final MolangExpression expression;
     private final Supplier<MolangRuntime> environment;
 
+    public GlobalScreenShake(String strengthExpression, int length) throws MolangSyntaxException {
+        this(VeilMolang.get().compile(strengthExpression), length);
+    }
+
     public GlobalScreenShake(MolangExpression strengthExpression, int length) {
         super(RandomSource.create(), length);
         this.expression = strengthExpression;
 
         this.environment = Suppliers.memoize(() -> MolangRuntime.runtime()
                 .setQuery("age", () -> (float) (this.length - this.ticksRemaining))
-                .setQuery("agePercent", () -> (float) (this.ticksRemaining) / this.length)
+                .setQuery("agePercent", () -> (float) (this.length - this.ticksRemaining) / this.length)
                 .setQuery("length", this.length)
                 .create());
     }
