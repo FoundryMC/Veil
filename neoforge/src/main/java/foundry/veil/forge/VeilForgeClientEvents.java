@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
@@ -20,7 +21,6 @@ import foundry.veil.impl.client.imgui.VeilImGuiCompat;
 import foundry.veil.impl.network.VeilClientServerFlags;
 import foundry.veil.impl.screenshake.GlobalScreenShake;
 import foundry.veil.impl.screenshake.LocalScreenShake;
-import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
@@ -128,30 +128,31 @@ public class VeilForgeClientEvents {
             LiteralArgumentBuilder<CommandSourceStack> shakeBuilder = Commands.literal("shake");
             shakeBuilder
                     .then(Commands.literal("local")
-                            .then(Commands.argument("position", Vec3Argument.vec3()).then(Commands.argument("length", IntegerArgumentType.integer(0)).then(Commands.argument("radius", FloatArgumentType.floatArg(0))
+                            .then(Commands.argument("expression", StringArgumentType.string()).then(Commands.argument("position", Vec3Argument.vec3()).then(Commands.argument("length", IntegerArgumentType.integer(0)).then(Commands.argument("radius", FloatArgumentType.floatArg(0))
                                     .executes(ctx -> {
                                         try {
                                             VeilRenderer renderer = VeilRenderSystem.renderer();
-                                            renderer.getScreenShakeManager().addScreenShake(new LocalScreenShake(MolangExpression.of(1), ctx.getArgument("position", WorldCoordinates.class).getPosition(ctx.getSource()), ctx.getArgument("length", Integer.class), ctx.getArgument("radius", Float.class), Easing.LINEAR));
+                                            renderer.getScreenShakeManager().addScreenShake(new LocalScreenShake(StringArgumentType.getString(ctx, "expression"), Vec3Argument.getVec3(ctx, "position"), IntegerArgumentType.getInteger(ctx, "length"), FloatArgumentType.getFloat(ctx, "radius"), Easing.LINEAR));
 
                                             return Command.SINGLE_SUCCESS;
                                         } catch (Exception e) {
                                             return 0;
                                         }
                                     })
-                            )))
+                            ))))
                     )
-                    .then(Commands.literal("global").then(Commands.argument("length", IntegerArgumentType.integer(0))
+                    .then(Commands.literal("global")
+                            .then(Commands.argument("expression", StringArgumentType.string()).then(Commands.argument("length", IntegerArgumentType.integer(0))
                             .executes(ctx -> {
                                 try {
                                     VeilRenderer renderer = VeilRenderSystem.renderer();
-                                    renderer.getScreenShakeManager().addScreenShake(new GlobalScreenShake(MolangExpression.of(1), ctx.getArgument("length", Integer.class)));
+                                    renderer.getScreenShakeManager().addScreenShake(new GlobalScreenShake(StringArgumentType.getString(ctx, "expression"), ctx.getArgument("length", Integer.class)));
 
                                     return Command.SINGLE_SUCCESS;
                                 } catch (Exception e) {
                                     return 0;
                                 }
-                            }))
+                            })))
                     );
             dispatcher.register(shakeBuilder);
         }
