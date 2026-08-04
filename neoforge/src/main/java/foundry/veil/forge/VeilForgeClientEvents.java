@@ -7,6 +7,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
+import foundry.veil.api.client.util.Easing;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
@@ -15,6 +16,9 @@ import foundry.veil.impl.ClientEnumArgument;
 import foundry.veil.impl.client.VeilClientSchedulerImpl;
 import foundry.veil.impl.client.imgui.VeilImGuiCompat;
 import foundry.veil.impl.network.VeilClientServerFlags;
+import foundry.veil.impl.screenshake.GlobalScreenShake;
+import foundry.veil.impl.screenshake.LocalScreenShake;
+import gg.moonflower.molangcompiler.api.MolangExpression;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
@@ -118,6 +122,37 @@ public class VeilForgeClientEvents {
                             }))
                     ));
             dispatcher.register(debugBuilder);
+
+            LiteralArgumentBuilder<CommandSourceStack> shakeBuilder = Commands.literal("shake");
+            shakeBuilder
+                    .then(Commands.literal("local")
+                            .then(Commands.argument("position", Vec3Argument.vec3())
+                                    .executes(ctx -> {
+                                        try {
+                                            VeilRenderer renderer = VeilRenderSystem.renderer();
+                                            renderer.getScreenShakeManager().addScreenShake(new LocalScreenShake(MolangExpression.of(1), ctx.getArgument("position", WorldCoordinates.class).getPosition(ctx.getSource()), 200, 10, Easing.LINEAR));
+
+                                            return Command.SINGLE_SUCCESS;
+                                        } catch (Exception e) {
+                                            return 0;
+                                        }
+                                    })
+                            )
+                    )
+                    .then(Commands.literal("global")
+                            .executes(ctx -> {
+                                try {
+                                    VeilRenderer renderer = VeilRenderSystem.renderer();
+                                    renderer.getScreenShakeManager().addScreenShake(new GlobalScreenShake(MolangExpression.of(1), 20));
+
+                                    return Command.SINGLE_SUCCESS;
+                                } catch (Exception e) {
+                                    return 0;
+                                }
+                            })
+
+                    );
+            dispatcher.register(shakeBuilder);
         }
     }
 

@@ -14,6 +14,7 @@ import foundry.veil.api.client.render.shader.ShaderModificationManager;
 import foundry.veil.api.client.render.shader.ShaderPreDefinitions;
 import foundry.veil.api.flare.FlareEffectManager;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
+import foundry.veil.api.screenshake.ScreenShakeManager;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import foundry.veil.impl.client.render.dynamicbuffer.VanillaShaderCompiler;
 import foundry.veil.impl.client.render.pipeline.VeilBloomRenderer;
@@ -64,6 +65,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
     private final EditorManager editorManager;
     private final CameraMatrices cameraMatrices;
     private final LightRenderer lightRenderer;
+    private final ScreenShakeManager screenShakeManager;
     private final GuiInfo guiInfo;
 
     @ApiStatus.Internal
@@ -82,6 +84,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
         this.editorManager = new EditorManager(resourceManager);
         this.cameraMatrices = new CameraMatrices();
         this.lightRenderer = new LightRenderer();
+        this.screenShakeManager = new ScreenShakeManager();
         this.guiInfo = new GuiInfo();
 
         List<PreparableReloadListener> listeners = ((PipelineReloadableResourceManagerAccessor) resourceManager).getListeners();
@@ -267,6 +270,13 @@ public class VeilRenderer implements ResourceManagerReloadListener {
      */
     public LightRenderer getLightRenderer() {
         return this.lightRenderer;
+    }
+
+    /**
+     * @return The manager for screen shaking
+     */
+    public ScreenShakeManager getScreenShakeManager() {
+        return this.screenShakeManager;
     }
 
     /**
