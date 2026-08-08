@@ -38,7 +38,7 @@ public final class PointAttractorForceData implements ParticleModuleData, Editor
 
     public static final MapCodec<PointAttractorForceData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             CodecUtil.VECTOR3DC_CODEC.fieldOf("position").forGetter(PointAttractorForceData::position),
-            Codec.BOOL.optionalFieldOf("localPosition", false).forGetter(PointAttractorForceData::invertDistanceModifier),
+            Codec.BOOL.optionalFieldOf("localPosition", false).forGetter(PointAttractorForceData::localPosition),
             Codec.FLOAT.fieldOf("range").forGetter(PointAttractorForceData::range),
             Codec.FLOAT.fieldOf("strength").forGetter(PointAttractorForceData::strength),
             Codec.BOOL.fieldOf("strengthByDistance").forGetter(PointAttractorForceData::strengthByDistance),
