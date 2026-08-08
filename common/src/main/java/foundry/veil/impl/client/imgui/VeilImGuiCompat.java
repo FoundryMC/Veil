@@ -22,7 +22,7 @@ public final class VeilImGuiCompat {
     }
 
     public static void load() {
-        ImGuiMCEvents.INSTANCE.imGuiLoadPre(() -> ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable));
+        ImGuiMCEvents.INSTANCE.imGuiLoadPre(() -> ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable));
         ImGuiMCEvents.INSTANCE.preRenderImGuiEvent(() -> {
             VeilImGuiStylesheet.initStyles();
             AdvancedFboImGuiAreaImpl.begin();
