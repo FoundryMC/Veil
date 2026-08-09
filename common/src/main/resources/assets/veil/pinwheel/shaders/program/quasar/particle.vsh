@@ -28,10 +28,10 @@ void main() {
     gl_Position = ProjMat * WorldPosition;
     vertexDistance = length(WorldPosition.xyz);
     vec2 uvs[4];
-    uvs[0] = UV0Min,
-    uvs[1] = vec2(UV0Min.x, UV0Max.y),
-    uvs[2] = UV0Max,
-    uvs[3] = vec2(UV0Max.x, UV0Min.y);
+    uvs[0] = UV0Max;
+    uvs[1] = vec2(UV0Max.x, UV0Min.y);
+    uvs[2] = UV0Min;
+    uvs[3] = vec2(UV0Min.x, UV0Max.y);
     texCoord0 = uvs[gl_VertexID % 4];
     #ifdef VEIL_LIGHT_UV
     // #veil:light_uv
