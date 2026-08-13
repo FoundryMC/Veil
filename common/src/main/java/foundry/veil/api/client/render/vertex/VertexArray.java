@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.impl.client.render.vertex.ARBVertexArray;
 import foundry.veil.impl.client.render.vertex.DSAVertexArray;
 import foundry.veil.impl.client.render.vertex.LegacyVertexArray;
@@ -219,7 +220,7 @@ public abstract class VertexArray implements NativeResource {
      * @param usage The draw usage
      */
     public static void upload(int buffer, ByteBuffer data, DrawUsage usage) {
-        if (VeilRenderSystem.directStateAccessSupported()) {
+        if (VeilRenderSystem.directStateAccessSupported() && !ImmersivePortalsCompat.isLoaded()) {
             glNamedBufferData(buffer, data, usage.getGlType());
         } else {
             glBindBuffer(GL_ARRAY_BUFFER, buffer);

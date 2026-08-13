@@ -67,4 +67,7 @@ dependencies {
 
     // Allows sodium compat to compile properly
     compileOnly "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.104.0+2.0.19+1.21.1"
+
+    // Immersive portals compat
+    compileOnly "maven.modrinth:immersive-portals-neoforge:6.0.7"
 }

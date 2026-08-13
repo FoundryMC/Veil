@@ -64,4 +64,7 @@ dependencies {
     include(api("io.github.ocelot:glsl-processor:${glsl_processor_version}"))
 
     modCompileOnly "foundry.imguimc:imguimc-fabric-${minecraft_version}:$imguimc_version"
+
+    // Immersive portals compat
+    modCompileOnly "maven.modrinth:immersiveportals:v6.0.6-mc1.21.1"
 }
