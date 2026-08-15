@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
+import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
@@ -12,6 +13,7 @@ import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
+import foundry.veil.impl.client.render.framebuffer.AdvancedFboMutableTextureAttachment;
 import foundry.veil.mixin.dynamicbuffer.accessor.DynamicBufferGameRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -30,7 +32,7 @@ import java.util.*;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
 import static org.lwjgl.opengl.GL14C.GL_TEXTURE_LOD_BIAS;
-import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT1;
+import static org.lwjgl.opengl.GL30C.*;
 
 @ApiStatus.Internal
 public class DynamicBufferManager implements NativeResource {
@@ -214,7 +216,13 @@ public class DynamicBufferManager implements NativeResource {
                     builder.setName(type.getSourceName()).addColorTextureWrapper(entry.getValue().textureId);
                 }
             }
-            builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
+            try (AdvancedFbo fboTarget = VeilRenderBridge.wrap(renderTarget)) {
+                builder.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
+                        fboTarget.hasStencilAttachment() ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT,
+                        renderTarget.getDepthTextureId(),
+                        -1,
+                        null));
+            }
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
             this.framebuffers.put(name, fbo);

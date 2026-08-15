@@ -12,7 +12,7 @@ public interface ImmersivePortalsCompat {
      * Retrieves the compat instance. This will be <code>null</code> if Immersive Portals is not installed.
      */
     @Nullable
-    ImmersivePortalsCompat INSTANCE = Veil.platform().isModLoaded("imm_ptl") ? ServiceLoader.load(ImmersivePortalsCompat.class).findFirst().orElse(null) : null;
+    ImmersivePortalsCompat INSTANCE = (Veil.platform().isModLoaded("immersive_portals") || Veil.platform().isModLoaded("imm_ptl")) ? ServiceLoader.load(ImmersivePortalsCompat.class).findFirst().orElse(null) : null;
 
     /**
      * @return Whether Immersive Portals is loaded

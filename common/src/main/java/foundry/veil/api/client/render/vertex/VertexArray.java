@@ -80,7 +80,7 @@ public abstract class VertexArray implements NativeResource {
 
     private static void loadType() {
         if (vertexArrayType == null) {
-            if (VeilRenderSystem.directStateAccessSupported()) {
+            if (VeilRenderSystem.directStateAccessSupported() && !ImmersivePortalsCompat.isLoaded()) {
                 vertexArrayType = VertexArrayType.DSA;
             } else {
                 GLCapabilities caps = GL.getCapabilities();
