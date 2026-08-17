@@ -4,13 +4,13 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import foundry.veil.Veil;
 import foundry.veil.VeilClient;
-import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBuffersChange;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
 import foundry.veil.impl.client.render.framebuffer.AdvancedFboMutableTextureAttachment;
@@ -164,7 +164,7 @@ public class DynamicBufferManager implements NativeResource {
     }
 
     public void setEnabled(boolean enabled) {
-        if (!Veil.IRIS) {
+        if (!Veil.IRIS && (!ImmersivePortalsCompat.isLoaded() || !ImmersivePortalsCompat.INSTANCE.renderingThroughPortal())) {
             this.enabled = enabled;
         }
     }
@@ -216,13 +216,12 @@ public class DynamicBufferManager implements NativeResource {
                     builder.setName(type.getSourceName()).addColorTextureWrapper(entry.getValue().textureId);
                 }
             }
-            try (AdvancedFbo fboTarget = VeilRenderBridge.wrap(renderTarget)) {
-                builder.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
-                        fboTarget.hasStencilAttachment() ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT,
-                        renderTarget.getDepthTextureId(),
-                        -1,
-                        null));
-            }
+            //builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
+            builder.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
+                    GL_DEPTH_STENCIL_ATTACHMENT,
+                    renderTarget.getDepthTextureId(),
+                    -1,
+                    null));
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
             this.framebuffers.put(name, fbo);
@@ -339,6 +338,7 @@ public class DynamicBufferManager implements NativeResource {
 
         if (!shaderIterator.hasNext()) {
             Veil.LOGGER.info("Finished uploading vanilla shaders");
+            this.swapShaders.clear();
         }
     }
 

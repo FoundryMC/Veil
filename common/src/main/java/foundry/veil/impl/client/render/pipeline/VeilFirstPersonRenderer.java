@@ -39,7 +39,7 @@ public final class VeilFirstPersonRenderer {
             free();
             firstPerson = AdvancedFbo.withSize(w, h)
                     .addColorTextureWrapper(framebufferTexture)
-                    .setFormat(stencil ? FramebufferAttachmentDefinition.Format.DEPTH32F_STENCIL8 : FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT)
+                    .setFormat(FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT)
                     .setDepthTextureBuffer()
                     .setDebugLabel("Veil First Person")
                     .build(true);
@@ -60,7 +60,7 @@ public final class VeilFirstPersonRenderer {
     public static void unbind() {
         // TODO update projection/modelview matrix
         ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
-        boolean rendered = VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), false);
+        boolean rendered = false;//VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), false);
         ((RenderTargetExtension) Minecraft.getInstance().getMainRenderTarget()).veil$setWrapper(null);
 
         if (rendered) {

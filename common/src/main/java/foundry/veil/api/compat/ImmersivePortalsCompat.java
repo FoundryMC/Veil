@@ -26,4 +26,6 @@ public interface ImmersivePortalsCompat {
     String transform(Program.Type type, String shaderId, String inputCode);
 
     boolean shouldAddUniform(String shaderName);
+
+    boolean renderingThroughPortal();
 }

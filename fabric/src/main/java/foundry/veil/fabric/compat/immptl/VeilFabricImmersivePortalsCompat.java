@@ -26,4 +26,9 @@ public class VeilFabricImmersivePortalsCompat implements ImmersivePortalsCompat 
     public boolean shouldAddUniform(String shaderName) {
         return ShaderCodeTransformation.shouldAddUniform(shaderName);
     }
+
+    @Override
+    public boolean renderingThroughPortal() {
+        return false;
+    }
 }
