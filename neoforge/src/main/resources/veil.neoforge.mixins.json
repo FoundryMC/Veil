@@ -41,7 +41,7 @@
         "compat.sodium.ShaderParserMixin",
         "compat.sodium.SodiumWorldRendererAccessor",
         "compat.sodium.SortedRenderListsAccessor",
-        "MyGameRendererMixin"
+        "compat.imm_ptl.MyGameRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1

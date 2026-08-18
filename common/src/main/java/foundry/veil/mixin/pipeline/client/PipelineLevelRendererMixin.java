@@ -112,7 +112,7 @@ public abstract class PipelineLevelRendererMixin implements LevelRendererExtensi
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     public void blit(CallbackInfo ci, @Local ProfilerFiller profiler) {
-        if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()/* && (ImmersivePortalsCompat.isLoaded() ? !ImmersivePortalsCompat.INSTANCE.renderingThroughPortal() : true)*/) {
+        if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
             if (VeilRenderSystem.drawLights(profiler, VeilRenderSystem.getCullingFrustum(), true)) {
                 VeilRenderSystem.compositeLights(profiler);
             } else {

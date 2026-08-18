@@ -42,7 +42,7 @@ public class ImmersivePortalsShaderPreProcessor implements ShaderPreProcessor {
             }
         }
 
-        String transformed = ImmersivePortalsCompat.INSTANCE.transform(type, key, tree.toSourceString());
+        String transformed = compat.transform(type, key, tree.toSourceString());
         GlslTree newShader = GlslParser.parse(transformed);
 
         tree.getBody().clear();

@@ -7,6 +7,7 @@ import qouteall.imm_ptl.core.render.ShaderCodeTransformation;
 
 public class VeilFabricImmersivePortalsCompat implements ImmersivePortalsCompat {
     private static boolean hasInitialized = false;
+    public static boolean renderingPortal = false;
 
     @Override
     public void init() {
@@ -29,6 +30,6 @@ public class VeilFabricImmersivePortalsCompat implements ImmersivePortalsCompat 
 
     @Override
     public boolean renderingThroughPortal() {
-        return false;
+        return renderingPortal;
     }
 }

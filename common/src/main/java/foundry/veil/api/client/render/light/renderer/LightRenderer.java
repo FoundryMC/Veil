@@ -10,6 +10,7 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.light.data.LightData;
 import foundry.veil.api.client.render.vertex.VertexArray;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.impl.client.render.light.VoxelShadowGrid;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.resources.ResourceLocation;
@@ -101,7 +102,7 @@ public final class LightRenderer implements NativeResource {
             lightInscatteringFbo.clear(GL_COLOR_BUFFER_BIT);
         }
 
-        if (!hasRendered) {
+        if (!hasRendered && !ImmersivePortalsCompat.isLoaded()) {
             renderer.disableBuffers(BUFFER_ID, DynamicBufferType.ALBEDO, DynamicBufferType.NORMAL);
             return false;
         }

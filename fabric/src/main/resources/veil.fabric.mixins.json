@@ -45,7 +45,8 @@
     "compat.sodium.ShaderChunkRendererMixin",
     "compat.sodium.ShaderLoaderMixin",
     "compat.sodium.ShaderParserMixin",
-    "compat.sodium.SodiumWorldRendererAccessor"
+    "compat.sodium.SodiumWorldRendererAccessor",
+    "compat.immersive_portals.MyGameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
