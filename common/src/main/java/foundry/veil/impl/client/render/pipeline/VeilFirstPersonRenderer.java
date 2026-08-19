@@ -9,6 +9,7 @@ import foundry.veil.api.client.render.framebuffer.FramebufferAttachmentDefinitio
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.client.render.post.PostProcessingManager;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferManager;
 import net.minecraft.client.Minecraft;
@@ -39,7 +40,7 @@ public final class VeilFirstPersonRenderer {
             free();
             firstPerson = AdvancedFbo.withSize(w, h)
                     .addColorTextureWrapper(framebufferTexture)
-                    .setFormat(FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT)
+                    .setFormat((stencil && !ImmersivePortalsCompat.isLoaded()) ? FramebufferAttachmentDefinition.Format.DEPTH32F_STENCIL8 : FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT)
                     .setDepthTextureBuffer()
                     .setDebugLabel("Veil First Person")
                     .build(true);

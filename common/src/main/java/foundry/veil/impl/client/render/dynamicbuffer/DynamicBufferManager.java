@@ -13,7 +13,6 @@ import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
-import foundry.veil.impl.client.render.framebuffer.AdvancedFboMutableTextureAttachment;
 import foundry.veil.mixin.dynamicbuffer.accessor.DynamicBufferGameRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -216,12 +215,7 @@ public class DynamicBufferManager implements NativeResource {
                     builder.setName(type.getSourceName()).addColorTextureWrapper(entry.getValue().textureId);
                 }
             }
-            //builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
-            builder.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
-                    GL_DEPTH_STENCIL_ATTACHMENT,
-                    renderTarget.getDepthTextureId(),
-                    -1,
-                    null));
+            builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
             this.framebuffers.put(name, fbo);

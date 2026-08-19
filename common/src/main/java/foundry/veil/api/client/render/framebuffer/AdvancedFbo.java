@@ -581,6 +581,33 @@ public interface AdvancedFbo extends NativeResource {
     }
 
     /**
+     * Gets the attachment type of the main depth buffer.
+     * @return Either {@code GL_DEPTH_ATTACHMENT} or {@code GL_DEPTH_STENCIL_ATTACHMENT}
+     * @apiNote If no match is found for whatever reason, {@code GL_DEPTH_ATTACHMENT} is returned.
+     */
+    static int getDepthAttachmentType(int textureId) {
+        int boundTexture = glGetInteger(GL_TEXTURE_2D);
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        int depthFormat = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+
+        glBindTexture(GL_TEXTURE_2D, boundTexture);
+
+        for (FramebufferAttachmentDefinition.Format format : FramebufferAttachmentDefinition.Format.VALUES) {
+            if (format.getInternalFormat() == depthFormat) {
+                if (format.getFormat() == GL_DEPTH_COMPONENT) {
+                    return GL_DEPTH_ATTACHMENT;
+                } else if (format.getFormat() == GL_DEPTH_STENCIL) {
+                    return GL_DEPTH_STENCIL_ATTACHMENT;
+                }
+            }
+        }
+
+        return GL_DEPTH_ATTACHMENT;
+    }
+
+    /**
      * A builder used to attach buffers to an {@link AdvancedFbo}.
      *
      * @author Ocelot
@@ -992,7 +1019,7 @@ public interface AdvancedFbo extends NativeResource {
          */
         public Builder setDepthTextureWrapper(int textureId, int layer) {
             return this.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
-                    GL_DEPTH_ATTACHMENT,
+                    getDepthAttachmentType(textureId),
                     textureId,
                     layer,
                     this.name));

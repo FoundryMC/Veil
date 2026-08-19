@@ -8,7 +8,6 @@ import foundry.veil.api.client.render.framebuffer.FramebufferStack;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
 import foundry.veil.api.client.render.post.PostPipeline;
 import foundry.veil.api.compat.IrisCompat;
-import foundry.veil.impl.client.render.framebuffer.AdvancedFboMutableTextureAttachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -16,8 +15,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL30C.GL_DEPTH_ATTACHMENT;
-import static org.lwjgl.opengl.GL30C.GL_DEPTH_STENCIL_ATTACHMENT;
 
 @ApiStatus.Internal
 public final class VeilBloomRenderer {
@@ -60,11 +57,7 @@ public final class VeilBloomRenderer {
             bloom = AdvancedFbo.withSize(w, h)
                     .setFormat(FramebufferAttachmentDefinition.Format.RGBA16F)
                     .addColorTextureBuffer()
-                    .setDepthBuffer(new AdvancedFboMutableTextureAttachment(
-                            mainRenderTarget.hasStencilAttachment() ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT,
-                            framebufferTexture,
-                            -1,
-                            null))
+                    .setDepthTextureWrapper(framebufferTexture)
                     .setDebugLabel("Veil Bloom")
                     .build(true);
         }
