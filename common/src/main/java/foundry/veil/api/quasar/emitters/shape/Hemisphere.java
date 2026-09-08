@@ -12,7 +12,7 @@ import static foundry.veil.api.quasar.emitters.shape.Sphere.parametricSphere;
 public class Hemisphere implements EmitterShape {
 
     @Override
-    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface) {
         double theta = randomSource.nextDouble() * 2 * Math.PI;
         double phi = randomSource.nextDouble() * Math.PI / 2;
         double x = Math.cos(theta) * Math.sin(phi);
@@ -30,7 +30,7 @@ public class Hemisphere implements EmitterShape {
             );
         }
         Vector3d pos = normal.mul(dim).mul(0.5);
-        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
+        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(shapeRotation.x()), (float) Math.toRadians(shapeRotation.y()), (float) Math.toRadians(shapeRotation.z())));
         return pos.add(position);
     }
 

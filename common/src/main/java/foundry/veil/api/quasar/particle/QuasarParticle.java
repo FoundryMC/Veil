@@ -268,6 +268,13 @@ public class QuasarParticle {
         return this.rotation;
     }
 
+    /**
+     * @since 4.5.0
+     */
+    public void setRotation(float x, float y, float z) {
+        this.rotation.set(x, y, z);
+    }
+
     public float getRadius() {
         return this.radius;
     }
