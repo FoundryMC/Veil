@@ -2,6 +2,7 @@ package foundry.veil.api.quasar.emitters.module.force;
 
 import foundry.veil.api.quasar.emitters.module.ForceParticleModule;
 import foundry.veil.api.quasar.particle.QuasarParticle;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
@@ -21,7 +22,8 @@ public class ConstantForceModule implements ForceParticleModule {
 
     @Override
     public void applyForce(QuasarParticle particle) {
-        particle.getVelocity().add(this.acceleration.x * this.strength, this.acceleration.y * this.strength, this.acceleration.z * this.strength);
+        Vector3d rotatedAcceleration = this.acceleration.rotate(particle.getEmitter().getRotation().get(new Quaterniond()), new Vector3d());
+        particle.getVelocity().add(rotatedAcceleration.x * this.strength, rotatedAcceleration.y * this.strength, rotatedAcceleration.z * this.strength);
     }
 
     @Override

@@ -271,7 +271,7 @@ public abstract class RenderStyle implements NativeResource {
 
             Matrix4f transformationMatrix = new Matrix4f()
                     .translate(renderOffset.x, renderOffset.y, renderOffset.z)
-                    .rotate(new Quaternionf().rotateLocalX(rotation.x()).rotateLocalY(rotation.y()).rotateLocalZ(rotation.z()));
+                    .rotate(new Quaternionf().rotationXYZ(rotation.x(), rotation.y(), rotation.z()));
             transformationMatrix.get(buffer.position(), buffer);
 
             buffer.position(buffer.position() + Float.BYTES * 16);
@@ -360,7 +360,7 @@ public abstract class RenderStyle implements NativeResource {
 
             Matrix4f transformationMatrix = new Matrix4f()
                     .translate(renderOffset.x, renderOffset.y, renderOffset.z)
-                    .rotate(faceCameraRotation.rotateLocalX(rotation.x()).rotateLocalY(rotation.y()).rotateLocalZ(rotation.z()));
+                    .rotate(faceCameraRotation.rotateXYZ(rotation.x(), rotation.y(), rotation.z()));
             transformationMatrix.get(buffer.position(), buffer);
 
             buffer.position(buffer.position() + Float.BYTES * 16);

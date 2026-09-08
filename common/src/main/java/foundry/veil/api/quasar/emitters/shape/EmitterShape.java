@@ -12,7 +12,7 @@ import org.joml.Vector3fc;
 
 public interface EmitterShape {
 
-    Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface);
+    Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface);
 
     void renderShape(PoseStack stack, VertexConsumer consumer, Vector3fc dimensions, Vector3fc rotation);
 

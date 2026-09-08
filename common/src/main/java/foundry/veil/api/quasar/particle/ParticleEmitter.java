@@ -20,11 +20,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,6 +51,7 @@ public class ParticleEmitter {
     private final List<ParticleModuleData> modulesView;
     private final RandomSource randomSource;
     private final Vector3d position;
+    private final Quaternionf rotation;
     private final Vector3d offset;
     private final List<QuasarParticle> particles;
 
@@ -80,6 +79,7 @@ public class ParticleEmitter {
         this.modulesView = Collections.unmodifiableList(this.modules);
         this.randomSource = RandomSource.create();
         this.position = new Vector3d();
+        this.rotation = new Quaternionf();
         this.offset = new Vector3d();
         this.particles = new LinkedList<>();
 
@@ -115,9 +115,9 @@ public class ParticleEmitter {
         this.particleManager.reserve(count);
 
         for (int i = 0; i < count; i++) {
-            Vector3dc particlePos = this.emitterShapeSettings.get(i % this.emitterShapeSettings.size()).getPos(this.randomSource, this.position);
-            Vector3fc particleDirection = this.particleSettings.particleDirection(this.randomSource);
-            Vector3fc particleRotation = this.particleSettings.initialRotation(this.randomSource).mul(Mth.DEG_TO_RAD, new Vector3f());
+            Vector3dc particlePos = this.emitterShapeSettings.get(i % this.emitterShapeSettings.size()).getPos(this.randomSource, this.getPosition(), this.getRotation());
+            Vector3fc particleDirection = this.particleSettings.particleDirection(this.randomSource).rotate(this.getRotation());
+            Vector3fc particleRotation = this.particleSettings.initialRotation(this.randomSource).mul(Mth.DEG_TO_RAD, new Vector3f()).add(this.getRotation().getEulerAnglesXYZ(new Vector3f()));
 
             // TODO
 //        this.getParticleData().getInitModules().stream().filter(force -> force instanceof InitialVelocityForce).forEach(f -> {
@@ -346,6 +346,15 @@ public class ParticleEmitter {
         return this.position;
     }
 
+    /**
+     * Rotation of the emitter
+     *
+     * @since 4.5.0
+     */
+    public Quaternionf getRotation() {
+        return this.rotation;
+    }
+
     public ParticleEmitterData getData() {
         return this.emitterData;
     }
@@ -429,6 +438,28 @@ public class ParticleEmitter {
         } else {
             this.position.set(this.offset);
         }
+    }
+
+    /**
+     * Sets the rotation of the particle emitter.
+     *
+     * @param x The rotation about the X axis, in radians.
+     * @param y The rotation about the Y axis, in radians.
+     * @param z The rotation about the Z axis, in radians.
+     * @since 4.5.0
+     */
+    public void setRotation(float x, float y, float z) {
+        this.rotation.identity().rotateLocalX(x).rotateLocalY(y).rotateLocalZ(z);
+    }
+
+    /**
+     * Sets the rotation of the particle emitter.
+     *
+     * @param rotation The rotation of the emitter.
+     * @since 4.5.0
+     */
+    public void setRotation(Quaternionfc rotation) {
+        this.rotation.set(rotation);
     }
 
     public void setMaxLifetime(int maxLifetime) {
