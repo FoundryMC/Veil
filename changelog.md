@@ -1,2 +1,3 @@
-- Fix mismatched codec field ([#184](https://github.com/FoundryMC/Veil/pull/184))
-- Fix UV winding direction ([#186](https://github.com/FoundryMC/Veil/pull/186))
+- Improve Quasar emitter rotation ([#180](https://github.com/FoundryMC/Veil/pull/180))
+- Add screen shake module ([#183](https://github.com/FoundryMC/Veil/pull/183))
+- Fix Necromancer Animation classes ([#196](https://github.com/FoundryMC/Veil/pull/196))
