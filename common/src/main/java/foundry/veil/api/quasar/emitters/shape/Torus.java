@@ -3,15 +3,14 @@ package foundry.veil.api.quasar.emitters.shape;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.RandomSource;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class Torus implements EmitterShape {
 
     @Override
-    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface) {
         double theta = randomSource.nextDouble() * 2 * Math.PI;
         double phi = randomSource.nextDouble() * 2 * Math.PI;
         double x = Math.cos(theta) * (1 + 0.5 * Math.cos(phi));
@@ -29,7 +28,7 @@ public class Torus implements EmitterShape {
             );
         }
         Vector3d pos = normal.mul(dim);
-        pos = pos.rotateX((float) Math.toRadians(rotation.x())).rotateY((float) Math.toRadians(rotation.y())).rotateZ((float) Math.toRadians(rotation.z()));
+        pos = pos.rotateX((float) Math.toRadians(shapeRotation.x())).rotateY((float) Math.toRadians(shapeRotation.y())).rotateZ((float) Math.toRadians(shapeRotation.z()));
         return pos.add(position);
     }
 

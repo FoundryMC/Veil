@@ -10,7 +10,7 @@ import java.lang.Math;
 public class Cylinder implements EmitterShape {
 
     @Override
-    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface) {
         double theta = randomSource.nextDouble() * 2 * Math.PI;
         double x = Math.cos(theta);
         double y = randomSource.nextDouble() * 2 - 1;
@@ -27,7 +27,7 @@ public class Cylinder implements EmitterShape {
             );
         }
         Vector3d pos = normal.mul(dim);
-        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
+        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(shapeRotation.x()), (float) Math.toRadians(shapeRotation.y()), (float) Math.toRadians(shapeRotation.z())));
         pos.mul(0.5);
         return pos.add(position);
     }

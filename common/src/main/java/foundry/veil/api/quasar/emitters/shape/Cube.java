@@ -12,7 +12,7 @@ import java.lang.Math;
 public class Cube implements EmitterShape {
 
     @Override
-    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface) {
         double x = randomSource.nextDouble() * 2 - 1;
         double y = randomSource.nextDouble() * 2 - 1;
         double z = randomSource.nextDouble() * 2 - 1;
@@ -28,7 +28,11 @@ public class Cube implements EmitterShape {
         }
         Vector3d normal = new Vector3d(x, y, z);
         Vector3d pos = normal.mul(dimensions).mul(0.5);
-        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
+        new Matrix4d().rotate(new Quaternionf().rotationXYZ((float) Math.toRadians(shapeRotation.x()), (float) Math.toRadians(shapeRotation.y()), (float) Math.toRadians(shapeRotation.z()))).transformPosition(pos);
+        //pos.rotateAxis(Math.toRadians(shapeRotation.x()), 1, 0, 0);
+        //pos.rotateAxis(Math.toRadians(shapeRotation.y()), 0, 1, 0);
+        //pos.rotateAxis(Math.toRadians(shapeRotation.z()), 0, 0, 1);
+        //pos.rotate(new Quaterniond().rotateLocalX((float) Math.toRadians(shapeRotation.x())).rotateLocalY( (float) Math.toRadians(shapeRotation.y())).rotateLocalZ( (float) Math.toRadians(shapeRotation.z())));
         return pos.add(position);
     }
 

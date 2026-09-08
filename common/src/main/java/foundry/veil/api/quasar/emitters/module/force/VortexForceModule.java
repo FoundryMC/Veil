@@ -2,6 +2,7 @@ package foundry.veil.api.quasar.emitters.module.force;
 
 import foundry.veil.api.quasar.data.module.force.VortexForceData;
 import foundry.veil.api.quasar.particle.QuasarParticle;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
@@ -38,9 +39,11 @@ public class VortexForceModule extends SimplePositionedForce {
         }
 
         // apply force to particle to move around the vortex center on the vortex axis, but do not modify outwards/inwards velocity
-        Vector3d particleToCenterOnAxis = diff.sub(this.vortexAxis.mul(diff.dot(this.vortexAxis), this.dot));
+        Vector3d rotatedAxis = this.vortexAxis.rotate(particle.getEmitter().getRotation().get(new Quaterniond()), new Vector3d()).normalize();
+
+        Vector3d particleToCenterOnAxis = diff.sub(rotatedAxis.mul(diff.dot(rotatedAxis), this.dot));
         particleToCenterOnAxis.normalize();
-        particleToCenterOnAxis.cross(this.vortexAxis).mul(this.strength);
+        particleToCenterOnAxis.cross(rotatedAxis).mul(this.strength);
         particle.getVelocity().add(particleToCenterOnAxis);
     }
 
