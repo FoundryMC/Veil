@@ -7,6 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -45,6 +46,10 @@ public record ParticleSettings(float particleSpeed,
             Codec.BOOL.optionalFieldOf("random_lifetime", false).forGetter(ParticleSettings::randomLifetime)
     ).apply(instance, ParticleSettings::new));
     public static final Codec<Holder<ParticleSettings>> CODEC = RegistryFileCodec.create(QuasarParticles.PARTICLE_SETTINGS, DIRECT_CODEC);
+
+    @ApiStatus.Internal
+    public ParticleSettings {
+    }
 
     public float particleSpeed(RandomSource random) {
         return this.randomSpeed ? this.particleSpeed + random.nextFloat() * this.particleSpeedVariation : this.particleSpeed;

@@ -779,7 +779,7 @@ public class ParticleEditorInspector extends SingleWindowInspector {
         }
 
         @Override
-        public void setRotation(Quaternionf newRot) {
+        public void setRotation(Quaternionfc newRot) {
             newRot.getEulerAnglesXYZ(this.rotation);
         }
 

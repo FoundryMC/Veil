@@ -15,6 +15,9 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.util.Mth;
 
+/**
+ * @since 4.5.0
+ */
 public final class TickRotationParticleModuleData implements ParticleModuleData, EditorAttributeProvider {
     public static final MapCodec<TickRotationParticleModuleData> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             MolangExpressionCodec.CODEC.fieldOf("x").forGetter(TickRotationParticleModuleData::rotationX),

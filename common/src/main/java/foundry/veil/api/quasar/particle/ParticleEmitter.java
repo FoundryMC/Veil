@@ -348,6 +348,8 @@ public class ParticleEmitter {
 
     /**
      * Rotation of the emitter
+     *
+     * @since 4.5.0
      */
     public Quaternionf getRotation() {
         return this.rotation;
@@ -444,6 +446,7 @@ public class ParticleEmitter {
      * @param x The rotation about the X axis, in radians.
      * @param y The rotation about the Y axis, in radians.
      * @param z The rotation about the Z axis, in radians.
+     * @since 4.5.0
      */
     public void setRotation(float x, float y, float z) {
         this.rotation.identity().rotateLocalX(x).rotateLocalY(y).rotateLocalZ(z);
@@ -453,8 +456,9 @@ public class ParticleEmitter {
      * Sets the rotation of the particle emitter.
      *
      * @param rotation The rotation of the emitter.
+     * @since 4.5.0
      */
-    public void setRotation(Quaternionf rotation) {
+    public void setRotation(Quaternionfc rotation) {
         this.rotation.set(rotation);
     }
 

@@ -138,6 +138,9 @@ public class ParticleModuleTypeRegistry {
 
     // UPDATE
     public static final ModuleType<TickSizeParticleModuleData> TICK_SIZE = registerModule("size", TickSizeParticleModuleData.CODEC, () -> new TickSizeParticleModuleData(MolangExpression.of(1)));
+    /**
+     * @since 4.5.0
+     */
     public static final ModuleType<TickRotationParticleModuleData> TICK_ROTATION = registerModule("rotation", TickRotationParticleModuleData.CODEC, () -> new TickRotationParticleModuleData(MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO));
     public static final ModuleType<TickSubEmitterModuleData> TICK_SUB_EMITTER = registerModule("tick_sub_emitter", TickSubEmitterModuleData.CODEC, () -> new TickSubEmitterModuleData(ResourceLocation.withDefaultNamespace(""), 5));
     // UPDATE - COLLISION

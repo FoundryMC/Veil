@@ -25,7 +25,14 @@ public record EmitterShapeSettings(EmitterShape shape,
     ).apply(instance, EmitterShapeSettings::new));
     public static final Codec<Holder<EmitterShapeSettings>> CODEC = RegistryFileCodec.create(QuasarParticles.EMITTER_SHAPE_SETTINGS, DIRECT_CODEC);
 
-    public Vector3d getPos(RandomSource randomSource, Vector3dc pos, Quaternionf rot) {
+    public Vector3d getPos(RandomSource randomSource, Vector3dc pos) {
+        return this.shape.getPoint(randomSource, this.dimensions, this.rotation, pos, this.fromSurface);
+    }
+
+    /**
+     * @since 4.5.0
+     */
+    public Vector3d getPos(RandomSource randomSource, Vector3dc pos, Quaternionfc rot) {
         return this.shape.getPoint(randomSource, this.dimensions, this.rotation.add(rot.getEulerAnglesXYZ(new Vector3f()).mul(Mth.RAD_TO_DEG), new Vector3f()), pos, this.fromSurface);
     }
 
