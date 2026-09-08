@@ -67,6 +67,8 @@ foundry.veil.api.quasar.registry
 foundry.veil.api.resource
 foundry.veil.api.resource.editor
 foundry.veil.api.resource.type
+foundry.veil.api.screenshake
+foundry.veil.api.screenshake.type
 foundry.veil.api.util
 foundry.veil.ext
 foundry.veil.ext.iris
@@ -127,6 +129,7 @@ foundry.veil.mixin.resource
 foundry.veil.mixin.resource.accessor
 foundry.veil.mixin.resource.client
 foundry.veil.mixin.scheduler
+foundry.veil.mixin.screenshake.client
 foundry.veil.mixin.shader_recompile.accessor
 foundry.veil.mixin.shader_recompile.client
 foundry.veil.mixin.shader.client
