@@ -1,1 +1,2 @@
-- Fix NeoForge crash when ImGuiMC is not loaded
+- Fix mismatched codec field ([#184](https://github.com/FoundryMC/Veil/pull/184))
+- Fix UV winding direction ([#186](https://github.com/FoundryMC/Veil/pull/186))
