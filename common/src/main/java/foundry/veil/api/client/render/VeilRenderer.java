@@ -274,6 +274,7 @@ public class VeilRenderer implements ResourceManagerReloadListener {
 
     /**
      * @return The manager for screen shaking
+     * @since 4.5.0
      */
     public ScreenShakeManager getScreenShakeManager() {
         return this.screenShakeManager;

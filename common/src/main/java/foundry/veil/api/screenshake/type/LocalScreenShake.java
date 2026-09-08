@@ -1,4 +1,4 @@
-package foundry.veil.impl.screenshake;
+package foundry.veil.api.screenshake.type;
 
 import foundry.veil.api.client.util.Easing;
 import gg.moonflower.molangcompiler.api.MolangExpression;
@@ -10,6 +10,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Screen shake that originates from a point in the world, strength decreasing with distance.
+ *
+ * @author Neddslayer
+ * @since 4.5.0
  */
 public class LocalScreenShake extends GlobalScreenShake {
 
@@ -35,7 +38,7 @@ public class LocalScreenShake extends GlobalScreenShake {
     protected float getStrength() {
         float strength = super.getStrength();
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        float distanceMultiplier = Mth.clamp( (float) (1.0f - (camera.getPosition().distanceTo(this.position) / this.radius)), 0, 1);
-        return falloff.ease(distanceMultiplier) * strength;
+        float distanceMultiplier = Mth.clamp((float) (1.0f - (camera.getPosition().distanceTo(this.position) / this.radius)), 0, 1);
+        return this.falloff.ease(distanceMultiplier) * strength;
     }
 }

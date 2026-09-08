@@ -6,9 +6,12 @@ import org.joml.Vector3f;
 
 /**
  * Defines the behavior of a screenshake
+ *
  * @author Neddslayer
+ * @since 4.5.0
  */
 public abstract class ScreenShakeType {
+
     private final Vector3f positionOffset = new Vector3f();
     private final RandomSource randomSource;
     private final int length;
@@ -25,12 +28,12 @@ public abstract class ScreenShakeType {
         this.ticksRemaining--;
         if (!this.isRemoved()) {
             float strength = this.getStrength();
-            positionOffset.set(randomOffset(strength), randomOffset(strength), randomOffset(strength));
+            this.positionOffset.set(this.randomOffset(strength), this.randomOffset(strength), this.randomOffset(strength));
         }
     }
 
     private float randomOffset(float strength) {
-        return (randomSource.nextFloat() - 0.5f) * strength;
+        return (this.randomSource.nextFloat() - 0.5f) * strength;
     }
 
     public boolean isRemoved() {
@@ -62,7 +65,7 @@ public abstract class ScreenShakeType {
      * @return For the current tick, where the screenshake has offset the camera.
      */
     public Vector3f getPositionOffset() {
-        return positionOffset;
+        return this.positionOffset;
     }
 
     /**

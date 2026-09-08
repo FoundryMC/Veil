@@ -1,7 +1,6 @@
-package foundry.veil.impl.screenshake;
+package foundry.veil.api.screenshake.type;
 
 import foundry.veil.api.molang.VeilMolang;
-import foundry.veil.api.screenshake.type.ScreenShakeType;
 import gg.moonflower.molangcompiler.api.MolangExpression;
 import gg.moonflower.molangcompiler.api.MolangRuntime;
 import gg.moonflower.molangcompiler.api.exception.MolangSyntaxException;
@@ -11,6 +10,9 @@ import java.util.function.Supplier;
 
 /**
  * A screen shake that affects the player regardless of distance.
+ *
+ * @author Neddslayer
+ * @since 4.5.0
  */
 public class GlobalScreenShake extends ScreenShakeType {
 
@@ -33,7 +35,6 @@ public class GlobalScreenShake extends ScreenShakeType {
 
     @Override
     protected float getStrength() {
-        MolangRuntime runtime = this.environment.get();
-        return runtime.safeResolve(this.expression);
+        return this.environment.get().safeResolve(this.expression);
     }
 }
