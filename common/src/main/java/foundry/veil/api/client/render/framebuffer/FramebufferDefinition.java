@@ -189,7 +189,13 @@ public record FramebufferDefinition(MolangExpression width,
         }
 
         if (this.depthBuffer != null) {
-            builder.setLevels(this.depthBuffer.levels()).setFormat(this.depthBuffer.format());
+            FramebufferAttachmentDefinition.Format depthFormat = this.depthBuffer.format();
+            // An unsized depth format lets the driver pick, and it does not always pick what the main render target
+            // got. Depth blits between the two then fail, so follow the main render target instead of guessing.
+            if (depthFormat == FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT || depthFormat == FramebufferAttachmentDefinition.Format.DEPTH_STENCIL) {
+                depthFormat = FramebufferAttachmentDefinition.Format.getMainDepthFormat(depthFormat);
+            }
+            builder.setLevels(this.depthBuffer.levels()).setFormat(depthFormat);
             if (this.depthBuffer.type() == FramebufferAttachmentDefinition.Type.RENDER_BUFFER) {
                 builder.setDepthRenderBuffer();
             } else {
