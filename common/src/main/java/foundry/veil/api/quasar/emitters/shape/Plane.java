@@ -12,7 +12,7 @@ import java.lang.Math;
 public class Plane implements EmitterShape {
 
     @Override
-    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc rotation, Vector3dc position, boolean fromSurface) {
+    public Vector3d getPoint(RandomSource randomSource, Vector3fc dimensions, Vector3fc shapeRotation, Vector3dc position, boolean fromSurface) {
         double x = randomSource.nextDouble() - 0.5;
         double y = 0;
         double z = randomSource.nextDouble() - 0.5;
@@ -25,7 +25,7 @@ public class Plane implements EmitterShape {
         }
         Vector3d normal = new Vector3d(x, y, z);
         Vector3d pos = normal.mul(dimensions);
-        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(rotation.x()), (float) Math.toRadians(rotation.y()), (float) Math.toRadians(rotation.z())));
+        pos = pos.rotate(new Quaterniond().rotationXYZ((float) Math.toRadians(shapeRotation.x()), (float) Math.toRadians(shapeRotation.y()), (float) Math.toRadians(shapeRotation.z())));
         return pos.add(position);
     }
 
