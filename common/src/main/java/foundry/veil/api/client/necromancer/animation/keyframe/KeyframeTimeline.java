@@ -13,11 +13,11 @@ public record KeyframeTimeline(Keyframe[] keyframes) {
         listToPopulate[0] = keyframes[previousIndex];
 
         int nextIndex = currentIndex + 1;
-        nextIndex = looped ? nextIndex % keyframes.length : Math.max(nextIndex, keyframes.length - 1);
+        nextIndex = looped ? nextIndex % keyframes.length : Math.min(nextIndex, keyframes.length - 1);
         listToPopulate[2] = keyframes[nextIndex];
 
         int nextNextIndex = currentIndex + 2;
-        nextNextIndex = looped ? nextNextIndex % keyframes.length : Math.max(nextNextIndex, keyframes.length - 1);
+        nextNextIndex = looped ? nextNextIndex % keyframes.length : Math.min(nextNextIndex, keyframes.length - 1);
         listToPopulate[3] = keyframes[nextNextIndex];
 
         // interpolation factor between the two keyframes
@@ -43,12 +43,11 @@ public record KeyframeTimeline(Keyframe[] keyframes) {
             float t1 = keyframes[mid].time();
             float t2 = keyframes[mid + 1].time();
 
-            // current time is between these two keyframes!
-            if (time > t1 && time < t2) {
+            if (time >= t1 && time < t2) {
                 return mid;
             } else if (time > t1) {
                 low = mid + 1;
-            } else if (time < t1) {
+            } else {
                 high = mid - 1;
             }
         }
