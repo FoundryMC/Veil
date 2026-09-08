@@ -7,7 +7,9 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.shader.processor.ShaderImporter;
 import foundry.veil.api.client.render.shader.processor.ShaderInjectProcessor;
 import foundry.veil.api.client.render.shader.processor.ShaderPreProcessor;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.impl.client.render.dynamicbuffer.DynamicBufferProcessor;
+import foundry.veil.impl.compat.ImmersivePortalsShaderPreProcessor;
 import io.github.ocelot.glslprocessor.api.GlslParser;
 import io.github.ocelot.glslprocessor.api.GlslSyntaxException;
 import io.github.ocelot.glslprocessor.api.node.GlslTree;
@@ -34,6 +36,9 @@ public class VanillaShaderProcessor {
         ShaderProcessorList list = new ShaderProcessorList(provider);
         list.addPreprocessor(new ShaderInjectProcessor(), false);
         list.addPreprocessor(new DynamicBufferProcessor(), false);
+        if (ImmersivePortalsCompat.isLoaded()) {
+            list.addPreprocessor(new ImmersivePortalsShaderPreProcessor(), false);
+        }
         VeilClient.clientPlatform().onRegisterShaderPreProcessors(provider, list);
         PROCESSOR.set(list);
     }

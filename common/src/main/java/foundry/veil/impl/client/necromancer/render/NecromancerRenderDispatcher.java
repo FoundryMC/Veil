@@ -14,6 +14,7 @@ import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.block.DynamicShaderBlock;
 import foundry.veil.api.client.render.shader.block.ShaderBlock;
 import foundry.veil.api.client.render.vertex.VertexArray;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -90,7 +91,7 @@ public class NecromancerRenderDispatcher {
             boneBlock.setSize(Skeleton.UNIFORM_STRIDE * newSize);
 
             VeilRenderSystem.renderer().getShaderDefinitions().set("NECROMANCER_BONE_BUFFER_SIZE", Long.toString(newSize));
-            if (VeilRenderSystem.directStateAccessSupported()) {
+            if (VeilRenderSystem.directStateAccessSupported() && !ImmersivePortalsCompat.isLoaded()) {
                 glNamedBufferData(boneBuffer, boneBlock.getSize(), GL_DYNAMIC_DRAW);
             } else {
                 glBindBuffer(GL_UNIFORM_BUFFER, boneBuffer);

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.ext.ShaderInstanceExtension;
 import foundry.veil.impl.ThreadTaskScheduler;
 import foundry.veil.impl.client.render.shader.processor.VanillaShaderProcessor;
@@ -110,6 +111,10 @@ public class VanillaShaderCompiler {
 
         int activeBuffers = VeilRenderSystem.renderer().getDynamicBufferManger().getActiveBuffers();
         GLCapabilities capabilities = GL.getCapabilities();
+
+        if (ImmersivePortalsCompat.isLoaded()) {
+            ImmersivePortalsCompat.INSTANCE.init();
+        }
 
         Stopwatch stopwatch = Stopwatch.createStarted();
         ThreadTaskScheduler scheduler = new ThreadTaskScheduler("VeilVanillaShaderCompile", Math.max(1, Runtime.getRuntime().availableProcessors() / 6), () -> {

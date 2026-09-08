@@ -10,6 +10,7 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBuffersChange;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import foundry.veil.ext.RenderTargetExtension;
 import foundry.veil.ext.ShaderInstanceExtension;
 import foundry.veil.mixin.dynamicbuffer.accessor.DynamicBufferGameRendererAccessor;
@@ -30,7 +31,7 @@ import java.util.*;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
 import static org.lwjgl.opengl.GL14C.GL_TEXTURE_LOD_BIAS;
-import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT1;
+import static org.lwjgl.opengl.GL30C.*;
 
 @ApiStatus.Internal
 public class DynamicBufferManager implements NativeResource {
@@ -162,7 +163,7 @@ public class DynamicBufferManager implements NativeResource {
     }
 
     public void setEnabled(boolean enabled) {
-        if (!Veil.IRIS) {
+        if (!Veil.IRIS && (!ImmersivePortalsCompat.isLoaded() || !ImmersivePortalsCompat.INSTANCE.renderingThroughPortal())) {
             this.enabled = enabled;
         }
     }
@@ -331,6 +332,7 @@ public class DynamicBufferManager implements NativeResource {
 
         if (!shaderIterator.hasNext()) {
             Veil.LOGGER.info("Finished uploading vanilla shaders");
+            this.swapShaders.clear();
         }
     }
 

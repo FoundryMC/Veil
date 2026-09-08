@@ -12,6 +12,7 @@ import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.block.DynamicShaderBlock;
 import foundry.veil.api.client.render.vertex.VertexArray;
 import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -32,8 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.ARBDirectStateAccess.glNamedBufferSubData;
-import static org.lwjgl.opengl.GL15C.glBindBuffer;
-import static org.lwjgl.opengl.GL15C.glBufferSubData;
+import static org.lwjgl.opengl.GL15C.*;
 import static org.lwjgl.opengl.GL30C.glUniform1ui;
 import static org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER;
 
@@ -120,7 +120,7 @@ public class Skin implements NativeResource {
         }
 
         // Upload data
-        if (VeilRenderSystem.directStateAccessSupported()) {
+        if (VeilRenderSystem.directStateAccessSupported() && !ImmersivePortalsCompat.isLoaded()) {
             glNamedBufferSubData(boneBuffer, 0, buffer);
         } else {
             glBindBuffer(GL_UNIFORM_BUFFER, boneBuffer);

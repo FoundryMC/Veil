@@ -1,12 +1,10 @@
 package foundry.veil.api.client.render.ext;
 
 import foundry.veil.Veil;
+import foundry.veil.api.compat.ImmersivePortalsCompat;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLCapabilities;
-import org.lwjgl.opengl.KHRDebug;
+import org.lwjgl.opengl.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,7 +42,9 @@ public enum VeilDebug {
         @Override
         public void objectLabel(int identifier, int name, @Nullable CharSequence label) {
             if (label != null) {
-                glObjectLabel(identifier, name, label);
+                if (!ImmersivePortalsCompat.isLoaded()) {
+                    glObjectLabel(identifier, name, label);
+                }
             } else {
                 nglObjectLabel(identifier, name, 0, 0L);
             }
