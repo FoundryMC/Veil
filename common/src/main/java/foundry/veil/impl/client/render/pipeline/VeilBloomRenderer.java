@@ -65,6 +65,10 @@ public final class VeilBloomRenderer {
         FramebufferStack.push(null);
         VeilRenderSystem.renderer().getFramebufferManager().setFramebuffer(VeilFramebuffers.BLOOM, bloom);
         bloom.bind(true);
+        // Keep the bloom depth attachment in sync with the main target.
+        if (bloom.getDepthTextureAttachment().getId() != framebufferTexture) {
+            bloom.setDepthAttachmentTexture(framebufferTexture);
+        }
         rendered = true;
     }
 
@@ -90,6 +94,10 @@ public final class VeilBloomRenderer {
 
     public static boolean hasRendered() {
         return rendered && enabled;
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
     }
 
     public static void flush() {
