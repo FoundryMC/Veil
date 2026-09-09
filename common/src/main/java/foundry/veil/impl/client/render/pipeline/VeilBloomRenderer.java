@@ -96,10 +96,6 @@ public final class VeilBloomRenderer {
         return rendered && enabled;
     }
 
-    public static boolean isEnabled() {
-        return enabled;
-    }
-
     public static void flush() {
         if (!rendered || !enabled) {
             return;
