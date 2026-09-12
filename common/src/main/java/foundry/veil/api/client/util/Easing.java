@@ -1,255 +1,81 @@
-package foundry.veil.api.client.util;
+package foundry.veil.api.client.necromancer.animation.keyframe;
 
-import foundry.veil.api.util.EnumCodec;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.ApiStatus;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
+// todo: support cubic interpolation w/ derivatives
 /**
- * @author amo
+ * @deprecated Use {@link foundry.veil.api.client.util.Easing} instead
  */
-public enum Easing {
-    LINEAR {
-        public float ease(float x) {
-            return x;
-        }
-    },
-    EASE_IN_QUAD {
-        public float ease(float x) {
-            return x * x;
-        }
-    },
-    EASE_OUT_QUAD {
-        public float ease(float x) {
-            return 1 - (1 - x) * (1 - x);
-        }
-    },
-    EASE_IN_OUT_QUAD {
-        public float ease(float x) {
-            return x < 0.5 ? 2 * x * x : (float) (1 - Math.pow(-2 * x + 2, 2) / 2);
-        }
-    },
-    EASE_IN_CUBIC {
-        public float ease(float x) {
-            return x * x * x;
-        }
-    },
-    EASE_OUT_CUBIC {
-        public float ease(float x) {
-            return (float) (1 - Math.pow(1 - x, 3));
-        }
-    },
-    EASE_IN_OUT_CUBIC {
-        public float ease(float x) {
-            return x < 0.5 ? 4 * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 3) / 2);
-        }
-    },
-    EASE_IN_QUART {
-        public float ease(float x) {
-            return x * x * x * x;
-        }
-    },
-    EASE_OUT_QUART {
-        public float ease(float x) {
-            return (float) (1 - Math.pow(1 - x, 4));
-        }
-    },
-    EASE_IN_OUT_QUART {
-        public float ease(float x) {
-            return x < 0.5 ? 8 * x * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 4) / 2);
-        }
-    },
-    EASE_IN_QUINT {
-        public float ease(float x) {
-            return x * x * x * x * x;
-        }
-    },
-    EASE_OUT_QUINT {
-        public float ease(float x) {
-            return (float) (1 - Math.pow(1 - x, 5));
-        }
-    },
-    EASE_IN_OUT_QUINT {
-        public float ease(float x) {
-            return x < 0.5 ? 16 * x * x * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 5) / 2);
-        }
-    },
-    EASE_IN_SINE {
-        public float ease(float x) {
-            return 1 - Mth.cos((float) ((x * Math.PI) / 2));
-        }
-    },
-    EASE_OUT_SINE {
-        public float ease(float x) {
-            return Mth.sin((float) ((x * Math.PI) / 2));
-        }
-    },
-    EASE_IN_OUT_SINE {
-        public float ease(float x) {
-            return -(Mth.cos((float) (Math.PI * x)) - 1) / 2;
-        }
-    },
-    EASE_IN_EXPO {
-        public float ease(float x) {
-            return x == 0 ? 0 : (float) Math.pow(2, 10 * x - 10);
-        }
-    },
-    EASE_OUT_EXPO {
-        public float ease(float x) {
-            return x == 1 ? 1 : (float) (1 - Math.pow(2, -10 * x));
-        }
-    },
-    EASE_IN_OUT_EXPO {
-        public float ease(float x) {
-            return x == 0
-                    ? 0
-                    : (float) (x == 1
-                    ? 1
-                    : x < 0.5
-                    ? Math.pow(2, 20 * x - 10) / 2
-                    : (2 - Math.pow(2, -20 * x + 10)) / 2);
-        }
-    },
-    EASE_IN_CIRC {
-        public float ease(float x) {
-            return (float) (1 - Math.sqrt(1 - Math.pow(x, 2)));
-        }
-    },
-    EASE_OUT_CIRC {
-        public float ease(float x) {
-            return (float) Math.sqrt(1 - Math.pow(x - 1, 2));
-        }
-    },
-    EASE_IN_OUT_CIRC {
-        public float ease(float x) {
-            return (float) (x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2);
-        }
-    },
-    EASE_IN_BACK {
-        public float ease(float x) {
-            return 2.70158F * x * x * x - 1.70158F * x * x;
-        }
-    },
-    EASE_OUT_BACK {
-        public float ease(float x) {
-            return (float) (1 + 2.70158F * Math.pow(x - 1, 3) + 1.70158F * Math.pow(x - 1, 2));
-        }
-    },
-    EASE_IN_OUT_BACK {
-        public float ease(float x) {
-            return (float) (x < 0.5
-                    ? (Math.pow(2 * x, 2) * ((2.5949095F + 1) * 2 * x - 2.5949095F)) / 2
-                    : (Math.pow(2 * x - 2, 2) * ((2.5949095F + 1) * (x * 2 - 2) + 2.5949095F) + 2) / 2);
-        }
-    },
-    EASE_IN_ELASTIC {
-        public float ease(float x) {
-            return x == 0
-                    ? 0
-                    : (float) (x == 1
-                    ? 1
-                    : -Math.pow(2, 10 * x - 10) * Mth.sin((float) ((x * 10 - 10.75) * ((2 * Math.PI) / 3))));
-        }
-    },
-    EASE_OUT_ELASTIC {
-        public float ease(float x) {
-            return x == 0
-                    ? 0
-                    : (float) (x == 1
-                    ? 1
-                    : Math.pow(2, -10 * x) * Mth.sin((float) ((x * 10 - 0.75) * ((2 * Math.PI) / 3))) + 1);
-        }
-    },
-    EASE_IN_OUT_ELASTIC {
-        public float ease(float x) {
-            return x == 0
-                    ? 0
-                    : (float) (x == 1
-                    ? 1
-                    : x < 0.5
-                    ? -(Math.pow(2, 20 * x - 10) * Mth.sin((float) ((20 * x - 11.125) * ((2 * Math.PI) / 4.5)))) / 2
-                    : (Math.pow(2, -20 * x + 10) * Mth.sin((float) ((20 * x - 11.125) * ((2 * Math.PI) / 4.5)))) / 2 + 1);
-        }
-    },
-    EASE_IN_BOUNCE {
-        public float ease(float x) {
-            return 1 - bounceOut(1 - x);
-        }
-    },
-    EASE_OUT_BOUNCE {
-        public float ease(float x) {
-            return 1 - bounceOut(1 - x);
-        }
-    },
-    EASE_IN_OUT_BOUNCE {
-        public float ease(float x) {
-            return x < 0.5
-                    ? (1 - bounceOut(1 - 2 * x)) / 2
-                    : (1 + bounceOut(2 * x - 1)) / 2;
-        }
-    },
-
-    // Additional Easings
+public enum Interpolation {
+    /**
+     * @since 4.5.0
+     */
+    STEP(
+            (a, b, t) -> t < 1F ? a : b,
+            (a, b, t, result) -> result.set(t < 1 ? a : b)
+    ),
+    LINEAR(
+            (a, b, t) -> Mth.lerp(t, a, b),
+            Quaternionfc::slerp
+    ),
+    /**
+     * @since 4.5.0
+     */
+    EASE_IN(
+            (a, b, t) -> Mth.lerp(t * t, a, b),
+            (a, b, t, result) -> result.set(a).slerp(b, t * t)
+    ),
+    /**
+     * @since 4.5.0
+     */
+    EASE_OUT(
+            (a, b, t) -> Mth.lerp(1F - (1F - t) * (1F - t), a, b),
+            (a, b, t, result) -> result.set(a).slerp(b, 1F - (1F - t) * (1F - t))
+    ),
+    /**
+     * @since 4.5.0
+     */
+    EASE_IN_OUT(
+            (a, b, t) -> Mth.lerp(easeInOut(t), a, b),
+            (a, b, t, result) -> result.set(a).slerp(b, easeInOut(t))
+    );
 
     /**
-     * @since 2.4.0
+     * @deprecated Use {@link #STEP} instead
      */
-    EASE_OUT_IN_QUAD {
-        public float ease(float x) {
-            return x < 0.5 ? 1 - Mth.square(x - 1) : 1 + Mth.square(x - 1);
-        }
-    },
-    /**
-     * @since 2.4.0
-     */
-    EASE_OUT_IN_CUBIC {
-        public float ease(float x) {
-            return 1 - (float) Math.pow(x - 1, 3);
-        }
-    },
-    /**
-     * @since 2.4.0
-     */
-    EASE_OUT_IN_QUART {
-        public float ease(float x) {
-            return x < 0.5 ? 1 - (float) Math.pow(x - 1, 4) : 1 + (float) Math.pow(x - 1, 4);
-        }
-    },
-    /**
-     * @since 2.4.0
-     */
-    EASE_OUT_IN_QUINT {
-        public float ease(float x) {
-            return 1 - (float) Math.pow(x - 1, 5);
-        }
-    };
+    @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+    @Deprecated
+    public static final Interpolation NEAREST_NEIGHBOR = STEP;
 
-    /**
-     * @since 2.4.0
-     */
-    public static final EnumCodec<Easing> CODEC = EnumCodec.
-            <Easing>builder("Easing")
-            .values(Easing.class)
-            .build();
+    private static float easeInOut(float t) {
+        return t < 0.5F ? 2F * t * t : 1F - (float) Math.pow(-2F * t + 2F, 2) / 2F;
+    }
 
-    /**
-     * Applies the easing to the specified input.
-     *
-     * @param x The input percentage from <code>0</code> to <code>1</code>
-     * @return A remapped value from <code>0</code> to <code>1</code> that follows this easing
-     */
-    public abstract float ease(float x);
+    private final FloatInterpolator fInterpolator;
+    private final QuaternionInterpolator qInterpolator;
 
-    private static float bounceOut(float x) {
-        float n1 = 7.5625F;
-        float d1 = 2.75F;
+    Interpolation(FloatInterpolator fInterpolator, QuaternionInterpolator qInterpolator) {
+        this.fInterpolator = fInterpolator;
+        this.qInterpolator = qInterpolator;
+    }
 
-        if (x < 1 / d1) {
-            return n1 * x * x;
-        } else if (x < 2 / d1) {
-            return n1 * (x -= 1.5F / d1) * x + 0.75F;
-        } else if (x < 2.5 / d1) {
-            return n1 * (x -= 2.25F / d1) * x + 0.9375F;
-        } else {
-            return n1 * (x -= 2.625F / d1) * x + 0.984375F;
-        }
+    public float interpolate(float a, float b, float t) {
+        return this.fInterpolator.interpolate(a, b, t);
+    }
+
+    public Quaternionf interpolate(Quaternionfc a, Quaternionfc b, float t, Quaternionf result) {
+        this.qInterpolator.interpolate(a, b, t, result);
+        return result;
+    }
+
+    public interface FloatInterpolator {
+        float interpolate(float a, float b, float t);
+    }
+
+    public interface QuaternionInterpolator {
+        void interpolate(Quaternionfc a, Quaternionfc b, float t, Quaternionf result);
     }
 }
