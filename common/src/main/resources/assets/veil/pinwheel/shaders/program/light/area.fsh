@@ -39,6 +39,15 @@ float sacos(float x)
     return mix(0.5*3.1415927, z, sign(x));
 }
 
+vec3 areaTextureCoordinate(vec3 point, mat4 planeMatrix, vec2 planeSize) {
+    planeMatrix[3].xyz *= -1.0;
+
+    // transform the point to the plane's local space
+    vec3 localSpacePoint = (planeMatrix * vec4(point, 1.0)).xyz;
+
+    return localSpacePoint;
+}
+
 struct AreaLightResult { vec3 position; float angle; };
 AreaLightResult closestPointOnPlaneAndAngle(vec3 point, mat4 planeMatrix, mat4 invPlaneMatrix, vec2 planeSize) {
     // no idea why i need to do this
@@ -177,6 +186,16 @@ void main() {
 
     float reflectivity = 0.05;
     vec3 diffuseColor = diffuse * lightColor;
+    #ifndef SPOTLIGHT
+    vec3 point = areaTextureCoordinate(pos, lightMat, size);
+
+    vec2 proj_uv = point.xy / ((2 * point.z + 2) * (size));
+    proj_uv = vec2(1.0 - proj_uv.x - 0.5, proj_uv.y + 0.5);
+
+    vec4 proj_color = texture(AlbedoSampler, proj_uv);
+
+    diffuseColor *= proj_color.rgb * proj_color.a;
+    #endif
 
     fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, 1.0);
 }
