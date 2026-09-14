@@ -10,6 +10,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
 import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
+import foundry.veil.api.client.render.light.LightProjectorData;
 import foundry.veil.api.client.util.Easing;
 import foundry.veil.api.quasar.data.QuasarParticles;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
@@ -32,10 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.*;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Locale;
@@ -166,5 +164,10 @@ public class VeilForgeClientEvents {
     @SubscribeEvent
     public static void clientStopping(ForgeFreeNativeResourcesEvent event) {
         VeilClientSchedulerImpl.shutdown();
+    }
+
+    @SubscribeEvent
+    public static void registerAtlases(RegisterMaterialAtlasesEvent event) {
+        event.register(LightProjectorData.PROJECTION_ATLAS, Veil.veilPath("light_projection"));
     }
 }

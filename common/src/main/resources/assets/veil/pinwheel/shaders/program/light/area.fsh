@@ -19,12 +19,14 @@ in float maxAngle;
 in float maxDistance;
 in float occluded;
 in float inscattering;
+in vec4 uvs;
 
 #ifndef INSCATTERING
 uniform sampler2D AlbedoSampler;
 uniform sampler2D NormalSampler;
 #endif
 uniform sampler2D DepthSampler;
+uniform sampler2D ProjectionAtlas;
 
 uniform vec2 ScreenSize;
 
@@ -39,7 +41,7 @@ float sacos(float x)
     return mix(0.5*3.1415927, z, sign(x));
 }
 
-vec3 areaTextureCoordinate(vec3 point, mat4 planeMatrix, vec2 planeSize) {
+vec3 areaTextureCoordinate(vec3 point, mat4 planeMatrix) {
     planeMatrix[3].xyz *= -1.0;
 
     // transform the point to the plane's local space
@@ -77,6 +79,10 @@ SpotLightResult spotLightPositionAndAngle(vec3 point, mat4 lightMatrix) {
 
     vec3 worldPos = (inverse(lightMatrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     return SpotLightResult(worldPos, angle);
+}
+
+vec2 map(vec2 value, vec2 inMin, vec2 inMax, vec2 outMin, vec2 outMax) {
+    return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
 }
 
 #ifdef INSCATTERING
@@ -187,14 +193,21 @@ void main() {
     float reflectivity = 0.05;
     vec3 diffuseColor = diffuse * lightColor;
     #ifndef SPOTLIGHT
-    vec3 point = areaTextureCoordinate(pos, lightMat, size);
+    if (uvs.x >= 0 && uvs.y >= 0 && uvs.z >= 0 && uvs.w >= 0) {
+        vec3 point = areaTextureCoordinate(pos, lightMat);
 
-    vec2 proj_uv = point.xy / ((2 * point.z + 2) * (size));
-    proj_uv = vec2(1.0 - proj_uv.x - 0.5, proj_uv.y + 0.5);
+        vec2 proj_uv = point.xy / ((1.1 * point.z + 2) * (size));
+        proj_uv = (vec2(1.0 - proj_uv.x, 1.0 - proj_uv.y) - 0.5);
 
-    vec4 proj_color = texture(AlbedoSampler, proj_uv);
+        vec2 mapped = map(proj_uv, vec2(0), vec2(1), uvs.xy, uvs.zw);
+        vec4 proj_color = texture(ProjectionAtlas, mapped);
 
-    diffuseColor *= proj_color.rgb * proj_color.a;
+        if (proj_uv.x < 0 || proj_uv.x > 1 || proj_uv.y < 0 || proj_uv.y > 1) {
+            proj_color.a = 0;
+        }
+
+        diffuseColor *= proj_color.rgb * proj_color.a;
+    }
     #endif
 
     fragColor = vec4(albedoColor.rgb * diffuseColor * (1.0 - reflectivity) + diffuseColor * reflectivity, 1.0);
