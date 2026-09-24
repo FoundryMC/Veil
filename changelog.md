@@ -1,3 +1,1 @@
-- Improve Quasar emitter rotation ([#180](https://github.com/FoundryMC/Veil/pull/180))
-- Add screen shake module ([#183](https://github.com/FoundryMC/Veil/pull/183))
-- Fix Necromancer Animation classes ([#196](https://github.com/FoundryMC/Veil/pull/196))
+- Fix crash on yarn mappings
