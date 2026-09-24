@@ -10,6 +10,7 @@ layout (location = 6) in vec2 Size;
 #endif
 layout (location = 7) in float NormalizedAngle;
 layout (location = 8) in vec3 Settings;
+layout (location = 9) in vec4 UVs;
 
 #define Distance Settings.x
 #define Occluded Settings.y
@@ -29,6 +30,7 @@ out float occluded;
 #ifdef INSCATTERING
 out float inscattering;
 #endif
+out vec4 uvs;
 
 void main() {
     vec3 vertexPos = Position;
@@ -67,4 +69,5 @@ void main() {
     #ifdef INSCATTERING
     inscattering = Inscattering;
     #endif
+    uvs = UVs;
 }

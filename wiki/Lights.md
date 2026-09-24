@@ -11,12 +11,14 @@ Point lights emit light uniformly in all directions from a single point. Each po
 
 ### [Area Lights](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/light/data/AreaLightData.java)
 Area lights emit light from a quad, which can be rotated to face any direction. Area lights have the same `position` property as point lights, but in addition have `distance`, `angle`, and `orientation`.
+Furthermore, area lights uniquely have the option to project a texture onto the world. Textures projected must be under the `textures/projection` asset folder, and can be added or modified by resource packs.
+For an example, if a texture was added to `assets/modid/textures/projection/image.png`, the location referenced in the area light options would be `modid:projection/image`
 
 ### [Directional Lights](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/light/data/DirectionalLightData.java)
 Directional lights, unlike point and area lights, do not have a position, merely having a `direction` property. Directional lights simulate the sun, shadowing faces away from the light.
 
 ### [Spot Lights](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/light/data/SpotLightData.java)
-Spot lights emit light from a point, which can be rotated to face any direction. Spot lights have the same values as Area lights except it has one `size` value instead of separate width and height values.
+Spot lights emit light from a point, which can be rotated to face any direction. Spot lights have the same values as area lights except it has one `size` value instead of separate width and height values.
 
 ## Light Renderers
 Each light type additionally its own [`LightTypeRenderer`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/light/renderer/LightTypeRenderer.java). Each `LightTypeRenderer` is responsible for rendering all lights of its assigned types. Lights that have a position (like point and area lights) can extend the [`InstancedLightRenderer`](https://github.com/FoundryMC/Veil/blob/1.21/common/src/main/java/foundry/veil/api/client/render/light/renderer/InstancedLightRenderer.java) to have some methods built in.
