@@ -999,6 +999,20 @@ public interface AdvancedFbo extends NativeResource {
         }
 
         /**
+         * Adds the specified depth-stencil texture as a depth-stencil texture attachment.
+         *
+         * @param textureId The id of the texture to add. It must have a depth-stencil internal format
+         */
+        public Builder setDepthStencilTextureWrapper(int textureId) {
+            return this.setDepthBuffer(new AdvancedFboMutableTextureAttachment(
+                    GL_DEPTH_STENCIL_ATTACHMENT,
+                    GL_DEPTH_STENCIL,
+                    textureId,
+                    -1,
+                    this.name));
+        }
+
+        /**
          * Sets the depth texture buffer to the size of the framebuffer.
          */
         public Builder setDepthTextureBuffer() {

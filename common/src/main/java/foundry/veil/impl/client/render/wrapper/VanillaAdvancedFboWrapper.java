@@ -139,8 +139,10 @@ public abstract class VanillaAdvancedFboWrapper implements AdvancedFbo {
         }
 
         this.depthTextureCache = renderTarget.getDepthTextureId();
+        int oldTexture = glGetInteger(GL_TEXTURE_BINDING_2D);
         GlStateManager._bindTexture(depthTextureId);
         int format = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+        GlStateManager._bindTexture(oldTexture);
         return this.hasStencil = (format == GL_DEPTH_STENCIL || format == GL_DEPTH24_STENCIL8 || format == GL_DEPTH32F_STENCIL8);
     }
 

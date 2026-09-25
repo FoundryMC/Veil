@@ -13,6 +13,8 @@ import foundry.veil.api.client.render.dynamicbuffer.DynamicBufferType;
 import foundry.veil.api.client.render.ext.VeilDebug;
 import foundry.veil.api.client.render.ext.VeilMultiBind;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.client.render.framebuffer.FramebufferAttachmentDefinition;
+import foundry.veil.api.client.render.framebuffer.FramebufferDefinition;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.framebuffer.FramebufferStack;
 import foundry.veil.api.client.render.framebuffer.VeilFramebuffers;
@@ -1280,8 +1282,11 @@ public final class VeilRenderSystem {
     @ApiStatus.Internal
     public static boolean drawLights(ProfilerFiller profiler, CullFrustum cullFrustum, boolean renderInscattering) {
         FramebufferManager framebufferManager = renderer.getFramebufferManager();
-        AdvancedFbo lightFbo = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT);
-        AdvancedFbo lightInscatteringFbo = framebufferManager.getFramebuffer(VeilFramebuffers.LIGHT_INSCATTERING);
+        // The main depth buffer is blitted into the light buffers, which requires the depth formats to match exactly.
+        // This is checked every frame because mods like TACZ can enable stencil on the main target at any time
+        FramebufferAttachmentDefinition.Format depthFormat = FramebufferAttachmentDefinition.Format.getMainDepthFormat(null);
+        AdvancedFbo lightFbo = matchDepthFormat(framebufferManager, VeilFramebuffers.LIGHT, depthFormat);
+        AdvancedFbo lightInscatteringFbo = matchDepthFormat(framebufferManager, VeilFramebuffers.LIGHT_INSCATTERING, depthFormat);
         if (lightFbo == null || lightInscatteringFbo == null) {
             AdvancedFbo.unbind();
             return false;
@@ -1310,6 +1315,27 @@ public final class VeilRenderSystem {
 
         debug.popDebugGroup();
         return rendered;
+    }
+
+    private static @Nullable AdvancedFbo matchDepthFormat(FramebufferManager framebufferManager, ResourceLocation name, @Nullable FramebufferAttachmentDefinition.Format format) {
+        AdvancedFbo fbo = framebufferManager.getFramebuffer(name);
+        if (format == null || fbo == null || !fbo.hasDepthAttachment() || fbo.getDepthAttachment().getFormat() == format.getInternalFormat()) {
+            return fbo;
+        }
+
+        FramebufferDefinition definition = framebufferManager.getFramebufferDefinition(name);
+        FramebufferAttachmentDefinition depth = definition != null ? definition.depthBuffer() : null;
+        if (depth == null) {
+            return fbo;
+        }
+
+        framebufferManager.setDefinition(name, new FramebufferDefinition(
+                definition.width(),
+                definition.height(),
+                definition.colorBuffers(),
+                new FramebufferAttachmentDefinition(depth.type(), format, true, depth.filter(), depth.levels(), depth.name()),
+                definition.autoClear()));
+        return framebufferManager.getFramebuffer(name);
     }
 
     @ApiStatus.Internal

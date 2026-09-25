@@ -22,7 +22,14 @@ public class AdvancedFboMutableTextureAttachment extends AdvancedFboTextureAttac
     private int layer;
 
     public AdvancedFboMutableTextureAttachment(int attachmentType, int textureId, int layer, String name) {
-        super(attachmentType, 0, 0, 0, 0, 1, TextureFilter.CLAMP, name);
+        this(attachmentType, 0, textureId, layer, name);
+    }
+
+    /**
+     * @param internalFormat The internal format of the wrapped texture, used to detect if the wrapped texture has a stencil component
+     */
+    public AdvancedFboMutableTextureAttachment(int attachmentType, int internalFormat, int textureId, int layer, String name) {
+        super(attachmentType, internalFormat, 0, 0, 0, 1, TextureFilter.CLAMP, name);
         this.setTexture(textureId, layer);
     }
 
@@ -75,7 +82,7 @@ public class AdvancedFboMutableTextureAttachment extends AdvancedFboTextureAttac
 
     @Override
     public AdvancedFboMutableTextureAttachment clone() {
-        return new AdvancedFboMutableTextureAttachment(this.getAttachmentType(), this.textureId, this.layer, this.getName());
+        return new AdvancedFboMutableTextureAttachment(this.getAttachmentType(), this.getFormat(), this.textureId, this.layer, this.getName());
     }
 
     @Override
