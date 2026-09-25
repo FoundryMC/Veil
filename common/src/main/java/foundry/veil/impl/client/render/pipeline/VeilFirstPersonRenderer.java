@@ -81,6 +81,7 @@ public final class VeilFirstPersonRenderer {
         }
 
         AdvancedFbo.unbind();
+        VeilBloomRenderer.flush(); // prevent leak
         VeilDebug.get().popDebugGroup();
     }
 
