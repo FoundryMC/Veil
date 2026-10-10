@@ -1,1 +1,2 @@
-- Fix crash on yarn mappings
+- Add quasar hot-reloading
+- Fix random particle variation
