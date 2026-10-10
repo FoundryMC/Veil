@@ -30,7 +30,7 @@ import java.util.*;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
 import static org.lwjgl.opengl.GL14C.GL_TEXTURE_LOD_BIAS;
-import static org.lwjgl.opengl.GL30C.GL_COLOR_ATTACHMENT1;
+import static org.lwjgl.opengl.GL30C.*;
 
 @ApiStatus.Internal
 public class DynamicBufferManager implements NativeResource {
@@ -214,7 +214,13 @@ public class DynamicBufferManager implements NativeResource {
                     builder.setName(type.getSourceName()).addColorTextureWrapper(entry.getValue().textureId);
                 }
             }
-            builder.setDepthTextureWrapper(renderTarget.getDepthTextureId());
+            int depthTexture = renderTarget.getDepthTextureId();
+            // Mods like TACZ enable stencil on the main target, so the wrapper has to keep the stencil attachment
+            if (renderTarget.useDepth && hasStencil(depthTexture)) {
+                builder.setDepthStencilTextureWrapper(depthTexture);
+            } else {
+                builder.setDepthTextureWrapper(depthTexture);
+            }
             builder.setDebugLabel(name.toString());
             fbo = builder.build(true);
             this.framebuffers.put(name, fbo);
@@ -243,7 +249,7 @@ public class DynamicBufferManager implements NativeResource {
 
         if (this.dynamicFboPointer < this.dynamicFramebuffers.size()) {
             AdvancedFbo fbo = this.dynamicFramebuffers.get(this.dynamicFboPointer);
-            if (fbo.getWidth() == framebuffer.getWidth() && fbo.getHeight() == framebuffer.getHeight()) {
+            if (fbo.getWidth() == framebuffer.getWidth() && fbo.getHeight() == framebuffer.getHeight() && fbo.hasStencilAttachment() == framebuffer.hasStencilAttachment()) {
                 this.dynamicFboPointer++;
                 fbo.setColorAttachmentTexture(0, colorTexture);
                 if (framebuffer.isDepthTextureAttachment()) {
@@ -272,7 +278,12 @@ public class DynamicBufferManager implements NativeResource {
             }
         }
         if (framebuffer.isDepthTextureAttachment()) {
-            builder.setDepthTextureWrapper(framebuffer.getDepthTextureAttachment().getId());
+            // Clearing a depth-stencil texture as depth-only fails, so the stencil attachment has to be kept
+            if (framebuffer.hasStencilAttachment()) {
+                builder.setDepthStencilTextureWrapper(framebuffer.getDepthTextureAttachment().getId());
+            } else {
+                builder.setDepthTextureWrapper(framebuffer.getDepthTextureAttachment().getId());
+            }
         } else {
             builder.setDepthTextureBuffer();
         }
@@ -290,6 +301,14 @@ public class DynamicBufferManager implements NativeResource {
      */
     public int[] getClearBuffers() {
         return this.clearBuffers;
+    }
+
+    private static boolean hasStencil(int depthTexture) {
+        int oldTexture = glGetInteger(GL_TEXTURE_BINDING_2D);
+        GlStateManager._bindTexture(depthTexture);
+        int format = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+        GlStateManager._bindTexture(oldTexture);
+        return format == GL_DEPTH_STENCIL || format == GL_DEPTH24_STENCIL8 || format == GL_DEPTH32F_STENCIL8;
     }
 
     public void endFrame() {
