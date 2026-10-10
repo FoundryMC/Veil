@@ -8,6 +8,7 @@ import foundry.veil.api.quasar.data.module.ModuleType;
 import foundry.veil.api.quasar.data.module.ParticleModuleData;
 import foundry.veil.api.quasar.particle.ParticleEmitter;
 import foundry.veil.api.resource.VeilDynamicRegistry;
+import foundry.veil.impl.flare.FlareManager;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -65,6 +66,11 @@ public final class QuasarParticles {
 
     @ApiStatus.Internal
     public static class Reloader implements PreparableReloadListener {
+
+        public static final Reloader INSTANCE = new Reloader();
+
+        private Reloader() {
+        }
 
         @Override
         public @NotNull CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller preparationsProfiler, @NotNull ProfilerFiller reloadProfiler, @NotNull Executor backgroundExecutor, @NotNull Executor gameExecutor) {

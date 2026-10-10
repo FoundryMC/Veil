@@ -11,7 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public final class VeilReloadListeners {
     public static void registerListeners(Context context) {
-        context.register(PackType.CLIENT_RESOURCES, "quasar", new QuasarParticles.Reloader());
+        context.register(PackType.CLIENT_RESOURCES, "quasar", QuasarParticles.Reloader.INSTANCE);
         context.register(PackType.CLIENT_RESOURCES, "flare", FlareManager.Reloader.INSTANCE);
         if (Veil.IMGUIMC) {
             context.register(PackType.CLIENT_RESOURCES, "resources", VeilClient.resourceManager().createReloadListener());

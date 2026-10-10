@@ -71,6 +71,7 @@ public class VeilResourceManagerImpl implements VeilResourceManager, NativeResou
         this.addLoader(new BlockModelResourceLoader());
         this.addLoader(new ShellResourceLoader());
         this.addLoader(new FlareResourcesLoader());
+        this.addLoader(new QuasarResourceLoader());
     }
 
     /**
