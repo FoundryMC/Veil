@@ -5,6 +5,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import foundry.veil.api.client.render.post.PostProcessingManager;
 import foundry.veil.api.client.render.texture.TextureFilter;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -193,6 +195,45 @@ public record FramebufferAttachmentDefinition(FramebufferAttachmentDefinition.Ty
         DEPTH32F_STENCIL8(GL_DEPTH_STENCIL, GL_DEPTH32F_STENCIL8);
 
         public static final Format[] VALUES = Format.values();
+
+        /**
+         * <p>Resolves the concrete depth format used by Minecraft's main render target.</p>
+         *
+         * <p>Unsized formats such as {@link #DEPTH_COMPONENT} leave the choice of a concrete format to the driver, and
+         * drivers do not all choose the same one. Minecraft asks for {@code GL_DEPTH_COMPONENT} with a
+         * {@code GL_FLOAT} pixel type while Veil asks with {@code GL_UNSIGNED_BYTE}, and some drivers take that as a
+         * hint and hand back different formats. {@code glBlitFramebuffer} requires depth formats to match exactly, so
+         * where a framebuffer is going to exchange depth with the main render target it has to use whatever format
+         * that target actually ended up with, rather than assume.</p>
+         *
+         * @param fallback The format to use when the main render target cannot be inspected
+         * @return The depth format of the main render target
+         */
+        public static Format getMainDepthFormat(Format fallback) {
+            Minecraft client = Minecraft.getInstance();
+            RenderTarget mainRenderTarget = client != null ? client.getMainRenderTarget() : null;
+            if (mainRenderTarget == null) {
+                return fallback;
+            }
+
+            int depthTexture = mainRenderTarget.getDepthTextureId();
+            if (depthTexture <= 0) {
+                return fallback;
+            }
+
+            int previousTexture = glGetInteger(GL_TEXTURE_BINDING_2D);
+            glBindTexture(GL_TEXTURE_2D, depthTexture);
+            int internalFormat = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT);
+            glBindTexture(GL_TEXTURE_2D, previousTexture);
+
+            for (Format format : VALUES) {
+                if (format.internalId == internalFormat && (format.id == GL_DEPTH_COMPONENT || format.id == GL_DEPTH_STENCIL)) {
+                    return format;
+                }
+            }
+            return fallback;
+        }
+
         public static final Codec<Format> CODEC = Codec.STRING.flatXmap(name -> {
             for (Format type : VALUES) {
                 if (type.name().equalsIgnoreCase(name)) {
