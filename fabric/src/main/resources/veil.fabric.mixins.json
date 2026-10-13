@@ -10,6 +10,7 @@
   ],
   "client": [
     "client.MinecraftMixin",
+    "client.ModelManagerMixin",
     "client.RenderBuffersMixin",
     "client.RenderTypeMixin",
     "client.debug.vanilla.DebugLevelRendererMixin",

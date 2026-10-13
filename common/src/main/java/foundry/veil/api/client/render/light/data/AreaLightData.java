@@ -9,8 +9,15 @@ import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.light.DDALightData;
 import foundry.veil.api.client.render.light.InstancedLightData;
 import foundry.veil.api.client.render.light.LightGuideProvider;
+import foundry.veil.api.client.render.light.LightProjectorData;
+import foundry.veil.ext.TextureAtlasExtension;
 import imgui.ImGui;
+import imgui.type.ImString;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -24,8 +31,7 @@ import java.nio.ByteBuffer;
  *
  * @since 2.0.0
  */
-public class AreaLightData extends LightData implements InstancedLightData, DDALightData, EditorAttributeProvider, LightGuideProvider {
-
+public class AreaLightData extends LightData implements InstancedLightData, DDALightData, LightProjectorData, EditorAttributeProvider, LightGuideProvider {
     private static final float MAX_ANGLE_SIZE = (float) (65535.0 / 2.0 / Math.PI);
 
     protected final Vector3d position;
@@ -39,6 +45,10 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     protected boolean occlusionEnabled;
     protected float inscattering;
 
+    protected ResourceLocation textureLocation;
+    protected Vector2f textureUVMin;
+    protected Vector2f textureUVMax;
+
     public AreaLightData() {
         this.matrix = new Matrix4d();
         this.position = new Vector3d();
@@ -50,6 +60,10 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         this.distance = 1.0F;
         this.occlusionEnabled = false;
         this.inscattering = 0.0F;
+
+        this.textureLocation = ResourceLocation.fromNamespaceAndPath("", "");
+        this.textureUVMin = new Vector2f();
+        this.textureUVMax = new Vector2f(1);
     }
 
     /**
@@ -199,6 +213,24 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         return this;
     }
 
+    public AreaLightData setTextureLocation(ResourceLocation textureLocation) {
+        this.textureLocation = textureLocation;
+        this.markDirty();
+        return this;
+    }
+
+    public AreaLightData setTextureUVMax(float u, float v) {
+        this.textureUVMax.set(u, v);
+        this.markDirty();
+        return this;
+    }
+
+    public AreaLightData setTextureUVMin(float u, float v) {
+        this.textureUVMin.set(u, v);
+        this.markDirty();
+        return this;
+    }
+
     @Override
     public AreaLightData setColor(Vector3fc color) {
         super.setColor(color);
@@ -230,6 +262,21 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
     }
 
     @Override
+    public ResourceLocation getTextureLocation() {
+        return this.textureLocation;
+    }
+
+    @Override
+    public Vector2f getTextureUVMin() {
+        return this.textureUVMin;
+    }
+
+    @Override
+    public Vector2f getTextureUVMax() {
+        return this.textureUVMax;
+    }
+
+    @Override
     public void store(ByteBuffer buffer) {
         this.matrix.identity().rotation(this.orientation).translate(this.position).getFloats(buffer.position(), buffer);
         buffer.position(buffer.position() + Float.BYTES * 16);
@@ -246,6 +293,24 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
         buffer.putFloat(this.distance);
         buffer.putFloat(this.occlusionEnabled ? 1.0F : 0.0F);
         buffer.putFloat(this.inscattering);
+
+        TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(PROJECTION_ATLAS);
+
+        if (((TextureAtlasExtension) atlas).veil$hasTexture(this.getTextureLocation())) {
+            TextureAtlasSprite sprite = atlas.getSprite(this.getTextureLocation());
+            Vector2f uv0 = new Vector2f(sprite.getU(this.getTextureUVMin().x), sprite.getV(this.getTextureUVMin().y));
+            Vector2f uv1 = new Vector2f(sprite.getU(this.getTextureUVMax().x), sprite.getV(this.getTextureUVMax().y));
+
+            buffer.putFloat(uv0.x);
+            buffer.putFloat(uv0.y);
+            buffer.putFloat(uv1.x);
+            buffer.putFloat(uv1.y);
+        } else {
+            buffer.putFloat(-1);
+            buffer.putFloat(-1);
+            buffer.putFloat(-1);
+            buffer.putFloat(-1);
+        }
     }
 
     @Override
@@ -349,6 +414,25 @@ public class AreaLightData extends LightData implements InstancedLightData, DDAL
 
         if (ImGui.dragScalar("In-scattering", editInscattering, 0.01F, 0.0F)) {
             this.setInscatteringStrength(editInscattering[0]);
+        }
+
+        ImString resourceLocation = new ImString(this.getTextureLocation().toString(), 256);
+        if (ImGui.inputText("Texture Location", resourceLocation)) {
+            var loc = ResourceLocation.tryParse(resourceLocation.get());
+
+            if (loc != null) {
+                this.setTextureLocation(loc);
+            }
+        }
+
+        float[] editUVMin = new float[] { this.getTextureUVMin().x, this.getTextureUVMin().y };
+        if (ImGui.dragFloat2("Texture UV Min", editUVMin, 0.005F, 0, 1)) {
+            this.setTextureUVMin(editUVMin[0], editUVMin[1]);
+        }
+
+        float[] editUVMax = new float[] { this.getTextureUVMax().x, this.getTextureUVMax().y };
+        if (ImGui.dragFloat2("Texture UV Max", editUVMax, 0.005F, 0, 1)) {
+            this.setTextureUVMax(editUVMax[0], editUVMax[1]);
         }
     }
 
