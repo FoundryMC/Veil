@@ -53,20 +53,10 @@ public class DSAVanillaAdvancedFboWrapper extends VanillaAdvancedFboWrapper {
                 }
 
                 if (hasStencilAttachment) {
-                    if (hasDepth && hasStencil) {
-                        if (clearTex) {
-                            glClearTexImage(renderTarget.getDepthTextureId(), 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, (ByteBuffer) null);
-                        } else {
-                            glClearNamedFramebufferfi(this.getId(), GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
-                        }
-                    } else {
-                        // Can't clear the texture if only clearing depth or stencil
-                        if (hasDepth) {
-                            glClearNamedFramebufferfv(this.getId(), GL_DEPTH, 0, stack.floats(depth));
-                        }
-                        if (hasStencil) {
-                            glClearNamedFramebufferiv(this.getId(), GL_STENCIL, 0, stack.ints(glGetInteger(GL_STENCIL_CLEAR_VALUE)));
-                        }
+                    if (hasDepth) {
+                        glClearNamedFramebufferfi(this.getId(), GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
+                    } else if (hasStencil) {
+                        glClearNamedFramebufferiv(this.getId(), GL_STENCIL, 0, stack.ints(glGetInteger(GL_STENCIL_CLEAR_VALUE)));
                     }
                 } else {
                     if (clearTex) {

@@ -96,20 +96,10 @@ public class DSAAdvancedFboImpl extends AdvancedFboImpl {
                 }
 
                 if (this.hasStencil) {
-                    if (hasDepth && hasStencil) {
-                        if (clearTex && this.depthAttachment instanceof AdvancedFboTextureAttachment texture) {
-                            glClearTexImage(texture.getId(), 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, (ByteBuffer) null);
-                        } else {
-                            glClearNamedFramebufferfi(this.id, GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
-                        }
-                    } else {
-                        // Can't clear the texture if only clearing depth or stencil
-                        if (hasDepth) {
-                            glClearNamedFramebufferfv(this.id, GL_DEPTH, 0, stack.floats(depth));
-                        }
-                        if (hasStencil) {
-                            glClearNamedFramebufferiv(this.id, GL_STENCIL, 0, stack.ints(glGetInteger(GL_STENCIL_CLEAR_VALUE)));
-                        }
+                    if (hasDepth) {
+                        glClearNamedFramebufferfi(this.id, GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
+                    } else if (hasStencil) {
+                        glClearNamedFramebufferiv(this.id, GL_STENCIL, 0, stack.ints(glGetInteger(GL_STENCIL_CLEAR_VALUE)));
                     }
                 } else {
                     if (clearTex && this.depthAttachment instanceof AdvancedFboTextureAttachment texture) {
