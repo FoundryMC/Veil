@@ -1,9 +1,10 @@
 package foundry.veil.api.client.necromancer.animation.keyframe;
 
+import foundry.veil.api.client.util.Easing;
 import org.joml.Quaternionfc;
 import org.joml.Vector3fc;
 
-public record Keyframe(float time, Interpolation interpolation, KeyframeTransform transform) {
+public record Keyframe(float time, Easing easing, KeyframeTransform transform) {
     record KeyframeTransform(float px, float py, float pz, float sx, float sy, float sz, float qx, float qy, float qz,
                              float qw) {
         public KeyframeTransform(float px, float py, float pz, float sx, float sy, float sz, Quaternionfc quaternion) {

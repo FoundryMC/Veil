@@ -15,6 +15,7 @@ public class Bone {
     public Quaternionf rotation, previousRotation, baseRotation;
     public Vector3f size, previousSize, baseSize;
     public Vector4f color, previousColor, baseColor;
+    public float additiveMixUsed;
 
     @Nullable
     public Bone parent;
@@ -48,6 +49,8 @@ public class Bone {
         this.color = new Vector4f(1.0F);
         this.previousColor = new Vector4f(1.0F);
         this.baseColor = new Vector4f(1.0F);
+
+        this.additiveMixUsed = 0;
 
         this.children = new ArrayList<>();
         this.parentChain = new ArrayList<>();
@@ -89,6 +92,7 @@ public class Bone {
         this.rotationPoint.set(this.baseRotationPoint);
         this.size.set(this.baseSize);
         this.color.set(this.baseColor);
+        this.additiveMixUsed = 0;
     }
 
     protected void updatePreviousAttributes() {
