@@ -98,7 +98,10 @@ public class DSAAdvancedFboImpl extends AdvancedFboImpl {
                 if (this.hasStencil) {
                     if (hasDepth && hasStencil) {
                         if (clearTex && this.depthAttachment instanceof AdvancedFboTextureAttachment texture) {
-                            glClearTexImage(texture.getId(), 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, (ByteBuffer) null);
+                            // FLOAT_32_UNSIGNED_INT_24_8_REV is a 32-bit float depth followed by 32 bits with stencil in the low 8
+                            ByteBuffer clearValue = stack.malloc(8);
+                            clearValue.putFloat(0, depth).putInt(4, glGetInteger(GL_STENCIL_CLEAR_VALUE) & 0xFF);
+                            glClearTexImage(texture.getId(), 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, clearValue);
                         } else {
                             glClearNamedFramebufferfi(this.id, GL_DEPTH_STENCIL, 0, depth, glGetInteger(GL_STENCIL_CLEAR_VALUE));
                         }

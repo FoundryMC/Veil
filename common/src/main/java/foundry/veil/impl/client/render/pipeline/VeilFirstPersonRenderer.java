@@ -35,11 +35,15 @@ public final class VeilFirstPersonRenderer {
         int h = mainRenderTarget.getHeight();
         int framebufferTexture = mainRenderTarget.getColorTextureAttachment(0).getId();
         boolean stencil = mainRenderTarget.hasStencilAttachment();
-        if (firstPerson == null || firstPerson.getWidth() != w || firstPerson.getHeight() != h || firstPerson.hasStencilAttachment() != stencil) {
+        // Must match the depth format of the main render target this stands in for, otherwise the depth
+        // blit in LightRenderer fails with GL_INVALID_OPERATION
+        FramebufferAttachmentDefinition.Format depthFormat = FramebufferAttachmentDefinition.Format.getMainDepthFormat(
+                stencil ? FramebufferAttachmentDefinition.Format.DEPTH32F_STENCIL8 : FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT);
+        if (firstPerson == null || firstPerson.getWidth() != w || firstPerson.getHeight() != h || firstPerson.getDepthAttachment().getFormat() != depthFormat.getInternalFormat()) {
             free();
             firstPerson = AdvancedFbo.withSize(w, h)
                     .addColorTextureWrapper(framebufferTexture)
-                    .setFormat(stencil ? FramebufferAttachmentDefinition.Format.DEPTH32F_STENCIL8 : FramebufferAttachmentDefinition.Format.DEPTH_COMPONENT)
+                    .setFormat(depthFormat)
                     .setDepthTextureBuffer()
                     .setDebugLabel("Veil First Person")
                     .build(true);
