@@ -6,6 +6,9 @@ import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 
 // todo: support cubic interpolation w/ derivatives
+/**
+ * @deprecated Use {@link foundry.veil.api.client.util.Easing} instead
+ */
 public enum Interpolation {
     /**
      * @since 4.5.0

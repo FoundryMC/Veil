@@ -4,6 +4,7 @@ import foundry.veil.api.client.necromancer.Bone;
 import foundry.veil.api.client.necromancer.Skeleton;
 import foundry.veil.api.client.necromancer.SkeletonParent;
 import foundry.veil.api.client.necromancer.animation.Animation;
+import foundry.veil.api.client.util.Easing;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
@@ -41,39 +42,51 @@ public class KeyframedAnimation<P extends SkeletonParent<?, ?>, S extends Skelet
             float t = keyframes.getAdjacentKeyframes(time, this.looping, tempKeyframes);
             Keyframe a = tempKeyframes[1];
             Keyframe b = tempKeyframes[2];
-            Interpolation interpolation = a.interpolation();
+            float easing = a.easing().ease(t);
 
-            // todo: cubic interpolation
             if (additive) {
-                bone.position.add(
-                        interpolation.interpolate(a.transform().px(), b.transform().px(), t),
-                        interpolation.interpolate(a.transform().py(), b.transform().py(), t),
-                        interpolation.interpolate(a.transform().pz(), b.transform().pz(), t)
-                );
+                float allowed = Mth.clamp(1F - bone.additiveMixUsed, 0F, 1F);
+                float effectiveMix = Math.min(mixFactor, allowed);
+                bone.additiveMixUsed += effectiveMix;
+
+                if (effectiveMix == 0) continue;
+
+                if (!(a.transform().px() == 0 && a.transform().py() == 0 && a.transform().pz() == 0 &&
+                      b.transform().px() == 0 && b.transform().py() == 0 && b.transform().pz() == 0)) {
+                    bone.position.add(
+                            Mth.lerp(effectiveMix, 0, Mth.lerp(easing, a.transform().px(), b.transform().px())),
+                            Mth.lerp(effectiveMix, 0, Mth.lerp(easing, a.transform().py(), b.transform().py())),
+                            Mth.lerp(effectiveMix, 0, Mth.lerp(easing, a.transform().pz(), b.transform().pz()))
+                    );
+                }
                 tempRotationA.set(a.transform().qx(), a.transform().qy(), a.transform().qz(), a.transform().qw());
                 tempRotationB.set(b.transform().qx(), b.transform().qy(), b.transform().qz(), b.transform().qw());
-                interpolation.interpolate(tempRotationA, tempRotationB, t, tempRotationA);
-                tempRotationA.slerp(tempRotationB.identity(), mixFactor);
-                bone.rotation.premul(tempRotationA);
-                bone.size.mul(
-                        Mth.lerp(mixFactor, 1, interpolation.interpolate(a.transform().sx(), b.transform().sx(), t)),
-                        Mth.lerp(mixFactor, 1, interpolation.interpolate(a.transform().sy(), b.transform().sy(), t)),
-                        Mth.lerp(mixFactor, 1, interpolation.interpolate(a.transform().sz(), b.transform().sz(), t))
-                );
+                if(!(tempRotationA.equals(0,0,0,1) && tempRotationB.equals(0,0,0,1))){
+                    tempRotationA.slerp(tempRotationB, easing);
+                    tempRotationA.slerp(tempRotationB.identity(), effectiveMix);
+                    bone.rotation.premul(tempRotationA);
+                }
+                if (!(a.transform().sx() == 1 && a.transform().sy() == 1 && a.transform().sz() == 1 &&
+                      b.transform().sx() == 1 && b.transform().sy() == 1 && b.transform().sz() == 1)) {
+                    bone.size.mul(
+                            Mth.lerp(effectiveMix, 1, Mth.lerp(easing, a.transform().sx(), b.transform().sx())),
+                            Mth.lerp(effectiveMix, 1, Mth.lerp(easing, a.transform().sy(), b.transform().sy())),
+                            Mth.lerp(effectiveMix, 1, Mth.lerp(easing, a.transform().sz(), b.transform().sz()))
+                    );
+                }
             } else {
                 bone.position.set(
-                        Mth.lerp(mixFactor, bone.position.x, interpolation.interpolate(a.transform().px(), b.transform().px(), t)),
-                        Mth.lerp(mixFactor, bone.position.y, interpolation.interpolate(a.transform().py(), b.transform().py(), t)),
-                        Mth.lerp(mixFactor, bone.position.z, interpolation.interpolate(a.transform().pz(), b.transform().pz(), t))
+                        Mth.lerp(mixFactor, bone.position.x, Mth.lerp(easing, a.transform().px(), b.transform().px())),
+                        Mth.lerp(mixFactor, bone.position.y, Mth.lerp(easing, a.transform().py(), b.transform().py())),
+                        Mth.lerp(mixFactor, bone.position.z, Mth.lerp(easing, a.transform().pz(), b.transform().pz()))
                 );
                 tempRotationA.set(a.transform().qx(), a.transform().qy(), a.transform().qz(), a.transform().qw());
                 tempRotationB.set(b.transform().qx(), b.transform().qy(), b.transform().qz(), b.transform().qw());
-                interpolation.interpolate(tempRotationA, tempRotationB, t, tempRotationA);
-                bone.rotation.slerp(tempRotationA, mixFactor);
+                bone.rotation.slerp(tempRotationA.slerp(tempRotationB, easing), mixFactor);
                 bone.size.set(
-                        Mth.lerp(mixFactor, bone.size.x, interpolation.interpolate(a.transform().sx(), b.transform().sx(), t)),
-                        Mth.lerp(mixFactor, bone.size.y, interpolation.interpolate(a.transform().sy(), b.transform().sy(), t)),
-                        Mth.lerp(mixFactor, bone.size.z, interpolation.interpolate(a.transform().sz(), b.transform().sz(), t))
+                        Mth.lerp(mixFactor, bone.size.x, Mth.lerp(easing, a.transform().sx(), b.transform().sx())),
+                        Mth.lerp(mixFactor, bone.size.y, Mth.lerp(easing, a.transform().sy(), b.transform().sy())),
+                        Mth.lerp(mixFactor, bone.size.z, Mth.lerp(easing, a.transform().sz(), b.transform().sz()))
                 );
             }
         }
@@ -96,12 +109,12 @@ public class KeyframedAnimation<P extends SkeletonParent<?, ?>, S extends Skelet
         // todo: allow for keyframes to only specify one channel (ex. only position, only orientation, etc.)
         // probably only in the builder? and just bake everything to equivalent full keyframes
         // idk!
-        public void addKeyframe(String boneId, float time, Interpolation interpolation,
+        public void addKeyframe(String boneId, float time, Easing easing,
                                 Vector3fc position, Vector3fc size, Quaternionfc orientation) {
             if (!timelines.containsKey(boneId)) {
                 timelines.put(boneId, new ArrayList<>(2));
             }
-            timelines.get(boneId).add(new Keyframe(time, interpolation, new Keyframe.KeyframeTransform(position, size, orientation)));
+            timelines.get(boneId).add(new Keyframe(time, easing, new Keyframe.KeyframeTransform(position, size, orientation)));
         }
 
         public KeyframedAnimation<P, S> build() {

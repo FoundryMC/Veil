@@ -6,10 +6,28 @@ import net.minecraft.util.Mth;
 /**
  * @author amo
  */
+/**
+ * * @see <a href="https://easings.net/">Easing Functions Cheat Sheet</a>
+ */
 public enum Easing {
     LINEAR {
         public float ease(float x) {
             return x;
+        }
+    },
+    EASE_IN_SINE {
+        public float ease(float x) {
+            return 1 - Mth.cos((float) ((x * Math.PI) / 2));
+        }
+    },
+    EASE_OUT_SINE {
+        public float ease(float x) {
+            return Mth.sin((float) ((x * Math.PI) / 2));
+        }
+    },
+    EASE_IN_OUT_SINE {
+        public float ease(float x) {
+            return -(Mth.cos((float) (Math.PI * x)) - 1) / 2;
         }
     },
     EASE_IN_QUAD {
@@ -70,21 +88,6 @@ public enum Easing {
     EASE_IN_OUT_QUINT {
         public float ease(float x) {
             return x < 0.5 ? 16 * x * x * x * x * x : (float) (1 - Math.pow(-2 * x + 2, 5) / 2);
-        }
-    },
-    EASE_IN_SINE {
-        public float ease(float x) {
-            return 1 - Mth.cos((float) ((x * Math.PI) / 2));
-        }
-    },
-    EASE_OUT_SINE {
-        public float ease(float x) {
-            return Mth.sin((float) ((x * Math.PI) / 2));
-        }
-    },
-    EASE_IN_OUT_SINE {
-        public float ease(float x) {
-            return -(Mth.cos((float) (Math.PI * x)) - 1) / 2;
         }
     },
     EASE_IN_EXPO {
