@@ -22,7 +22,7 @@ public interface NecromancerRenderer extends MultiBufferSource {
     }
 
     default void setOverlay(int packedOverlay) {
-        this.setUv1(packedOverlay >> 4 & 65535, packedOverlay >> 20 & 65535);
+        this.setUv1(packedOverlay & 65535, packedOverlay >>> 16);
     }
 
     /**
