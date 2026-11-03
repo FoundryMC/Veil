@@ -148,7 +148,7 @@ public abstract class ShaderInstanceMixin implements Shader {
                 int minecraftType;
                 int minecraftCount;
                 switch (dataType) {
-                    case GL_INT -> {
+                    case GL_INT, GL_BOOL -> {
                         minecraftType = Uniform.UT_INT1;
                         minecraftCount = 1;
                     }
