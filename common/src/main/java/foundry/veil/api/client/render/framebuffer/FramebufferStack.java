@@ -54,7 +54,7 @@ public class FramebufferStack {
     }
 
     /**
-     * Pushes the current framebuffer and restores the previous state. If the stack is empty, the main framebuffer is bound.
+     * Pops the current framebuffer and restores the previous state. If the stack is empty, the main framebuffer is bound.
      *
      * @param name The name of the buffer to pop
      */
@@ -71,7 +71,7 @@ public class FramebufferStack {
         }
 
         lastPop = name;
-        State state = STATE_STACK.removeFirst();
+        State state = STATE_STACK.removeLast();
         if (state.framebuffer == AdvancedFbo.getMainFramebuffer().getId()) {
             AdvancedFbo.unbind();
             return;
