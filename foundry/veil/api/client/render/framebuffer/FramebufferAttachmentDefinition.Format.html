@@ -326,13 +326,18 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInternalFormat()" class="member-name-link">getInternalFormat</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getMainDepthFormat(foundry.veil.api.client.render.framebuffer.FramebufferAttachmentDefinition.Format)" class="member-name-link">getMainDepthFormat</a><wbr>(<a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a>&nbsp;fallback)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Resolves the concrete depth format used by Minecraft's main render target.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a>[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a>[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
 </div>
@@ -904,6 +909,24 @@ not permitted.)</div>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if this enum class has no constant with the specified name</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/NullPointerException.html" title="class or interface in java.lang" class="external-link">NullPointerException</a></code> - if the argument is null</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getMainDepthFormat(foundry.veil.api.client.render.framebuffer.FramebufferAttachmentDefinition.Format)">
+<h3>getMainDepthFormat</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a></span>&nbsp;<span class="element-name">getMainDepthFormat</span><wbr><span class="parameters">(<a href="FramebufferAttachmentDefinition.Format.html" title="enum class in foundry.veil.api.client.render.framebuffer">FramebufferAttachmentDefinition.Format</a>&nbsp;fallback)</span></div>
+<div class="block"><p>Resolves the concrete depth format used by Minecraft's main render target.</p>
+
+ <p>Unsized formats such as <a href="#DEPTH_COMPONENT"><code>DEPTH_COMPONENT</code></a> leave the choice of a concrete format to the driver, and
+ mods like TACZ enable stencil on the main target, which changes it to <a href="#DEPTH32F_STENCIL8"><code>DEPTH32F_STENCIL8</code></a>.
+ <code>glBlitFramebuffer</code> requires depth formats to match exactly, so framebuffers that exchange depth with
+ the main render target have to use whatever format that target actually has.</p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>fallback</code> - The format to use when the main render target cannot be inspected</dd>
+<dt>Returns:</dt>
+<dd>The depth format of the main render target</dd>
 </dl>
 </section>
 </li>
