@@ -7,10 +7,9 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.impl.client.editor.*;
 import foundry.veil.platform.VeilEventPlatform;
 import imgui.ImGui;
-import imgui.ImGuiViewport;
 import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiDockNodeFlags;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -22,7 +21,14 @@ public final class VeilImGuiCompat {
     }
 
     public static void load() {
-        ImGuiMCEvents.INSTANCE.imGuiLoadPre(() -> ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable));
+        ImGuiMCEvents.INSTANCE.imGuiLoadPre(() -> {
+            int flags = ImGuiConfigFlags.DockingEnable;
+            // Multi-viewport likes to crash on MacOS
+            if (!Minecraft.ON_OSX) {
+                flags |= ImGuiConfigFlags.ViewportsEnable;
+            }
+            ImGui.getIO().addConfigFlags(flags);
+        });
         ImGuiMCEvents.INSTANCE.preRenderImGuiEvent(() -> {
             VeilImGuiStylesheet.initStyles();
             AdvancedFboImGuiAreaImpl.begin();
